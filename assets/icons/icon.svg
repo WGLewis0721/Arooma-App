@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="dl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F4EFE6"/><stop offset="1" stop-color="#E3DAC7"/></linearGradient>
+    <linearGradient id="dr" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#E9E1D0"/><stop offset="1" stop-color="#D5CAB4"/></linearGradient>
+    <linearGradient id="gap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDFAF3"/><stop offset=".7" stop-color="#F0E8D8"/><stop offset="1" stop-color="#E2D7C0"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".42" r=".62"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="edgeL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#25231F" stop-opacity="0"/><stop offset="1" stop-color="#25231F" stop-opacity=".24"/></linearGradient>
+    <linearGradient id="edgeR" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#25231F" stop-opacity="0"/><stop offset="1" stop-color="#25231F" stop-opacity=".24"/></linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#46423C"/><stop offset=".22" stop-color="#25231F"/><stop offset="1" stop-color="#151412"/></linearGradient>
+    <radialGradient id="cast" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#25231F" stop-opacity=".34"/><stop offset="1" stop-color="#25231F" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#F2EDE4"/>
+  <!-- the opening: warm light, a shelf, one object -->
+  <rect x="392" y="0" width="240" height="1024" fill="url(#gap)"/>
+  <rect x="392" y="0" width="240" height="1024" fill="url(#glow)"/>
+  <rect x="392" y="764" width="240" height="260" fill="#D9CDB5"/>
+  <rect x="392" y="764" width="240" height="4" fill="#FFFFFF" opacity=".6"/>
+  <ellipse cx="512" cy="776" rx="116" ry="14" fill="url(#cast)"/>
+  <rect x="480" y="226" width="64" height="98" rx="9" fill="#25231F"/>
+  <rect x="490" y="236" width="9" height="70" rx="4.5" fill="#FFFFFF" opacity=".14"/>
+  <rect x="492" y="318" width="40" height="44" fill="#25231F"/>
+  <path d="M492 352 H532 V372 Q587 384 587 440 V744 Q587 764 567 764 H457 Q437 764 437 744 V440 Q437 384 492 372 Z" fill="url(#body)"/>
+  <rect x="452" y="440" width="12" height="270" rx="6" fill="#FFFFFF" opacity=".15"/>
+  <!-- the doors, parted -->
+  <rect x="0" y="0" width="392" height="1024" fill="url(#dl)"/>
+  <rect x="332" y="0" width="60" height="1024" fill="url(#edgeL)"/>
+  <rect x="56" y="64" width="280" height="896" fill="none" stroke="#25231F" stroke-opacity=".14" stroke-width="4"/>
+  <rect x="630" y="0" width="2" height="1024" fill="#25231F" opacity=".18"/>
+  <rect x="632" y="0" width="392" height="1024" fill="url(#dr)"/>
+  <rect x="632" y="0" width="60" height="1024" fill="url(#edgeR)"/>
+  <rect x="688" y="64" width="280" height="896" fill="none" stroke="#25231F" stroke-opacity=".14" stroke-width="4"/>
+  <rect x="392" y="0" width="2" height="1024" fill="#25231F" opacity=".22"/>
+  <!-- pulls -->
+  <rect x="352" y="420" width="12" height="190" rx="6" fill="#73765F"/>
+  <rect x="660" y="420" width="12" height="190" rx="6" fill="#73765F"/>
+</svg>

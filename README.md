@@ -1,24 +1,82 @@
 # Arooma
 
-Premium iOS fragrance collection demo. Warm Archive cabinet aesthetic.
+A personal cabinet for your fragrance collection. A premium iOS app concept: not a storefront, not an inventory dashboard. Bottles are the richest thing on screen; everything around them is paper, light and restraint.
 
-## Features
+This repo holds the **iOS web app demo** (an installable PWA) and the brand board.
 
-- Cover Flow, Stack, and Fan shelf layouts
-- Add bottle to cabinet
-- Wear tracking with last-worn and count
-- Daily Pick
-- Quiet low-stock state
-- Authenticity check (simulated)
-- Blind-buy DNA matcher
-- Search
-- Shareable shelf image
-- Dynamic Island testing timer
+**Live demo:** https://wglewis0721.github.io/Arooma-App/
 
-## Run
+## Try it on iPhone
 
-Open `index.html` in a browser. No build step.
+1. Open the link above in **Safari** on your iPhone.
+2. Tap **Share**, then **Add to Home Screen**.
+3. Launch **Arooma** from the Home Screen. It opens full screen with its own icon and a closed-cabinet launch image, and keeps working offline after the first load.
 
-## Brand
+Hold the phone upright; landscape shows a prompt to rotate.
 
-Warm Archive: oat `#F2EDE4`, ink `#25231F`, muted olive `#73765F`, clay `#A4623F`.
+## What the demo shows
+
+| Area | What to try |
+|---|---|
+| First open | Two cabinet doors swing open, the interior light comes up, bottles rise into place. Tap the doors to open sooner. The door button in the header replays it. |
+| Shelf | 7 sample bottles (fictional houses). Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record. |
+| Layouts | Cover Flow, Stack and Fan keep the same bottle selected. Fan is a saved 3-bottle rotation. |
+| Daily Pick | Brings the next candidate forward with an olive outline and a "Today's pick" tab. |
+| Low stock | Salt Cedar: the liquid level drops, and a quiet "Running low" label with a hairline gauge. Always labeled as an estimate. |
+| Test timer | "Test" starts a 30 s session. A Dynamic Island style chip shows the timer, expands on tap, and walks through Opening, Heart and Dry-down. |
+| Shelf image | The share button builds an editorial 1080 x 1350 image with no app chrome and opens the iOS share sheet (Save Image, Messages, AirDrop). |
+
+## Web demo versus the native app
+
+This is a web app, so a few things are imitations of native features:
+
+| Feature | In this demo | In the native app |
+|---|---|---|
+| Dynamic Island | In-app chip drawn inside the page | Live Activity (ActivityKit) |
+| Widgets | Not possible on the web | WidgetKit: today's pick plus one action |
+| Haptics | Best effort. Safari 17.4+ ticks through a hidden switch control, and only near a tap | UIFeedbackGenerator |
+| Glass | CSS blur on controls and navigation only | Native Liquid Glass |
+| Fonts | `ui-serif` resolves to New York on iOS, SF Pro for UI | Same |
+
+## Deploy
+
+`.github/workflows/pages.yml` runs on every push to `main`:
+
+1. Assembles `dist/` (the app, manifest, service worker, icons) and stamps the service worker with the commit SHA.
+2. Runs `tests/smoke.cjs` in a headless browser at an iPhone viewport: doors, 7 cards, layouts keep the selection, Daily Pick, Island timer, manifest and icons resolve, service worker active, share image export, no console errors. Screenshots are kept as a build artifact.
+3. Deploys to GitHub Pages.
+
+**One-time setup:** in the repo go to **Settings, Pages, Build and deployment, Source** and choose **GitHub Actions**. Then re-run the workflow if the first run stopped at the deploy step.
+
+## Develop
+
+```bash
+npm start                  # serves the folder at http://localhost:8080
+npm install && npx playwright install chromium
+npm test                   # same smoke test CI runs
+npm run assets             # regenerate icons and splash screens (needs Python Playwright)
+```
+
+No build step: `index.html` is one self-contained file.
+
+## Repo map
+
+```
+index.html                  the app (HTML, CSS and JS in one file)
+manifest.webmanifest        install metadata
+sw.js                       offline cache
+assets/icons/               icon.svg is the source; PNGs are generated
+assets/splash/              iPhone launch images (closed cabinet doors)
+docs/brand-board.md         palette, type, materials, motion, icon, share image
+tests/smoke.cjs             CI smoke test
+tools/generate_assets.py    icon and splash generator
+.github/workflows/pages.yml test and deploy
+```
+
+## Earlier prototype
+
+`variants/collection-demo.html` is the earlier all-in-one prototype from the first commit on `main` (add bottle, wear tracking, search, simulated authenticity check, blind-buy DNA matcher, shareable shelf image, Dynamic Island timer). It is kept as it was, served next to the app at `/variants/collection-demo.html`, and has no iOS install layer.
+
+## Status
+
+Tested in headless Chromium with an iPhone viewport and iOS user agent. It has not been run on a physical iPhone yet, so check Safari and the Home Screen install on a device, especially the status bar, the splash image and haptics.

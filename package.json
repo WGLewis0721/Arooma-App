@@ -1,0 +1,14 @@
+{
+  "name": "arooma-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arooma: iOS web app demo, a personal cabinet for a fragrance collection.",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "assets": "python3 tools/generate_assets.py",
+    "test": "node tests/smoke.cjs ."
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

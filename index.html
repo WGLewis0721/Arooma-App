@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Arooma — Your Fragrance Collection</title>
+<style>
+:root {
+  --ink: #25231F;
+  --olive: #73765F;
+  --olive-deep: #575A44;
+  --clay: #A4623F;
+  --clay-deep: #8F4E2E;
+  --oat: #F2EDE4;
+  --paper: #FBF8F1;
+  --soft: #6B6862;
+  --hair: rgba(37,35,31,.12);
+  --shelf: #E9E2D4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  background: var(--oat);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.serif { font-family: ui-serif, "New York", "Newsreader", Georgia, serif; }
+header {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px;
+  background: rgba(242,237,228,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hair);
+}
+.logo { font-size: 17px; letter-spacing: -0.01em; }
+.island {
+  display: none; align-items: center; gap: 8px;
+  background: #1c1b18; color: #ede7db;
+  padding: 4px 10px; border-radius: 20px; font-size: 12px;
+}
+.island.active { display: flex; }
+.island-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--clay); }
+.controls { display: flex; gap: 6px; }
+button, .btn {
+  background: var(--paper); border: 1px solid var(--hair);
+  color: var(--ink); border-radius: 8px; padding: 6px 10px;
+  font-size: 13px; cursor: pointer;
+}
+button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.layout-switch { display: flex; gap: 4px; }
+.layout-switch button.active { background: var(--ink); color: var(--paper); }
+
+.search-bar {
+  margin: 10px 16px; position: relative;
+}
+.search-bar input {
+  width: 100%; padding: 10px 12px 10px 36px;
+  border: 1px solid var(--hair); border-radius: 10px;
+  background: var(--paper); font-size: 15px; color: var(--ink);
+}
+.search-bar::before {
+  content: "⌕"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--soft); font-size: 16px;
+}
+
+.shelf-wrap { padding: 20px 0 120px; min-height: 70vh; }
+.shelf {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 0 16px; transition: transform .6s cubic-bezier(.22,1,.36,1);
+}
+.card {
+  background: var(--paper); border: 1px solid var(--hair); border-radius: 10px;
+  width: 200px; min-width: 200px; padding: 16px 14px 12px;
+  box-shadow: 0 8px 24px rgba(37,35,31,.08);
+  text-align: center; position: relative; cursor: pointer;
+  transition: transform .5s cubic-bezier(.22,1,.36,1), opacity .4s;
+}
+.card.selected { transform: scale(1.04); z-index: 2; }
+.card.low .level { height: 28%; }
+.bottle {
+  width: 72px; height: 140px; margin: 0 auto 12px; position: relative;
+}
+.bottle-body {
+  width: 48px; height: 100px; margin: 0 auto;
+  background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.1));
+  border: 1.5px solid rgba(37,35,31,.25); border-radius: 4px 4px 8px 8px;
+  position: relative; overflow: hidden;
+}
+.level {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 65%;
+  background: linear-gradient(180deg, #c4a574, #8b6b3a);
+}
+.cap {
+  width: 22px; height: 18px; margin: 0 auto 2px;
+  background: #3a3a3a; border-radius: 2px;
+}
+.house { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--olive-deep); }
+.name { font-size: 18px; margin: 4px 0 2px; letter-spacing: -0.01em; }
+.meta { font-size: 11px; color: var(--soft); }
+.low-label { font-size: 9.5px; color: var(--clay-deep); font-weight: 600; margin-top: 6px; }
+.pick-tab {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--olive-deep); color: var(--paper); font-size: 8px;
+  letter-spacing: .12em; padding: 2px 6px; border-radius: 3px;
+}
+.actions { display: flex; gap: 6px; margin-top: 10px; justify-content: center; }
+.actions button { font-size: 12px; padding: 5px 8px; }
+
+.fan { transform: rotate(-8deg); }
+.fan + .card { transform: rotate(0deg); }
+.fan + .card + .card { transform: rotate(8deg); }
+
+.sheet {
+  position: fixed; inset: 0; background: rgba(37,35,31,.4); z-index: 40;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.sheet.open { display: flex; }
+.sheet-inner {
+  background: var(--paper); width: 100%; max-width: 420px;
+  border-radius: 16px 16px 0 0; padding: 20px 16px 32px;
+  max-height: 80vh; overflow-y: auto;
+}
+.sheet h2 { font-size: 20px; margin-bottom: 12px; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 11px; color: var(--soft); margin-bottom: 4px; letter-spacing: .04em; }
+.field input, .field select {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--hair);
+  border-radius: 8px; background: var(--oat); font-size: 14px;
+}
+.result { padding: 10px; background: var(--oat); border-radius: 8px; margin: 10px 0; font-size: 14px; }
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); padding: 8px 14px;
+  border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; z-index: 50;
+}
+.toast.show { opacity: 1; }
+
+.record { font-size: 13px; line-height: 1.5; }
+.record div { margin: 4px 0; }
+.dna { display: flex; gap: 8px; margin-top: 10px; }
+.dna .mini { flex: 1; text-align: center; font-size: 11px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo serif">Arooma</div>
+  <div class="island" id="island">
+    <div class="island-dot"></div>
+    <span id="island-time">30s</span>
+  </div>
+  <div class="controls">
+    <button id="add-btn">Add</button>
+    <button id="share-btn">Share</button>
+  </div>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="Search house or fragrance">
+</div>
+
+<div style="display:flex;justify-content:space-between;padding:0 16px 8px;align-items:center">
+  <div class="layout-switch">
+    <button data-layout="flow" class="active">Cover Flow</button>
+    <button data-layout="stack">Stack</button>
+    <button data-layout="fan">Fan</button>
+  </div>
+  <button id="pick-btn">Daily Pick</button>
+</div>
+
+<div class="shelf-wrap">
+  <div class="shelf" id="shelf"></div>
+</div>
+
+<div class="sheet" id="add-sheet">
+  <div class="sheet-inner">
+    <h2 class="serif">Add to Cabinet</h2>
+    <div class="field"><label>HOUSE</label><input id="add-house" placeholder="Byredo"></div>
+    <div class="field"><label>FRAGRANCE</label><input id="add-name" placeholder="Blanche"></div>
+    <div class="field"><label>CONCENTRATION</label>
+      <select id="add-conc"><option>EDP</option><option>EDT</option><option>Parfum</option></select>
+    </div>
+    <div class="field"><label>SIZE (ML)</label><input id="add-size" type="number" value="50"></div>
+    <div class="field"><label>REMAINING (ML)</label><input id="add-remain" type="number" value="50"></div>
+    <button class="primary" id="save-add" style="width:100%;margin-top:8px">Add Bottle</button>
+    <button id="close-add" style="width:100%;margin-top:6px">Cancel</button>
+  </div>
+</div>
+
+<div class="sheet" id="detail-sheet">
+  <div class="sheet-inner" id="detail-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const bottles = [
+  { id:1, house:"Maison", name:"Salt Cedar", conc:"EDP", size:50, remain:12, wears:8, last:"2026-09-20", notes:"Cool air, dry wood" },
+  { id:2, house:"Atelier", name:"Paper White", conc:"EDT", size:100, remain:70, wears:3, last:"2026-10-12", notes:"Clean, bright" },
+  { id:3, house:"Studio", name:"Amber Drift", conc:"EDP", size:50, remain:40, wears:12, last:"2026-10-25", notes:"Warm, resinous" },
+  { id:4, house:"House", name:"Night Orchard", conc:"Parfum", size:30, remain:22, wears:5, last:"2026-08-15", notes:"Dark fruit" },
+  { id:5, house:"Line", name:"Green Stem", conc:"EDT", size:100, remain:85, wears:1, last:"2026-10-28", notes:"Fresh cut" },
+  { id:6, house:"Cabinet", name:"Soft Smoke", conc:"EDP", size:50, remain:18, wears:9, last:"2026-10-01", notes:"Incense, soft" },
+  { id:7, house:"Archive", name:"Linen Air", conc:"EDT", size:100, remain:55, wears:4, last:"2026-10-20", notes:"Crisp cotton" }
+];
+
+let selected = 0;
+let layout = "flow";
+let timer = null;
+let timeLeft = 30;
+
+function render() {
+  const shelf = document.getElementById("shelf");
+  const q = document.getElementById("search").value.toLowerCase();
+  const filtered = bottles.filter(b => b.house.toLowerCase().includes(q) || b.name.toLowerCase().includes(q));
+  shelf.innerHTML = "";
+  filtered.forEach((b, i) => {
+    const realIndex = bottles.indexOf(b);
+    const card = document.createElement("div");
+    card.className = "card" + (realIndex === selected ? " selected" : "") + (b.remain <= 15 ? " low" : "");
+    if (layout === "fan" && realIndex !== selected) card.style.opacity = "0.7";
+    const isPick = b.id === bottles[selected]?.id && document.getElementById("pick-btn").dataset.picked === "1";
+    card.innerHTML = `
+      ${isPick ? '<div class="pick-tab">TODAY\'S PICK</div>' : ''}
+      <div class="bottle">
+        <div class="cap"></div>
+        <div class="bottle-body"><div class="level" style="height:${Math.max(15, (b.remain/b.size)*100)}%"></div></div>
+      </div>
+      <div class="house">${b.house}</div>
+      <div class="name serif">${b.name}</div>
+      <div class="meta">${b.conc} · ${b.size} ml</div>
+      ${b.remain <= 15 ? `<div class="low-label">Running low</div>` : ""}
+      <div class="actions">
+        <button onclick="wear(${realIndex});event.stopPropagation()">Wear</button>
+        <button onclick="verify(${realIndex});event.stopPropagation()">Verify</button>
+        <button onclick="dna(${realIndex});event.stopPropagation()">DNA</button>
+      </div>
+    `;
+    card.onclick = () => openDetail(realIndex);
+    shelf.appendChild(card);
+  });
+}
+
+function wear(i) {
+  bottles[i].wears++;
+  bottles[i].last = new Date().toISOString().slice(0,10);
+  bottles[i].remain = Math.max(0, bottles[i].remain - 1);
+  showToast("Wear logged");
+  render();
+}
+
+function verify(i) {
+  const b = bottles[i];
+  const flagged = Math.random() > 0.8;
+  openSheet("detail-sheet", `
+    <h2 class="serif">Authenticity</h2>
+    <div class="result">${flagged ? "Flagged in community reports" : "No known issues"}</div>
+    <p style="font-size:13px;color:var(--soft);margin:8px 0">Batch check for ${b.house} ${b.name}. This is a simulated result.</p>
+    <button onclick="closeSheets()">Done</button>
+  `);
+}
+
+function dna(i) {
+  const b = bottles[i];
+  const others = bottles.filter((_, idx) => idx !== i).slice(0,3);
+  openSheet("detail-sheet", `
+    <h2 class="serif">Similar Scents</h2>
+    <p style="font-size:13px;margin-bottom:8px">Compared to ${b.name}</p>
+    <div class="dna">${others.map(o => `<div class="mini"><strong>${o.name}</strong><br><span style="color:var(--soft)">Shared: soft woods</span></div>`).join("")}</div>
+    <p style="font-size:12px;color:var(--soft);margin-top:10px">Does not predict personal preference.</p>
+    <button onclick="closeSheets()">Close</button>
+  `);
+}
+
+function openDetail(i) {
+  const b = bottles[i];
+  openSheet("detail-sheet", `
+    <h2 class="serif">${b.name}</h2>
+    <div class="record">
+      <div>House: ${b.house}</div>
+      <div>Concentration: ${b.conc}</div>
+      <div>Size: ${b.size} ml</div>
+      <div>Remaining: about ${b.remain} ml (estimate)</div>
+      <div>Wears: ${b.wears}</div>
+      <div>Last worn: ${b.last}</div>
+      <div>Notes: ${b.notes}</div>
+      <div style="margin-top:8px"><label><input type="checkbox"> Reorder reminder set</label></div>
+    </div>
+    <div class="actions" style="margin-top:12px">
+      <button onclick="wear(${i})">Wear today</button>
+      <button onclick="verify(${i})">Verify</button>
+      <button onclick="closeSheets()">Close</button>
+    </div>
+  `);
+}
+
+function openSheet(id, html) {
+  document.getElementById(id).classList.add("open");
+  if (html) document.getElementById(id === "add-sheet" ? "add-sheet" : "detail-content").innerHTML = html;
+}
+function closeSheets() {
+  document.querySelectorAll(".sheet").forEach(s => s.classList.remove("open"));
+}
+
+document.getElementById("add-btn").onclick = () => document.getElementById("add-sheet").classList.add("open");
+document.getElementById("close-add").onclick = closeSheets;
+document.getElementById("save-add").onclick = () => {
+  const house = document.getElementById("add-house").value || "Unknown";
+  const name = document.getElementById("add-name").value || "Untitled";
+  const conc = document.getElementById("add-conc").value;
+  const size = +document.getElementById("add-size").value || 50;
+  const remain = +document.getElementById("add-remain").value || size;
+  bottles.push({ id: Date.now(), house, name, conc, size, remain, wears: 0, last: "—", notes: "" });
+  selected = bottles.length - 1;
+  closeSheets();
+  showToast("Added to cabinet");
+  render();
+};
+
+document.getElementById("pick-btn").onclick = () => {
+  const eligible = bottles.filter(b => b.remain > 15);
+  if (!eligible.length) return showToast("No eligible bottles");
+  const pick = eligible[Math.floor(Math.random() * eligible.length)];
+  selected = bottles.indexOf(pick);
+  document.getElementById("pick-btn").dataset.picked = "1";
+  showToast("Today’s pick: " + pick.name);
+  render();
+};
+
+document.querySelectorAll(".layout-switch button").forEach(btn => {
+  btn.onclick = () => {
+    layout = btn.dataset.layout;
+    document.querySelectorAll(".layout-switch button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  };
+});
+
+document.getElementById("search").oninput = render;
+
+document.getElementById("share-btn").onclick = () => {
+  openSheet("detail-sheet", `
+    <h2 class="serif">Share Shelf</h2>
+    <div style="background:var(--oat);padding:20px;border-radius:8px;text-align:center;margin:10px 0">
+      <div class="serif" style="font-size:16px;margin-bottom:8px">Autumn Rotation</div>
+      <div style="font-size:12px;color:var(--soft)">7 bottles · Arooma</div>
+    </div>
+    <button onclick="showToast('Image saved');closeSheets()">Save image</button>
+  `);
+};
+
+function startTimer() {
+  if (timer) return;
+  timeLeft = 30;
+  document.getElementById("island").classList.add("active");
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("island-time").textContent = timeLeft + "s";
+    if (timeLeft <= 0) {
+      clearInterval(timer); timer = null;
+      document.getElementById("island").classList.remove("active");
+      showToast("Test finished");
+    }
+  }, 1000);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "t") startTimer();
+});
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1600);
+}
+
+render();
+setTimeout(() => showToast("Cabinet open"), 800);
+</script>
+</body>
+</html>

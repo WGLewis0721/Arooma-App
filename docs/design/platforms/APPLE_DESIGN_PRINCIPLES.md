@@ -6,7 +6,7 @@
 
 Forked from the Spread document of the same name (written 2026-10-28) and adapted for Arooma on 2026-10-29. This file turns Apple's guidance on materials, color and sheets into decisions for Arooma, and records the first principles behind them.
 
-Evidence tags: **[Apple]** read on a developer.apple.com page. **[3P]** third party, including mirrors of Apple pages. **[Repo]** from Arooma docs or code. **[Rec]** a recommendation, not a fact. **The Apple facts below were read for Spread on 2026-10-28 and carried over. Re-read the Apple pages (Materials, Adopting Liquid Glass, Sheets, Color, Live Activities, Widgets) before relying on this file for a new decision.**
+Evidence tags: **[Apple]** read on a developer.apple.com page. **[3P]** third party, including mirrors of Apple pages. **[Repo]** from Arooma docs or code. **[Rec]** a recommendation, not a fact. **Apple facts below were read for Spread on 2026-10-28 and carried over, except the Live Activities and Widgets rows, which were re-read on developer.apple.com on 2026-10-29 (HIG Live Activities, HIG Widgets, ActivityKit, WidgetKit interactivity; add `.md` to a page URL to fetch it as text). Re-read the other Apple pages (Materials, Adopting Liquid Glass, Sheets, Color) before relying on them for a new decision.**
 
 ---
 
@@ -36,8 +36,8 @@ Evidence tags: **[Apple]** read on a developer.apple.com page. **[3P]** third pa
 | Corners | Use rounded shapes concentric to their container [Apple: Adopting Liquid Glass] | Nested radius is container radius minus padding. Do not mix unrelated radii |
 | Accessibility | Test with Reduce Transparency, Increase Contrast and Reduce Motion [Apple: Adopting Liquid Glass] | Reduce Transparency means opaque controls. Increase Contrast means stronger hairlines and ink. Reduce Motion means cross-fades only |
 | Scroll edges | Content under controls needs a scroll edge treatment so controls stay legible [Apple: Adopting Liquid Glass] | If a list ever scrolls under the toolbar, fade or blur its edge |
-| Live Activities | Timer is the example of a task with a defined beginning and end. Persistent decoration is not a use. Keep elements in place as the presentation expands [Apple: Live Activities] | The Island chip exists only during a test session, and its elements keep their position as it expands |
-| Widgets | A simple, focused purpose with timely content and useful actions. Support tinted and clear appearances [Apple: Widgets] | Today's pick plus one action. Never a miniature shelf |
+| Live Activities | Defined beginning and end, short to medium duration, never over eight hours. Minimal shows updated information such as the Timer's remaining time. End it immediately and set a custom dismissal, 15 to 30 minutes in most cases. Avoid sensitive information. Use at most one interactive element. Island background is black and opaque [Apple: HIG Live Activities, read 2026-10-29] | The Island chip exists only during a test session, shows the time in compact and minimal, keeps its elements in place as it expands, and offers one action. See [../specs/2026-10-29-widget-live-activity.md](../specs/2026-10-29-widget-live-activity.md) |
+| Widgets | Simple, focused, related to the app's purpose; offer the sizes that add value. Text at 11 pt or larger. Lock Screen widgets are monochrome. Tinted and clear appearances desaturate full-color images unless the image opts out; reserve full color for media-like content smaller than the widget. Buttons and toggles are inactive on a locked device [Apple: HIG Widgets and WidgetKit, read 2026-10-29] | Today's pick plus one action. The bottle image may stay full color. No Wear control on the Lock Screen widget |
 
 ---
 

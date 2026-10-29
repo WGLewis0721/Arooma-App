@@ -39,6 +39,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Design brain checks
+        run: |
+          npm run docs:check
+          npm run test:docs
+
       - name: Install test tooling
         run: |
           npm install --no-audit --no-fund

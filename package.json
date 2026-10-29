@@ -6,7 +6,12 @@
   "scripts": {
     "start": "python3 -m http.server 8080",
     "assets": "python3 tools/generate_assets.py",
-    "test": "node tests/smoke.cjs ."
+    "test": "node tests/smoke.cjs .",
+    "docs:tokens": "node scripts/design-tokens.mjs --write",
+    "docs:sync": "node scripts/design-docs.mjs --sync",
+    "docs:check": "node scripts/design-docs.mjs",
+    "test:docs": "node --test scripts/design-docs.test.mjs",
+    "check": "npm run docs:check && npm run test:docs"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

@@ -48,6 +48,12 @@ This is a web app, so a few things are imitations of native features:
 
 **One-time setup:** in the repo go to **Settings, Pages, Build and deployment, Source** and choose **GitHub Actions**. Then re-run the workflow if the first run stopped at the deploy step.
 
+## Design brain
+
+All design guidance lives in [docs/design/README.md](docs/design/README.md): a task router, a short rules card that is copied into `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and the Copilot instructions, task packs, a plan and spec protocol, and the brand board. `npm run docs:check` keeps it consistent (links, size budgets, a fresh rules card, a fresh `tokens.json`) and runs in CI.
+
+The structure and checks are forked from the Spread repository (`WGLewis0721/spread-app`, commit `4c23d25`) and adapted to Arooma. Spread's iPhone, iPad and Duo build guides, widget and Live Activity spec and iOS release runbooks are kept unchanged in [docs/reference/spread/](docs/reference/spread/README.md) for reference.
+
 ## Develop
 
 ```bash
@@ -55,6 +61,7 @@ npm start                  # serves the folder at http://localhost:8080
 npm install && npx playwright install chromium
 npm test                   # same smoke test CI runs
 npm run assets             # regenerate icons and splash screens (needs Python Playwright)
+npm run check              # design docs check and its tests (no install needed)
 ```
 
 No build step: `index.html` is one self-contained file.
@@ -67,7 +74,10 @@ manifest.webmanifest        install metadata
 sw.js                       offline cache
 assets/icons/               icon.svg is the source; PNGs are generated
 assets/splash/              iPhone launch images (closed cabinet doors)
-docs/brand-board.md         palette, type, materials, motion, icon, share image
+variants/                   the earlier prototype, kept as it was
+docs/design/                the design brain: map, rules card, protocol, packs, brand board
+docs/reference/spread/      iOS reference documents forked unchanged from Spread
+scripts/                    design docs checker and token generator
 tests/smoke.cjs             CI smoke test
 tools/generate_assets.py    icon and splash generator
 .github/workflows/pages.yml test and deploy

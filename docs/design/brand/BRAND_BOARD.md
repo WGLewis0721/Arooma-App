@@ -1,5 +1,9 @@
 # Arooma Brand Board: Warm Archive
 
+> Part of the Arooma design brain. Start at [../README.md](../README.md) for the map and the router. Highest authority for visual and motion decisions.
+
+> Summary: palette and contrast (1), type (2), bottle and card materials (3), layout motion, haptics and the Island (4), App Store icon (5), share image (6), low stock and daily pick (7).
+
 **Idea:** a personal cabinet of objects. Not a storefront, not an inventory dashboard. Bottles are the richest thing on screen; everything around them is paper, light and restraint.
 
 ## 1. Color

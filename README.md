@@ -19,7 +19,9 @@ Hold the phone upright; landscape shows a prompt to rotate.
 | Area | What to try |
 |---|---|
 | First open | Two cabinet doors swing open, the interior light comes up, bottles rise into place. Tap the doors to open sooner. Cabinet menu, then Replay the cabinet doors, plays it again. |
+| Shelves | The cabinet opens on the Autumn shelf. **Pinch in** (or tap the grid button in the header, or press `-`) to zoom out to every shelf: Spring, Summer, Autumn and Winter by default. Each has a **pencil** to rename it, and **Add a shelf** sits at the bottom. Pinch out over a shelf, tap it, or press Escape to go back in; the selected bottle stays selected. Move a bottle between shelves from the three dots under the card. |
 | Shelf | 7 sample bottles (fictional houses), saved on this device once you change anything. Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record. |
+| Liquid | Every bottle shows its liquid and fill level, including the black, white ceramic and terracotta ones through a small level window. The surface sloshes with momentum when you swipe, ripples in the direction the card moves, stays level with the room when cards lean in Fan, and never goes dead still. With Reduce Motion it stays flat at the true level. |
 | Layouts | Cover Flow, Stack and Fan keep the same bottle selected. Fan is a saved 3-bottle rotation and needs at least three bottles. |
 | Daily Pick | Brings the next candidate forward with an olive outline and a "Today's pick" tab. |
 | Low stock | Salt Cedar: the liquid level drops, and a quiet "Running low" label with a hairline gauge. Always labeled as an estimate. |
@@ -48,7 +50,7 @@ This is a web app, so a few things are imitations of native features:
 `.github/workflows/pages.yml` runs on every push to `main`:
 
 1. Assembles `dist/` (the app, manifest, service worker, icons) and stamps the service worker with the commit SHA.
-2. Runs `tests/smoke.cjs` in a headless browser at an iPhone viewport: doors, 7 cards, layouts keep the selection, Daily Pick, Island timer, manifest and icons resolve, service worker active, share image export, then add, delete with Undo, wear history, the evidence checklist, compare, reload persistence, damaged storage, a one-bottle shelf and a 375 by 667 phone, with no console errors. Screenshots are kept as a build artifact.
+2. Runs `tests/smoke.cjs` in a headless browser at an iPhone viewport: doors, 7 cards, layouts keep the selection, Daily Pick, Island timer, manifest and icons resolve, service worker active, share image export, then pinch to every shelf (touch, trackpad and Safari gestures), rename, add a shelf, move a bottle, liquid level and motion, then add, delete with Undo, wear history, the evidence checklist, compare, reload persistence, damaged storage, a one-bottle shelf and a 375 by 667 phone, with no console errors. Screenshots are kept as a build artifact.
 3. Deploys to GitHub Pages.
 
 **One-time setup:** in the repo go to **Settings, Pages, Build and deployment, Source** and choose **GitHub Actions**. Then re-run the workflow if the first run stopped at the deploy step.
@@ -94,4 +96,4 @@ tools/generate_assets.py    icon and splash generator
 
 ## Status
 
-Tested in headless Chromium with an iPhone viewport and iOS user agent. It has not been run on a physical iPhone yet, so check Safari and the Home Screen install on a device, especially the status bar, the splash image, haptics, the keyboard over the Add panel, date pickers, and that a shelf built in a Safari tab is separate from the installed app's shelf.
+Tested in headless Chromium with an iPhone viewport and iOS user agent. It has not been run on a physical iPhone yet, so check Safari and the Home Screen install on a device, especially the status bar, the splash image, haptics, the two-finger pinch (and that the page itself does not zoom), the liquid's feel and frame rate, the keyboard over the Add panel, date pickers, and that a shelf built in a Safari tab is separate from the installed app's shelf.

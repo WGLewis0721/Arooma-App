@@ -316,6 +316,39 @@ select.in{-webkit-appearance:menulist;appearance:auto}
 .legend{display:flex;gap:16px;justify-content:center;font-size:11.5px;color:var(--soft)}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 @media (max-height:700px){.panel h2{font-size:21px}.vopt svg{height:48px}}
+/* ---------- all shelves (zoomed out) ---------- */
+.device{--z:0;touch-action:pan-x pan-y}
+.stage{touch-action:none}
+.pbody,.range{touch-action:pan-y}
+.head>div:first-child{flex:1 1 auto;min-width:0;padding-right:8px}
+h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
+.stage,.info{transform-origin:50% 45%;transform:scale(calc(1 - var(--z)*.3));opacity:max(0,calc(1 - var(--z)*1.7))}
+.info.swap{opacity:0}
+.toolbar{opacity:max(0,calc(1 - var(--z)*2.2))}
+.over,.ovbar{opacity:max(0,calc(var(--z)*1.7 - .55))}
+.over{position:absolute;left:0;right:0;top:var(--ot,150px);bottom:var(--ob,96px);transform-origin:50% 40%;transform:scale(calc(1.18 - var(--z)*.18))}
+.ovbar{position:absolute;left:0;right:0;bottom:0}
+.off{visibility:hidden;pointer-events:none}
+.over-scroll{position:relative;height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:2px 12px 16px}
+.shelf{position:relative;margin:0 0 12px;padding:6px 12px 0;border-radius:22px;overflow:hidden;
+  background:linear-gradient(180deg,#E9E2D4 0%,#EEE8DB 62%,#E6DECE 100%);
+  box-shadow:inset 0 0 0 1px rgba(37,35,31,.07),inset 0 12px 22px -18px rgba(37,35,31,.30),0 1px 0 rgba(255,255,255,.7)}
+.shelf.cur{box-shadow:inset 0 0 0 1.5px var(--olive),inset 0 12px 22px -18px rgba(37,35,31,.30),0 1px 0 rgba(255,255,255,.7)}
+.sh-top{display:flex;align-items:center;gap:6px;min-height:46px}
+.sname{flex:1 1 auto;min-width:0;text-align:left;font-family:var(--serif);font-weight:500;font-size:20px;letter-spacing:-.005em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:8px 0}
+.scount{flex:none;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--olive-deep);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pen{flex:none;width:44px;height:44px;margin-right:-8px;border-radius:22px;display:grid;place-items:center;color:var(--olive-deep)}
+.tier{display:flex;align-items:flex-end;gap:6px;padding:4px 4px 0;min-height:98px}
+.pl{height:12px;margin:0 -12px;background:linear-gradient(180deg,#F4EFE4 0%,#E4DBC9 100%);border-top:1px solid rgba(255,255,255,.75);box-shadow:0 -10px 14px -12px rgba(37,35,31,.3)}
+.mb{position:relative;flex:none;width:40px;height:90px;margin-bottom:-3px;transition:transform .45s var(--ease)}
+.mb svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mb.is-sel{transform:translateY(-5px)}
+.mb.is-sel::after{content:"";position:absolute;left:50%;bottom:-6px;width:16px;height:2px;margin-left:-8px;border-radius:1px;background:var(--olive)}
+.mb:focus-visible{outline:2px solid var(--olive);outline-offset:2px;border-radius:4px}
+.sh-empty{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:62px;padding:0 4px 4px;font-family:var(--serif);font-style:italic;font-size:15px;color:var(--soft)}
+.sh-add{flex:none;height:44px;padding:0 4px;font-family:var(--sans);font-style:normal;font-size:13px;font-weight:600;color:var(--olive-deep)}
+@media (max-width:380px){h1{font-size:28px}}
+@media (prefers-reduced-motion:reduce){.stage,.info,.over{transform:none!important}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;transition-delay:0s!important}
 }
@@ -337,9 +370,12 @@ select.in{-webkit-appearance:menulist;appearance:auto}
     <header class="head">
       <div>
         <div class="eyebrow" id="eyebrow">The cabinet &middot; 07 objects</div>
-        <h1>Autumn shelf</h1>
+        <h1 id="title">Autumn shelf</h1>
       </div>
       <div class="hbtns">
+        <button class="glass round" id="shelvesBtn" aria-label="All shelves" aria-pressed="false">
+          <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.2"/></svg>
+        </button>
         <button class="glass round" id="addBtn" aria-label="Add a bottle">
           <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>
         </button>
@@ -369,7 +405,7 @@ select.in{-webkit-appearance:menulist;appearance:auto}
       </div>
     </section>
 
-    <nav class="toolbar" aria-label="Shelf controls">
+    <nav class="toolbar" id="toolbar" aria-label="Shelf controls">
       <div class="glass seg" id="seg" data-i="0" role="group" aria-label="Layout">
         <i class="thumb"></i>
         <button data-mode="flow" aria-pressed="true">Cover Flow</button>
@@ -380,6 +416,15 @@ select.in{-webkit-appearance:menulist;appearance:auto}
         <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13 6.4 8.6 2 7l4.4-1.6z"/></svg>
         Daily Pick
       </button>
+    </nav>
+
+    <section class="over off" id="over" aria-label="All shelves" aria-hidden="true"><div class="over-scroll" id="overScroll"></div></section>
+    <nav class="toolbar ovbar off" id="ovBar" aria-label="Shelf overview controls">
+      <button class="glass pickbtn" id="addShelf" aria-label="Add a shelf">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 2.5v11M2.5 8h11"/></svg>
+        Add a shelf
+      </button>
+      <button class="glass pickbtn" id="openShelf" aria-label="Open the shelf you were on">Open shelf</button>
     </nav>
   </div>
 
@@ -440,6 +485,23 @@ function sh(id){return '<radialGradient id="'+id+'"><stop offset="0" stop-color=
 function ground(id){return '<ellipse cx="70" cy="238" rx="48" ry="6.5" fill="url(#'+id+')"/>'}
 function wrap(b){return '<svg viewBox="20 30 100 220" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+b+'</svg>'}
 
+/* Liquid: one path per bottle, redrawn by the physics (see LQ). Drawn flat at the true fill level, so a still image is exact. */
+function n2(v){return Math.round(v*100)/100}
+function liq(p,o){
+  var d='M'+o.xl+' '+n2(o.y0)+'H'+o.xr+'V'+o.yb+'H'+o.xl+'Z';
+  return '<path class="lq" data-y0="'+n2(o.y0)+'" data-yb="'+o.yb+'" data-yt="'+o.yt+'" data-xl="'+o.xl+'" data-xr="'+o.xr+'" data-g="'+(o.g||1)+'" d="'+d+'" fill="url(#'+o.fill+')" opacity="'+(o.op||.94)+'"/>'
+   +'<path class="lqh" d="M'+o.xl+' '+n2(o.y0+.8)+'H'+o.xr+'" fill="none" stroke="'+(o.hl||'#fff')+'" stroke-opacity="'+(o.ho||.75)+'" stroke-width="1.5" stroke-linecap="round"/>';
+}
+/* An opaque vessel (black glass, ceramic, terracotta) gets a narrow level window so the liquid and its level are always visible. */
+function sight(p,x,y0,y1,w,f,o){
+  var h=y1-y0,top=y1-Math.max(0,Math.min(1,f))*h;
+  return '<defs>'+lg(p+'q',o.liq)+'<clipPath id="'+p+'w"><rect x="'+x+'" y="'+y0+'" width="'+w+'" height="'+h+'" rx="2"/></clipPath></defs>'
+   +'<rect x="'+(x-1.4)+'" y="'+(y0-1.4)+'" width="'+(w+2.8)+'" height="'+(h+2.8)+'" rx="3.2" fill="'+o.frame+'"/>'
+   +'<rect x="'+x+'" y="'+y0+'" width="'+w+'" height="'+h+'" rx="2" fill="'+o.glass+'"/>'
+   +'<g clip-path="url(#'+p+'w)">'+liq(p,{y0:top,yb:y1,yt:y0,xl:x-1,xr:x+w+1,fill:p+'q',op:.97,hl:o.hl,ho:.8,g:2.4})
+   +'<rect x="'+(x+1.1)+'" y="'+y0+'" width="1.5" height="'+h+'" fill="#fff" opacity=".5"/></g>';
+}
+
 /* 0. transparent heavy glass, pale liquid, chrome cap */
 function bLinen(p,f){var top=216-f*114;return wrap('<defs>'
  +lg(p+'g',[[0,'#ffffff',.9],[.2,'#DCE8E4',.5],[.62,'#BFD0CB',.3],[1,'#7E9690',.5]])
@@ -448,8 +510,7 @@ function bLinen(p,f){var top=216-f*114;return wrap('<defs>'
  +sh(p+'s')+'<clipPath id="'+p+'k"><rect x="36" y="98" width="68" height="138" rx="7"/></clipPath></defs>'
  +ground(p+'s')
  +'<rect x="34" y="96" width="72" height="140" rx="9" fill="url(#'+p+'g)" stroke="#25231F" stroke-opacity=".28"/>'
- +'<g clip-path="url(#'+p+'k)"><rect x="36" y="'+top+'" width="68" height="'+(216-top)+'" fill="url(#'+p+'l)" opacity=".94"/>'
- +'<rect x="36" y="'+top+'" width="68" height="1.6" fill="#fff" opacity=".75"/><rect x="36" y="216" width="68" height="22" fill="#fff" opacity=".45"/></g>'
+ +'<g clip-path="url(#'+p+'k)">'+liq(p,{y0:top,yb:216,yt:98,xl:34,xr:106,fill:p+'l',op:.94,hl:'#fff',ho:.75})+'<rect x="36" y="216" width="68" height="22" fill="#fff" opacity=".45"/></g>'
  +'<rect x="58" y="80" width="24" height="18" fill="url(#'+p+'g)" stroke="#25231F" stroke-opacity=".22"/>'
  +'<rect x="51" y="44" width="38" height="40" rx="3.5" fill="url(#'+p+'c)"/><rect x="51" y="44" width="38" height="3.5" rx="1.7" fill="#fff" opacity=".75"/>'
  +'<rect x="51" y="80" width="38" height="1.4" fill="#25231F" opacity=".25"/>'
@@ -457,7 +518,7 @@ function bLinen(p,f){var top=216-f*114;return wrap('<defs>'
  +'<rect x="53" y="146" width="34" height="1.3" fill="#25231F" opacity=".7"/><rect x="53" y="152" width="22" height="1.3" fill="#25231F" opacity=".5"/>')}
 
 /* 1. near-black glass, black cap, silver foil label */
-function bInk(p){return wrap('<defs>'
+function bInk(p,f){return wrap('<defs>'
  +lg(p+'g',[[0,'#4a4a48'],[.14,'#262625'],[.6,'#121211'],[1,'#050505']])
  +lg(p+'c',[[0,'#3a3a38'],[.2,'#1c1c1b'],[.7,'#0d0d0c'],[1,'#000']])
  +lg(p+'m',[[0,'#8a8d8e'],[.25,'#eceded'],[.5,'#b8bbbc'],[.8,'#e2e3e3'],[1,'#7a7d7e']])
@@ -469,7 +530,8 @@ function bInk(p){return wrap('<defs>'
  +'<rect x="52" y="52" width="36" height="48" rx="2.5" fill="url(#'+p+'c)"/><rect x="52" y="94" width="36" height="3.5" fill="url(#'+p+'m)"/>'
  +'<rect x="56" y="55" width="3" height="36" rx="1.5" fill="#fff" opacity=".18"/>'
  +'<rect x="55" y="150" width="30" height="40" fill="url(#'+p+'f)"/>'
- +'<rect x="59" y="158" width="22" height="1.4" fill="#25231F" opacity=".75"/><rect x="59" y="164" width="14" height="1.4" fill="#25231F" opacity=".55"/><rect x="59" y="178" width="18" height="1.4" fill="#25231F" opacity=".55"/>')}
+ +'<rect x="59" y="158" width="22" height="1.4" fill="#25231F" opacity=".75"/><rect x="59" y="164" width="14" height="1.4" fill="#25231F" opacity=".55"/><rect x="59" y="178" width="18" height="1.4" fill="#25231F" opacity=".55"/>'
+ +sight(p,88,124,230,12,f,{frame:'#7C7F81',glass:'#D8DAD6',liq:[[0,'#B98A45'],[.5,'#8C5F25'],[1,'#5C3A14']],hl:'#F4E2B8'}))}
 
 /* 2. green glass, brass cap, cream label */
 function bFig(p,f){var body='M28 228 Q28 236 36 236 H104 Q112 236 112 228 V150 Q112 128 90 121 H50 Q28 128 28 150 Z';var top=232-f*102;return wrap('<defs>'
@@ -479,7 +541,7 @@ function bFig(p,f){var body='M28 228 Q28 236 36 236 H104 Q112 236 112 228 V150 Q
  +sh(p+'s')+'<clipPath id="'+p+'k"><path d="'+body+'"/></clipPath></defs>'
  +ground(p+'s')
  +'<path d="'+body+'" fill="url(#'+p+'g)"/>'
- +'<g clip-path="url(#'+p+'k)"><rect x="28" y="'+top+'" width="84" height="'+(240-top)+'" fill="url(#'+p+'l)" opacity=".92"/><rect x="28" y="'+top+'" width="84" height="1.6" fill="#cfe6d3" opacity=".6"/></g>'
+ +'<g clip-path="url(#'+p+'k)">'+liq(p,{y0:top,yb:240,yt:121,xl:26,xr:114,fill:p+'l',op:.92,hl:'#cfe6d3',ho:.6})+'</g>'
  +'<path d="'+body+'" fill="none" stroke="#12251a" stroke-opacity=".35"/>'
  +'<rect x="56" y="98" width="28" height="26" fill="url(#'+p+'g)"/>'
  +'<rect x="51" y="68" width="38" height="34" rx="3" fill="url(#'+p+'c)"/><rect x="51" y="68" width="38" height="3.5" rx="1.7" fill="#fff" opacity=".55"/>'
@@ -488,7 +550,7 @@ function bFig(p,f){var body='M28 228 Q28 236 36 236 H104 Q112 236 112 228 V150 Q
  +'<rect x="34" y="138" width="5" height="82" rx="2.5" fill="#fff" opacity=".4"/>')}
 
 /* 3. opaque white ceramic, stone cap */
-function bMilk(p){var body='M32 226 Q32 236 42 236 H98 Q108 236 108 226 V104 Q108 86 90 84 H50 Q32 86 32 104 Z';return wrap('<defs>'
+function bMilk(p,f){var body='M32 226 Q32 236 42 236 H98 Q108 236 108 226 V104 Q108 86 90 84 H50 Q32 86 32 104 Z';return wrap('<defs>'
  +lg(p+'g',[[0,'#FFFFFF'],[.25,'#F7F4ED'],[.7,'#E4DFD3'],[1,'#C6C0B1']])
  +lg(p+'c',[[0,'#EDE8DD'],[.3,'#D9D3C5'],[.7,'#BFB8A8'],[1,'#9D9686']])
  +sh(p+'s')+'</defs>'
@@ -497,7 +559,8 @@ function bMilk(p){var body='M32 226 Q32 236 42 236 H98 Q108 236 108 226 V104 Q10
  +'<rect x="46" y="56" width="48" height="32" rx="7" fill="url(#'+p+'c)"/><rect x="46" y="56" width="48" height="3" rx="1.5" fill="#fff" opacity=".5"/>'
  +'<circle cx="70" cy="166" r="17" fill="none" stroke="#25231F" stroke-opacity=".16"/><circle cx="70.8" cy="166.8" r="17" fill="none" stroke="#fff" stroke-opacity=".9"/>'
  +'<rect x="62" y="165.4" width="16" height="1.4" fill="#25231F" opacity=".35"/>'
- +'<rect x="37" y="102" width="5" height="120" rx="2.5" fill="#fff" opacity=".9"/><rect x="100" y="100" width="3" height="124" rx="1.5" fill="#25231F" opacity=".06"/>')}
+ +'<rect x="37" y="102" width="5" height="120" rx="2.5" fill="#fff" opacity=".9"/><rect x="100" y="100" width="3" height="124" rx="1.5" fill="#25231F" opacity=".06"/>'
+ +sight(p,90,108,226,12,f,{frame:'#B9B2A2',glass:'#DCE3E1',liq:[[0,'#F1E7C2'],[.5,'#E2D39C'],[1,'#C2AD6A']],hl:'#fff'}))}
 
 /* 4. clear glass, amber liquid, walnut cap, paper label (low stock shows in the liquid level) */
 function bCedar(p,f){var top=218-f*114;return wrap('<defs>'
@@ -507,7 +570,7 @@ function bCedar(p,f){var top=218-f*114;return wrap('<defs>'
  +sh(p+'s')+'<clipPath id="'+p+'k"><rect x="40" y="102" width="60" height="134" rx="8"/></clipPath></defs>'
  +ground(p+'s')
  +'<rect x="38" y="100" width="64" height="136" rx="10" fill="url(#'+p+'g)" stroke="#25231F" stroke-opacity=".3"/>'
- +'<g clip-path="url(#'+p+'k)"><rect x="40" y="'+top+'" width="60" height="'+(236-top)+'" fill="url(#'+p+'l)" opacity=".95"/><rect x="40" y="'+top+'" width="60" height="1.6" fill="#fff" opacity=".6"/><rect x="40" y="220" width="60" height="16" fill="#fff" opacity=".25"/></g>'
+ +'<g clip-path="url(#'+p+'k)">'+liq(p,{y0:top,yb:236,yt:102,xl:38,xr:102,fill:p+'l',op:.95,hl:'#fff',ho:.6})+'<rect x="40" y="220" width="60" height="16" fill="#fff" opacity=".25"/></g>'
  +'<rect x="57" y="82" width="26" height="20" fill="url(#'+p+'g)" stroke="#25231F" stroke-opacity=".22"/>'
  +'<rect x="51" y="46" width="38" height="40" rx="3" fill="url(#'+p+'c)"/><rect x="51" y="46" width="38" height="3" rx="1.5" fill="#fff" opacity=".28"/>'
  +'<path d="M51 56H89M51 64H89M51 72H89" stroke="#000" stroke-opacity=".18"/>'
@@ -525,7 +588,7 @@ function bSmoke(p,f){var body='M46 236 Q24 228 28 192 Q31 152 53 128 Q61 119 62 
  +sh(p+'s')+'<clipPath id="'+p+'k"><path d="'+body+'"/></clipPath></defs>'
  +ground(p+'s')
  +'<path d="'+body+'" fill="url(#'+p+'g)"/>'
- +'<g clip-path="url(#'+p+'k)"><rect x="20" y="'+top+'" width="100" height="'+(240-top)+'" fill="url(#'+p+'l)" opacity=".82"/><rect x="20" y="'+top+'" width="100" height="1.6" fill="#f0c9ad" opacity=".5"/>'
+ +'<g clip-path="url(#'+p+'k)">'+liq(p,{y0:top,yb:240,yt:104,xl:20,xr:120,fill:p+'l',op:.82,hl:'#f0c9ad',ho:.5})
  +'<polygon points="62,104 80,104 90,128 70,140" fill="#fff" opacity=".16"/><polygon points="53,128 70,140 62,172 34,178 28,192 31,158" fill="#fff" opacity=".13"/>'
  +'<polygon points="70,140 90,128 112,160 100,184 78,162" fill="#000" opacity=".12"/><polygon points="62,172 78,162 100,184 96,236 60,236" fill="#000" opacity=".10"/></g>'
  +'<path d="'+body+'" fill="none" stroke="#25231F" stroke-opacity=".3"/>'
@@ -533,7 +596,7 @@ function bSmoke(p,f){var body='M46 236 Q24 228 28 192 Q31 152 53 128 Q61 119 62 
  +'<rect x="56" y="72" width="30" height="34" rx="2.5" fill="url(#'+p+'c)"/>'+dots+'<rect x="56" y="72" width="30" height="2.4" rx="1.2" fill="#fff" opacity=".22"/>')}
 
 /* 6. terracotta, cork stopper, kraft label */
-function bEarth(p){var body='M30 226 Q30 236 40 236 H100 Q110 236 110 226 V160 Q110 130 84 122 H56 Q30 130 30 160 Z';
+function bEarth(p,f){var body='M30 226 Q30 236 40 236 H100 Q110 236 110 226 V160 Q110 130 84 122 H56 Q30 130 30 160 Z';
  var sp='';[[62,80],[70,90],[76,78],[66,100],[78,96],[72,72]].forEach(function(d){sp+='<circle cx="'+d[0]+'" cy="'+d[1]+'" r="1" fill="#7a5a30" opacity=".5"/>'});
  return wrap('<defs>'
  +lg(p+'g',[[0,'#D79470'],[.25,'#BC6C48'],[.7,'#9A4F31'],[1,'#703620']])
@@ -543,9 +606,125 @@ function bEarth(p){var body='M30 226 Q30 236 40 236 H100 Q110 236 110 226 V160 Q
  +'<rect x="60" y="100" width="20" height="26" fill="url(#'+p+'g)"/>'
  +'<path d="'+body+'" fill="url(#'+p+'g)"/>'
  +'<rect x="57" y="68" width="26" height="36" rx="2" fill="url(#'+p+'c)"/>'+sp
- +'<rect x="40" y="172" width="60" height="28" fill="#DCCBA8"/><rect x="40" y="172" width="60" height="28" fill="none" stroke="#25231F" stroke-opacity=".3"/>'
+ +'<rect x="40" y="172" width="50" height="28" fill="#DCCBA8"/><rect x="40" y="172" width="50" height="28" fill="none" stroke="#25231F" stroke-opacity=".3"/>'
  +'<rect x="46" y="181" width="36" height="1.5" fill="#25231F" opacity=".7"/><rect x="46" y="188" width="22" height="1.5" fill="#25231F" opacity=".5"/>'
- +'<path d="M38 150 Q40 138 54 131" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" opacity=".28"/>')}
+ +'<path d="M38 150 Q40 138 54 131" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" opacity=".28"/>'
+ +sight(p,93,150,228,12,f,{frame:'#6A311C',glass:'#EEE2C8',liq:[[0,'#D9A55B'],[.5,'#B97B2E'],[1,'#7C4A14']],hl:'#FBE7C0'}))}
+
+/* ---------- liquid physics ---------- */
+/* Every liquid is one path clipped to its vessel. At rest it is a flat surface at the true fill level, which is what the
+   share image and Reduced Motion show. While the page is live the path is redrawn each frame from a small simulation:
+   - tilt: a damped spring. The surface leans against the acceleration of the card (swipes, layout changes) and, in Fan and
+     Stack, stays level with the room while the card leans. It overshoots and settles, so it has momentum.
+   - waves: two travelling ripples. Their energy comes from motion and fades. They run the way the card is moving.
+   - a slow ambient ripple keeps every visible bottle gently alive, so the level can always be read.
+   A full bottle hardly moves and a low one pools, because headroom and depth limit the tilt. */
+var LQ=(function(){
+  var ON=!RM,recs=[],raf=0,last=0,fn=0,shelfOn=true,ovOn=false;
+  var KA=5e-5,KV=2.4e-4,W1=2*Math.PI*1.65,Z1=.15,WB=2*Math.PI*2.3,ZB=.22;
+  function bez(x1,y1,x2,y2){
+    function B(a,b,t){var u=1-t;return 3*a*u*u*t+3*b*u*t*t+t*t*t}
+    function D(a,b,t){var u=1-t;return 3*a*u*u+6*(b-a)*u*t+3*(1-b)*t*t}
+    return function(x){
+      if(x<=0)return 0;if(x>=1)return 1;var t=x,i,e,d;
+      for(i=0;i<8;i++){e=B(x1,x2,t)-x;if(Math.abs(e)<1e-5)break;d=D(x1,x2,t);if(Math.abs(d)<1e-5)break;t=clamp(t-e/d,0,1)}
+      return B(y1,y2,t);
+    };
+  }
+  var EASE=bez(.22,1,.36,1);
+  function num(el,a){return +el.getAttribute(a)}
+  function mk(p,grp,slot){
+    var n=p.nextElementSibling,r={p:p,hl:n&&n.getAttribute&&n.getAttribute('class')==='lqh'?n:null,grp:grp,slot:slot||null,
+      y0:num(p,'data-y0'),yb:num(p,'data-yb'),yt:num(p,'data-yt'),xl:num(p,'data-xl'),xr:num(p,'data-xr'),g:num(p,'data-g')||1,
+      s:0,sv:0,b:0,bv:0,A:0,ph:Math.random()*6.28,dir:0,pk:null,pvx:0,pvy:0,fx:0,fy:0,vx:0,hot:true};
+    r.cx=(r.xl+r.xr)/2;r.hw=(r.xr-r.xl)/2;
+    r.amb=Math.min(r.g>1?.9:.85,Math.max(0,r.y0-r.yt)/4);r.A=r.amb;r.sw=Math.random()*6.28;
+    return r;
+  }
+  function regSlot(el){el._k=null;el._on=false;el._lq=[];$$('.lq',el).forEach(function(p){var r=mk(p,'sl',el);recs.push(r);el._lq.push(r)});if(ON)start()}
+  function regStatic(p,grp){recs.push(mk(p,grp));if(ON)start()}
+  function dropSlot(el){recs=recs.filter(function(r){return r.slot!==el})}
+  function dropGroup(g){recs=recs.filter(function(r){return r.grp!==g})}
+  function kinAt(k,t){
+    if(!k||!k.b)return {X:0,Y:0,R:0};
+    if(k.dur<=0||t>=k.t0+k.dur)return k.b;
+    if(t<=k.t0)return k.a;
+    var u=EASE((t-k.t0)/k.dur);
+    return {X:k.a.X+(k.b.X-k.a.X)*u,Y:k.a.Y+(k.b.Y-k.a.Y)*u,R:k.a.R+(k.b.R-k.a.R)*u};
+  }
+  /* called from render() with the card's new target; mirrors the CSS transition so the physics sees the same motion */
+  function move(el,o,instant){
+    if(!ON)return;
+    var th=o.rz*Math.PI/180,X=o.x+o.p*Math.sin(th),Y=o.y+o.p*(1-Math.cos(th)),R=o.rz,k=el._k;
+    el._on=o.op>.15;
+    if(!k){el._k={a:{X:X,Y:Y,R:R},b:{X:X,Y:Y,R:R},t0:0,dur:0};return}
+    if(Math.abs(k.b.X-X)<.05&&Math.abs(k.b.Y-Y)<.05&&Math.abs(k.b.R-R)<.02)return;
+    var now=performance.now(),cur=kinAt(k,now);
+    k.a={X:cur.X,Y:cur.Y,R:cur.R};k.b={X:X,Y:Y,R:R};
+    k.t0=now+(instant?0:(parseFloat(el.style.transitionDelay)||0));k.dur=instant?0:850;
+  }
+  function impulse(r,o){
+    var sg=o.rand?(Math.random()<.5?-1:1):1;
+    r.sv+=(o.s||0)*sg*W1*r.g;r.bv+=(o.b||0)*WB;r.A=Math.max(r.A,Math.min(2.6,(o.A||0)));
+  }
+  function kick(el,o){if(el&&el._lq)el._lq.forEach(function(r){impulse(r,o)})}
+  function kickGroup(g,o){recs.forEach(function(r){if(r.grp===g)impulse(r,o)})}
+  function setVis(sh,ov){shelfOn=sh;ovOn=ov}
+  function f1(v){return Math.round(v*10)/10}
+  function step(r,dt,rdt,t){
+    var rot=0;
+    if(r.slot&&r.slot._k){
+      var k=kinAt(r.slot._k,t);
+      if(r.pk&&rdt>0&&rdt<.1){
+        var vX=(k.X-r.pk.X)/rdt,vY=(k.Y-r.pk.Y)/rdt,f=Math.min(1,rdt*30);
+        r.fx+=(clamp((vX-r.pvx)/rdt,-60000,60000)-r.fx)*f;r.fy+=(clamp((vY-r.pvy)/rdt,-60000,60000)-r.fy)*f;
+        r.vx+=(vX-r.vx)*Math.min(1,rdt*12);r.pvx=vX;r.pvy=vY;
+      }else{r.pvx=0;r.pvy=0;r.fx=0;r.fy=0;r.vx=0}
+      r.pk={X:k.X,Y:k.Y,R:k.R};rot=k.R;
+    }
+    var up=Math.max(0,r.y0-r.yt),hh=Math.max(0,r.yb-r.y0);
+    var smax=Math.max(0,Math.min(.6,(hh-1)/r.hw,(up-.4)/r.hw));
+    var sway=.03*Math.sin(t*.0011+r.sw)*Math.min(1,smax*8);
+    var tgt=clamp(clamp(r.fx*KA*r.g,-.9,.9)-Math.tan(rot*Math.PI/180)+sway,-smax,smax),h=dt/2,n;
+    for(n=0;n<2;n++){
+      r.sv+=(W1*W1*(tgt-r.s)-2*Z1*W1*r.sv)*h;r.s+=r.sv*h;
+      r.bv+=(WB*WB*(clamp(-r.fy*KV*r.g,-1.1,1.1)-r.b)-2*ZB*WB*r.bv)*h;r.b+=r.bv*h;
+    }
+    if(r.s>smax){r.s=smax;if(r.sv>0)r.sv*=-.35}else if(r.s<-smax){r.s=-smax;if(r.sv<0)r.sv*=-.35}
+    var amax=Math.min(2.8,hh/4,up/3);
+    var drive=Math.min(amax,Math.abs(r.sv)*1.5/r.g+Math.abs(r.vx)*.0011+Math.abs(r.fy)*2.4e-5);
+    r.A=r.amb+(r.A-r.amb)*Math.exp(-dt/1.6);if(drive>r.A)r.A=drive;if(r.A>amax)r.A=Math.max(r.amb,amax);
+    r.dir+=(clamp(r.vx/350,-1,1)-r.dir)*Math.min(1,dt*5);
+    r.ph+=dt*(1.15+8*r.dir);
+    r.hot=Math.abs(r.sv)>.003||Math.abs(r.s)>.004||r.A>r.amb*1.5||Math.abs(r.bv)>.01;
+    draw(r);
+  }
+  function draw(r){
+    var kx=Math.PI*2/Math.max(r.hw*2.2,14),c=r.cx,A=r.A,s=r.s,y0=r.y0+r.b,lo=r.yt+.2,hi=r.yb-.6,cnt=Math.max(6,Math.round(r.hw*2/3.5)),i,x,u,y,d='',dh='';
+    for(i=0;i<=cnt;i++){
+      x=r.xl+(r.xr-r.xl)*i/cnt;u=x-c;
+      y=y0+s*u+A*(Math.sin(kx*u-r.ph)*.7+Math.sin(kx*2.1*u-r.ph*1.37+1.3)*.3);
+      y=y<lo?lo:y>hi?hi:y;
+      d+=(i?'L':'M')+f1(x)+' '+f1(y);dh+=(i?'L':'M')+f1(x)+' '+f1(y+.8);
+    }
+    r.p.setAttribute('d',d+'V'+r.yb+'H'+r.xl+'Z');
+    if(r.hl)r.hl.setAttribute('d',dh);
+  }
+  function frame(t){
+    raf=requestAnimationFrame(frame);
+    if(document.hidden){last=0;return}
+    var rdt=last?(t-last)/1000:.016;last=t;fn++;
+    var dt=Math.min(rdt,.034),i,r;
+    for(i=0;i<recs.length;i++){
+      r=recs[i];
+      if(r.grp==='ov'?!ovOn:!(shelfOn&&r.slot&&r.slot._on))continue;
+      if(!r.hot&&(fn&1))continue;
+      step(r,dt*(r.hot?1:2),rdt*(r.hot?1:2),t);
+    }
+  }
+  function start(){if(!raf&&ON){last=0;raf=requestAnimationFrame(frame)}}
+  return {move:move,regSlot:regSlot,regStatic:regStatic,dropSlot:dropSlot,dropGroup:dropGroup,kick:kick,kickGroup:kickGroup,setVis:setVis,on:ON};
+})();
 
 /* ---------- the cabinet: data model (saved on this device only) ---------- */
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -604,13 +783,13 @@ function overlap(a,b){var mn=0,mx=0;for(var i=0;i<8;i++){mn+=Math.min(a[i],b[i])
 
 /* sample collection: every house is a fictional placeholder */
 var SEED=[
- {id:'s0',house:'Maison Aubrac',name:'Linen Rain',conc:'Eau de Toilette',ml:100,left:.78,notes:'Wet stone, white tea, clean linen',vessel:'clear',acq:540,first:531,last:41,wears:19,cool:false,note:'A summer bottle. Still the cleanest thing on the shelf.'},
- {id:'s1',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.'},
- {id:'s2',house:'Hollis & Reed',name:'Fig Hour',conc:'Eau de Parfum',ml:75,left:.85,notes:'Fig leaf, cedar, warm milk',vessel:'green',acq:330,first:325,last:12,wears:31,cool:false,note:'From the market trip. Wear it with wool.'},
- {id:'s3',house:'Oru Studio',name:'Milk Paper',conc:'Eau de Parfum',ml:50,left:.7,notes:'Rice milk, white cedar, soft musk',vessel:'white',acq:95,first:90,last:6,wears:14,cool:false,note:'Quiet and close to the skin. The easiest decision.'},
- {id:'s4',house:'Sable Lane',name:'Salt Cedar',conc:'Eau de Parfum',ml:50,left:.14,notes:'Cedar, sea salt, tobacco leaf',vessel:'amber',acq:610,first:600,last:3,wears:58,cool:true,note:'Nearly finished. Keep the box.'},
- {id:'s5',house:'Kiln & Co.',name:'Smoke Orchard',conc:'Parfum',ml:50,left:.66,notes:'Orchard smoke, black pepper, amber',vessel:'smoke',acq:150,first:140,last:18,wears:12,cool:true,note:'Best in cold air and near a fire.'},
- {id:'s6',house:'Terre Basse',name:'Dry Earth',conc:'Eau de Parfum',ml:100,left:.9,notes:'Warm clay, rain on dust, cork',vessel:'clay',acq:400,first:392,last:33,wears:22,cool:true,note:'Saved for slow weekends.'}
+ {id:'s0',shelf:'su',house:'Maison Aubrac',name:'Linen Rain',conc:'Eau de Toilette',ml:100,left:.78,notes:'Wet stone, white tea, clean linen',vessel:'clear',acq:540,first:531,last:41,wears:19,cool:false,note:'A summer bottle. Still the cleanest thing on the shelf.'},
+ {id:'s1',shelf:'au',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.'},
+ {id:'s2',shelf:'au',house:'Hollis & Reed',name:'Fig Hour',conc:'Eau de Parfum',ml:75,left:.85,notes:'Fig leaf, cedar, warm milk',vessel:'green',acq:330,first:325,last:12,wears:31,cool:false,note:'From the market trip. Wear it with wool.'},
+ {id:'s3',shelf:'sp',house:'Oru Studio',name:'Milk Paper',conc:'Eau de Parfum',ml:50,left:.7,notes:'Rice milk, white cedar, soft musk',vessel:'white',acq:95,first:90,last:6,wears:14,cool:false,note:'Quiet and close to the skin. The easiest decision.'},
+ {id:'s4',shelf:'au',house:'Sable Lane',name:'Salt Cedar',conc:'Eau de Parfum',ml:50,left:.14,notes:'Cedar, sea salt, tobacco leaf',vessel:'amber',acq:610,first:600,last:3,wears:58,cool:true,note:'Nearly finished. Keep the box.'},
+ {id:'s5',shelf:'au',house:'Kiln & Co.',name:'Smoke Orchard',conc:'Parfum',ml:50,left:.66,notes:'Orchard smoke, black pepper, amber',vessel:'smoke',acq:150,first:140,last:18,wears:12,cool:true,note:'Best in cold air and near a fire.'},
+ {id:'s6',shelf:'au',house:'Terre Basse',name:'Dry Earth',conc:'Eau de Parfum',ml:100,left:.9,notes:'Warm clay, rain on dust, cork',vessel:'clay',acq:400,first:392,last:33,wears:22,cool:true,note:'Saved for slow weekends.'}
 ];
 var ROT_IDS=['s1','s3','s5'];
 function seedLog(first,last,n){
@@ -618,7 +797,7 @@ function seedLog(first,last,n){
   for(var k=0;k<n;k++){var d=n>1?Math.round(last+(first-last)*k/(n-1)):last,s=agoStr(d);if(!seen[s]){seen[s]=1;out.push(s)}}
   return out;
 }
-function fromSeed(s){return {id:s.id,house:s.house,name:s.name,conc:s.conc,ml:s.ml,left:s.left,notes:s.notes,vessel:s.vessel,acq:agoStr(s.acq),log:seedLog(s.first,s.last,s.wears),auth:null,cool:s.cool,note:s.note,sample:true}}
+function fromSeed(s){return {id:s.id,shelf:s.shelf,house:s.house,name:s.name,conc:s.conc,ml:s.ml,left:s.left,notes:s.notes,vessel:s.vessel,acq:agoStr(s.acq),log:seedLog(s.first,s.last,s.wears),auth:null,cool:s.cool,note:s.note,sample:true}}
 
 /* what is saved is plain data; drawing, profile and low-stock are derived each load */
 var STORE_KEY='arooma.v1';
@@ -626,7 +805,7 @@ var DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
 function clean(s){
   if(!s||typeof s!=='object')return null;
   var str=function(v,d,max){return typeof v==='string'?v.slice(0,max):d};
-  var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',28).trim(),name:str(s.name,'',28).trim(),conc:str(s.conc,'Eau de Parfum',24),
+  var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),shelf:str(s.shelf,'',16).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',28).trim(),name:str(s.name,'',28).trim(),conc:str(s.conc,'Eau de Parfum',24),
     ml:Math.max(1,Math.min(1000,Math.round(+s.ml)||50)),left:Math.max(0,Math.min(1,+s.left||0)),notes:str(s.notes,'',80),vessel:vessel(s.vessel).k,
     acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],auth:null,cool:!!s.cool,note:str(s.note,'',80),sample:!!s.sample};
   if(!b.id||!b.house||!b.name)return null;
@@ -640,19 +819,42 @@ function prep(b){
   b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
   return b;
 }
-function plain(b){return {id:b.id,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log,auth:b.auth,cool:b.cool,note:b.note,sample:b.sample}}
-function loadBottles(){
+function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log,auth:b.auth,cool:b.cool,note:b.note,sample:b.sample}}
+var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
+var MAXSH=12;
+function cleanShelves(a){
+  var out=[],seen={};
+  (Array.isArray(a)?a:[]).forEach(function(x){
+    if(!x||typeof x!=='object'||out.length>=MAXSH)return;
+    var id=typeof x.id==='string'?x.id.slice(0,16).replace(/[^a-z0-9]/gi,''):'',name=typeof x.name==='string'?x.name.trim().slice(0,28):'';
+    if(id&&name&&!seen[id]){seen[id]=1;out.push({id:id,name:name})}
+  });
+  return out;
+}
+/* v2 adds shelves. A v1 save has none: its bottles go on the Autumn shelf, where they were shown before. */
+function loadState(){
   try{
     var raw=localStorage.getItem(STORE_KEY);
-    if(raw){var s=JSON.parse(raw);if(s&&s.v===1&&Array.isArray(s.bottles)){
+    if(raw){var s=JSON.parse(raw);if(s&&(s.v===1||s.v===2)&&Array.isArray(s.bottles)){
+      var shelves=s.v===2?cleanShelves(s.shelves):[];
+      if(!shelves.length)shelves=DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}});
       var ids={},out=[];s.bottles.forEach(function(x){var b=clean(x);if(b&&!ids[b.id]){ids[b.id]=1;out.push(b)}});
-      if(out.length)return out;
+      if(out.length){
+        var known={};shelves.forEach(function(h){known[h.id]=1});
+        var fallback=known.au?'au':shelves[0].id;
+        out.forEach(function(b){if(!known[b.shelf])b.shelf=fallback});
+        return {bottles:out,shelves:shelves};
+      }
     }}
   }catch(e){}
   return null;
 }
-function saveState(){try{localStorage.setItem(STORE_KEY,JSON.stringify({v:1,bottles:BOTTLES.map(plain)}))}catch(e){}}
-var BOTTLES=(loadBottles()||SEED.map(fromSeed)).map(prep);
+function saveState(){try{localStorage.setItem(STORE_KEY,JSON.stringify({v:2,shelves:SHELVES,bottles:BOTTLES.map(plain)}))}catch(e){}}
+var LOADED=loadState();
+var SHELVES=LOADED?LOADED.shelves:DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}});
+var BOTTLES=(LOADED?LOADED.bottles:SEED.map(fromSeed)).map(prep);
+function shelfById(id){for(var i=0;i<SHELVES.length;i++)if(SHELVES[i].id===id)return SHELVES[i];return null}
+function shelfName(id){var h=shelfById(id);return h?h.name:'Shelf'}
 var N=BOTTLES.length;
 function idxOfId(id){for(var i=0;i<BOTTLES.length;i++)if(BOTTLES[i].id===id)return i;return -1}
 /* the saved three-bottle rotation: its members that still exist, then anyone else */
@@ -677,7 +879,20 @@ var LEAN=[-1.8,1.4,-.8,1.9,-1.4,.9,-1.1];
 
 /* ---------- state ---------- */
 var stage=$('#stage'), G={cw:216,ch:310};
-var sel=Math.min(3,N-1), mode='flow', pickIdx=null, pickPtr=-1, introDone=false;
+var sel=idxOfId('s2');if(sel<0)sel=Math.min(3,N-1);
+var mode='flow', pickIdx=null, pickPtr=-1, introDone=false;
+/* One shelf is in view at a time. VIEW lists its bottles (indexes into BOTTLES) and VPOS maps an index to its place
+   on the shelf, or -1. The selected bottle decides which shelf is in view, so selection survives every change. */
+var curShelf=BOTTLES[sel].shelf, VIEW=[], VPOS=[], shelfLast={};
+function refreshView(){
+  var prev=curShelf;curShelf=BOTTLES[sel].shelf;VIEW=[];VPOS=new Array(BOTTLES.length);
+  BOTTLES.forEach(function(b,i){if(b.shelf===curShelf){VPOS[i]=VIEW.length;VIEW.push(i)}else VPOS[i]=-1});
+  shelfLast[curShelf]=BOTTLES[sel].id;
+  return prev!==curShelf;
+}
+function shareDirty(){edBuilt=false;shelfBlob=null;shelfPromise=null;shelfRev++}
+function setTitle(){var t=$('#title');if(t){var v=(typeof Z!=='undefined'&&Z>.5)?'All shelves':shelfName(curShelf);if(t.textContent!==v)t.textContent=v}}
+function syncShelf(){var moved=refreshView();if(moved)shareDirty();setTitle();return moved}
 var slots=[], infoTok=0, settleTimer=null;
 
 var touched=false;
@@ -730,10 +945,11 @@ function buildSlot(b,i){
    +'<div class="rec-t">'+esc(b.name)+'</div><div class="rec-s">'+esc(b.house)+'</div>'
    +'<dl class="rec-dl"></dl><div class="rec-n"></div></div></div>'
    +'<div class="tab">Today&rsquo;s pick</div>';
-  fillRecord(el,b);
+  fillRecord(el,b);LQ.regSlot(el);
   return el;
 }
 BOTTLES.forEach(function(b,i){var el=buildSlot(b,i);stage.appendChild(el);slots.push(el)});
+renumber();refreshView();
 
 /* ---------- geometry ---------- */
 function geo(){
@@ -748,9 +964,9 @@ function geo(){
 
 /* ---------- layouts: one DOM, three arrangements, same transform grammar ---------- */
 function place(i,pos){
-  var W=G.cw,H=G.ch,d=i-pos,ad=Math.abs(d),s=d<0?-1:1;
+  var W=G.cw,H=G.ch,v=VPOS[i],d=v-pos,ad=Math.abs(d),s=d<0?-1:1;
   var o={x:0,y:0,z:0,ry:0,p:0,rz:0,s:1,op:1,shade:0,zi:10};
-  if(!introDone){o.y=H*.16;o.z=-60;o.s=.96;o.op=0;o.shade=.2;o.zi=10-Math.round(ad);return o}
+  if(!introDone||v<0){o.y=H*.16;o.z=-60;o.s=.96;o.op=0;o.shade=.2;o.zi=v<0?5:10-Math.round(ad);return o}
   if(mode==='flow'){
     var near=Math.min(ad,1),far=Math.max(ad-1,0);
     o.x=s*(near*W*.62+far*W*.20);o.z=-(near*W*.85+far*W*.25);o.ry=-s*near*54;
@@ -759,7 +975,7 @@ function place(i,pos){
   }else{ /* stack */
     if(d>=0){
       var dd=Math.min(d,3);
-      o.y=-dd*H*.05;o.z=-d*30;o.s=1-dd*.05;o.rz=LEAN[i%LEAN.length]*Math.min(d,1);
+      o.y=-dd*H*.05;o.z=-d*30;o.s=1-dd*.05;o.rz=LEAN[v%LEAN.length]*Math.min(d,1);
       o.shade=dd*.05;o.zi=100-Math.round(d*10);o.op=d>3.4?0:1;
     }else{
       var t=Math.min(-d,1);
@@ -779,18 +995,21 @@ function fanPlace(i){
   return {x:sp*W*.03,y:Math.abs(sp)*H*.03-(sp===0?H*.02:0),z:sp===0?40:0,ry:0,p:H*.85,rz:sp*14,s:sp===0?1:.9,op:1,shade:sp===0?0:.07,zi:sp===0?120:(sp===1?110:100)};
 }
 function render(pos){
-  if(pos==null)pos=sel;
+  if(pos==null)pos=VPOS[sel];
+  var live=stage.classList.contains('dragging');
   slots.forEach(function(el,i){
     var o=(mode==='fan'&&introDone)?fanPlace(i):place(i,pos);
     el.style.transform='translate3d('+o.x.toFixed(1)+'px,'+o.y.toFixed(1)+'px,'+o.z.toFixed(1)+'px) rotateY('+o.ry.toFixed(1)+'deg) translateY('+o.p.toFixed(1)+'px) rotateZ('+o.rz.toFixed(2)+'deg) translateY('+(-o.p).toFixed(1)+'px) scale('+o.s.toFixed(3)+')';
     el.style.opacity=o.op;el.style.zIndex=o.zi;el.style.setProperty('--shade',o.shade);
     el.style.pointerEvents=o.op<.2?'none':'auto';
     el.tabIndex=i===sel?0:-1;
+    LQ.move(el,o,live);
   });
   capUpdate();
 }
 function capUpdate(){
-  var c=$('#cap'),t=mode==='flow'?pad(sel+1)+' / '+pad(N):mode==='stack'?'Shortlist · '+pad(sel+1)+' of '+pad(N):(ROTI().indexOf(sel)>-1?'Autumn rotation · 3 objects':'Autumn rotation · with a guest');
+  var c=$('#cap'),V=VIEW.length,p=pad(VPOS[sel]+1);
+  var t=mode==='flow'?p+' / '+pad(V):mode==='stack'?'Shortlist · '+p+' of '+pad(V):(ROTI().indexOf(sel)>-1?'Rotation · 3 objects':'Rotation · with a guest');
   if(c.textContent!==t){c.textContent=t}
 }
 
@@ -798,7 +1017,7 @@ function capUpdate(){
 function settleFx(){
   clearTimeout(settleTimer);
   settleTimer=setTimeout(function(){
-    haptic('settle');
+    haptic('settle');LQ.kick(slots[sel],{s:.08,A:.8,b:.4});
     var el=slots[sel];if(!el||RM||el.classList.contains('flipped'))return;
     var inner=el.firstChild;if(inner&&inner.animate){inner.animate([{transform:'translateY(0)'},{transform:'translateY(-3px)'},{transform:'translateY(0)'}],{duration:260,easing:'ease-out'})}
   },560);
@@ -807,7 +1026,7 @@ function select(i){
   i=clamp(i,0,N-1);
   if(i===sel){render();return}
   slots.forEach(function(el){el.classList.remove('flipped')});
-  sel=i;render();updateInfo();settleFx();
+  sel=i;syncShelf();render();updateInfo();settleFx();
 }
 function flip(){slots[sel].classList.toggle('flipped');haptic('settle')}
 function stepFan(dir){select(dir>0?rightOf():leftOf())}
@@ -846,7 +1065,7 @@ $('#wear').addEventListener('click',doWear);
 
 /* ---------- daily pick ---------- */
 $('#pick').addEventListener('click',function(){
-  var all=BOTTLES.map(function(b,i){var d=lastDays(b);return {i:i,s:(d===null?400:d)+(b.cool?20:0),low:b.low,w:wornToday(b)}});
+  var all=VIEW.map(function(i){var b=BOTTLES[i],d=lastDays(b);return {i:i,s:(d===null?400:d)+(b.cool?20:0),low:b.low,w:wornToday(b)}});
   var c=all.filter(function(x){return !x.low&&!x.w});
   if(!c.length)c=all.filter(function(x){return !x.low});
   if(!c.length)c=all;
@@ -863,8 +1082,8 @@ $('#pick').addEventListener('click',function(){
 /* ---------- gestures ---------- */
 var drag=null;
 stage.addEventListener('pointerdown',function(e){
-  if(!introDone)return;
-  drag={x:e.clientX,id:e.pointerId,start:sel,live:sel,moved:false,slot:e.target.closest?e.target.closest('.slot'):null,lastX:e.clientX,lastT:performance.now(),v:0};
+  if(!introDone||pz)return;
+  drag={x:e.clientX,id:e.pointerId,start:VPOS[sel],live:VPOS[sel],moved:false,slot:e.target.closest?e.target.closest('.slot'):null,lastX:e.clientX,lastT:performance.now(),v:0};
 });
 stage.addEventListener('pointermove',function(e){
   if(!drag||e.pointerId!==drag.id)return;
@@ -874,7 +1093,7 @@ stage.addEventListener('pointermove',function(e){
   var now=performance.now();drag.v=(e.clientX-drag.lastX)/Math.max(1,now-drag.lastT);drag.lastX=e.clientX;drag.lastT=now;
   if(mode!=='fan'){
     var unit=mode==='stack'?G.cw*.85:G.cw*.55;
-    drag.live=clamp(drag.start-dx/unit,0,N-1);render(drag.live);
+    drag.live=clamp(drag.start-dx/unit,0,VIEW.length-1);render(drag.live);
   }
 });
 function endDrag(e,cancel){
@@ -886,7 +1105,7 @@ function endDrag(e,cancel){
     if(mode==='fan'){if(Math.abs(dx)>30){stepFan(dx<0?1:-1)}else{render()}}
     else{
       var unit=mode==='stack'?G.cw*.85:G.cw*.55;
-      select(Math.round(clamp(d.live-(d.v*180)/unit,0,N-1)));
+      select(VIEW[Math.round(clamp(d.live-(d.v*180)/unit,0,VIEW.length-1))]);
     }
   }else if(d.slot){
     var i=+d.slot.dataset.i;
@@ -897,8 +1116,8 @@ stage.addEventListener('pointerup',function(e){endDrag(e,false)});
 stage.addEventListener('pointercancel',function(e){endDrag(e,true)});
 stage.addEventListener('keydown',function(e){
   if(!introDone)return;
-  if(e.key==='ArrowRight'){e.preventDefault();mode==='fan'?stepFan(1):select(sel+1)}
-  else if(e.key==='ArrowLeft'){e.preventDefault();mode==='fan'?stepFan(-1):select(sel-1)}
+  if(e.key==='ArrowRight'){e.preventDefault();mode==='fan'?stepFan(1):select(VIEW[Math.min(VIEW.length-1,VPOS[sel]+1)])}
+  else if(e.key==='ArrowLeft'){e.preventDefault();mode==='fan'?stepFan(-1):select(VIEW[Math.max(0,VPOS[sel]-1)])}
   else if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}
 });
 $$('#seg button').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
@@ -958,9 +1177,9 @@ var edBuilt=false;
 function buildEditorial(){
   if(edBuilt)return;edBuilt=true;
   var tiers=tiersOf();
-  $('#ed').innerHTML='<div class="ed-top"><span>Arooma</span><span>Autumn 2026</span></div><h3 class="ed-title">Autumn shelf</h3>'
-   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+b.draw('e'+i,b.left)+'<figcaption>'+pad(i+1)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
-   +'<div class="ed-foot"><span>'+footTxt()+'</span><span>N&deg; '+pad(N)+'</span></div>';
+  $('#ed').innerHTML='<div class="ed-top"><span>Arooma</span><span>'+new Date().getFullYear()+'</span></div><h3 class="ed-title">'+esc(shelfName(curShelf))+'</h3>'
+   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+b.draw('e'+i,b.left)+'<figcaption>'+pad(VPOS[i]+1)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
+   +'<div class="ed-foot"><span>'+footTxt()+'</span><span>N&deg; '+pad(VIEW.length)+'</span></div>';
 }
 function fitEditorial(){
   var dev=$('#device'),avail=dev.clientHeight-250,s=clamp(avail/380,.55,1);
@@ -998,8 +1217,11 @@ function renderShelfPNG(){
     g.addColorStop(0,'#FCF8F0');g.addColorStop(.55,'#F4EFE4');g.addColorStop(1,'#EDE7DA');
     ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#575A44';ctx.font='600 24px '+SANS;
-    spaced(ctx,'AROOMA',88,100,5,'left');spaced(ctx,'AUTUMN 2026',W-88,100,5,'right');
-    ctx.fillStyle='#25231F';ctx.font='500 150px '+SERIF;ctx.textAlign='left';ctx.fillText('Autumn shelf',84,300);
+    spaced(ctx,'AROOMA',88,100,5,'left');spaced(ctx,String(new Date().getFullYear()),W-88,100,5,'right');
+    ctx.fillStyle='#25231F';ctx.textAlign='left';
+    var ttl=shelfName(curShelf),fs=150;ctx.font='500 '+fs+'px '+SERIF;
+    while(fs>60&&ctx.measureText(ttl).width>W-168){fs-=6;ctx.font='500 '+fs+'px '+SERIF}
+    ctx.fillText(ttl,84,300);
     var idx=0;
     tiers.forEach(function(t,ti){
       var y=baseY[ti];
@@ -1010,11 +1232,11 @@ function renderShelfPNG(){
       t.forEach(function(i,k){
         var cx=88+(W-176)*(k+.5)/t.length;
         ctx.drawImage(imgs[idx++],cx-75,y-330+10,150,330);
-        ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;spaced(ctx,pad(i+1),cx,y+52,3,'center');
+        ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;spaced(ctx,pad(VPOS[i]+1),cx,y+52,3,'center');
       });
     });
     ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;
-    spaced(ctx,footTxt().toUpperCase(),88,1298,3,'left');spaced(ctx,'N° '+pad(N),W-88,1298,3,'right');
+    spaced(ctx,footTxt().toUpperCase(),88,1298,3,'left');spaced(ctx,'N° '+pad(VIEW.length),W-88,1298,3,'right');
     return new Promise(function(res,rej){c.toBlob(function(b){b?res(b):rej(new Error('toBlob'))},'image/png')});
   });
 }
@@ -1024,13 +1246,14 @@ function prepShelf(){
   var rev=shelfRev;
   shelfPromise=renderShelfPNG().then(function(b){if(rev===shelfRev)shelfBlob=b;shelfPromise=null}).catch(function(){shelfPromise=null});
 }
+function shelfFile(){return 'arooma-'+(shelfName(curShelf).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'shelf')+'.png'}
 function deliverShelf(blob){
-  var file=null;try{file=new File([blob],'arooma-autumn-shelf.png',{type:'image/png'})}catch(e){}
+  var file=null;try{file=new File([blob],shelfFile(),{type:'image/png'})}catch(e){}
   if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-    return navigator.share({files:[file],title:'Autumn shelf'}).then(function(){haptic('complete')},function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
+    return navigator.share({files:[file],title:shelfName(curShelf)}).then(function(){haptic('complete')},function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
   }
   var url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='arooma-autumn-shelf.png';document.body.appendChild(a);a.click();a.remove();
+  a.href=url;a.download=shelfFile();document.body.appendChild(a);a.click();a.remove();
   setTimeout(function(){URL.revokeObjectURL(url)},4000);haptic('complete');toast('Image saved');
   return Promise.resolve();
 }
@@ -1057,14 +1280,14 @@ function openCabinet(){
     render();
     setTimeout(function(){slots.forEach(function(el){el.style.transitionDelay=''})},1600);
     setTimeout(function(){haptic('settle')},1500);
-    setTimeout(maybeShowInstallHint,2800);
+    setTimeout(maybeShowInstallHint,2800);setTimeout(maybeShowPinchHint,5200);
   },RM?0:650);
   setTimeout(function(){cab.classList.add('gone')},RM?50:2100);
 }
 cab.addEventListener('click',openCabinet);
 function doReopen(){
   if(test)return toast('Finish the test first');
-  closeSheet();
+  closeSheet();cancelZ();setZ(0);
   introDone=false;stage.classList.remove('lit');
   slots.forEach(function(el){el.classList.remove('flipped')});
   render();
@@ -1094,25 +1317,25 @@ function closePanel(){
 }
 panelBody.addEventListener('click',function(e){if(panelClick)panelClick(e)});
 panelBody.addEventListener('input',function(e){if(panelInput)panelInput(e)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePanel();closeSheet()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var had=panel.classList.contains('on')||$('#sheet').classList.contains('on');closePanel();closeSheet();if(!had&&Z>.5)closeOver()}});
 /* keep the panel above the iOS keyboard */
 if(window.visualViewport){var vv=window.visualViewport;var kbFix=function(){panel.style.bottom=Math.max(0,window.innerHeight-vv.height-vv.offsetTop)+'px'};vv.addEventListener('resize',kbFix);vv.addEventListener('scroll',kbFix)}
 
 function rowHtml(act,title,sub,cls){return '<button class="prow'+(cls?' '+cls:'')+'" id="'+act+'" data-act="'+act+'"><span><b>'+title+'</b><small>'+sub+'</small></span><i aria-hidden="true">&rsaquo;</i></button>'}
 
 /* shelf image helpers (the share sheet reads these) */
-function tiersOf(){var n=Math.min(N,8),a=[],b=[];for(var i=0;i<n;i++)(i<4?a:b).push(i);return b.length?[a,b]:[a]}
+function tiersOf(){var v=VIEW.slice(0,8),a=v.slice(0,4),b=v.slice(4);return b.length?[a,b]:[a]}
 var NUMW=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight'];
-function footTxt(){return N<=8?NUMW[N]+(N===1?' object':' objects')+', kept close':'Eight of '+N+' objects'}
+function footTxt(){var V=VIEW.length;return V<=8?NUMW[V]+(V===1?' object':' objects')+', kept close':'Eight of '+V+' objects'}
 
 /* shelf bookkeeping after any add, delete or reset */
-function renumber(){slots.forEach(function(el,i){el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(i+1);$('.rec-no',el).innerHTML='N&deg; '+pad(i+1)})}
+function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(n);$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
 function updateCounts(){
   $('#eyebrow').innerHTML='The cabinet &middot; '+pad(N)+(N===1?' object':' objects');
   var s=$('#cabinet .label span:last-child');if(s)s.textContent=pad(N)+(N===1?' object':' objects');
 }
 function setFanState(){var f=$('#seg button[data-mode="fan"]');f.disabled=N<3;f.style.opacity=N<3?'.45':''}
-function shelfChanged(){edBuilt=false;shelfBlob=null;shelfPromise=null;shelfRev++;updateCounts();setFanState();if(mode==='fan'&&N<3)setMode('flow')}
+function shelfChanged(){shareDirty();updateCounts();setFanState();syncShelf();if(mode==='fan'&&N<3)setMode('flow');if(typeof ovBuilt!=='undefined'&&ovBuilt)buildOver()}
 function refreshBottle(b){var i=BOTTLES.indexOf(b);if(i<0)return;fillRecord(slots[i],b);if(i===sel)updateInfo()}
 function markPick(){slots.forEach(function(el,k){el.classList.toggle('is-pick',k===pickIdx)})}
 
@@ -1133,19 +1356,22 @@ function openMenu(){
 function openBottleMenu(){
   var b=BOTTLES[sel],n=b.log.length;
   openPanel('<h2>'+esc(b.name)+'</h2><p class="sub">'+esc(b.house)+'</p>'
+   +(SHELVES.length>1?rowHtml('move','Move to another shelf','Now on '+esc(shelfName(b.shelf))):'')
    +rowHtml('history','Wear history',n?n+(n===1?' wear':' wears')+', last '+agoText(lastDays(b)):'No wears logged yet')
    +rowHtml('auth','Check authenticity','A five-point evidence checklist. Simulated, so it cannot verify')
    +rowHtml('del','Delete bottle',N>1?'Removes it and its wear history. You can undo for a few seconds.':'Keep at least one bottle. Add another first.','danger'),
   function(e){var a=actOf(e);if(!a)return;
-    if(a==='history')openHistory();
+    if(a==='move')openMove();
+    else if(a==='history')openHistory();
     else if(a==='auth')openAuth();
     else if(a==='del'){if(N>1)confirmDelete(sel);else toast('Keep at least one bottle. Add another first.')}
   });
 }
 
 /* ---- add a bottle ---- */
-function openAdd(){
+function openAdd(shelfId){
   if(N>=MAXN){toast('The cabinet holds '+MAXN+' bottles.');return}
+  var pre=shelfById(shelfId)?shelfId:curShelf;
   var vopts=VESSELS.map(function(v,k){return '<button type="button" class="vopt" data-v="'+v.k+'" aria-pressed="'+(k===0)+'" aria-label="'+v.label+'">'+v.fn('v'+k,.8)+'<span>'+v.label.split(',')[0]+'</span></button>'}).join('');
   openPanel('<h2>Add a bottle</h2><p class="sub">Use your own bottles. Arooma draws a neutral vessel and never uses a house&rsquo;s logo or label.</p>'
    +'<label class="fl" for="fHouse">House</label><input class="in" id="fHouse" maxlength="28" autocomplete="off" autocapitalize="words" placeholder="For example, Maison Aubrac">'
@@ -1153,6 +1379,7 @@ function openAdd(){
    +'<div class="two"><div><label class="fl" for="fConc">Concentration</label><select class="in" id="fConc"><option>Eau de Parfum</option><option>Eau de Toilette</option><option>Eau de Cologne</option><option>Parfum</option><option>Extrait</option></select></div>'
    +'<div><label class="fl" for="fMl">Size, ml</label><input class="in" id="fMl" type="number" inputmode="numeric" min="5" max="500" value="50"></div></div>'
    +'<label class="fl" for="fLeft">Remaining, estimate: <span id="fLeftV">100%</span></label><input class="range" id="fLeft" type="range" min="5" max="100" step="5" value="100">'
+   +'<label class="fl" for="fShelf">Shelf</label><select class="in" id="fShelf">'+SHELVES.map(function(h){return '<option value="'+h.id+'"'+(h.id===pre?' selected':'')+'>'+esc(h.name)+'</option>'}).join('')+'</select>'
    +'<label class="fl" for="fNotes">Notes</label><input class="in" id="fNotes" maxlength="80" autocomplete="off" placeholder="cedar, fig leaf, warm milk">'
    +'<label class="fl" for="fAcq">Acquired</label><input class="in" id="fAcq" type="date" value="'+todayStr()+'" max="'+todayStr()+'">'
    +'<div class="fl">Vessel</div><div class="vgrid" id="fVessel">'+vopts+'</div>'
@@ -1175,18 +1402,18 @@ function saveNewBottle(){
   var acq=$('#fAcq').value;if(!DATE_RE.test(acq)||acq>todayStr())acq=todayStr();
   var pressed=$('#fVessel .vopt[aria-pressed="true"]'),notes=$('#fNotes').value.trim();
   closePanel();
-  addBottle({id:'u'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36),house:house,name:name,conc:$('#fConc').value,ml:ml,left:(+$('#fLeft').value)/100,
+  addBottle({id:'u'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36),shelf:$('#fShelf').value,house:house,name:name,conc:$('#fConc').value,ml:ml,left:(+$('#fLeft').value)/100,
     notes:notes,vessel:pressed?pressed.getAttribute('data-v'):'clear',acq:acq,log:[],auth:null,cool:coolFrom(profileOf(notes).v),note:$('#fNote').value.trim(),sample:false});
 }
 var MAXN=40;
 function addBottle(spec){
   if(N>=MAXN){toast('The cabinet holds '+MAXN+' bottles.');return}
-  var b=clean(spec);if(!b)return;prep(b);
+  var b=clean(spec);if(!b)return;prep(b);if(!shelfById(b.shelf))b.shelf=curShelf;
   BOTTLES.push(b);N=BOTTLES.length;
   var el=buildSlot(b,N-1);el.style.opacity='0';stage.appendChild(el);slots.push(el);
   slots.forEach(function(s){s.classList.remove('flipped')});
-  sel=N-1;shelfChanged();saveState();render();updateInfo();settleFx();haptic('complete');
-  toast('Added '+b.name+' to the cabinet.');
+  sel=N-1;renumber();shelfChanged();saveState();render();updateInfo();settleFx();haptic('complete');
+  toast('Added '+b.name+' to '+shelfName(b.shelf)+'.');
 }
 
 /* ---- delete, with undo ---- */
@@ -1198,16 +1425,24 @@ function confirmDelete(i){
 }
 function deleteBottle(i){
   var b=BOTTLES[i];if(!b||N<=1)return;
-  var pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null;
-  BOTTLES.splice(i,1);var el=slots.splice(i,1)[0];el.parentNode.removeChild(el);N=BOTTLES.length;
+  var pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null,wasSel=(i===sel);
+  BOTTLES.splice(i,1);var el=slots.splice(i,1)[0];LQ.dropSlot(el);el.parentNode.removeChild(el);N=BOTTLES.length;
   pickIdx=pid&&pid!==b.id?idxOfId(pid):null;markPick();
-  if(sel>i)sel--;if(sel>=N)sel=N-1;
+  if(sel>i)sel--;
+  else if(wasSel){
+    /* stay on the same shelf when it still has bottles: the one that slid into this place, else the last one before it */
+    var k=-1,j;for(j=i;j<N;j++)if(BOTTLES[j].shelf===b.shelf){k=j;break}
+    if(k<0)for(j=Math.min(i,N)-1;j>=0;j--)if(BOTTLES[j].shelf===b.shelf){k=j;break}
+    sel=k>=0?k:Math.min(i,N-1);
+  }
+  if(sel>=N)sel=N-1;
   slots.forEach(function(s){s.classList.remove('flipped')});
   renumber();shelfChanged();saveState();render();updateInfo();haptic('complete');
   toast('Deleted '+b.name+'.',{label:'Undo',fn:function(){restoreBottle(b,i)}});
 }
 function restoreBottle(b,i){
   var pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null;
+  if(!shelfById(b.shelf))b.shelf=SHELVES[0].id;
   i=Math.min(i,BOTTLES.length);BOTTLES.splice(i,0,b);N=BOTTLES.length;
   var el=buildSlot(b,i);slots.splice(i,0,el);stage.appendChild(el);
   pickIdx=pid?idxOfId(pid):null;markPick();
@@ -1220,16 +1455,18 @@ function confirmReset(){
 }
 function resetData(){
   try{localStorage.removeItem(STORE_KEY)}catch(e){}
-  slots.forEach(function(el){el.parentNode.removeChild(el)});slots=[];
+  slots.forEach(function(el){LQ.dropSlot(el);el.parentNode.removeChild(el)});slots=[];
+  SHELVES=DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}});
   BOTTLES=SEED.map(fromSeed).map(prep);N=BOTTLES.length;
   BOTTLES.forEach(function(b,i){var el=buildSlot(b,i);stage.appendChild(el);slots.push(el)});
-  pickIdx=null;pickPtr=-1;sel=Math.min(3,N-1);shelfChanged();render();updateInfo();toast('Demo data reset.');
+  pickIdx=null;pickPtr=-1;shelfLast={};sel=idxOfId('s2');if(sel<0)sel=Math.min(3,N-1);
+  renumber();shelfChanged();render();updateInfo();toast('Demo data reset.');
 }
 
 /* ---- wear tracking ---- */
 function doWear(){
   var b=BOTTLES[sel];if(!b||wornToday(b))return;
-  var d=todayStr();addWear(b,d);saveState();haptic('confirm');refreshBottle(b);
+  var d=todayStr();addWear(b,d);saveState();haptic('confirm');LQ.kick(slots[BOTTLES.indexOf(b)],{s:.22,A:1.3,b:.3});refreshBottle(b);
   toast('Logged. '+b.name+' worn today.',{label:'Undo',fn:function(){removeWear(b,d);saveState();refreshBottle(b)}});
 }
 function openHistory(){
@@ -1350,10 +1587,240 @@ function openCompare(){
   function(e){if(e.target.id==='cNotes'){text=e.target.value;pick=-1;$('#cRes').innerHTML=results()}});
 }
 
-$('#addBtn').addEventListener('click',openAdd);
+$('#addBtn').addEventListener('click',function(){openAdd()});
 $('#menu').addEventListener('click',openMenu);
 $('#bMenu').addEventListener('click',openBottleMenu);
 
+
+/* ---------- all shelves: pinch out to see every shelf, pinch in to go back ---------- */
+/* Paths to the same thing: pinch (touch), ctrl+wheel (trackpad), WebKit gesture events, the header Shelves button,
+   the keys - and + , and Escape. Zoom is one number, Z: 0 is the shelf in view, 1 is every shelf. */
+var dev=$('#device'),over=$('#over'),overScroll=$('#overScroll'),ovBar=$('#ovBar'),toolbarMain=$('#toolbar'),infoEl=$('#info');
+var Z=0,zRaf=0,ovBuilt=false,zs=null,pz=null,pts={},wheelT=0,noClickUntil=0;
+function unflip(el){el.classList.remove('flipped')}
+function setZ(v){
+  Z=clamp(v,0,1);dev.style.setProperty('--z',Z.toFixed(3));
+  var on=Z>.97;
+  stage.classList.toggle('off',on);infoEl.classList.toggle('off',on);toolbarMain.classList.toggle('off',on);
+  over.classList.toggle('off',Z<.03);ovBar.classList.toggle('off',Z<.03);
+  over.setAttribute('aria-hidden',Z<.5?'true':'false');
+  $('#shelvesBtn').setAttribute('aria-pressed',Z>.5?'true':'false');
+  LQ.setVis(Z<.97,Z>.03);setTitle();
+}
+function cancelZ(){if(zRaf){cancelAnimationFrame(zRaf);zRaf=0}}
+function tweenZ(to,ms){
+  cancelZ();
+  if(RM||Math.abs(to-Z)<.001){setZ(to);zDone(to);return}
+  var from=Z,t0=performance.now();
+  (function step(t){
+    var u=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-u,3);setZ(from+(to-from)*e);
+    if(u<1)zRaf=requestAnimationFrame(step);else{zRaf=0;zDone(to)}
+  })(t0);
+}
+function zDone(to){
+  if(to===1)LQ.kickGroup('ov',{s:.12,A:1.1,b:.5,rand:1});
+  else LQ.kick(slots[sel],{s:.1,A:.9,b:.4});
+}
+function fitOver(){
+  var sc=$('#screen');
+  over.style.setProperty('--ot',stage.offsetTop+'px');
+  over.style.setProperty('--ob',Math.max(0,sc.clientHeight-(infoEl.offsetTop+infoEl.offsetHeight))+'px');
+}
+function pickInShelf(id){
+  var k=shelfLast[id]?idxOfId(shelfLast[id]):-1;
+  if(k>-1&&BOTTLES[k].shelf===id)return k;
+  for(var i=0;i<BOTTLES.length;i++)if(BOTTLES[i].shelf===id)return i;
+  return -1;
+}
+function goTo(i){if(i===sel||!BOTTLES[i])return;slots.forEach(unflip);sel=i;syncShelf();render();updateInfo()}
+function shelfAtPoint(x,y){var el=document.elementFromPoint(x,y),h=el&&el.closest?el.closest('.shelf'):null;return h?h.getAttribute('data-id'):curShelf}
+function canZoom(){return introDone&&!panel.classList.contains('on')&&!$('#sheet').classList.contains('on')}
+
+/* the overview: every shelf as a row of miniature bottles. Bottles keep their true liquid level. */
+var PENCIL='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 3.8l3 3L7.4 15.6l-3.9.9.9-3.9z"/><path d="M11.6 5.4l3 3"/></svg>';
+function buildOver(){
+  ovBuilt=true;LQ.dropGroup('ov');
+  var per=Math.max(4,Math.floor(((overScroll.clientWidth||366)-56+6)/46)),h='';
+  SHELVES.forEach(function(sh){
+    var idxs=[];BOTTLES.forEach(function(b,i){if(b.shelf===sh.id)idxs.push(i)});
+    var cur=sh.id===curShelf;
+    h+='<section class="shelf'+(cur?' cur':'')+'" data-id="'+sh.id+'" aria-label="'+esc(sh.name)+'"'+(cur?' aria-current="true"':'')+'>'
+      +'<div class="sh-top"><button class="sname" data-open="'+sh.id+'">'+esc(sh.name)+'</button>'
+      +'<span class="scount">'+pad(idxs.length)+(idxs.length===1?' object':' objects')+(cur?' &middot; here':'')+'</span>'
+      +'<button class="pen" data-pen="'+sh.id+'" aria-label="Rename '+esc(sh.name)+'">'+PENCIL+'</button></div>';
+    if(!idxs.length)h+='<div class="sh-empty"><span>Nothing here yet</span><button class="sh-add" data-addto="'+sh.id+'">Add a bottle</button></div><div class="pl"></div>';
+    else for(var k=0;k<idxs.length;k+=per){
+      h+='<div class="tier">'+idxs.slice(k,k+per).map(function(i){
+        var b=BOTTLES[i];
+        return '<button class="mb'+(i===sel?' is-sel':'')+'" data-b="'+i+'" aria-label="'+esc(b.house+', '+b.name)+(i===sel?', selected':'')+'">'+b.draw('o'+b.id,b.left)+'</button>';
+      }).join('')+'</div><div class="pl"></div>';
+    }
+    h+='</section>';
+  });
+  overScroll.innerHTML=h;
+  $$('.lq',overScroll).forEach(function(p){LQ.regStatic(p,'ov')});
+}
+overScroll.addEventListener('click',function(e){
+  if(performance.now()<noClickUntil)return;
+  var t=e.target.closest?e.target.closest('button'):null;if(!t)return;
+  if(t.getAttribute('data-b')!==null)zoomToBottle(+t.getAttribute('data-b'));
+  else if(t.getAttribute('data-open'))zoomInto(t.getAttribute('data-open'));
+  else if(t.getAttribute('data-pen'))openRename(t.getAttribute('data-pen'));
+  else if(t.getAttribute('data-addto'))openAdd(t.getAttribute('data-addto'));
+});
+function openOver(){
+  if(!introDone||Z>.5||panel.classList.contains('on'))return;
+  closeSheet();slots.forEach(unflip);buildOver();fitOver();
+  var cur=$('.shelf.cur',overScroll);if(cur)overScroll.scrollTop=Math.max(0,cur.offsetTop-8);
+  tweenZ(1,640);
+}
+function closeOver(){tweenZ(0,560)}
+function toggleOver(){if(Z>.5)closeOver();else openOver()}
+function zoomToBottle(i){goTo(i);tweenZ(0,560)}
+function zoomInto(id){var k=pickInShelf(id);if(k<0){openAdd(id);return}zoomToBottle(k)}
+$('#shelvesBtn').addEventListener('click',toggleOver);
+$('#addShelf').addEventListener('click',function(){openNewShelf()});
+$('#openShelf').addEventListener('click',function(){zoomInto(curShelf)});
+
+/* gestures. zs is the zoom in progress, pz the pinch driving it. */
+function zoomStart(mx,my){
+  cancelZ();
+  zs={from:Z>.5?1:0,z0:Z,target:null,blocked:false,prevSel:sel};
+  if(zs.from===0){slots.forEach(unflip);buildOver();fitOver()}
+  else{
+    var id=shelfAtPoint(mx,my),k=pickInShelf(id);zs.target=id;
+    if(k<0)zs.blocked=true;else goTo(k);
+  }
+}
+function pinchTo(scale){if(zs)setZ(zs.z0+(1-scale)/.5)}
+function zoomFinish(){
+  var z=zs;zs=null;
+  var to=z&&z.from===1?(Z<.7?0:1):(Z>.3?1:0);
+  if(z&&z.blocked&&to===0){to=1;toast('That shelf is empty. Tap Add a bottle on it.')}
+  if(z&&z.from===1&&to===1&&z.prevSel!==sel)goTo(z.prevSel);
+  tweenZ(to,380);
+}
+function pinchBegin(){
+  var k=Object.keys(pts),a=pts[k[0]],b=pts[k[1]];
+  if(drag){try{stage.releasePointerCapture(drag.id)}catch(_){}drag=null;stage.classList.remove('dragging');render()}
+  zoomStart((a.x+b.x)/2,(a.y+b.y)/2);
+  pz={d0:Math.max(40,Math.hypot(a.x-b.x,a.y-b.y)),src:'p'};
+}
+function endPinch(){if(!pz)return;pz=null;noClickUntil=performance.now()+400;zoomFinish()}
+dev.addEventListener('pointerdown',function(e){
+  if(e.pointerType==='mouse')return;
+  pts[e.pointerId]={x:e.clientX,y:e.clientY};
+  if(Object.keys(pts).length===2&&!zs&&canZoom())pinchBegin();
+},true);
+dev.addEventListener('pointermove',function(e){
+  var p=pts[e.pointerId];if(!p)return;p.x=e.clientX;p.y=e.clientY;
+  if(!pz||pz.src!=='p')return;
+  var k=Object.keys(pts);if(k.length<2)return;
+  pinchTo(Math.hypot(pts[k[0]].x-pts[k[1]].x,pts[k[0]].y-pts[k[1]].y)/pz.d0);
+},true);
+function ptrEnd(e){
+  delete pts[e.pointerId];
+  if(pz&&pz.src==='p'&&Object.keys(pts).length<2)endPinch();
+  else if(pz&&pz.src==='g')setTimeout(function(){if(pz&&pz.src==='g'&&!Object.keys(pts).length)endPinch()},160);
+}
+dev.addEventListener('pointerup',ptrEnd,true);
+dev.addEventListener('pointercancel',ptrEnd,true);
+/* iOS Safari and macOS Safari report a pinch as WebKit gesture events. Blocking them also stops the page itself zooming. */
+['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
+dev.addEventListener('gesturestart',function(e){
+  if(!canZoom())return;
+  if(!zs)zoomStart(e.clientX||window.innerWidth/2,e.clientY||window.innerHeight/2);
+  pz={d0:1,src:'g'};
+});
+dev.addEventListener('gesturechange',function(e){if(pz&&pz.src==='g')pinchTo(e.scale)});
+dev.addEventListener('gestureend',function(){if(pz&&pz.src==='g')endPinch()});
+/* a trackpad pinch arrives as ctrl+wheel; deltaY above zero means the fingers are closing */
+dev.addEventListener('wheel',function(e){
+  if(!e.ctrlKey)return;
+  e.preventDefault();
+  if(!canZoom())return;
+  if(!zs)zoomStart(e.clientX,e.clientY);
+  cancelZ();setZ(Z+e.deltaY*.012);
+  clearTimeout(wheelT);wheelT=setTimeout(zoomFinish,150);
+},{passive:false});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||''))return;
+  if(e.key==='-'||e.key==='_'){if(Z<.5)openOver()}
+  else if(e.key==='='||e.key==='+'){if(Z>.5)closeOver()}
+});
+
+/* ---- shelves: rename, add, remove, move a bottle ---- */
+function renameShelf(id,name){var h=shelfById(id);if(!h)return;h.name=name;saveState();shareDirty();setTitle();if(ovBuilt)buildOver()}
+function commitRename(id){
+  var v=$('#shName').value.trim();
+  if(!v){$('#shErr').textContent='Give the shelf a name.';$('#shName').focus();return}
+  closePanel();renameShelf(id,v.slice(0,28));toast('Renamed to '+v.slice(0,28)+'.');
+}
+function openRename(id){
+  var h=shelfById(id);if(!h)return;
+  var n=BOTTLES.filter(function(b){return b.shelf===id}).length;
+  openPanel('<h2>Rename shelf</h2><p class="sub">Shelves start with the seasons. Call this one whatever suits it.</p>'
+   +'<label class="fl" for="shName">Name</label><input class="in" id="shName" maxlength="28" autocomplete="off" autocapitalize="words" value="'+esc(h.name)+'">'
+   +'<p class="err" id="shErr" role="alert"></p>'
+   +(n===0&&SHELVES.length>1?rowHtml('rmShelf','Remove this empty shelf','Nothing is on it. You can undo for a few seconds.','danger'):'')
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Cancel</button><button class="btn primary" data-act="save">Save</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='save')commitRename(id);else if(a==='rmShelf'){closePanel();removeShelf(id)}});
+  setTimeout(function(){var i=$('#shName');if(i){try{i.focus();i.select()}catch(e){}}},60);
+}
+function openNewShelf(){
+  if(SHELVES.length>=MAXSH){toast('The cabinet holds '+MAXSH+' shelves.');return}
+  openPanel('<h2>Add a shelf</h2><p class="sub">A shelf is a group of bottles, like a season or an occasion.</p>'
+   +'<label class="fl" for="nsName">Name</label><input class="in" id="nsName" maxlength="28" autocomplete="off" autocapitalize="words" placeholder="For example, Weekend">'
+   +'<p class="err" id="nsErr" role="alert"></p>'
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Cancel</button><button class="btn primary" data-act="save">Add shelf</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='save'){
+    var v=$('#nsName').value.trim();
+    if(!v){$('#nsErr').textContent='Give the shelf a name.';$('#nsName').focus();return}
+    closePanel();addShelf(v.slice(0,28));
+  }});
+  setTimeout(function(){var i=$('#nsName');if(i){try{i.focus()}catch(e){}}},60);
+}
+function addShelf(name){
+  var h={id:'h'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36),name:name};
+  SHELVES.push(h);saveState();buildOver();
+  var el=$('.shelf[data-id="'+h.id+'"]',overScroll);if(el)overScroll.scrollTop=el.offsetTop-8;
+  haptic('complete');toast('Added '+name+'. Add bottles from the plus button.');
+}
+function removeShelf(id){
+  var i=SHELVES.findIndex(function(h){return h.id===id});
+  if(i<0||SHELVES.length<2||BOTTLES.some(function(b){return b.shelf===id}))return;
+  var h=SHELVES.splice(i,1)[0];saveState();buildOver();
+  toast('Removed '+h.name+'.',{label:'Undo',fn:function(){SHELVES.splice(Math.min(i,SHELVES.length),0,h);saveState();buildOver()}});
+}
+function openMove(){
+  var b=BOTTLES[sel];
+  openPanel('<h2>Move '+esc(b.name)+'</h2><p class="sub">Pick the shelf it should live on.</p>'
+   +SHELVES.filter(function(h){return h.id!==b.shelf}).map(function(h){
+      var n=BOTTLES.filter(function(x){return x.shelf===h.id}).length;
+      return '<button class="prow" data-sh="'+h.id+'"><span><b>'+esc(h.name)+'</b><small>'+(n?n+(n===1?' object':' objects'):'Empty')+'</small></span><i aria-hidden="true">&rsaquo;</i></button>';
+    }).join('')
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Cancel</button></div>',
+  function(e){
+    var r=e.target.closest?e.target.closest('[data-sh]'):null;
+    if(r){closePanel();moveBottle(b,r.getAttribute('data-sh'));return}
+    if(actOf(e)==='cancel')closePanel();
+  });
+}
+function moveBottle(b,id){
+  var from=b.shelf;b.shelf=id;
+  function after(){saveState();renumber();shelfChanged();render();updateInfo()}
+  after();
+  toast('Moved '+b.name+' to '+shelfName(id)+'.',{label:'Undo',fn:function(){if(shelfById(from))b.shelf=from;after()}});
+}
+panelBody.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;
+  var b=$('[data-act="save"]',panelBody);if(b){e.preventDefault();b.click()}
+});
+function maybeShowPinchHint(){
+  if(lsGet('arooma-pinch')==='1'||Z>.5||panel.classList.contains('on')||SHELVES.length<2)return;
+  lsSet('arooma-pinch','1');toast('Pinch to see every shelf');
+}
 
 /* ---------- layout / fit ---------- */
 function fit(){
@@ -1362,7 +1829,7 @@ function fit(){
   else dev.style.removeProperty('--fit');
 }
 window.addEventListener('resize',function(){fit()});
-if(window.ResizeObserver){new ResizeObserver(function(){geo();render()}).observe(stage)}
+if(window.ResizeObserver){new ResizeObserver(function(){geo();fitOver();render()}).observe(stage)}
 else window.addEventListener('resize',function(){geo();render()});
 
 /* ---------- iOS install layer: standalone detection, Add to Home Screen hint, offline ---------- */
@@ -1385,7 +1852,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 }
 
-fit();geo();updateCounts();setFanState();markPick();render();updateInfo();updateTestBtn();
+fit();geo();fitOver();setZ(0);updateCounts();setFanState();markPick();render();updateInfo();updateTestBtn();
 openT=setTimeout(openCabinet,RM?0:1700);
 })();
 </script>

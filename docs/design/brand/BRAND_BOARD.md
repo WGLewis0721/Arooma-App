@@ -2,7 +2,7 @@
 
 > Part of the Arooma design brain. Start at [../README.md](../README.md) for the map and the router. Highest authority for visual and motion decisions.
 
-> Summary: palette and contrast (1), type (2), bottle and card materials (3), layout motion, haptics and the Island (4), App Store icon (5), share image (6), low stock and daily pick (7).
+> Summary: palette and contrast (1), type (2), bottle, liquid and card materials (3), layout motion, all-shelves zoom, liquid physics, haptics and the Island (4), App Store icon (5), share image (6), low stock and daily pick (7).
 
 **Idea:** a personal cabinet of objects. Not a storefront, not an inventory dashboard. Bottles are the richest thing on screen; everything around them is paper, light and restraint.
 
@@ -37,7 +37,7 @@ Every card has three separate levels, never merged: house (caps, Olive Deep), fr
 - Neutral studio light: one large soft key from the left, about 35° above, neutral white balance, no per-house color grade, so houses never look like one brand.
 - Every object stands on the same warm paper table with a contact shadow. No floating cutouts.
 - Four readable materials: glass (clear edge, vertical highlight at left), liquid (darker than glass, bright meniscus), label paper (flat, evenly lit), cap (hard highlight for metal, matte speckle for stone).
-- Liquid level is drawn from the owner's estimate, so a low bottle looks low.
+- Liquid level is drawn from the owner's estimate, so a low bottle looks low. The liquid is always visible: a vessel that is opaque (near-black glass, white ceramic, terracotta) carries a narrow level window with the same liquid inside, so the fill reads on every bottle, on the card and in the all-shelves view.
 - Stress test shelf: transparent glass, near-black bottle, amber liquid, opaque white vessel, metal cap, irregular silhouette. The demo shelf is exactly this.
 
 **Cards**
@@ -56,6 +56,10 @@ One rule: the selected bottle persists across layouts. Layouts rearrange the sam
 | Cover Flow | Browse everything | Center bottle frontal and 3% larger; neighbors turn 54°, recede, shade 10%. Drag maps directly to position; release carries velocity, then settles. |
 | Stack | Choose from a shortlist | Selected card on top, up to three behind peeking above with ±2° lean. Swipe throws the top card left as it fades. |
 | Fan | Compare a saved rotation of 3 | Cards pivot from below the shelf (±14°). Selected card lifts forward. Non-members drop back into the cabinet. |
+
+**All shelves:** pinch in to zoom out to every shelf, pinch out over a shelf to open it. The same gesture has a tap path (the Shelves button, Open shelf), a trackpad path (ctrl and wheel), a Safari gesture path and keys (- and Escape). The shelf in view fades and shrinks while the overview grows in, driven by the fingers, then snaps. Each shelf is a Paper-light row of miniature bottles on a plank, with its name in the display serif and a pencil that opens rename. Shelves start as the four seasons. The shelf you were on carries an Olive ring and "here". The selected bottle is lifted and underlined in Olive, so it survives the zoom. Reduce Motion swaps the layers with no scaling.
+
+**Liquid:** every liquid is a simulated surface, flat and exact at rest. It tilts against the card's acceleration with a damped spring (it overshoots and settles, so it has momentum), stays level with the room while a card leans in Fan and Stack, and carries two ripples that travel the way the card is moving. A slow ripple keeps every visible bottle alive. A full bottle barely moves and a low one pools. Landing a selection and wearing a bottle each give it a small kick. Reduce Motion draws it flat at the true level.
 
 **Haptics, three only:** selection settle (after the card stops, never during drag), wear confirmation, completed action (test finished, impression saved).
 
@@ -76,7 +80,7 @@ One rule: the selected bottle persists across layouts. Layouts rearrange the sam
 
 ## 6. Shareable shelf image
 
-Editorial, no chrome, 4:5 portrait. Paper ground with the lateral light gradient. Small caps header row (Arooma left, season right), one display-serif title, bottles on two shelf tiers (4 + 3) at one scale and one baseline, hairline shelf rule with soft shadow, two-digit numerals beneath, one footer line and count. A saved Fan renders as one row of 3 to 5 in the same style.
+Editorial, no chrome, 4:5 portrait. Paper ground with the lateral light gradient. Small caps header row (Arooma left, year right), one display-serif title that is the shelf's name, bottles of that shelf on one or two tiers of up to four (the first eight) at one scale and one baseline, hairline shelf rule with soft shadow, two-digit numerals beneath, one footer line and count. A saved Fan renders as one row of 3 to 5 in the same style.
 
 No buttons, tabs, status bar, glass, prices, ratings or watermark. Silhouettes must stay readable at 42 px wide. Caption is the owner's, never retail copy. No fake paper distress.
 

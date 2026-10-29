@@ -10,6 +10,6 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
-| | None yet | |
+| 2026-10-29 | [Today's pick widget and the testing Live Activity](2026-10-29-widget-live-activity.md) | Draft, owner decisions open |
 
-Starting points that already exist as reference, written for Spread: the Lock Screen and Home Screen widget with a later Live Activity spec is at [../../reference/spread/specs/2026-10-28-widget-live-activity.md](../../reference/spread/specs/2026-10-28-widget-live-activity.md). Arooma's widget and Island need their own spec before any native work.
+Spread's spec for a different widget, written 2026-10-28, is kept unchanged as a model at [../../reference/spread/specs/2026-10-28-widget-live-activity.md](../../reference/spread/specs/2026-10-28-widget-live-activity.md).

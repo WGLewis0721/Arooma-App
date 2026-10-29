@@ -35,7 +35,7 @@ Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log
 | Layout for iPhone or iPad, safe areas, Home Screen install, status bar, App Store screenshots | [packs/device-layout.md](packs/device-layout.md) | The Spread device guides named in the pack |
 | Making the UI feel native: materials, color, sheets, motion | [packs/apple-native-feel.md](packs/apple-native-feel.md) | [platforms/APPLE_DESIGN_PRINCIPLES.md](platforms/APPLE_DESIGN_PRINCIPLES.md) |
 | App icon, launch images, generated assets | [brand/ICON_HANDOFF.md](brand/ICON_HANDOFF.md) | Files in `assets/icons/` |
-| Widget, Live Activity, native iOS release | [../reference/spread/README.md](../reference/spread/README.md) | The Spread documents it lists |
+| Widget, Live Activity, native iOS release | [specs/2026-10-29-widget-live-activity.md](specs/2026-10-29-widget-live-activity.md) (draft) | [../reference/spread/README.md](../reference/spread/README.md) and the Spread documents it lists |
 | Recording a decision or checking what is undecided | [DECISIONS.md](DECISIONS.md) | |
 | Pointing an AI tool at these docs | [AI_TOOL_SETUP.md](AI_TOOL_SETUP.md) | |
 

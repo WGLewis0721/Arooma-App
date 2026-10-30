@@ -4,7 +4,22 @@
 
 > Summary: palette and contrast (1), type (2), bottle, liquid and card materials (3), layout motion, all-shelves zoom, liquid physics, haptics and the Island (4), App Store icon (5), share image (6), low stock and daily pick (7).
 
-**Idea:** a personal cabinet of objects. Not a storefront, not an inventory dashboard. Bottles are the richest thing on screen; everything around them is paper, light and restraint.
+**Idea (V2):** a private luxury fragrance archive where the selected collectible card is the hero. Not a storefront and not a noisy card game. The old light-paper cabinet survives as the **owner's data and legacy vessel-art system**, but its front-end appearance and door launch are superseded by V2.
+
+## V2 implemented appearance and interaction override (2026-10-30)
+
+Implementation and acceptance: [V2 spec](../specs/2026-10-30-v2-collectible-gallery-implementation.md). This **overrides the V1 color, no-real-house-demo, card material, serif restriction and door-animation paragraphs below**, while preserving data model, physics, movements, layout semantics and local backup requirements.
+
+- **Shell palettes, in 60:30:10 proportions** (dominant / secondary / metal accent): Obsidian Gold `#161B24 / #312B33 / #B88B47`; Ivory Oud `#F3EBDD / #D8C4AA / #9F6A36`; Violet Ink `#1B1A28 / #5D5266 / #C9B6D9`; Emerald Resin `#18211F / #4B5A55 / #D1B68B`. Pale themes adjust to bone `#F4EEE4`, beige `#DCCDBA`, cream `#F8F2E8`; dark is navy/plum mixed with near-black, never flat `#000`. Surfaces, microtype and controls obey accessible contrast.
+- **Fonts:** SF Pro/system for controls; curated serif themes optically akin to Iowan Old Style, Didot/Bodoni, EB Garamond, Palatino/Fraunces. Runtime uses installed fallback faces with no remote font dependence. Calligraphy (Snell Roundhand/Apple Chancery-style) appears **only** in the fountain-pen Arooma entry wordmark.
+- **Entry:** the old hinged cabinet doors are disabled. The calligraphic wordmark draws in with a restrained underline; entry includes four theme swatches, appearance, Demo and My Collection. Returning users land directly in their last collection with no mandatory intro, and can replay the lettering from the menu.
+- **Collection:** Keep one selected object across finger-driven Cover Flow, Stack, Fan; haptics only at original allowed moments; honor Reduce Motion and keyboard input. Collector faces use narrow foil edges and v3 59:86 layout, front top notes and horizontal reverse fragrance map. The first four **illustrated** collector demo cards represent prior concepts; standard owner bottles still use original art/photo handling.
+- **Utility is one tap away:** selected card flip, Wear Today, Test, Search/All Shelves, Add bottle, and demo/own collection switch. Details opens personal wear/history/edit records without replacing a fragrance's scent-map reverse.
+- **Trademark/media boundary:** these are Arooma-independent visual art concepts, not sponsored; publication of any actual manufacturer photos follows [third-party content policy](THIRD_PARTY_CONTENT_POLICY.md). Do not confuse name/notes as permission to scrape photography.
+
+### Legacy V1 language (retained for data/animation references)
+
+The paragraphs that follow describe the previous Warm Archive look. Where they conflict with the V2 override, V2 wins for rendered shell, thematic typography, first-run animation, and collectible-card faces.
 
 ## 1. Color
 

@@ -9,22 +9,22 @@ This card is the single source for the always-loaded design rules. `npm run docs
 
 **Look**
 - A personal cabinet of objects, not a storefront or an inventory dashboard. Bottles are the richest thing on screen.
-- No new colors, fonts or decorative styles. Use a token (`--oat`, `--paper`, `--ink`, `--soft`, `--hair`, `--olive`, `--olive-deep`, `--clay`, `--clay-deep`) or an existing pattern. Two faces only: `ui-serif` and SF Pro.
+- Use a token (`--oat`, `--paper`, `--ink`, `--soft`, `--hair`, `--olive`, `--olive-deep`, `--clay`, `--clay-deep`). Clay is the one accent, for a state that needs it. Two faces: `ui-serif` and SF Pro.
 - Cards are opaque Paper. No glass, blur or transparency on cards, bottles or sheets. Glass only on the layout switcher, toolbar and header buttons.
-- Bottle art stays neutral and true to each house: same studio light and table, no per-house color grade, truthful liquid level.
+- Drawn bottles share one studio light, table and baseline. An owner's own photo replaces the drawing, cropped to cover, never stretched.
 - Olive and Clay are for graphics and large text; small text uses Olive Deep and Clay Deep. Status is never color alone.
 - Low stock is quiet: label, hairline gauge, liquid level. Never red, never a badge.
 
 **Behavior**
-- The selected bottle persists across Cover Flow, Stack and Fan. Layouts rearrange the same objects.
+- Cover Flow browses the shelf, Stack is today's shortlist, Fan presents a saved rotation. The selected bottle persists across all three.
 - Every drag has a tap and a keyboard path. Reduced motion means cross-fades only.
-- Haptics at three moments only: selection settle, wear confirmation, completed action.
-- The Dynamic Island is for a timed testing session only. Widgets are today's pick plus one action, never a mini shelf.
-- Remaining volume is an estimate and says so. Never claim authenticity is verified or a scent match is certain.
+- Haptics only when they mean something: selection settle, wear, completed action, a timer check-in.
+- The testing timer is an in-app aid, not a Dynamic Island integration. Widgets are today's pick plus one action.
+- Say "Estimated remaining". Compare is overlap in entered notes. Authenticity notes are the owner's record, never verified.
 
 **Boundaries**
-- Sample houses and bottles are fictional. Never draw a real brand's bottle, logo or label.
-- No backend, account, analytics or network call without a spec.
+- Demo houses are fictional and the demo never mixes with the owner's collection. Never draw a real brand's bottle, logo or label; never block an owner's own photo.
+- Local-first: data stays on the device, backed up as a JSON file the owner keeps. No backend, account, analytics or network call without a spec.
 - `index.html` stays one self-contained file. Generated assets come from `tools/generate_assets.py`.
 - Never force-push `main`.
 

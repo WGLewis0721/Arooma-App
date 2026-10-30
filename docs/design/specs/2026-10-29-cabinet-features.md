@@ -2,6 +2,9 @@
 
 > Part of the Arooma design brain. Start at [../README.md](../README.md). Follow [../PLAN_SPEC_PROTOCOL.md](../PLAN_SPEC_PROTOCOL.md). Saved as `docs/design/specs/2026-10-29-cabinet-features.md`.
 
+
+> Partly superseded by [2026-10-29-polish-pass.md](2026-10-29-polish-pass.md): the last bottle can now be deleted, the cap is 150, search is built, and the authenticity checklist is called Authenticity notes.
+
 | | |
 | --- | --- |
 | Request | "Can you see what grok was doing? And take over? It was pushing those last 4 features", then "Add bottle, Authenticity check, DNA matcher, or full Wear tracking. If you don't see any trace or commit in the repo then add them", then "Oh and delete bottle" |

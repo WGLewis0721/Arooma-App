@@ -4,7 +4,7 @@
 
 > Summary: **Approved visual master (2026-10-30): the two-sided MIND GAMES PRODIGY dark photographic diptych with etched iridescent border, white sculptural hero bottle, diagonal studio light, layered glass/plant props, precise silver typography and a three-column note map above a wide photographic footer.** Supersedes the earlier Prada-minimal reference and both the busy fantasy and plain catalog explorations. This is an art-directed collectible, not a generic prompt style.
 
-**Version:** 2.0 | **Status:** owner-approved *visual direction*; actual product copy and image rights separately checked. **Reference:** the owner's explicitly approved final Prodigy front/back image in the 2026-10-30 ChatGPT conversation. A low-resolution schematic is available in [../../assets/collectibles/templates/](../../assets/collectibles/templates/). The approved raster itself is not embedded in this public repository; keep that reference attached to every image-production task.
+**Version:** 2.0 | **Status:** owner-approved *visual direction*; actual product copy and image rights separately checked. **Reference:** the owner's explicitly approved final Prodigy front/back image in the 2026-10-30 ChatGPT conversation. A low-resolution schematic is available in [../../assets/collectibles/templates/](../../../assets/collectibles/templates/). The approved raster itself is not embedded in this public repository; keep that reference attached to every image-production task.
 
 ## 1. North star and rejection boundary
 
@@ -92,7 +92,7 @@ For **real brands**, original user photos are preferred for private concept work
 
 ## 7. Production, export and QA
 
-**Production workflow and gates:** [COLLECTIBLE_CARD_PRODUCTION.md](COLLECTIBLE_CARD_PRODUCTION.md) (source manifest, AI-only components, retouching, human layout, export profiles, prompts and fail conditions). Editable, branded-free skeletons: [front](../../assets/collectibles/templates/archive-foil-front.svg) and [back](../../assets/collectibles/templates/archive-foil-back.svg).
+**Production workflow and gates:** [COLLECTIBLE_CARD_PRODUCTION.md](COLLECTIBLE_CARD_PRODUCTION.md) (source manifest, AI-only components, retouching, human layout, export profiles, prompts and fail conditions). Editable, branded-free skeletons: [front](../../../assets/collectibles/templates/archive-foil-front.svg) and [back](../../../assets/collectibles/templates/archive-foil-back.svg).
 
 **Automatic reject:** (1) wrong bottle geometry or brand inscription; (2) wrong concentration or unverified notes; (3) imaginary perfume branding; (4) foil/reflections appear generated across entire image; (5) legibility fails at 360 px; (6) front/back optical mismatch; (7) border crops or text goes outside safety; (8) copied anime/card logos or game statistics; (9) project exported only as flat AI image with uneditable text; (10) claim of brand endorsement.
 

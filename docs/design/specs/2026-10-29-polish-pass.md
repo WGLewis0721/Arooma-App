@@ -90,9 +90,9 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 
 ## 9. Verification and acceptance report
 
-Before the port of the parallel build's features (see the end of this section), `npm test` ran 192 checks, all passing in headless Chromium. **The port was done without running or updating the smoke test, at the owner's direction, and was not run in a browser at all.** Several of those checks describe behavior the port changed (rotations as named sets, Stack as a shortlist, the 15 minute / 1 hour / 3 hour timer, the bottle menu's Rotations row, deleting the last bottle on a shelf), so `npm test` will fail until it is updated. `npm run docs:check` passes. Nothing here was run on an iPhone.
+`npm test` runs 211 checks, all passing in headless Chromium, including checks for the features ported from the parallel build. `npm run docs:check` passes. Nothing here was run on an iPhone.
 
-Ported from the parallel build (`648a506`), untested: named rotations of up to five (up to twelve) and the rotation maker; Stack as today's shortlist; the selected bottle, layout and rotation remembered per collection; the pencil on the selected card and the `e` key; cards hidden once faded; a Demo tag on the plank and in the shared image; the storage line in the menu; the panel scroll fix; no haptic on a flip and one on a due check-in; due check-ins that wait and open the matching field; an impression note; the impression summary on the button; photos that fill the picture with crop, zoom and position; an empty shelf that stays in view; Delete in the edit form; `?clock=N`; and import of that build's backup files and saves.
+Ported from the parallel build (`648a506`); the smoke test covers all of this except the faded-card hiding, the iOS panel scroll fix, the haptic changes and `?clock=N`: named rotations of up to five (up to twelve) and the rotation maker; Stack as today's shortlist; the selected bottle, layout and rotation remembered per collection; the pencil on the selected card and the `e` key; cards hidden once faded; a Demo tag on the plank and in the shared image; the storage line in the menu; the panel scroll fix; no haptic on a flip and one on a due check-in; due check-ins that wait and open the matching field; an impression note; the impression summary on the button; photos that fill the picture with crop, zoom and position; an empty shelf that stays in view; Delete in the edit form; `?clock=N`; and import of that build's backup files and saves.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ Ported from the parallel build (`648a506`), untested: named rotations of up to f
 | BK-4 | Done | Backup panel, empty card and menu row say the data lives in this browser on this device |
 | CM-1 | Done | Accent-free, case-free, all-words search in the overview; `/` opens it |
 | CM-2 | Done | Edit details is the first bottle-menu row and a link on the record |
-| CM-3 | Done, port untested | Selection survives all three layouts; in Fan a bottle outside the rotation visits as a guest |
+| CM-3 | Done | Selection survives all three layouts; in Fan a bottle outside the rotation visits as a guest |
 | CM-4 | Done | Add and move go to the end of the shelf; delete selects the next on the same shelf; Undo restores the place |
 | CM-5 | Done in Chromium | Ellipsis, hidden empty notes, duplicate asked once, 60 bottles under 25 ms per step headless; device speed owed |
 | CM-6 | Done | One tap, toast with Undo, meta reads Worn today |
@@ -118,19 +118,19 @@ Ported from the parallel build (`648a506`), untested: named rotations of up to f
 | WL-4 | Done | "You haven't worn this in a while: 40 days. Last time you noted over 6 hours." |
 | WL-5 | Done | No feed or ranking; no request leaves the page in the test |
 | BP-1 | Done | Six photos stored; PNG or WebP kept for transparency, JPEG otherwise |
-| BP-2 | Done, fill mode untested | `meet` everywhere for cut-outs; fill mode crops without stretching (`slice`) with zoom and position sliders |
+| BP-2 | Done | `meet` everywhere for cut-outs; fill mode crops without stretching (`slice`) with zoom and position sliders |
 | BP-3 | Done in Chromium | Generated clear, near-black, amber, opaque white with background, metal cap, irregular and wide images; screenshots 35 to 40 |
 | BP-4 | Done in Chromium | Same table, baseline, shadow, light and moving liquid for every photo; true scale is set by the owner, and a photo with a background still reads as a picture |
 | PL-1 | Partial | Long-name ellipsis, record timeline, empty state on the card recipe, install hint style bug fixed; no token or shadow values changed |
-| PL-2 | Done, port untested | Cover Flow browses the shelf, Stack is today's shortlist, Fan shows a named rotation; the share image in Fan is the rotation |
+| PL-2 | Done | Cover Flow browses the shelf, Stack is today's shortlist ("Stack is today's shortlist" check), Fan shows a named rotation of up to five (rotation checks); the share image in Fan is the rotation |
 | PL-3 | Done | One DOM kept; selection survives every layout and the visiting state |
 | PL-4 | Done | Every new drag has sliders or buttons; search, edit and impressions never need a gesture |
 | PL-5 | Done | Liquid engine unchanged; Reduce Motion tests pass |
 | WO-1 | Done | "Estimated remaining" everywhere; test scans all text |
 | WO-2 | Done | Compare says it compares notes you entered and cannot predict wear or liking |
 | WO-3 | Done | "Authenticity notes", "Your checks", "cannot verify" |
-| WO-4 | Done, port untested | 30 second default removed; check-ins at 15 minutes, 1 hour, 3 hours; labelled an in-app timer |
-| TS-1 | Partial | 192 checks passed before the port; the smoke test was not updated for it, at the owner's direction |
+| WO-4 | Done | 30 second default removed; check-ins at 15 minutes, 1 hour, 3 hours that wait for the owner; labelled an in-app timer |
+| TS-1 | Done | 211 checks, including the ported features |
 | TS-2 | Not done | No device available in this session |
 | TS-3 | Done | Checklist below, untested |
 

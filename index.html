@@ -365,7 +365,6 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
 .rrow .prow{flex:1}
 .prow.chk i{font-size:13px;font-weight:600;color:var(--olive-deep);min-width:18px;text-align:right;font-variant-numeric:tabular-nums}
 .seg2{grid-template-columns:1fr 1fr}
-.ph-ed{grid-template-columns:auto 1fr}
 .ph-frame.fill{width:140px}
 #impBtn{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .capn>div:first-child{min-width:0;flex:1 1 auto}
@@ -417,8 +416,8 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
 .hit mark{background:none;color:var(--ink);font-weight:700}
 .nohit{padding:18px 4px;font-family:var(--serif);font-style:italic;font-size:16px;color:var(--soft)}
 /* photo editor in the add and edit panel */
-.ph-ed{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start}
-.ph-frame{position:relative;width:120px;height:168px;border-radius:8px;overflow:hidden;touch-action:none;
+.ph-ed{display:block}
+.ph-frame{position:relative;margin:0 auto 10px;width:120px;height:168px;border-radius:8px;overflow:hidden;touch-action:none;
   background:radial-gradient(90% 70% at 28% 18%,#FFFFFF 0%,#F7F3EA 52%,#ECE6D9 100%);box-shadow:0 0 0 1px var(--hair)}
 .ph-frame::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12%;background:linear-gradient(180deg,rgba(37,35,31,.045),rgba(37,35,31,.085));border-top:1px solid rgba(37,35,31,.06);pointer-events:none}
 .ph-frame svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}

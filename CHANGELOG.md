@@ -2,7 +2,7 @@
 
 ## 2026-10-30: Features ported from the parallel build
 
-Ported, at the owner's direction, from the polish build that was on `main` briefly as `648a506`. **Not run in a browser and the smoke test was not updated**, so `npm test` is expected to fail until it is.
+Ported, at the owner's direction, from the polish build that was on `main` briefly as `648a506`. The smoke test was updated for it and now runs 211 checks.
 
 **Added**
 - Rotations: named sets of up to five bottles, up to twelve. Fan shows the active one; its caption names it and opens the list. Fan with none opens the maker.
@@ -19,6 +19,7 @@ Ported, at the owner's direction, from the polish build that was on `main` brief
 
 **Fixed**
 - On iPhone, typing in a panel could leave the page scrolled out of place after it closed.
+- The photo editor's preview no longer overlaps its sliders.
 
 **Not ported**
 - Its full-screen welcome (the card on the open cabinet does the same job), its find panel (search lives in All shelves), and photos that draw no liquid.

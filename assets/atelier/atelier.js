@@ -4,6 +4,8 @@
 */
 (function(){
 'use strict';
+/* Legacy regression fixture keeps its original presentation and interactions. */
+if(new URLSearchParams(location.search).has('classicDemo'))return;
 function $(selector,root){return (root||document).querySelector(selector)}
 function $$(selector,root){return Array.from((root||document).querySelectorAll(selector))}
 var c=window.AroomaCore;

@@ -6,6 +6,14 @@ Arooma is a personal cabinet for a fragrance collection, shipped as an installab
 
 All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**. The block below is generated from `docs/design/RULES_CARD.md` (`npm run docs:sync`); do not edit it here. Plans and specs follow [docs/design/PLAN_SPEC_PROTOCOL.md](docs/design/PLAN_SPEC_PROTOCOL.md). Setup for each AI tool: [docs/design/AI_TOOL_SETUP.md](docs/design/AI_TOOL_SETUP.md).
 
+## Current owner instruction for GPT-6 Sol (Extra thinking)
+
+**START HERE for the final Arooma V2 polish and asset integration:** [`AROOMA_V2_FINAL_POLISH_HANDOFF.md`](AROOMA_V2_FINAL_POLISH_HANDOFF.md). This is an explicit one-time root handoff requested by the owner. It overrides stale V1/V2 placeholder-image implementation advice but leaves the canonical design brain in `docs/design/`.
+
+**Source artwork is in THIS REPO:** [`assets/collectibles/masters/README.md`](assets/collectibles/masters/README.md). Three exact approved photographic **original diptych PNGs** (Dior Sauvage Elixir / Rasasi Hawas / YSL MYSLF) are committed. Prodigy and Prada original art are archived as historical, not approved v3. Never remake or substitute approved cards with the old low-detail SVGs. First task for Sol: crop each approved master losslessly to usable front/back files and wire those actual pixels into the running app.
+
+**Execution limits:** preserve the working web app and local collections; no rebuild, no new platform, no creative card redo. Tight targeted acceptance and a single final CI run; don't multiply tests or skip meaningful failures. Deliver a live iPhone-usable preview and a focused merge with tangible visible improvements.
+
 Commands: `npm start`, `npm run docs:check`, `npm test`, `npm run assets`.
 
 <!-- design-rules-card:start -->

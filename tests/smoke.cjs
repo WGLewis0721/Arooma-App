@@ -118,7 +118,11 @@ function check(name, ok, detail) {
   check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
 
-  // daily pick
+  // Keep the established seven-bottle smoke fixture for complete V1 core-feature regression.
+  // The default V2 experience above has already proved its eleven cards and four themes.
+  await page.goto(base + '?classicDemo=1'); await page.waitForTimeout(800);
+  check('classic regression fixture retains seven independent bottle cards', (await page.locator('.slot').count()) === 7 && (await page.textContent('.slot[tabindex="0"] .nm')) === 'Fig Hour');
+    // daily pick
   await page.click('#pick'); await page.waitForTimeout(1200);
   await page.screenshot({ path: path.join(outDir, '5-daily-pick.png') });
   check('Daily Pick tags exactly one card', (await page.locator('.slot.is-pick').count()) === 1);
@@ -223,7 +227,7 @@ function check(name, ok, detail) {
   await page.click('.vopt[data-v="green"]'); await page.fill('#fNote', 'Bought at the market.');
   await page.click('[data-act="save"]'); await page.waitForTimeout(1500);
   check('added bottle appears and is selected', (await page.locator('.slot').count()) === n0 + 1 && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === String(n0));
-  check('eyebrow and door count follow the shelf', /08 objects/.test(await page.textContent('#eyebrow')));
+  check('eyebrow count follows the shelf', /08 objects/.test(await page.textContent('#eyebrow')));
   check('added bottle is saved on this device', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.some((b) => b.name === 'Test Scent' && b.vessel === 'green' && b.sample === false)));
   await page.screenshot({ path: path.join(outDir, '14-added.png') });
   await page.click('.slot[tabindex="0"]'); await page.waitForTimeout(1100);
@@ -247,7 +251,7 @@ function check(name, ok, detail) {
 
   // persistence across reloads
   await reopenFast(page);
-  check('shelf, wear and evidence survive a reload', (await page.locator('.slot').count()) === 12 && await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('arooma.demo')); return d.bottles.some((b) => b.auth && b.auth.v.every((x) => x === 1)) && d.bottles.some((b) => b.log.length > 0); }));
+  check('shelf, wear and evidence survive a reload', (await page.locator('.slot').count()) === 8 && await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('arooma.demo')); return d.bottles.some((b) => b.auth && b.auth.v.every((x) => x === 1)) && d.bottles.some((b) => b.log.length > 0); }));
 
   // delete with undo
   await page.focus('#stage'); for (let k = 0; k < 4; k++) await page.keyboard.press('ArrowRight');
@@ -257,7 +261,7 @@ function check(name, ok, detail) {
   check('delete asks first', /Delete Test Scent\?/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
   check('delete removes the bottle', (await page.locator('.slot').count()) === 7 && /07 objects/.test(await page.textContent('#eyebrow')));
-  check('delete is saved', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.length === 11));
+  check('delete is saved', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.length === 7));
   await page.screenshot({ path: path.join(outDir, '17-deleted-undo.png') });
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
   check('Undo puts the bottle back where it was', (await page.locator('.slot').count()) === 8 && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
@@ -267,7 +271,7 @@ function check(name, ok, detail) {
   // reset
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#reset'); await page.waitForTimeout(300);
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('reset restores all eleven demo bottles', (await page.locator('.slot').count()) === 11 && (await stored()) === null);
+  check('classic demo reset restores original seven bottles', (await page.locator('.slot').count()) === 7 && (await stored()) === null);
 
 
   // ================= shelves: overview, pinch, rename, add shelf, move a bottle =================

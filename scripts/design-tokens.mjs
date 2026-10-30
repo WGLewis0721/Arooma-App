@@ -59,13 +59,13 @@ export function buildTokens(html) {
   const light = Object.fromEntries(Object.keys(TOKEN_ROLES).map((k) => [k, all[k]]));
   return {
     note: "Generated from the :root block in index.html by scripts/design-tokens.mjs. Do not edit by hand. Use tokens, never raw values.",
-    modes: "light only in the CSS today",
+    modes: "V2 four luxury themes plus light/dark appearance, legacy :root tokens kept for neutral bottle artwork",
     roles: TOKEN_ROLES,
     light,
     fonts: { display: all["--serif"], ui: all["--sans"] },
     ease: all["--ease"],
     night: {
-      status: "specified in docs/design/brand/BRAND_BOARD.md section 1, not built",
+      status: "implemented via V2 themed dark appearance; these five values remain historical V1 reference",
       ground: "#1C1B18",
       card: "#26241F",
       text: "#EDE7DB",

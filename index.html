@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Arooma: a personal cabinet for your fragrance collection. iOS web app demo.">
 <meta name="theme-color" content="#F2EDE4">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -27,7 +27,7 @@
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="assets/splash/splash-828x1792.png">
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="assets/splash/splash-1242x2208.png">
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="assets/splash/splash-750x1334.png">
-<title>Arooma</title>
+<title>Arooma V2 · The Collectible Archive</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -437,6 +437,102 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;transition-delay:0s!important}
 }
+
+/* ---- V2: lacquered gallery shell and 60/30/10 theme system. One shell, four distinct accents. ---- */
+/* The old door DOM remains only for backwards compatible script hooks; it can never cover controls. */
+.device #cabinet,.device #dim{display:none!important;pointer-events:none!important}
+
+.device{--v2-major:#161b24;--v2-secondary:#312b33;--v2-accent:#b88b47;--v2-text:#f3ede6;--v2-muted:#b7abb0;--v2-surface:#211e29;
+  --v2-display:Didot,"Bodoni MT","Iowan Old Style",Georgia,serif;
+  background:radial-gradient(110% 65% at 90% 1%,var(--v2-secondary),transparent 72%),linear-gradient(150deg,var(--v2-major),var(--v2-secondary));color:var(--v2-text);
+  --oat:var(--v2-major);--ink:var(--v2-text);--olive:var(--v2-accent);--olive-deep:var(--v2-accent);--clay:var(--v2-accent);--clay-deep:var(--v2-accent);
+  --paper:var(--v2-surface);--soft:var(--v2-muted);--hair:rgba(255,255,255,.13);--serif:var(--v2-display);
+  transition:background .48s ease,color .36s ease}
+.device[data-theme="ivory"]{--v2-major:#f3ebdd;--v2-secondary:#d8c4aa;--v2-accent:#9f6a36;--v2-display:Didot,"Bodoni MT",Georgia,serif}
+.device[data-appearance="dark"][data-theme="ivory"]{--v2-major:#1d1b25;--v2-secondary:#3b3035;--v2-accent:#d0af81;--v2-surface:#27232c;--v2-text:#f4eee4;--v2-muted:#c7bab0}
+.device[data-theme="violet"]{--v2-major:#1b1a28;--v2-secondary:#5d5266;--v2-accent:#c9b6d9;--v2-display:"Iowan Old Style",Palatino,Georgia,serif}
+.device[data-theme="emerald"]{--v2-major:#18211f;--v2-secondary:#4b5a55;--v2-accent:#d1b68b;--v2-display:"Palatino Linotype",Palatino,Georgia,serif}
+.device[data-theme="obsidian"]{--v2-display:"Iowan Old Style",Georgia,serif}
+.device[data-appearance="light"]{--v2-major:#f4eee4;--v2-secondary:#dccdba;--v2-surface:#f8f2e8;--v2-text:#28232a;--v2-muted:#645e65;--paper:#f8f2e8;--hair:rgba(40,35,42,.13)}
+.device[data-appearance="light"][data-theme="ivory"]{--v2-secondary:#d8c4aa;--v2-accent:#9f6a36}
+.device[data-appearance="light"][data-theme="violet"]{--v2-secondary:#d3c8d5;--v2-accent:#745986}
+.device[data-appearance="light"][data-theme="emerald"]{--v2-secondary:#c9d0bf;--v2-accent:#556e5f}
+.device[data-appearance="light"][data-theme="obsidian"]{--v2-secondary:#d8ccbf;--v2-accent:#99733b}
+.device .head{align-items:center;padding:6px 12px 13px;gap:5px}
+.device .head .hbtns{gap:4px;flex-shrink:0}
+.device .head .round{width:34px;height:34px}
+.device #demoQuick{min-width:51px;height:34px;padding:0 5px;font-size:10px}
+.device .head h1{font-family:var(--v2-display);font-size:26px;line-height:1.04;font-weight:500;letter-spacing:.012em}
+.device .eyebrow{color:var(--v2-accent);letter-spacing:.22em}
+.device .sb{color:var(--v2-text)}
+.device .stage{background:radial-gradient(90% 70% at 51% 36%,color-mix(in srgb,var(--v2-secondary) 75%,transparent),transparent),linear-gradient(145deg,color-mix(in srgb,var(--v2-major) 82%,black),color-mix(in srgb,var(--v2-secondary) 40%,black));
+  border:1px solid color-mix(in srgb,var(--v2-accent) 32%,transparent);box-shadow:inset 0 18px 60px rgba(0,0,0,.23),0 0 0 1px rgba(255,255,255,.035);border-radius:25px}
+.device[data-appearance="light"] .stage{background:radial-gradient(90% 70% at 48% 35%,#eee5d8 0%,#dfd4c4 90%)}
+.device .plank{background:linear-gradient(180deg,color-mix(in srgb,var(--v2-secondary) 35%,var(--v2-major)),var(--v2-major));border-color:color-mix(in srgb,var(--v2-accent) 34%,transparent);height:38px}
+.device .stage-cap,.device .demo-tag{color:var(--v2-accent);background:transparent}
+.device .glass{background:color-mix(in srgb,var(--v2-surface) 70%,transparent);border-color:color-mix(in srgb,var(--v2-accent) 19%,transparent);box-shadow:inset 0 1px rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.12);color:var(--v2-text)}
+.device .thumb{background:color-mix(in srgb,var(--v2-accent) 18%,var(--v2-surface));box-shadow:inset 0 1px rgba(255,255,255,.28),0 4px 13px rgba(0,0,0,.15)}
+.device .seg button,.device .seg button[aria-pressed="true"]{color:var(--v2-text)}
+.device .pickbtn svg{color:var(--v2-accent)}
+.device .btn{border-color:color-mix(in srgb,var(--v2-accent) 50%,transparent);color:var(--v2-text)}
+.device .btn.primary{background:var(--v2-accent);border-color:var(--v2-accent);color:var(--v2-major)}
+.device .notes{font-family:var(--v2-display);font-size:17px;color:var(--v2-text)}
+.device .meta,.device .reason{color:var(--v2-muted)}
+.device .info{min-height:117px}
+.device .face{background:var(--v2-surface);border:1px solid color-mix(in srgb,var(--v2-accent) 38%,transparent)}
+.device .face::after{background:linear-gradient(115deg,rgba(255,255,255,.12),transparent 32%,rgba(0,0,0,.10))}
+.device .slot{transition:transform .57s cubic-bezier(.2,.9,.22,1),opacity .4s ease;transform-style:preserve-3d}
+.device .slot.is-sel{filter:drop-shadow(0 10px 20px rgba(0,0,0,.23))}
+.device .slot .card-inner{transition:transform .59s cubic-bezier(.18,.78,.22,1)}
+.device .slot.is-sel:active .card-inner{filter:brightness(1.075)}
+.device .slot.collectible .face{padding:0;overflow:hidden;background:#080b13;border:0;border-radius:11px}
+.device .slot.collectible .face::after{content:none}
+.device .slot.collectible .collectible-img{display:block;width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none}
+.device .slot.collectible .shade{background:#000}
+.device .slot.collectible .tab{z-index:10;top:5px;transform:translate(-50%,-50%);border-radius:10px}
+.device .slot.collectible .cpen{z-index:5}
+.device .slot.collectible .num,.device .slot.collectible .rec-no{display:none}
+.device .slot.collectible .face.back{transform:rotateY(180deg)}
+.device .slot.is-sel .face{box-shadow:0 18px 36px rgba(0,0,0,.32)}
+.device .panel{background:var(--v2-surface);color:var(--v2-text)}
+.device .over{background:var(--v2-major);color:var(--v2-text)}
+.device .empty,.device .toast,.device .hit{background:var(--v2-surface);color:var(--v2-text)}
+.device .home{background:var(--v2-text)}
+.device .round.themegear{font-family:var(--sans);font-size:21px}
+.device .introV2{position:absolute;inset:0;z-index:190;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;
+  padding:48px 27px 35px;color:var(--v2-text);
+  background:radial-gradient(circle at 60% 29%,color-mix(in srgb,var(--v2-secondary) 68%,transparent),transparent 67%),var(--v2-major);
+  transition:opacity .42s ease,visibility .42s ease}
+.device .introV2.dismissed{opacity:0;visibility:hidden;pointer-events:none}
+.device .introMark{width:min(320px,100%);height:192px;overflow:visible;color:var(--v2-accent)}
+.device .inkscript{font-family:"Snell Roundhand","Bickham Script Pro","Apple Chancery",cursive;font-size:108px;font-style:italic;font-weight:400;fill:var(--v2-text);clip-path:inset(0 100% 0 0);animation:ink-reveal 1.45s cubic-bezier(.35,.05,.38,1) .1s both}
+.device .inkflourish{stroke:var(--v2-accent);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-dasharray:520;stroke-dashoffset:520;animation:ink-underline .9s ease 1.03s forwards}
+@keyframes ink-reveal{to{clip-path:inset(0 0 0 0)}}
+@keyframes ink-underline{to{stroke-dashoffset:0}}
+.device .introLead{font-family:var(--v2-display);font-size:21px;line-height:1.3;text-align:center;max-width:320px}
+.device .introSub{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--v2-muted)}
+.device .v2ThemeGroup{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px}
+.device .themeSwatch{width:37px;height:37px;border-radius:50%;background:linear-gradient(125deg,var(--sw-major) 60%,var(--sw-secondary) 60% 90%,var(--sw-accent) 90%);
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 0 0 1px rgba(0,0,0,.1);transition:transform .25s ease}
+.device .themeSwatch[aria-pressed="true"]{outline:2px solid var(--v2-accent);outline-offset:4px;transform:scale(1.08)}
+.device .themeName{font-family:var(--v2-display);font-size:17px;margin-top:2px;min-height:23px;text-align:center}
+.device .v2Appearance{display:flex;gap:6px;background:color-mix(in srgb,var(--v2-secondary) 45%,transparent);padding:5px;border-radius:23px}
+.device .v2Appearance button{font-size:12px;padding:9px 20px;border-radius:18px;color:var(--v2-text)}
+.device .v2Appearance button[aria-pressed="true"]{background:var(--v2-accent);color:var(--v2-major)}
+.device .v2Start{width:100%;max-width:270px;min-height:48px;border-radius:24px;font-size:14px;letter-spacing:.02em;font-weight:650;background:var(--v2-accent);color:var(--v2-major);border:0}
+.device .v2Secondary{font-size:13px;color:var(--v2-text);padding:9px}
+.device .v2legal{max-width:270px;text-align:center;font-size:10px;line-height:1.4;color:var(--v2-muted)}
+.device #demoQuick{min-width:58px;padding:0 11px;font-size:11px;border-radius:21px;height:40px;border:1px solid color-mix(in srgb,var(--v2-accent) 40%,transparent)}
+.device #bMenu{font-size:12px;padding:0 12px;min-width:66px}
+.device .v2FooterActions{display:flex;justify-content:center;gap:6px}
+.device .empty p{color:var(--v2-muted)}
+/* One light control system, not a second decorative card system */
+@media(prefers-reduced-motion:reduce){
+ .device .inkscript{animation:none;clip-path:none}
+ .device .inkflourish{animation:none;stroke-dasharray:none;stroke-dashoffset:0}
+ .device .slot{transition-duration:.01ms!important}
+}
+
 </style>
 </head>
 <body>
@@ -458,6 +554,8 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
         <h1 id="title">Autumn shelf</h1>
       </div>
       <div class="hbtns">
+        <button class="glass" id="demoQuick" aria-label="Switch between the demo and my collection">Demo</button>
+        <button class="glass round themegear" id="themeToggle" aria-label="Appearance and theme">◐</button>
         <button class="glass round" id="shelvesBtn" aria-label="All shelves and search" aria-pressed="false">
           <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.2"/></svg>
         </button>
@@ -488,7 +586,7 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
       <div class="actions">
         <button class="btn primary" id="wear"></button>
         <button class="btn" id="test"></button>
-        <button class="btn icon" id="bMenu" aria-label="More for this bottle" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="4.5" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="15.5" cy="10" r="1.5"/></svg></button>
+        <button class="btn" id="bMenu" aria-label="Bottle details and wear history" aria-haspopup="dialog">Details</button>
       </div>
       <button class="impbtn" id="impBtn" aria-haspopup="dialog">Add how it wore</button>
     </section>
@@ -528,7 +626,29 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
     <div class="hint">Tap to open</div>
   </div>
 
-  <div class="scrim" id="scrim"></div>
+  <div class="introV2" id="introV2" role="dialog" aria-label="Welcome to Arooma">
+  <div class="introSub">Your private fragrance archive</div>
+  <svg class="introMark" viewBox="0 0 380 200" role="img" aria-label="Arooma calligraphy wordmark">
+    <text class="inkscript" x="190" y="127" text-anchor="middle">Arooma</text>
+    <path class="inkflourish" d="M82 142 Q165 166 257 138 T333 144 M92 149q-25 15-31-1"/>
+  </svg>
+  <div class="introLead">Every fragrance, a story worth keeping.</div>
+  <div class="introSub">Choose your finish</div>
+  <div class="v2ThemeGroup" data-theme-controls="true">
+    <button class="themeSwatch" data-palette="obsidian" style="--sw-major:#161b24;--sw-secondary:#312b33;--sw-accent:#b88b47" aria-label="Obsidian Gold" title="Obsidian Gold"></button>
+    <button class="themeSwatch" data-palette="ivory" style="--sw-major:#f3ebdd;--sw-secondary:#d8c4aa;--sw-accent:#9f6a36" aria-label="Ivory Oud" title="Ivory Oud"></button>
+    <button class="themeSwatch" data-palette="violet" style="--sw-major:#1b1a28;--sw-secondary:#5d5266;--sw-accent:#c9b6d9" aria-label="Violet Ink" title="Violet Ink"></button>
+    <button class="themeSwatch" data-palette="emerald" style="--sw-major:#18211f;--sw-secondary:#4b5a55;--sw-accent:#d1b68b" aria-label="Emerald Resin" title="Emerald Resin"></button>
+  </div>
+  <div class="themeName" id="introThemeName">Obsidian Gold</div>
+  <div class="v2Appearance" data-appearance-controls="true">
+    <button data-look="light" aria-pressed="false">Light</button><button data-look="dark" aria-pressed="true">Dark</button>
+  </div>
+  <button class="v2Start" id="introDemo">Explore the demo cards</button>
+  <button class="v2Secondary" id="introOwn">Open my collection</button>
+  <div class="v2legal">Independent fragrance companion. Brand names identify products; no affiliation or endorsement is implied.</div>
+</div>
+<div class="scrim" id="scrim"></div>
   <div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Cabinet" tabindex="-1"><div class="grab"></div><div class="pbody" id="panelBody"></div></div>
   <div class="sheet" id="sheet" role="dialog" aria-label="Share your shelf">
     <div class="grab"></div>
@@ -917,7 +1037,23 @@ function profileOf(text){
 function coolFrom(v){return v[2]+v[3]+v[4]+v[5]>=1.6}
 function overlap(a,b){var mn=0,mx=0;for(var i=0;i<8;i++){mn+=Math.min(a[i],b[i]);mx+=Math.max(a[i],b[i])}return mx?mn/mx:0}
 
-/* sample collection: every house is a fictional placeholder */
+/* Archive Foil v3: previously commissioned fragrance concepts, in an opt-in demo only.
+   These lightweight editable illustrated editions use original Arooma vector art;
+   they do not claim rights to third-party manufacturer product photography. */
+var CARDS={
+ c0:{key:'dior',house:'Dior',name:'Sauvage Elixir',conc:'Elixir',shelf:'au',notes:'Grapefruit, cinnamon, nutmeg, cardamom, lavender, woods',vessel:'noir',ml:60,cool:true},
+ c1:{key:'hawas',house:'Rasasi',name:'Hawas For Him',conc:'Eau de Parfum',shelf:'su',notes:'Apple, bergamot, lemon, cinnamon, orange blossom, cardamom, plum',vessel:'clear',ml:100,cool:false},
+ c2:{key:'myslf',house:'Yves Saint Laurent',name:'MYSLF',conc:'Eau de Parfum',shelf:'sp',notes:'Bergamot, orange blossom, Indonesian patchouli, Ambrofix',vessel:'noir',ml:100,cool:false},
+ c3:{key:'prodigy',house:'MIND GAMES',name:'Prodigy',conc:'Extrait de Parfum',shelf:'au',notes:'Rose absolute, cardamom, bergamot, patchouli, latte, sandalwood',vessel:'white',ml:100,cool:true}
+};
+function curatedSeed(){
+ return Object.keys(CARDS).map(function(id){
+   var c=CARDS[id];return {id:id,shelf:c.shelf,house:c.house,name:c.name,conc:c.conc,ml:c.ml,left:.91,notes:c.notes,vessel:c.vessel,
+    acq:12,first:10,last:3,wears:3,cool:c.cool,note:'Collectible artwork demo. Independent and unaffiliated.'};
+ });
+}
+
+/* Legacy fictional demo bottles remain available beside the four curated cards. */
 var SEED=[
  {id:'s0',shelf:'su',house:'Maison Aubrac',name:'Linen Rain',conc:'Eau de Toilette',ml:100,left:.78,notes:'Wet stone, white tea, clean linen',vessel:'clear',acq:540,first:531,last:41,wears:19,cool:false,note:'A summer bottle. Still the cleanest thing on the shelf.'},
  {id:'s1',shelf:'au',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.'},
@@ -978,7 +1114,7 @@ function clean(s){
   if(!s||typeof s!=='object')return null;
   var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),shelf:str(s.shelf,'',16).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',40).trim(),name:str(s.name,'',NAMEMAX).trim(),conc:str(s.conc,'Eau de Parfum',24),
     ml:Math.max(1,Math.min(1000,Math.round(+s.ml)||50)),left:num(s.left,0,1,0),notes:str(s.notes,'',120),vessel:vessel(s.vessel).k,
-    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',120),sample:!!s.sample,img:cleanImg(s.img)};
+    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',120),sample:!!s.sample,img:cleanImg(s.img),artKey:/^(dior|hawas|myslf|prodigy)$/.test(s.artKey||'')?s.artKey:null};
   if(!b.id||!b.house||!b.name)return null;
   var seen={};(Array.isArray(s.log)?s.log:[]).forEach(function(d){if(typeof d==='string'&&DATE_RE.test(d)&&!seen[d]){seen[d]=1;b.log.push(d)}});
   b.log.sort().reverse();
@@ -991,7 +1127,7 @@ function prep(b){
   b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
   return b;
 }
-function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?JSON.parse(JSON.stringify(b.img)):null}}
+function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?JSON.parse(JSON.stringify(b.img)):null,artKey:b.artKey||null}}
 var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
 var MAXSH=12;
 function seasons(){return DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}})}
@@ -1033,9 +1169,26 @@ function cleanState(s){
 }
 function readJSON(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null}catch(e){return null}}
 function emptyState(){return {shelves:seasons(),bottles:[],rots:[]}}
-function demoState(){return {shelves:seasons(),bottles:SEED.map(fromSeed),rots:DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}})}}
+/* Classic demo is kept for compatibility tests and existing sample-only workflows.
+   Normal entry stays on the eleven-card V2 demo. */
+var CLASSIC_DEMO=/(?:[?&])classicDemo=1(?:&|$)/.test(location.search);
+function demoState(){return {shelves:seasons(),bottles:(CLASSIC_DEMO?SEED:curatedSeed().concat(SEED)).map(fromSeed),
+  rots:(CLASSIC_DEMO?[]:[{id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']}]).concat(DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}))}}
 function loadOwn(){return cleanState(readJSON(KEY_OWN))}
-function loadDemo(){return cleanState(readJSON(KEY_DEMO))||demoState()}
+function loadDemo(){
+  var saved=cleanState(readJSON(KEY_DEMO));
+  if(CLASSIC_DEMO)return saved||demoState();
+  if(!saved)return demoState();
+  /* One-time demo-only upgrade; owner collections and their backups are never touched.
+     A demo user can still remove a card afterward without it reappearing on reload. */
+  if(!readJSON('arooma.v2.curatedInstalled')){
+    var existing={};saved.bottles.forEach(function(b){existing[b.id]=true});
+    curatedSeed().forEach(function(seed){if(!existing[seed.id])saved.bottles.push(clean(fromSeed(seed)))});
+    if(!saved.rots.some(function(r){return r.id==='rfoil'}))saved.rots.unshift({id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']});
+    try{localStorage.setItem('arooma.v2.curatedInstalled','true');localStorage.setItem(KEY_DEMO,JSON.stringify({v:SCHEMA,shelves:saved.shelves,bottles:saved.bottles.map(plain),rots:saved.rots}))}catch(e){}
+  }
+  return saved;
+}
 var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null,remindAt:DATE_RE.test(p.remindAt)?p.remindAt:null}})();
 function savePrefs(){try{localStorage.setItem(KEY_PREFS,JSON.stringify(PREFS))}catch(e){}}
 /* A parallel build (main at 648a506, live for a few minutes on 2026-10-29) wrote its own v3 into arooma.v1:
@@ -1130,7 +1283,7 @@ var LEAN=[-1.8,1.4,-.8,1.9,-1.4,.9,-1.1];
 /* ---------- state ---------- */
 var stage=$('#stage'), G={cw:216,ch:310};
 var U=MODE?(loadUI()[MODE]||{}):{};
-function startSel(u){u=u||{};var k=u.sel?idxOfId(u.sel):-1;if(k<0&&N)k=MODE==='demo'&&idxOfId('s2')>-1?idxOfId('s2'):idxOfId('s2')>-1&&BOTTLES[idxOfId('s2')].sample?idxOfId('s2'):0;return N?k:-1}
+function startSel(u){u=u||{};var k=u.sel?idxOfId(u.sel):-1;if(k<0&&N)k=MODE==='demo'&&idxOfId('c0')>-1?idxOfId('c0'):idxOfId('s2')>-1&&BOTTLES[idxOfId('s2')].sample?idxOfId('s2'):0;return N?k:-1}
 var sel=startSel(U);
 rotId=U.rot&&ROTS.some(function(r){return r.id===U.rot})?U.rot:(ROTS[0]?ROTS[0].id:null);
 var mode=(U.mode==='stack'||U.mode==='fan')?U.mode:'flow', pickIdx=null, pickPtr=-1, introDone=false;
@@ -1200,6 +1353,7 @@ function timelineHtml(b){
   return b.log.slice(0,3).map(function(d){var t=impText(b.imp[d]);return '<li><b>'+fmtShort(d)+'</b><span>'+(t?esc(t):'No impression noted')+'</span></li>'}).join('');
 }
 function fillRecord(el,b){
+  if(!$('.rec-dl',el))return; // Collectible backs show a fragrance map, not an ownership form.
   $('.rec-dl',el).innerHTML=recordRows(b).map(function(r){return '<dt>'+r[0]+'</dt><dd>'+esc(r[1])+'</dd>'}).join('');
   $('.rec-tl ul',el).innerHTML=timelineHtml(b);
   $('.rec-n',el).innerHTML='&ldquo;'+esc(b.note||'Added to the cabinet.')+'&rdquo;';
@@ -1208,6 +1362,17 @@ function buildSlot(b,i){
   var el=document.createElement('div');
   el.className='slot';el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
   el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':'')+(b.sample&&MODE==='own'?', sample bottle':''));
+  if((MODE==='demo'&&CARDS[b.id])||(b.artKey&&!b.img)){
+    var art=b.artKey||(CARDS[b.id]&&CARDS[b.id].key),root='assets/collectibles/cards/'+art;
+    el.classList.add('collectible');
+    el.innerHTML='<div class="card-inner">'
+      +'<div class="face front"><img class="collectible-img" src="'+root+'-front.svg" alt="'+esc(b.house+' '+b.name+' front')+'" decoding="async"><span class="num">N&deg; '+pad(i+1)+'</span><div class="shade"></div></div>'
+      +'<div class="face back"><img class="collectible-img" src="'+root+'-back.svg" alt="'+esc(b.name+' fragrance map')+'" decoding="async"><span class="rec-no"></span></div>'
+      +'</div><div class="tab">Today&rsquo;s pick</div>'
+      +'<span class="nm" style="position:absolute;left:-9999px">'+esc(b.name)+'</span>'
+      +'<button class="cpen" tabindex="-1" aria-label="Edit '+esc(b.name)+'"><i>'+PEN+'</i></button>';
+    LQ.regSlot(el);return el;
+  }
   var lowHtml=b.low?'<div class="low">Running low<i><b style="width:'+Math.round(b.left*100)+'%"></b></i></div>':'';
   el.innerHTML='<div class="card-inner">'
    +'<div class="face front"><div class="photo"><span class="num">N&deg; '+pad(i+1)+'</span>'+b.draw('c'+b.id,b.left)+'</div>'
@@ -1363,7 +1528,7 @@ function updateInfo(){
     $('#meta').innerHTML=lastTxt+' &middot; '+left;
     w.classList.toggle('done',wornToday(b));
     if(wornToday(b)){w.disabled=true;w.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.5"/></svg>Worn today'}
-    else{w.disabled=false;w.textContent='Wear today'}
+    else{w.disabled=false;w.textContent=MODE==='demo'&&CARDS[b.id]?'Add to Mine':'Wear today'}
     var today=wornToday(b),x=today?b.imp[todayStr()]:null;
     ib.classList.toggle('on',today);
     ib.textContent=x?'Today: '+impText(x)+'. Edit ›':'Add how it wore today ›';
@@ -1376,7 +1541,28 @@ function updateTestBtn(){
   else{t.disabled=sel<0;t.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.5h6v8.5L7 12.5 4 10z"/></svg>Test'}
   t.setAttribute('aria-label',test?'Testing session running':'Start a testing session');
 }
-$('#wear').addEventListener('click',doWear);
+function addCuratedToMine(){
+  if(MODE!=='demo'||!BOTTLES[sel]||!CARDS[BOTTLES[sel].id])return;
+  var source=BOTTLES[sel],already=null,own=loadOwn()||emptyState();
+  already=own.bottles.find(function(b){return b.artKey===CARDS[source.id].key;});
+  if(!already){
+    if(own.bottles.length>=MAXN){toast('Your collection is full.');return}
+    var copy=plain(source);
+    copy.id=uid('u');copy.sample=false;copy.artKey=CARDS[source.id].key;
+    copy.log=[];copy.imp={};copy.auth=null;copy.img=null;
+    copy.note='';copy.left=1;copy.acq=todayStr();
+    if(!own.shelves.some(function(sh){return sh.id===copy.shelf}))copy.shelf=own.shelves[0].id;
+    own.bottles.push(copy);already=copy;
+  }
+  setPrefMode('own');dropUI('own');mount(own);
+  var i=idxOfId(already.id);if(i>=0&&i!==sel)select(i);
+  saveState();saveUI();haptic('complete');
+  toast(source.name+' is in your collection.'); 
+}
+$('#wear').addEventListener('click',function(){
+  if(MODE==='demo'&&BOTTLES[sel]&&CARDS[BOTTLES[sel].id])addCuratedToMine();
+  else doWear();
+});
 $('#impBtn').addEventListener('click',function(){var b=BOTTLES[sel];if(b)openImpression(b,todayStr())});
 
 /* ---------- daily pick ---------- */
@@ -1608,6 +1794,13 @@ $('#saveImg').addEventListener('click',function(){
 /* ---------- cabinet doors ---------- */
 var cab=$('#cabinet'), dim=$('#dim'), openT=null;
 function openCabinet(){
+  /* V2: the old physical-door scene is retired; the writing animation is the welcome. */
+  if(cab.classList.contains('gone'))return;
+  clearTimeout(openT);cab.classList.add('gone','open');dim.classList.add('off');
+  introDone=true;stage.classList.add('lit');render();
+  // Installation is an explicit menu choice, never an unsolicited overlay on a card.
+  setTimeout(maybeRemindBackup,3600);
+  return;
   if(cab.classList.contains('open'))return;
   clearTimeout(openT);
   cab.classList.add('open');dim.classList.add('off');
@@ -1625,12 +1818,9 @@ cab.addEventListener('click',openCabinet);
 function doReopen(){
   if(test)return toast('Finish the test first');
   closeSheet();cancelZ();setZ(0);
-  introDone=false;stage.classList.remove('lit');
-  slots.forEach(function(el){el.classList.remove('flipped')});
-  render();
-  cab.classList.remove('gone');void cab.offsetWidth;
-  cab.classList.remove('open');dim.classList.remove('off');
-  openT=setTimeout(openCabinet,RM?0:1500);
+  var intro=$('#introV2');intro.classList.remove('dismissed');
+  intro.querySelector('.inkscript').style.animation='none';void intro.offsetWidth;
+  intro.querySelector('.inkscript').style.animation='';
 }
 
 /* ---------- panels: cabinet menu, add, delete, wear history, authenticity, compare ---------- */
@@ -1672,8 +1862,9 @@ var NUMW=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight'];
 function footTxt(){var V=shareList().length;return shareRot()?NUMW[V]+(V===1?' bottle':' bottles')+' in rotation':V<=8?NUMW[V]+(V===1?' object':' objects')+', kept close':'Eight of '+V+' objects'}
 
 /* shelf bookkeeping after any add, delete, move or mode change */
-function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
+function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;var label='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');if($('.num',el))$('.num',el).innerHTML=label;if($('.rec-no',el))$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
 function updateCounts(){
+  var quick=$('#demoQuick');if(quick)quick.textContent=MODE==='demo'?'Mine':'Demo';
   var demo=MODE==='demo',cnt=pad(N)+(N===1?' object':' objects');
   $('#eyebrow').innerHTML=!MODE?'Arooma &middot; personal cabinet':(demo?'Demo':'The cabinet')+' &middot; '+cnt;
   $('#device').classList.toggle('is-demo',demo);
@@ -1704,7 +1895,7 @@ function updateEmpty(){
   var shelfEmpty=!!MODE&&N>0&&sel<0,on=!N||!MODE||shelfEmpty,h;
   stage.classList.toggle('is-empty',on);emptyEl.classList.toggle('on',on);
   if(!on){emptyEl.innerHTML='';return}
-  if(!MODE)h='<div class="eb">Personal cabinet</div><h2>Your cabinet is open</h2><p>Start with an empty cabinet for your own bottles, or look around a demo of fictional houses first. Nothing leaves this device.</p>'
+  if(!MODE)h='<div class="eb">Personal archive</div><h2>Your collection awaits</h2><p>Start your own fragrance collection, or explore the curated collectible demo first. Nothing leaves this device.</p>'
     +'<div class="actions"><button class="btn primary" data-er="start">Start my collection</button><button class="btn" data-er="demo">Explore demo</button></div>';
   else if(shelfEmpty)h='<div class="eb">'+esc(shelfName(curShelf))+'</div><h2>Nothing on this shelf yet</h2><p>Add a bottle here, or move one from another shelf.</p>'
     +'<div class="actions"><button class="btn primary" data-er="addhere">Add a bottle</button><button class="btn" data-er="all">See all shelves</button></div>';
@@ -1736,15 +1927,15 @@ function mount(st){
 }
 function setPrefMode(m){MODE=m;PREFS.mode=m;savePrefs()}
 function startOwn(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();haptic('complete');toast(N?'Your collection.':'Your cabinet is ready. Add your first bottle.')}
-function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Demo collection. The houses are fictional.')}
+function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Explore the collectible archive. Your own collection stays separate.')}
 function leaveDemo(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();toast(N?'Back to your collection.':'Back to your collection. It is empty.')}
 function confirmLoadDemo(){
-  openPanel('<h2>Open the demo collection?</h2><p class="sub">Seven sample bottles from fictional houses. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
+  openPanel('<h2>Open the demo collection?</h2><p class="sub">A collectible fragrance gallery plus classic fictional samples. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Stay here</button><button class="btn primary" data-act="yes">Open the demo</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();enterDemo()}});
 }
 function confirmResetDemo(){
-  openPanel('<h2>Reset the demo?</h2><p class="sub">This brings back the seven sample bottles and clears what you changed in the demo. Your own collection is not touched.</p>'
+  openPanel('<h2>Reset the demo?</h2><p class="sub">This restores the curated collectible cards and classic samples. Your own collection is untouched.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Reset</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();try{localStorage.removeItem(KEY_DEMO)}catch(_){}dropUI('demo');mount(demoState());toast('Demo reset.')}});
 }
@@ -1785,10 +1976,11 @@ function openMenu(){
    +rowHtml('compare','Compare notes before buying','Overlap between notes you type and the notes on your bottles')
    +rowHtml('share','Share shelf image','An editorial picture of the shelf, no app chrome')
    +rowHtml('backup','Backup and restore',PREFS.backupAt?'Kept on this device only. Last export '+fmtDate(PREFS.backupAt):'Kept on this device only. No backup exported yet')
-   +(demo?rowHtml('reset','Reset the demo','Bring back the seven sample bottles'):(MODE?rowHtml('demo','Explore the demo collection','Fictional sample bottles, kept apart from yours'):''))
+   +rowHtml('install','Install Arooma','Show Add to Home Screen instructions')
+   +(demo?rowHtml('reset','Reset the demo','Restore the collectible cards and samples'):(MODE?rowHtml('demo','Explore the demo collection','Curated collectible cards and fictional samples, separate from yours'):''))
    +(samples?rowHtml('samples','Remove sample bottles','Sample bottles from an earlier version are on your shelves'):'')
    +(MODE==='own'&&N?rowHtml('clear','Clear my collection','Remove every bottle from this device','danger'):'')
-   +rowHtml('reopen','Replay the cabinet doors','Close the doors and open them again'),
+   +rowHtml('reopen','Show Arooma calligraphy','Replay the fountain-pen wordmark and entry choices'),
   function(e){var a=actOf(e);if(!a)return;
     if(a==='leave'){closePanel();leaveDemo()}
     else if(a==='find'){closePanel();openFind()}
@@ -1796,6 +1988,7 @@ function openMenu(){
     else if(a==='compare')openCompare();
     else if(a==='share'){closePanel();openSheet()}
     else if(a==='backup')openBackup();
+    else if(a==='install'){closePanel();lsSet('arooma-a2hs','0');maybeShowInstallHint()}
     else if(a==='demo')confirmLoadDemo();
     else if(a==='reset')confirmResetDemo();
     else if(a==='samples')confirmRemoveSamples();
@@ -2615,8 +2808,49 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 }
 
+/* ---- V2: independent themes and immediate access to the two collections. ---- */
+var V2_THEME_KEY='arooma.v2.theme',V2_LOOK_KEY='arooma.v2.appearance';
+var V2_NAMES={obsidian:'Obsidian Gold',ivory:'Ivory Oud',violet:'Violet Ink',emerald:'Emerald Resin'};
+function v2Stored(k){try{return localStorage.getItem(k)}catch(e){return null}}
+var v2Theme=V2_NAMES[v2Stored(V2_THEME_KEY)]?v2Stored(V2_THEME_KEY):'obsidian';
+var v2Look=/^(light|dark)$/.test(v2Stored(V2_LOOK_KEY)||'')?v2Stored(V2_LOOK_KEY):(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+function v2Apply(){
+  var d=$('#device');d.setAttribute('data-theme',v2Theme);d.setAttribute('data-appearance',v2Look);
+  Array.from(document.querySelectorAll('.themeSwatch')).forEach(function(btn){btn.setAttribute('aria-pressed',btn.dataset.palette===v2Theme?'true':'false')});
+  Array.from(document.querySelectorAll('[data-look]')).forEach(function(btn){btn.setAttribute('aria-pressed',btn.dataset.look===v2Look?'true':'false')});
+  var title=$('#introThemeName');if(title)title.textContent=V2_NAMES[v2Theme];
+  var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',v2Look==='light'?'#F4EEE4':'#161B24');
+}
+function v2PickTheme(v){if(!V2_NAMES[v])return;v2Theme=v;lsSet(V2_THEME_KEY,v);v2Apply()}
+function v2PickLook(v){if(v!=='light'&&v!=='dark')return;v2Look=v;lsSet(V2_LOOK_KEY,v);v2Apply()}
+document.addEventListener('click',function(e){
+  var p=e.target.closest&&e.target.closest('.themeSwatch');
+  if(p){v2PickTheme(p.dataset.palette);return}
+  var l=e.target.closest&&e.target.closest('[data-look]');
+  if(l){v2PickLook(l.dataset.look);return}
+});
+function v2CloseIntro(){var el=$('#introV2');el.classList.add('dismissed');$('#stage').focus({preventScroll:true});}
+$('#introDemo').addEventListener('click',function(){if(MODE!=='demo')enterDemo();v2CloseIntro()});
+$('#introOwn').addEventListener('click',function(){if(MODE==='demo')leaveDemo();else if(MODE!=='own')startOwn();v2CloseIntro()});
+$('#demoQuick').addEventListener('click',function(){if(MODE==='demo')leaveDemo();else enterDemo()});
+$('#themeToggle').addEventListener('click',function(){
+  var opts=Object.keys(V2_NAMES).map(function(k){
+    var colors={obsidian:['#161b24','#312b33','#b88b47'],ivory:['#f3ebdd','#d8c4aa','#9f6a36'],violet:['#1b1a28','#5d5266','#c9b6d9'],emerald:['#18211f','#4b5a55','#d1b68b']}[k];
+    return '<button class="themeSwatch" data-palette="'+k+'" title="'+V2_NAMES[k]+'" aria-label="'+V2_NAMES[k]+'" style="--sw-major:'+colors[0]+';--sw-secondary:'+colors[1]+';--sw-accent:'+colors[2]+'"></button>';
+  }).join('');
+  openPanel('<h2>Appearance</h2><p class="sub">Four editorial finishes, one consistent card system. Your selection stays on this device.</p>'
+    +'<div class="v2ThemeGroup" data-theme-controls="true">'+opts+'</div>'
+    +'<p class="sub" id="v2CurrentTheme">'+V2_NAMES[v2Theme]+'</p>'
+    +'<div class="v2Appearance" data-appearance-controls="true"><button data-look="light">Light</button><button data-look="dark">Dark</button></div>'
+    +'<div class="pbtns"><button class="btn primary" data-act="done">Done</button></div>',
+    function(e){if(actOf(e)==='done')closePanel();var t=$('#v2CurrentTheme');if(t)t.textContent=V2_NAMES[v2Theme]});
+  v2Apply();
+});
+v2Apply();
+
 fit();geo();fitOver();setZ(0);updateCounts();setFanState();updateEmpty();markPick();render();updateInfo();updateTestBtn();setModeButtons();resumeTest();
-openT=setTimeout(openCabinet,RM?0:1700);
+openCabinet();
+if(PREFS.mode){$('#introV2').classList.add('dismissed')}
 })();
 </script>
 </body>

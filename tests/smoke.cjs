@@ -56,21 +56,34 @@ function check(name, ok, detail) {
   await page.goto(base);
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(outDir, '1-doors-closed.png') });
-  check('doors are closed on first paint', await page.evaluate(() => !document.getElementById('cabinet').classList.contains('open')));
+  check('V2 calligraphy intro visible at first paint', await page.isVisible('#introV2') && await page.isVisible('#introDemo') && await page.isVisible('.inkscript'));
 
   await page.waitForTimeout(4600);
   await page.screenshot({ path: path.join(outDir, '2-cover-flow.png') });
-  check('cabinet opened and cleared', await page.evaluate(() => document.getElementById('cabinet').classList.contains('gone')));
+  check('retired cabinet doors do not block V2', await page.evaluate(() => document.getElementById('cabinet').classList.contains('gone')));
   // FR-1: the first run offers a choice and puts no sample bottle on the shelf
-  check('FR-1 first run shows no bottles and offers Start my collection or Explore demo', (await page.locator('.slot').count()) === 0 && await page.isVisible('[data-er="start"]') && await page.isVisible('[data-er="demo"]'));
+  check('FR-1 first run shows no bottles and exposes Arooma direct-entry options', (await page.locator('.slot').count()) === 0 && await page.isVisible('#introOwn') && await page.isVisible('#introDemo'));
   check('FR-1 nothing is saved before the choice', await page.evaluate(() => ['arooma.cabinet', 'arooma.demo', 'arooma.prefs', 'arooma.v1'].every((k) => localStorage.getItem(k) === null)));
   await page.screenshot({ path: path.join(outDir, '2a-first-run.png') });
-  await page.click('[data-er="demo"]'); await page.waitForTimeout(1600);
-  check('7 bottle cards rendered', (await page.locator('.slot').count()) === 7);
+  await page.click('#introDemo'); await page.waitForTimeout(1600);
+  check('11 bottle cards rendered, including four curated collectibles', (await page.locator('.slot').count()) === 11 && (await page.locator('.slot.collectible').count()) === 4);
   check('FR-2 the demo is labelled as the demo, in the header and on the plank', /^Demo/.test((await page.textContent('#eyebrow')).trim()) && await page.isVisible('.demo-tag'));
-  check('Cover Flow opens on Fig Hour, 02 of 05 on the Autumn shelf', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2' && (await page.textContent('#cap')).trim() === '02 / 05' && (await page.textContent('#title')) === 'Autumn shelf');
+  check('Cover Flow opens on Dior card in Autumn', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0' && (await page.textContent('#cap')).trim() === '01 / 07' && (await page.textContent('#title')) === 'Autumn shelf');
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
+  // V2 native-feel and theme acceptance
+  check('four collectible art assets load without breaking the app', await page.evaluate(async () => {
+    const sources=[...document.querySelectorAll('.slot.collectible .collectible-img')].map(n=>n.getAttribute('src'));
+    const statuses=await Promise.all(sources.map(async url=>(await fetch(url)).ok));
+    return sources.length===8&&statuses.every(Boolean);
+  }));
+  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('#panel .themeSwatch[data-palette="violet"]');
+  await page.click('#panel [data-look="dark"]');
+  check('theme and appearance change without reloading or losing selection', await page.evaluate(() =>
+    document.querySelector('#device').dataset.theme==='violet'&&document.querySelector('#device').dataset.appearance==='dark'
+      && localStorage.getItem('arooma.v2.theme')==='violet'&&localStorage.getItem('arooma.v2.appearance')==='dark'));
+  await page.click('#panel [data-act="done"]');await page.waitForTimeout(300);
   // PWA wiring
   const manifest = await page.evaluate(async () => {
     const href = document.querySelector('link[rel="manifest"]').href;
@@ -99,13 +112,37 @@ function check(name, ok, detail) {
   // layouts keep the selection
   await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '3-fan.png') });
-  check('Fan keeps Fig Hour selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
+  check('Fan keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '4-stack.png') });
-  check('Stack keeps Fig Hour selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
+  check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
 
-  // daily pick
+  // V2: one-tap collectible import goes into my own collection, preserving art and not duplicating cards.
+  const cctx = await browser.newContext({ viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true });
+  const cpage = await cctx.newPage();
+  const cerrors = []; cpage.on('pageerror', (e) => cerrors.push(e.message));
+  await cpage.goto(base); await cpage.click('#introDemo'); await cpage.waitForTimeout(350);
+  await cpage.click('#wear'); await cpage.waitForTimeout(800);
+  check('V2 one-tap add copies Dior card to own collection with art', await cpage.evaluate(() => {
+    const own=JSON.parse(localStorage.getItem('arooma.cabinet')||'null');
+    return !!own&&own.bottles.length===1&&own.bottles[0].artKey==='dior'&&
+      document.querySelector('.slot.collectible')!==null&&
+      localStorage.getItem('arooma.prefs').includes('"mode":"own"');
+  }));
+  await cpage.click('#demoQuick'); await cpage.waitForTimeout(350);
+  await cpage.click('#wear'); await cpage.waitForTimeout(650);
+  check('V2 repeated add opens the existing card without duplication', await cpage.evaluate(() => {
+    const own=JSON.parse(localStorage.getItem('arooma.cabinet')||'null');
+    return own.bottles.length===1&&own.bottles[0].artKey==='dior';
+  })&&cerrors.length===0,cerrors.join(' | '));
+  await cctx.close();
+
+  // Keep the established seven-bottle smoke fixture for complete V1 core-feature regression.
+  // The default V2 experience above has already proved its eleven cards and four themes.
+  await page.goto(base + '?classicDemo=1'); await page.waitForTimeout(800);
+  check('classic regression fixture retains seven independent bottle cards', (await page.locator('.slot').count()) === 7 && (await page.textContent('.slot[tabindex="0"] .nm')) === 'Fig Hour');
+    // daily pick
   await page.click('#pick'); await page.waitForTimeout(1200);
   await page.screenshot({ path: path.join(outDir, '5-daily-pick.png') });
   check('Daily Pick tags exactly one card', (await page.locator('.slot.is-pick').count()) === 1);
@@ -120,7 +157,11 @@ function check(name, ok, detail) {
   check('Island returns to idle', (await page.getAttribute('#island', 'data-s')) === 'idle');
 
   // install hint (iOS user agent, not standalone)
-  check('Add to Home Screen hint shown on iOS Safari', await page.evaluate(() => document.getElementById('a2hs').classList.contains('show')));
+  check('V2 does not obstruct cards with unsolicited install instructions', await page.evaluate(() => !document.getElementById('a2hs').classList.contains('show')));
+  await page.click('#menu'); await page.waitForSelector('#panel.on');
+  await page.click('#install'); await page.waitForTimeout(450);
+  check('Install Arooma is available on demand', await page.evaluate(() => document.getElementById('a2hs').classList.contains('show')));
+  await page.click('#a2hsx'); await page.waitForTimeout(650);
 
   // share export (reached from the cabinet menu)
   await page.click('#menu'); await page.waitForSelector('#panel.on');
@@ -134,7 +175,7 @@ function check(name, ok, detail) {
   // ================= cabinet features: wear, authenticity, compare, add, delete, persistence =================
   const reopenFast = async (p) => {
     await p.reload(); await p.waitForTimeout(300);
-    await p.evaluate(() => document.getElementById('cabinet').click()); await p.waitForTimeout(2300);
+    await p.evaluate(() => { document.getElementById('cabinet').click(); document.getElementById('introV2').classList.add('dismissed'); }); await p.waitForTimeout(2300);
   };
   const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo') || 'null'));
   const panelOn = () => page.evaluate(() => document.getElementById('panel').classList.contains('on'));
@@ -210,7 +251,7 @@ function check(name, ok, detail) {
   await page.click('.vopt[data-v="green"]'); await page.fill('#fNote', 'Bought at the market.');
   await page.click('[data-act="save"]'); await page.waitForTimeout(1500);
   check('added bottle appears and is selected', (await page.locator('.slot').count()) === n0 + 1 && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === String(n0));
-  check('eyebrow and door count follow the shelf', /08 objects/.test(await page.textContent('#eyebrow')));
+  check('eyebrow count follows the shelf', /08 objects/.test(await page.textContent('#eyebrow')));
   check('added bottle is saved on this device', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.some((b) => b.name === 'Test Scent' && b.vessel === 'green' && b.sample === false)));
   await page.screenshot({ path: path.join(outDir, '14-added.png') });
   await page.click('.slot[tabindex="0"]'); await page.waitForTimeout(1100);
@@ -254,7 +295,7 @@ function check(name, ok, detail) {
   // reset
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#reset'); await page.waitForTimeout(300);
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('reset restores the seven sample bottles', (await page.locator('.slot').count()) === 7 && (await stored()) === null);
+  check('classic demo reset restores original seven bottles', (await page.locator('.slot').count()) === 7 && (await stored()) === null);
 
 
   // ================= shelves: overview, pinch, rename, add shelf, move a bottle =================
@@ -437,7 +478,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#demo'); await page.waitForTimeout(300);
   check('FR-5 Load demo asks first and promises my collection stays', /Open the demo collection/.test(await page.textContent('#panelBody')) && /stays saved/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(1200);
-  check('FR-5 the demo opens, labelled', (await page.locator('.slot').count()) === 7 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
+  check('FR-5 the classic demo opens, labelled', (await page.locator('.slot').count()) === 7 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
   await addB('Demo House', 'Demo Only', 'au');
   check('FR-2 a bottle added in the demo never reaches my collection', (await own()).bottles.map((b) => b.name).join() === 'Only One' && (await demoSaved()).bottles.some((b) => b.name === 'Demo Only'));
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#leave'); await page.waitForTimeout(1100);
@@ -445,7 +486,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#clear'); await page.waitForTimeout(300);
   check('FR-5 Clear my collection asks first and suggests a backup', /Clear your collection/.test(await page.textContent('#panelBody')) && /Export a backup first/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('FR-5 Clear empties only my collection; the demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 8);
+  check('FR-5 Clear empties only my collection; the classic demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 8);
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
   check('FR-5 Undo after Clear restores my collection', (await page.locator('.slot').count()) === 1 && (await own()).bottles.length === 1);
 
@@ -755,7 +796,7 @@ function check(name, ok, detail) {
   const dpage = await dctx.newPage();
   const derrors = [];
   dpage.on('pageerror', (e) => derrors.push(e.message));
-  await dpage.goto(base); await dpage.waitForTimeout(5200);
+  await dpage.goto(base + '?classicDemo=1'); await dpage.waitForTimeout(5200);
   await dpage.screenshot({ path: path.join(outDir, '9-desktop.png') });
   check('desktop shows the framed device', (await dpage.locator('.slot').count()) === 7 && derrors.length === 0, derrors.join(' | '));
 
@@ -766,7 +807,7 @@ function check(name, ok, detail) {
   const rpage = await rctx.newPage();
   const rerr = [];
   rpage.on('pageerror', (e) => rerr.push(e.message));
-  await rpage.goto(base); await rpage.waitForTimeout(300);
+  await rpage.goto(base + '?classicDemo=1'); await rpage.waitForTimeout(300);
   await rpage.evaluate(() => document.getElementById('cabinet').click()); await rpage.waitForTimeout(1200);
   const flat = () => rpage.evaluate(() => document.querySelector('.slot[tabindex="0"] .lq').getAttribute('d'));
   const f1 = await flat(); await rpage.waitForTimeout(700);
@@ -782,7 +823,7 @@ function check(name, ok, detail) {
   const spage = await sctx.newPage();
   const serr = [];
   spage.on('pageerror', (e) => serr.push(e.message));
-  await spage.goto(base); await spage.waitForTimeout(300);
+  await spage.goto(base + '?classicDemo=1'); await spage.waitForTimeout(300);
   await spage.evaluate(() => document.getElementById('cabinet').click()); await spage.waitForTimeout(2400);
   const noScroll = () => spage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1 && document.body.scrollWidth <= window.innerWidth + 1);
   check('375 wide: no horizontal scroll', await noScroll());

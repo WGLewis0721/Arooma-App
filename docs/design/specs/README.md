@@ -11,6 +11,7 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 | Date | Spec | Status |
 | --- | --- | --- |
 | 2026-10-30 | [Independent real-fragrance companion strategy and content-rights rollout](2026-10-30-unofficial-companion-strategy.md) | Product direction selected; implementation and media rights pending |
+| 2026-10-30 | [Arooma V2 implemented luxury collectible gallery and appearance system](2026-10-30-v2-collectible-gallery-implementation.md) | Implemented in PR #8; automated and real-device checks owed |
 | 2026-10-30 | [Archive Foil collectible art direction, source rules and generation QA](2026-10-30-collectible-card-art-direction.md) | Historical v1, superseded by owner-locked Dior v3 art direction |
 | 2026-10-29 | [Today's pick widget and the testing Live Activity](2026-10-29-widget-live-activity.md) | Draft, owner decisions open |
 | 2026-10-29 | [Add and delete bottles, wear history, evidence check and compare before buying](2026-10-29-cabinet-features.md) | In review, built in `index.html` |

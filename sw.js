@@ -11,7 +11,15 @@ const SHELL = [
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
   'assets/icons/apple-touch-icon.png',
-  'assets/icons/favicon-32.png'
+  'assets/icons/favicon-32.png',
+  'assets/collectibles/cards/dior-front.svg',
+  'assets/collectibles/cards/dior-back.svg',
+  'assets/collectibles/cards/hawas-front.svg',
+  'assets/collectibles/cards/hawas-back.svg',
+  'assets/collectibles/cards/myslf-front.svg',
+  'assets/collectibles/cards/myslf-back.svg',
+  'assets/collectibles/cards/prodigy-front.svg',
+  'assets/collectibles/cards/prodigy-back.svg'
 ];
 
 self.addEventListener('install', (event) => {

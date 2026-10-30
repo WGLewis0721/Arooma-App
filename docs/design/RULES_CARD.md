@@ -5,32 +5,33 @@
 This card is the single source for the always-loaded design rules. `npm run docs:sync` copies the block below into `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and `.github/copilot-instructions.md`, and the docs check fails if a copy is stale. Edit only here. Keep the block under 3,000 bytes.
 
 <!-- card:start -->
-**Start here:** `docs/design/README.md` (router). Plans and specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Tokens as data: `docs/design/tokens.json`. Visual authority: `docs/design/brand/BRAND_BOARD.md`. Read the task pack the router names, then only the section it points to.
+**Start here:** `docs/design/README.md` (router). Plans/specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Visual authority: `docs/design/brand/BRAND_BOARD.md`; V2 spec in `docs/design/specs/`.
 
 **Look**
-- A personal cabinet of objects, not a storefront or an inventory dashboard. Bottles are the richest thing on screen.
-- No new colors, fonts or decorative styles. Use a token (`--oat`, `--paper`, `--ink`, `--soft`, `--hair`, `--olive`, `--olive-deep`, `--clay`, `--clay-deep`) or an existing pattern. Two faces only: `ui-serif` and SF Pro.
-- Cards are opaque Paper. No glass, blur or transparency on cards, bottles or sheets. Glass only on the layout switcher, toolbar and header buttons.
-- Bottle art stays neutral and true to each house: same studio light and table, no per-house color grade, liquid drawn at the estimated level. The owner's own photos sit on the same table. Every bottle shows its liquid, moving, photos included.
-- Olive and Clay are for graphics and large text; small text uses Olive Deep and Clay Deep. Status is never color alone.
-- Low stock is quiet: label, hairline gauge, liquid level. Never red, never a badge.
+- Arooma is a private premium fragrance archive. The object and collectible card are the hero; not a storefront or noisy game screen.
+- V2 themes follow 60:30:10: Obsidian Gold, Ivory Oud, Violet Ink and Emerald Resin. Light/dark: navy/plum and bone/cream; avoid pure black/white.
+- SF Pro utility, editorial serifs for titles, calligraphy for wordmark only.
+- 59:86 opaque collectible faces, selective foil edge, glass only on controls.
+- Dior Archive Foil v3: front verified top notes; reverse horizontal note strips; concentration, not rarity badges.
+- Preserve owner photos, liquid physics and local records.
 
 **Behavior**
-- The selected bottle persists across Cover Flow, Stack and Fan. Layouts rearrange the same objects.
-- Every drag has a tap and a keyboard path. Reduced motion means cross-fades only.
-- Haptics at three moments only: selection settle, wear confirmation, completed action.
-- The Island chip is an in-app timer for a testing session only. Widgets are today's pick plus one action, never a mini shelf.
-- Remaining volume is an estimate and says so. Never claim authenticity is verified or a scent match is certain.
+- Returning users skip intro. First run: calligraphic `Arooma`, demo/own buttons and themes. No cabinet doors.
+- Demo/own stores are separate; one-tap switch. Never mix.
+- Selection persists across Cover Flow/Stack/Fan; drag snaps by velocity, tap/keyboard paths and reduced motion.
+- Card tap flips notes; Details opens ownership; Wear, Test, Search and Add are immediate.
+- Haptics only for selection settle, wear confirmation and completed actions. Island is an in-app testing timer, not a permanent badge.
+- Estimates and note overlap never become promised accuracy claims.
 
 **Boundaries**
-- Sample houses and bottles are fictional. Never draw a real brand's bottle, logo or label. The demo is labelled and stored apart from the owner's collection.
-- No backend, account, analytics or network call without a spec.
-- `index.html` stays one self-contained file. Generated assets come from `tools/generate_assets.py`.
+- Seven fictional demo bottles and four independent branded illustrations; no endorsement or scraped images.
+- Rights follow `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`.
+- No new backend, account, analytics, ads, or IAP without a dedicated implementation spec.
+- Preserve self-contained PWA; never claim it is SwiftUI.
 - Never force-push `main`.
 
 **Verify**
-- Widths 375, 390, 430, the landscape prompt, reduced motion, no horizontal scroll.
-- `npm run docs:check` and `npm test` are necessary, not sufficient. Device checks are owed: Home Screen install, status bar, launch image, haptics, share sheet.
-
-**If a request seems to need something forbidden, list it as an exception for the owner to decide. Never design around a rule silently.**
+- 375/390/430 px, landscape, reduced motion, no overflow, offline cards, fast entry.
+- `npm run docs:check`, `npm run test:docs` and `npm test` before merge. iPhone Safari, Home Screen install, touch physics and haptics need real-device validation.
+- Existing owner backups, photos, saved rotations, migration and Undo remain intact.
 <!-- card:end -->

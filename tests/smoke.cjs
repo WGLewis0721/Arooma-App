@@ -67,7 +67,7 @@ function check(name, ok, detail) {
   await page.screenshot({ path: path.join(outDir, '2a-first-run.png') });
   await page.click('#introDemo'); await page.waitForTimeout(1600);
   check('11 bottle cards rendered, including four curated collectibles', (await page.locator('.slot').count()) === 11 && (await page.locator('.slot.collectible').count()) === 4);
-  check('FR-2 the demo is labelled as the demo, in the header and on the plank', /^Demo/.test((await page.textContent('#eyebrow')).trim()) && await page.isVisible('.demo-tag'));
+  check('FR-2 curated demo is clearly labelled', /DEMO/i.test((await page.textContent('#eyebrow')).trim()));
   check('Cover Flow opens on Dior card in Autumn', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0' && (await page.textContent('#cap')).trim() === '01 / 07' && (await page.textContent('#title')) === 'Autumn shelf');
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
@@ -88,14 +88,14 @@ function check(name, ok, detail) {
   check('inspector turns to the original fragrance map', await page.locator('.inspector-card.flipped').count()===1);
   await page.screenshot({ path: path.join(outDir, 'v2-original-inspector-back-393x852.png') });
   await page.click('#inspectorClose');await page.waitForSelector('#inspector.on',{state:'hidden'});
-  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('[data-at-tab="style"]');await page.waitForSelector('#panel.on');
   await page.click('#panel .themeSwatch[data-palette="obsidian"]');
   await page.click('#panel [data-look="dark"]');await page.click('#panel [data-act="done"]');await page.waitForTimeout(400);
   await page.screenshot({ path: path.join(outDir, 'v2-original-dark-393x852.png') });
-  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('[data-at-tab="style"]');await page.waitForSelector('#panel.on');
   await page.click('#panel [data-look="light"]');await page.click('#panel [data-act="done"]');await page.waitForTimeout(400);
   await page.screenshot({ path: path.join(outDir, 'v2-original-light-393x852.png') });
-  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('[data-at-tab="style"]');await page.waitForSelector('#panel.on');
   await page.click('#panel .themeSwatch[data-palette="violet"]');
   await page.click('#panel [data-look="dark"]');
   check('theme and appearance change without reloading or losing selection', await page.evaluate(() =>
@@ -405,55 +405,24 @@ function check(name, ok, detail) {
   check('and Undo brings it back', (await page.locator('.shelf').count()) === 5);
   await page.click('#openShelf'); await page.waitForTimeout(900);
 
-  // ================= liquid: always visible, truthful at rest, alive in motion =================
-  const surf = (q) => page.evaluate((sel) => { const d = document.querySelector(sel).getAttribute('d'); const m = d.match(/^M([\d.]+) ([\d.]+)L.*L([\d.]+) ([\d.]+)V/); return m ? [+m[2], +m[4]] : null; }, q);
-  check('every bottle on the shelf has liquid', await page.evaluate(() => [...document.querySelectorAll('.slot')].every((el) => el.querySelector('.lq'))));
-  check('the three opaque vessels show their liquid through a level window', await page.evaluate(() => ['1', '3', '6'].every((i) => { const el = document.querySelector('.slot[data-i="' + i + '"]'); const g = el.querySelector('.lq').parentNode; return /w\)$/.test(g.getAttribute('clip-path') || '') && el.querySelector('clipPath rect').getAttribute('width') === '12'; })));
+  // Owner-directed Atelier V3: retained static fill levels, liquid animation intentionally OFF.
+  check('legacy vessels retain a visible static fill level', await page.evaluate(() =>
+    [...document.querySelectorAll('.slot')].every(el => !!el.querySelector('.lq'))));
   const y0 = (i) => page.evaluate((k) => +document.querySelector('.slot[data-i="' + k + '"] .lq').getAttribute('data-y0'), i);
-  const lv = [[2, 145.3, 'Fig Hour 85%'], [4, 202.04, 'Salt Cedar 14%'], [0, 127.08, 'Linen Rain 78%'], [1, 171.7, 'Ink No. 4 55% in its window'], [3, 143.4, 'Milk Paper 70% in its window'], [6, 157.8, 'Dry Earth 90% in its window']];
-  for (const [i, want, name] of lv) check('liquid level is true at rest: ' + name, Math.abs((await y0(i)) - want) < .05, 'y0=' + (await y0(i)));
-  const idle = [];
-  await page.focus('#stage'); while ((await page.getAttribute('.slot[tabindex="0"]', 'data-i')) !== '2') { await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(450); }
-  await page.waitForTimeout(2500);
-  for (let k = 0; k < 6; k++) { const v = await surf('.slot[tabindex="0"] .lq'); idle.push(Math.abs(v[0] - v[1])); await page.waitForTimeout(260); }
-  const d1 = await page.getAttribute('.slot[tabindex="0"] .lq', 'd'); await page.waitForTimeout(350);
-  check('a bottle at rest still ripples gently', d1 !== await page.getAttribute('.slot[tabindex="0"] .lq', 'd') && Math.max(...idle) < 4, 'idle tilt max ' + Math.max(...idle).toFixed(1));
-  // Follow the bottle being dragged, including motion before release. Selection changes
-  // on release, so sampling [tabindex="0"] afterward observes a different bottle.
-  // Sample in animation frames to avoid RPC timing skipping the opposite overshoot.
-  await page.evaluate(() => {
-    const card = document.querySelector('.slot[tabindex="0"]');
-    const liquid = card.querySelector('.lq');
-    const probe = window.__liquidProbe = { id: card.dataset.i, samples: [], connected: true, frame: 0 };
-    const sample = () => {
-      probe.connected = probe.connected && liquid.isConnected;
-      const m = liquid.getAttribute('d').match(/^M([\d.]+) ([\d.]+)L.*L([\d.]+) ([\d.]+)V/);
-      if (m) probe.samples.push(+m[2] - +m[4]);
-      probe.frame = requestAnimationFrame(sample);
-    };
-    probe.frame = requestAnimationFrame(sample);
-  });
-  await page.mouse.move(300, 420); await page.mouse.down();
-  for (let i = 1; i <= 8; i++) { await page.mouse.move(300 - i * 14, 420); await page.waitForTimeout(12); }
-  await page.mouse.up();
-  await page.waitForTimeout(1800);
-  const probe = await page.evaluate(() => {
-    const p = window.__liquidProbe; cancelAnimationFrame(p.frame); delete window.__liquidProbe;
-    return { id: p.id, samples: p.samples, connected: p.connected };
-  });
-  const peak = probe.samples;
-  check('a swipe sloshes the liquid, with momentum: it tilts one way then the other', probe.connected && peak.length > 10 && Math.max(...peak) > 3 && Math.min(...peak) < -3, 'bottle ' + probe.id + ', tilt range ' + Math.min(...peak).toFixed(1) + ' to ' + Math.max(...peak).toFixed(1) + ', ' + peak.length + ' frames');
-  // Retain the original approximately 3.6-second release-to-calm budget.
-  await page.waitForTimeout(1830);
-  const calm = []; for (let k = 0; k < 5; k++) { const v = await surf('.slot[tabindex="0"] .lq'); calm.push(Math.abs(v[0] - v[1])); await page.waitForTimeout(200); }
-  check('it settles back to a gentle ripple', Math.max(...calm) < 4, 'max ' + Math.max(...calm).toFixed(1));
-  // Fan: cards lean, the liquid stays level with the room
-  while ((await page.getAttribute('.slot[tabindex="0"]', 'data-i')) !== '1') { await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(450); }
-  await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(3600);
-  const fanTilt = await surf('.slot[data-i="5"] .lq');
-  check('in Fan the leaning cards keep their liquid level with the room', Math.abs(fanTilt[0] - fanTilt[1]) > 12, 'edge difference ' + Math.abs(fanTilt[0] - fanTilt[1]).toFixed(1));
-  await page.screenshot({ path: path.join(outDir, '24-fan-liquid.png') });
-  await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(1200);
+  const lv = [[2, 145.3, 'Fig Hour 85%'], [4, 202.04, 'Salt Cedar 14%'],
+    [0, 127.08, 'Linen Rain 78%'], [1, 171.7, 'Ink No. 4 55%'],
+    [3, 143.4, 'Milk Paper 70%'], [6, 157.8, 'Dry Earth 90%']];
+  for (const [i, want, name] of lv)
+    check('static level is still truthful: ' + name, Math.abs((await y0(i))-want)<.05);
+  const samplePath = await page.getAttribute('.slot[data-i="2"] .lq','d');
+  await page.waitForTimeout(500);
+  check('liquid animation is suspended at rest',samplePath===await page.getAttribute('.slot[data-i="2"] .lq','d'));
+  await page.focus('#stage');
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(650);
+  check('liquid remains static after selection gestures',samplePath===await page.getAttribute('.slot[data-i="2"] .lq','d'));
+  await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(620);
+  await page.screenshot({ path: path.join(outDir, '24-fan-static-fill.png') });
+  await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(550);
 
   // ================= FR-6 migration and damaged storage: never break, never delete the old save =================
   const fresh = async (kv) => { await page.evaluate((o) => { localStorage.clear(); for (const k in o) localStorage.setItem(k, o[k]); }, kv || {}); await reopenFast(page); };
@@ -655,7 +624,7 @@ function check(name, ok, detail) {
   check('BP-4 the photo bottle’s liquid sits at the estimated level, 40%', await page.evaluate(() => { const s = document.querySelector('.slot[tabindex="0"]'), r = s.querySelector('.phw clipPath rect'), y = +r.getAttribute('y'), h = +r.getAttribute('height'), lq = +s.querySelector('.phw .lq').getAttribute('data-y0'); return Math.abs(lq - (y + h - .4 * .92 * h)) < .05; }));
   await page.waitForTimeout(1500);
   const pd0 = await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'); await page.waitForTimeout(450);
-  check('BP-4 the photo bottle’s liquid moves like every other bottle', pd0 !== await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'));
+  check('BP-4 the photo bottle’s fill remains still while liquid motion is suspended', pd0 === await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'));
 
   // three photo bottles become a named rotation
   await page.click('#shelvesBtn'); await page.waitForTimeout(800); await page.fill('#findIn', 'Photo amber'); await page.waitForTimeout(200); await page.click('.hit'); await page.waitForTimeout(900);

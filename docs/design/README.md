@@ -30,6 +30,7 @@ Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
+| Real fragrance catalog, brand-photo use, independent-app disclosure, image rights, ads or optional IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [brand/THIRD_PARTY_CONTENT_POLICY.md](brand/THIRD_PARTY_CONTENT_POLICY.md). Strategy only; do not import or publish third-party media based on these docs | 
 | Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
 | A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
 | The shelf, cards, bottle art, layouts, Daily Pick, low stock, ownership record, test timer, share image | [packs/shelf-change.md](packs/shelf-change.md) | [brand/BRAND_BOARD.md](brand/BRAND_BOARD.md) sections named in the pack |
@@ -57,6 +58,8 @@ All paths are under `docs/design/`.
 | specs/ (README.md is the index) | One spec per request | Plans, not approval |
 | packs/ | One digest per kind of task | Derived. The long documents win if they differ |
 | packs/collectible-image-generation.md | Task instructions for AI-generated collectible art, not production cabinet cards | Task pack, derived from the collectible guide |
+| brand/THIRD_PARTY_CONTENT_POLICY.md | Unofficial real-fragrance companion positioning, asset provenance, fair-use review gates, takedown and Apple review preparation | Policy for third-party content planning; not a publication license |
+| specs/2026-10-30-unofficial-companion-strategy.md | Product/business strategy and staged real-catalog rollout | Chosen direction; implementation and image rights gated |
 | brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Owner-locked Dior **Archive Foil v3** composition, front top notes, no separate rarity label and a three-horizontal-strip reverse | Highest for optional collectible art only; does not override cabinet UI |
 | brand/COLLECTIBLE_CARD_PRODUCTION.md | Human+AI production workflow, copy manifests, prompts and editable layered delivery requirements | Operational for collectible art only |
 | assets/collectibles/templates/archive-foil-v3-{front,back}.svg | Matching editable v3 composition artboards (outside design docs) | Current collectible templates |

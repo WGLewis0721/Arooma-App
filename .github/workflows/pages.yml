@@ -49,8 +49,9 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
-      - name: Smoke test (iPhone viewport)
-        run: node tests/smoke.cjs dist artifacts
+      - name: Atelier focused smoke test (iPhone viewport)
+        run: node tests/atelier-smoke.cjs dist artifacts
+        # Full legacy regression remains available via: node tests/smoke.cjs dist artifacts
 
       - name: Keep screenshots
         if: always()

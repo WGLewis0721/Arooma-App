@@ -6,6 +6,10 @@ This repo holds the **iOS web app demo** (an installable PWA) and the brand boar
 
 **Live demo:** https://wglewis0721.github.io/Arooma-App/
 
+## Final-polish handoff (GPT-6 Sol · Extra High)
+
+The complete owner-approved production brief is at [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and its [agent execution checklist](SOL_EXTRA_HANDOFF.md). **Actual prior photographic collectible artwork is committed in [assets/collectibles/masters](assets/collectibles/masters/README.md)**; the SVG card sketches in the current demo are placeholders, not the approved final cards. This is a scoped handoff, not a claim that the final-polish implementation is already deployed.
+
 ## Try it on iPhone
 
 1. Open the link above in **Safari** on your iPhone.

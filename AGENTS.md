@@ -1,6 +1,6 @@
 # Arooma: instructions for coding agents
 
-For Codex, Cursor, Grok Build and any other tool that reads `AGENTS.md`.
+**CURRENT OWNER ASSIGNMENT FOR GPT-6 SOL (EXTRA HIGH):** Read [SOL_EXTRA_HANDOFF.md](SOL_EXTRA_HANDOFF.md) and [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) **before touching app UI or card assets**. The original photographic card PNG masters are already committed under `assets/collectibles/masters/`; do not regenerate or substitute them. This single owner-commissioned root spec supersedes older demo-art instructions for the final polish pass. Keep local owner records safe and use the compact QA gate in the root spec.\n\nFor Codex, Cursor, Grok Build and any other tool that reads `AGENTS.md`.
 
 Arooma is a personal cabinet for a fragrance collection, shipped as an installable iOS web app. The whole app is `index.html` (one self-contained file), tested and deployed to GitHub Pages by `.github/workflows/pages.yml`.
 

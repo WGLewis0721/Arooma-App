@@ -30,7 +30,7 @@ Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
-| Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-8 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
+| Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
 | A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
 | The shelf, cards, bottle art, layouts, Daily Pick, low stock, ownership record, test timer, share image | [packs/shelf-change.md](packs/shelf-change.md) | [brand/BRAND_BOARD.md](brand/BRAND_BOARD.md) sections named in the pack |
 | Layout for iPhone or iPad, safe areas, Home Screen install, status bar, App Store screenshots | [packs/device-layout.md](packs/device-layout.md) | The Spread device guides named in the pack |
@@ -57,8 +57,9 @@ All paths are under `docs/design/`.
 | specs/ (README.md is the index) | One spec per request | Plans, not approval |
 | packs/ | One digest per kind of task | Derived. The long documents win if they differ |
 | packs/collectible-image-generation.md | Task instructions for AI-generated collectible art, not production cabinet cards | Task pack, derived from the collectible guide |
-| brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Owner-approved Prodigy **Archive Foil v2** visual composition, foil, typography and QC | Highest for optional collectible art only; does not override cabinet UI |
+| brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Owner-locked Dior **Archive Foil v3** composition, front top notes, no separate rarity label and a three-horizontal-strip reverse | Highest for optional collectible art only; does not override cabinet UI |
 | brand/COLLECTIBLE_CARD_PRODUCTION.md | Human+AI production workflow, copy manifests, prompts and editable layered delivery requirements | Operational for collectible art only |
+| assets/collectibles/templates/archive-foil-v3-{front,back}.svg | Matching editable v3 composition artboards (outside design docs) | Current collectible templates |
 | tokens.json | Design tokens | Generated from `index.html` |
 | brand/BRAND_BOARD.md | Palette, type, materials, motion, icon, share image, low stock, daily pick | Highest for visual and motion decisions |
 | brand/ICON_HANDOFF.md | Icon files, generation and placement | Highest for icon files |

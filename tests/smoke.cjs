@@ -340,6 +340,9 @@ function check(name, ok, detail) {
   await pinch(await shelfY('au'), 80, 260);
   check('pinching out over a shelf opens it with the same bottle selected', (await zval()) < .02 && (await ttl()) === 'Autumn shelf' && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
   await page.click('#shelvesBtn'); await page.waitForTimeout(900);
+  // The taller editorial header leaves a scrollable overview; Spring is above the
+  // Autumn-centered opening position, so bring it under the gesture first.
+  await page.locator('.shelf[data-id="sp"]').scrollIntoViewIfNeeded();
   await pinch(await shelfY('sp'), 80, 260);
   check('pinching out over another shelf opens that shelf', (await ttl()) === 'Spring shelf' && (await page.textContent('#cap')).trim() === '01 / 01' && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '3');
   await page.keyboard.press('-'); await page.waitForTimeout(900);

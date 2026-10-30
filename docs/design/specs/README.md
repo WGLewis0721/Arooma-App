@@ -10,7 +10,7 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
-| 2026-10-29 | [Today's pick widget and the testing Live Activity](2026-10-29-widget-live-activity.md) | Draft, owner decisions open |
+| 2026-10-30 | [Archive Foil collectible art direction, source rules and generation QA](2026-10-30-collectible-card-art-direction.md) | In review, docs-only; no app integration |\n| 2026-10-29 | [Today's pick widget and the testing Live Activity](2026-10-29-widget-live-activity.md) | Draft, owner decisions open |
 | 2026-10-29 | [Add and delete bottles, wear history, evidence check and compare before buying](2026-10-29-cabinet-features.md) | In review, built in `index.html` |
 | 2026-10-29 | [All-shelves zoom, named shelves, and living liquid](2026-10-29-shelves-and-liquid.md) | In review, built in `index.html` |
 | 2026-10-29 | [Polish pass: ownership, backup, wear loop, photos](2026-10-29-polish-pass.md) | In review, built in `index.html`; device checks owed |

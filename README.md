@@ -18,20 +18,23 @@ Hold the phone upright; landscape shows a prompt to rotate.
 
 | Area | What to try |
 |---|---|
-| First open | Two cabinet doors swing open, the interior light comes up, bottles rise into place. Tap the doors to open sooner. Cabinet menu, then Replay the cabinet doors, plays it again. |
+| First open | Two cabinet doors swing open and the interior light comes up. The first time, the cabinet asks: **Start my collection** (truly empty) or **Explore demo**. Nothing is saved before that choice. Tap the doors to open sooner. Cabinet menu, then Replay the cabinet doors, plays it again. |
 | Shelves | The cabinet opens on the Autumn shelf. **Pinch in** (or tap the grid button in the header, or press `-`) to zoom out to every shelf: Spring, Summer, Autumn and Winter by default. Each has a **pencil** to rename it, and **Add a shelf** sits at the bottom. Pinch out over a shelf, tap it, or press Escape to go back in; the selected bottle stays selected. Move a bottle between shelves from the three dots under the card. |
-| Shelf | 7 sample bottles (fictional houses), saved on this device once you change anything. Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record. |
-| Liquid | Every bottle shows its liquid and fill level, including the black, white ceramic and terracotta ones through a small level window. The surface sloshes with momentum when you swipe, ripples in the direction the card moves, stays level with the room when cards lean in Fan, and never goes dead still. With Reduce Motion it stays flat at the true level. |
-| Layouts | Cover Flow, Stack and Fan keep the same bottle selected. Fan is a saved 3-bottle rotation and needs at least three bottles. |
-| Daily Pick | Brings the next candidate forward with an olive outline and a "Today's pick" tab. |
+| Your collection and the demo | Your collection and the demo (seven bottles from fictional houses) are stored apart and never mix. The eyebrow says Demo while you are in it. Switch from the Cabinet menu; loading the demo and clearing your collection each ask first. An empty cabinet shows Add a bottle and Restore a backup. |
+| Shelf | Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record, which shows the three latest wears and how they wore, and an Edit details link. |
+| Liquid | Every bottle shows its liquid and fill level, including the black, white ceramic and terracotta ones through a small level window. The surface sloshes with momentum when you swipe, ripples in the direction the card moves, stays level with the room when cards lean in Fan, and never goes dead still. With Reduce Motion it stays flat at the estimated level. A bottle shown with your own photo draws no liquid; its estimate is written below the card. |
+| Layouts | Cover Flow browses, Stack shortlists, Fan presents your saved rotation of up to three (Add to rotation in the three dots under the card). The same bottle stays selected; a bottle outside the rotation visits in front, labelled. |
+| Daily Pick | Brings the next candidate forward with an olive outline and a "Today's pick" tab, with one honest reason from your log and notes, for example "You haven't worn this in a while: 40 days." |
+| Search | The grid button (or `/`) opens All shelves with a search field. It matches fragrance names and houses, ignoring case and accents. Tap a result to open its shelf. |
 | Low stock | Salt Cedar: the liquid level drops, and a quiet "Running low" label with a hairline gauge. Always labeled as an estimate. |
-| Add and delete | The plus button adds a bottle: house, fragrance, size, an estimate of what is left, notes, acquired date and one of seven neutral vessels. The three dots under the card open Delete bottle, which asks first and offers Undo. The shelf holds 1 to 40 bottles. |
-| Wear tracking | Wear today logs the date with Undo. Wear history (three dots under the card) lists every wear, adds a past date, removes one and shows the average gap. Daily Pick uses the log. |
-| Authenticity check | Five observations per bottle: Matches, Differs or Not checked. It is a simulated checklist with no scan or lookup, so it reports "Consistent on" or "Differs on" and says it cannot verify. The result goes on the ownership record. |
+| Add, edit and delete | The plus button adds a bottle: house, fragrance, size, estimated remaining, notes, acquired date, your own photo (optional, with size and position) or one of seven neutral drawings. Edit details is the first row in the three dots under the card. Added and moved bottles go to the end of their shelf. Any bottle can be deleted, including the last, with Undo. The cabinet holds up to 200. |
+| Wear and impressions | Wear today logs the date with Undo. Then, if you want, Add how it wore: opening, development, projection and longevity, all optional. Wear history lists every wear, adds a past date, adds or edits each wear's impression, removes one and shows the average gap. |
+| Authenticity notes | Five observations per bottle: Matches, Differs or Not checked. It is your own record with no scan or lookup, so it reports "Consistent on" or "Differs on" and says it cannot verify. The result goes on the ownership record. |
 | Compare before buying | Cabinet menu, Compare notes. Type the notes of a bottle you are considering and see the three closest bottles you own by overlap in listed notes, with an eight-family radar. It does not predict how a scent wears on you. |
-| Test timer | "Test" starts a 30 s session. A Dynamic Island style chip shows the timer, expands on tap, and walks through Opening, Heart and Dry-down. |
+| Testing session | "Test" starts an in-app timer in a chip shaped like the Island, with check-ins at the opening, the heart (20 minutes) and the dry-down (2 hours). It survives a reload but only shows while Arooma is open. Log impression saves to today's wear. |
 | Shelf image | Cabinet menu, then Share shelf image, builds an editorial 1080 x 1350 image of up to eight bottles with no app chrome and opens the iOS share sheet (Save Image, Messages, AirDrop). |
-| Reset | Cabinet menu, then Reset demo data, clears what you added and logged and brings back the seven samples. |
+| Backup | Cabinet menu, Backup and restore. Your data lives only in this browser on this device (Safari and the Home Screen app keep separate copies). Export writes one JSON file; Restore shows what the file holds, then lets you replace or add, and never overwrites silently. |
+| Reset | In the demo, Cabinet menu, then Reset the demo, brings back the seven samples. It never touches your collection. |
 
 ## Web demo versus the native app
 
@@ -92,7 +95,7 @@ tools/generate_assets.py    icon and splash generator
 
 ## Earlier prototype
 
-`variants/collection-demo.html` is the earlier all-in-one prototype from the first commit on `main` (add bottle, wear tracking, search, simulated authenticity check, blind-buy DNA matcher, shareable shelf image, Dynamic Island timer). It is kept as it was, served next to the app at `/variants/collection-demo.html`, and has no iOS install layer. Its authenticity result was a random number and its scent matcher printed fixed text, so those two were rebuilt rather than ported; see [the spec](docs/design/specs/2026-10-29-cabinet-features.md). Its search is not in the iOS build.
+`variants/collection-demo.html` is the earlier all-in-one prototype from the first commit on `main` (add bottle, wear tracking, search, simulated authenticity check, blind-buy DNA matcher, shareable shelf image, Dynamic Island timer). It is kept as it was, served next to the app at `/variants/collection-demo.html`, and has no iOS install layer. Its authenticity result was a random number and its scent matcher printed fixed text, so those two were rebuilt rather than ported; see [the spec](docs/design/specs/2026-10-29-cabinet-features.md).
 
 ## Status
 

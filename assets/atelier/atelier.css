@@ -601,3 +601,60 @@ body {
  .at-nav,.device .themeSwatch{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}
  .device .stage::before{opacity:1}
 }
+
+
+/* Final card tactility: a 1.5px engraved rim responds only while a finger moves
+   across the focused card. The foil is kept OUT of the text/photo content plane. */
+.device .slot.collectible.is-sel:not(.archival)::before {
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:9;
+  border:2px solid transparent;
+  border-radius:13px;
+  pointer-events:none;
+  opacity:var(--at-foil-opacity,0);
+  background:linear-gradient(var(--at-foil-angle,110deg),
+    rgba(244,204,154,.8),rgba(130,207,238,.53),rgba(214,175,224,.77),rgba(244,204,154,.65)) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  transition:opacity .25s ease;
+}
+.device .at-owner-links {
+  display:flex;
+  flex-direction:column;
+  padding-bottom:5px;
+}
+.device .at-owner-links .btn {
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  text-align:left;
+  padding:0 4px;
+  min-height:52px;
+  border:0;
+  border-radius:0;
+  border-bottom:1px solid var(--at-stroke);
+  background:transparent;
+  font-size:14px;
+  font-weight:560;
+  color:var(--at-ink);
+}
+.device .at-owner-links .btn::after {
+  content:"›";
+  font:400 25px var(--at-serif);
+  color:var(--at-gold);
+  line-height:1;
+}
+.device .at-owner-links .btn[data-at-owner="delete"] {color:#c77f7a}
+.device .at-owner-links .btn[data-at-owner="delete"]::after {color:#c77f7a}
+.device .at-owner-links .btn:hover,.device .at-shelf-tile:hover {opacity:.92}
+.device #over .shelf .sh-top .pen svg {
+  width:18px;height:18px;stroke:var(--at-gold);fill:none;
+}
+.device .at-nav + .toast {z-index:180}
+@media(prefers-reduced-motion:reduce){
+ .device .slot.collectible.is-sel::before {opacity:0!important}
+}

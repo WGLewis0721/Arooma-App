@@ -24,8 +24,6 @@
 
 **Ratio:** Oat, Paper and Ink carry about 90% of any screen. Olive and Clay together stay under 5%.
 
-**Accent:** Clay is the one accent, used only where a state needs it (running low, a destructive row, a timer check-in that is due). No new hues.
-
 ## 2. Typography
 
 - **Display:** New York (Apple's system serif, `ui-serif`), Regular or Medium, tracking -0.01em. Cross-platform fallback: Newsreader Display. Used for screen titles, fragrance names, the record title, and italic note lines.
@@ -40,6 +38,7 @@ Every card has three separate levels, never merged: house (caps, Olive Deep), fr
 - Every object stands on the same warm paper table with a contact shadow. No floating cutouts.
 - Four readable materials: glass (clear edge, vertical highlight at left), liquid (darker than glass, bright meniscus), label paper (flat, evenly lit), cap (hard highlight for metal, matte speckle for stone).
 - Liquid level is drawn from the owner's estimate, so a low bottle looks low. The liquid is always visible: a vessel that is opaque (near-black glass, white ceramic, terracotta) carries a narrow level window with the same liquid inside, so the fill reads on every bottle, on the card and in the all-shelves view.
+- **Owner photos:** a person may use a photo of their own bottle. It stands in the same frame as the drawings: same table, contact shadow and baseline, the same soft key light from the left laid over its shape, aspect ratio always kept, scale and position set by the owner. Arooma never adds a logo or label itself. A photo carries the same level window as the opaque drawings: placed from the photo's real outline, in its lower body, moved and scaled with the photo, slid onto the glass by the owner, holding liquid in the colour sampled from the photo, with the same simulated surface. A full bottle keeps a little air at the top so its surface can move.
 - Stress test shelf: transparent glass, near-black bottle, amber liquid, opaque white vessel, metal cap, irregular silhouette. The demo shelf is exactly this.
 
 **Cards**
@@ -49,31 +48,25 @@ Every card has three separate levels, never merged: house (caps, Olive Deep), fr
 
 **Glass:** native Liquid Glass on the layout switcher, toolbar and header buttons only. Cards, bottles and sheets stay opaque.
 
-## 3b. Owner photos
-
-An owner can give any bottle their own photo. It sits in the card's art well at the same size and baseline as the drawings, cropped to cover (never stretched), with zoom and position sliders, under the same Paper card and contact shadow. The liquid simulation is drawn only on drawn bottles; a photo shows the real bottle. We never draw a real house's logo or label, and we never block an owner's own picture of their own bottle.
-
-**Demo label:** the demo collection carries "Demo" in the eyebrow and a small "Demo collection" tag on the plank, so it is never mistaken for the owner's shelf.
-
 ## 4. Motion
 
 One rule: the selected bottle persists across layouts. Layouts rearrange the same objects; nothing is rebuilt. Ease `cubic-bezier(.22,1,.36,1)`, 0.85 s for layout moves, 0.9 s for flips. Reduce Motion means cross-fades only.
 
 | Layout | Job | Behavior |
 |---|---|---|
-| Cover Flow | Browse the shelf | Center bottle frontal and 3% larger; neighbors turn 54°, recede, shade 10%. Drag maps directly to position; release carries velocity, then settles. |
-| Stack | Choose from today's shortlist | The five best candidates for today (least recently worn, enough left, plus the selected bottle). Caption reads "Shortlist for today". Selected card on top, up to three behind peeking above with ±2° lean. Swipe throws the top card left as it fades. |
-| Fan | Present a saved rotation | A rotation is a named set of up to five bottles (Evenings, Travel). Fan arcs its members from below the shelf; a selected bottle outside it joins as a guest. Caption names the rotation and opens the list. With no rotation, Fan opens the rotation maker. |
+| Cover Flow | Browse everything | Center bottle frontal and 3% larger; neighbors turn 54°, recede, shade 10%. Drag maps directly to position; release carries velocity, then settles. |
+| Stack | Choose from a shortlist | Selected card on top, up to three behind peeking above with ±2° lean. Swipe throws the top card left as it fades. |
+| Fan | Present the saved rotation (up to 3, chosen by the owner) | Cards pivot from below the shelf (±14°). Selected card lifts forward. Non-members drop back into the cabinet; a selected bottle outside the rotation visits in front, labelled "not in your rotation". |
 
 **All shelves:** pinch in to zoom out to every shelf, pinch out over a shelf to open it. The same gesture has a tap path (the Shelves button, Open shelf), a trackpad path (ctrl and wheel), a Safari gesture path and keys (- and Escape). The shelf in view fades and shrinks while the overview grows in, driven by the fingers, then snaps. Each shelf is a Paper-light row of miniature bottles on a plank, with its name in the display serif and a pencil that opens rename. Shelves start as the four seasons. The shelf you were on carries an Olive ring and "here". The selected bottle is lifted and underlined in Olive, so it survives the zoom. Reduce Motion swaps the layers with no scaling.
 
 **Liquid:** every liquid is a simulated surface, flat and exact at rest. It tilts against the card's acceleration with a damped spring (it overshoots and settles, so it has momentum), stays level with the room while a card leans in Fan and Stack, and carries two ripples that travel the way the card is moving. A slow ripple keeps every visible bottle alive. A full bottle barely moves and a low one pools. Landing a selection and wearing a bottle each give it a small kick. Reduce Motion draws it flat at the true level.
 
-**Haptics, only with meaning:** selection settle (after the card stops, never during drag), wear confirmation, completed action (impression saved, backup saved, test finished), a testing check-in coming due. Never on flips, scrolls or menu taps.
+**Haptics, three only:** selection settle (after the card stops, never during drag), wear confirmation, completed action (test finished, impression saved, bottle added or edited, backup exported or restored).
 
 **First open:** two doors swing 1.7 s, the interior lamp fades up, bottles rise in an 80 ms stagger from the selected one.
 
-**Testing timer (in-app):** an Island-shaped chip inside the app, not a Dynamic Island integration (that needs the native build). It counts down to check-ins at 15 minutes, 1 hour and 3 hours. Compact: ring and time to the next check-in. Expanded: fragrance, phase, one action, End. When a check-in is due the one action is Log impression. No 30 second default. The timer is a test aid, not a longevity measure.
+**Island chip:** an in-app timer shaped like the Island, shown only during a testing session. Check-ins at the opening, the heart (20 minutes) and the dry-down (2 hours); it runs on the wall clock while Arooma is open and is not a system Live Activity. Compact: progress ring and time left. Expanded: fragrance, phase prompt (Opening, Heart, Dry-down), End, Log impression. Never a permanent "today's fragrance" badge, and the timer is a test aid, not a longevity measure.
 
 **Widgets:** one bottle, short name, "Today's pick", one Wear action. Never a mini shelf.
 
@@ -103,5 +96,5 @@ No buttons, tabs, status bar, glass, prices, ratings or watermark. Silhouettes m
 **Daily pick (ceremonial but small)**
 - The card comes to center, lifts 2.5%, grows 2%.
 - 1.5 pt Olive outline plus an Olive Deep paper tab, "TODAY'S PICK", attached to the top edge like a file label.
-- One honest reason line in Olive Deep, from the owner's own history: "You haven't worn this in 5 weeks. Last time you noted: all day." Wear today stays within thumb reach.
+- One reason line in Olive Deep: "Unworn for 33 days. Suits cooler air." Wear today stays within thumb reach.
 - The tab stays on the shelf until the next pick. Haptic only when the card settles. Not in the Island.

@@ -13,6 +13,6 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 | 2026-10-29 | [Today's pick widget and the testing Live Activity](2026-10-29-widget-live-activity.md) | Draft, owner decisions open |
 | 2026-10-29 | [Add and delete bottles, wear history, evidence check and compare before buying](2026-10-29-cabinet-features.md) | In review, built in `index.html` |
 | 2026-10-29 | [All-shelves zoom, named shelves, and living liquid](2026-10-29-shelves-and-liquid.md) | In review, built in `index.html` |
-| 2026-10-29 | [Polish pass: own collection, backup, wear loop, photos, rotations](2026-10-29-polish-pass.md) | In review, built in `index.html`, device checks untested |
+| 2026-10-29 | [Polish pass: ownership, backup, wear loop, photos](2026-10-29-polish-pass.md) | In review, built in `index.html`; device checks owed |
 
 Spread's spec for a different widget, written 2026-10-28, is kept unchanged as a model at [../../reference/spread/specs/2026-10-28-widget-live-activity.md](../../reference/spread/specs/2026-10-28-widget-live-activity.md).

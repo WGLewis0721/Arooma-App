@@ -152,7 +152,7 @@ h1{font-family:var(--serif);font-weight:500;font-size:32px;letter-spacing:-.012e
 .island::after{content:"";position:absolute;right:14px;top:50%;width:11px;height:11px;margin-top:-5.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#2b2d33,#0b0c0f);transition:opacity .2s}
 .island:not([data-s="idle"])::after{opacity:0}
 .island[data-s="compact"]{width:196px}
-.island[data-s="expanded"],.island[data-s="done"]{width:358px;height:134px;border-radius:40px}
+.island[data-s="expanded"],.island[data-s="done"]{width:358px;height:150px;border-radius:40px}
 .i-c,.i-x{position:absolute;inset:0;opacity:0;transition:opacity .2s;pointer-events:none}
 .island[data-s="compact"] .i-c{opacity:1;transition-delay:.15s}
 .island[data-s="expanded"] .i-x,.island[data-s="done"] .i-x{opacity:1;transition-delay:.2s;pointer-events:auto}
@@ -239,7 +239,7 @@ h1{font-family:var(--serif);font-weight:500;font-size:32px;letter-spacing:-.012e
   box-shadow:0 18px 30px -18px rgba(37,35,31,.55);opacity:0;transform:translateY(12px);transition:opacity .5s,transform .6s var(--ease)}
 .a2hs.show{display:flex}
 @media (max-height:700px){.a2hs.show{display:none}}
-.a2hs.in{opacity:1;transform:none}
+.a2hs.vis{opacity:1;transform:none}
 .a2hs b{font-size:12.5px}
 .a2hs span{font-size:12px;color:var(--soft)}
 .a2hs .x{margin-left:auto;flex:none;width:28px;height:28px;border-radius:14px;background:rgba(37,35,31,.07);font-size:16px;line-height:1}
@@ -348,69 +348,76 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
 .sh-empty{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:62px;padding:0 4px 4px;font-family:var(--serif);font-style:italic;font-size:15px;color:var(--soft)}
 .sh-add{flex:none;height:44px;padding:0 4px;font-family:var(--sans);font-style:normal;font-size:13px;font-weight:600;color:var(--olive-deep)}
 @media (max-width:380px){h1{font-size:28px}}
-@media (prefers-reduced-motion:reduce){.stage,.info,.over{transform:none!important}}
-/* ---------- polish pass: first run, empty shelf, photos, impressions, rotations ---------- */
-.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+
+/* ---------- polish pass: long names, sample tag, empty and first-run states ---------- */
+.capn>div:first-child{min-width:0;flex:1 1 auto}
 .house,.nm,.spec{overflow:hidden;text-overflow:ellipsis}
-.capn .cap-t{min-width:0;flex:1 1 auto}
-.rec-t,.rec-s,.back dd{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rec-tl{margin-top:calc(var(--u)*10px);font-size:calc(var(--u)*9.5px);color:var(--soft)}
-.rec-tl b{display:block;font-size:calc(var(--u)*8.5px);letter-spacing:.16em;text-transform:uppercase;color:var(--olive-deep);font-weight:600;margin-bottom:calc(var(--u)*4px)}
-.rec-tl ul{list-style:none}
-.rec-tl li{display:flex;gap:calc(var(--u)*8px);line-height:1.5;white-space:nowrap;overflow:hidden}
-.rec-tl li span{flex:none;font-variant-numeric:tabular-nums;color:var(--ink)}
-.rec-tl li em{font-style:normal;overflow:hidden;text-overflow:ellipsis}
-.rec-tl p{font-style:italic}
-.rec-n{font-size:calc(var(--u)*12px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pimg{position:absolute;inset:0;overflow:hidden;z-index:1}
-.pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.94) contrast(.98);-webkit-user-drag:none}
-.photo .pimg::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(37,35,31,.06),inset 0 -40px 36px -30px rgba(37,35,31,.22),inset 28px 0 40px -30px rgba(255,255,255,.35)}
-.mb .pimg{inset:4px 3px 3px;border-radius:5px;box-shadow:0 3px 6px -3px rgba(37,35,31,.45)}
-.ed-tier .pimg{position:relative;display:block;height:100%;aspect-ratio:10/22;border-radius:4px}
-.cpen{position:absolute;top:0;right:0;z-index:4;width:44px;height:44px;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .3s}
-.cpen i{width:30px;height:30px;border-radius:15px;display:grid;place-items:center;background:var(--paper);border:1px solid var(--hair);color:var(--olive-deep);box-shadow:0 2px 6px -3px rgba(37,35,31,.35)}
-.slot.is-sel .cpen{opacity:1;pointer-events:auto}
-.slot.flipped .cpen{opacity:0;pointer-events:none}
-.empty{position:absolute;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px 28px calc(var(--plank) + 10px);text-align:center}
+.num em{font-style:normal;color:var(--olive-deep)}
+.empty{position:absolute;left:18px;right:18px;bottom:calc(var(--plank) + 22px);z-index:20;display:none;flex-direction:column;align-items:center;text-align:center;gap:8px;
+  padding:22px 18px 18px;background:var(--paper);border-radius:10px;
+  box-shadow:0 0 0 1px rgba(37,35,31,.08),inset 0 1px 0 rgba(255,255,255,.95),0 24px 26px -24px rgba(37,35,31,.6),0 5px 10px -5px rgba(37,35,31,.2)}
 .empty.on{display:flex}
-.empty-in{max-width:290px}
-.e-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--olive-deep)}
-.empty h2{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:8px 0}
-#eSub{font-size:13px;line-height:1.45;color:var(--soft)}
-.e-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
-.welcome{position:absolute;inset:0;z-index:80;display:none;background:var(--oat);padding:calc(70px + env(safe-area-inset-top,0px)) 28px calc(28px + env(safe-area-inset-bottom,0px));overflow-y:auto}
-.welcome.on{display:flex;align-items:center}
-.w-in{width:100%;max-width:340px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-.w-eye{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--olive-deep)}
-.welcome h2{font-family:var(--serif);font-weight:500;font-size:38px;letter-spacing:-.012em;line-height:1.02}
-.welcome p{font-size:14px;line-height:1.45;color:var(--soft)}
-.welcome .btn{height:48px;border-radius:24px;justify-content:center;font-size:14px}
-.welcome .w-note{font-size:12px;margin-top:6px}
-.demo-tag{position:absolute;left:14px;top:auto;bottom:calc(var(--plank) / 2 - 10px);z-index:3;display:none;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--olive-deep);background:var(--paper);border:1px solid var(--hair);border-radius:10px;padding:4px 8px;pointer-events:none}
-.is-demo .demo-tag{display:block}
-.info.none .notes,.info.none .meta,.info.none .reason{visibility:hidden}
-.notes.muted{color:var(--soft)}
-.reason{height:auto;min-height:17px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.notes{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.empty .eb{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--olive-deep)}
+.empty h2{font-family:var(--serif);font-weight:500;font-size:26px;letter-spacing:-.01em;line-height:1.08}
+.empty p{font-size:13px;line-height:1.4;color:var(--soft);max-width:280px}
+.empty .actions{flex-direction:column;align-items:stretch;width:100%;max-width:260px;gap:8px;margin-top:8px}
+.empty .btn{justify-content:center;height:44px;border-radius:22px}
+.lnk{height:40px;padding:0 10px;font-size:13px;font-weight:600;color:var(--olive-deep)}
+.stage.is-empty .stage-cap{opacity:0}
+.info.is-empty .actions,.info.is-empty .notes,.info.is-empty .impbtn{visibility:hidden}
+.impbtn{display:block;visibility:hidden;margin:4px auto 0;height:34px;padding:0 12px;font-size:12.5px;font-weight:600;color:var(--olive-deep);letter-spacing:.01em}
+.impbtn.on{visibility:visible}
+.eyebrow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.impbtn::after{content:" \203A"}
 .pickbtn[disabled]{opacity:.45;cursor:default}
-.stage.fan .stage-cap{pointer-events:auto;cursor:pointer}
-.stage.fan .stage-cap::after{content:" \203A"}
-.lnk{display:inline-block;min-height:36px;padding:8px 2px;font-size:12.5px;font-weight:600;color:var(--olive-deep);text-align:left}
-#impBtn{margin-top:2px;min-height:32px;padding:6px 4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#impBtn[hidden]{display:none}
-.phbox{display:flex;gap:12px;align-items:flex-start}
-.phprev{position:relative;flex:none;width:104px;height:118px;border-radius:10px;overflow:hidden;background:radial-gradient(90% 70% at 28% 18%,#FFFFFF 0%,#F7F3EA 52%,#ECE6D9 100%);border:1px solid var(--hair)}
-.phprev svg{position:absolute;inset:0;width:100%;height:100%}
-.phctl{flex:1;min-width:0}
-.phctl .btn{cursor:pointer}
-.phctl .fl{margin-top:8px}
-.rrow{display:flex;align-items:center;gap:8px}
-.rrow .prow{flex:1}
-.prow.chk i{font-size:13px;font-weight:600;color:var(--olive-deep);min-width:18px;text-align:right;font-variant-numeric:tabular-nums}
-.hb{display:flex;align-items:center;gap:2px}
-.hrow button.lnk{width:auto;height:44px;border-radius:0;padding:0 8px;font-size:12.5px;color:var(--olive-deep)}
-.hrow small{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ovbar .pickbtn{padding:0 15px}
+/* recent wears on the ownership record */
+.rec-tl{margin-top:calc(var(--u)*10px);border-top:1px solid var(--hair);padding-top:calc(var(--u)*7px)}
+.rec-tl h4{font-size:calc(var(--u)*8px);letter-spacing:.16em;text-transform:uppercase;color:var(--olive-deep);font-weight:600;margin-bottom:calc(var(--u)*3px)}
+.rec-tl li{list-style:none;display:flex;gap:calc(var(--u)*8px);font-size:calc(var(--u)*10px);line-height:1.35;padding:calc(var(--u)*2px) 0;white-space:nowrap}
+.rec-tl li b{flex:none;font-weight:500;font-variant-numeric:tabular-nums;width:calc(var(--u)*42px)}
+.rec-tl li span{min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--soft)}
+.back .rec-n{font-size:calc(var(--u)*12px)}
+.rec-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.back dl{margin-top:calc(var(--u)*9px)}
+.rec-edit{align-self:flex-end;height:calc(var(--u)*26px);margin:calc(var(--u)*4px) calc(var(--u)*-4px) calc(var(--u)*-6px) 0;padding:0 calc(var(--u)*4px);font-size:calc(var(--u)*10.5px);font-weight:600;color:var(--olive-deep)}
+/* search, in the all-shelves view */
+.ov-find{position:relative;padding:0 12px 10px}
+.ov-find .in{padding-left:38px}
+.ov-find svg{position:absolute;left:25px;top:13px;color:var(--soft);pointer-events:none}
+.over-scroll{height:calc(100% - 54px)}
+.hit{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:6px 12px 6px 6px;margin-bottom:8px;background:var(--paper);border:1px solid var(--hair);border-radius:14px}
+.hit .mb{width:34px;height:70px;margin:0}
+.hit span{min-width:0}
+.hit>span:last-child{flex:1 1 auto}
+.hit .mb{flex:none}
+#findIn::-webkit-search-cancel-button,#findIn::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
+.ov-find .in{padding-right:44px}
+.fx{position:absolute;right:14px;top:0;width:44px;height:44px;display:none;place-items:center;font-size:20px;line-height:1;color:var(--soft)}
+.fx.on{display:grid}
+.hit b{display:block;font-family:var(--serif);font-weight:500;font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hit small{display:block;font-size:11.5px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.hit small i{font-style:normal;letter-spacing:.12em;text-transform:uppercase;font-size:10px;font-weight:600;color:var(--olive-deep)}
+.hit mark{background:none;color:var(--ink);font-weight:700}
+.nohit{padding:18px 4px;font-family:var(--serif);font-style:italic;font-size:16px;color:var(--soft)}
+/* photo editor in the add and edit panel */
+.ph-ed{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start}
+.ph-frame{position:relative;width:120px;height:168px;border-radius:8px;overflow:hidden;touch-action:none;
+  background:radial-gradient(90% 70% at 28% 18%,#FFFFFF 0%,#F7F3EA 52%,#ECE6D9 100%);box-shadow:0 0 0 1px var(--hair)}
+.ph-frame::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12%;background:linear-gradient(180deg,rgba(37,35,31,.045),rgba(37,35,31,.085));border-top:1px solid rgba(37,35,31,.06);pointer-events:none}
+.ph-frame svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.ph-ctl .fl{margin-top:2px}
+.ph-ctl .range{height:28px}
+.ph-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ph-btns .btn{height:36px;padding:0 12px;font-size:12px}
+.vfile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.hrow .imp{display:block;font-size:12px;color:var(--soft);margin-top:2px;white-space:normal}
+.hrow .imp-b{width:auto;height:36px;border-radius:18px;padding:0 10px;font-size:12px;font-weight:600;color:var(--olive-deep)}
+.hrow>span{min-width:0;flex:1}
+.hrow .hb{display:flex;align-items:center;flex:none}
+.note-sm{font-size:12px;line-height:1.4;color:var(--soft);margin-top:10px}
+textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-height:1.35}
+.i-note{font-size:10.5px;color:#A4A596;margin-top:6px}
+@media (prefers-reduced-motion:reduce){.stage,.info,.over{transform:none!important}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;transition-delay:0s!important}
 }
@@ -435,7 +442,7 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
         <h1 id="title">Autumn shelf</h1>
       </div>
       <div class="hbtns">
-        <button class="glass round" id="shelvesBtn" aria-label="All shelves" aria-pressed="false">
+        <button class="glass round" id="shelvesBtn" aria-label="All shelves and search" aria-pressed="false">
           <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1.2"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1.2"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.2"/></svg>
         </button>
         <button class="glass round" id="addBtn" aria-label="Add a bottle">
@@ -448,10 +455,9 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
     </header>
 
     <main class="stage" id="stage" tabindex="0" aria-label="Fragrance shelf. Use arrow keys or swipe.">
-      <button class="stage-cap" id="cap" tabindex="-1"></button>
-      <div class="demo-tag" aria-hidden="true">Demo collection</div>
-      <div class="empty" id="empty"><div class="empty-in"><p class="e-eyebrow" id="eEye">This shelf</p><h2 id="eTitle">Nothing here yet</h2><p id="eSub">Add a bottle to this shelf. Everything stays on this device.</p><div class="e-btns"><button class="btn primary" id="eAdd">Add a bottle</button><button class="btn" id="eAll">See all shelves</button></div></div></div>
+      <div class="stage-cap" id="cap"></div>
       <div class="plank"></div>
+      <div class="empty" id="empty" role="region" aria-label="Empty cabinet"></div>
       <div class="a2hs" id="a2hs" role="note">
         <div><b>Install:</b> <span>tap Share, then Add to Home Screen</span></div>
         <button class="x" id="a2hsx" aria-label="Dismiss">&times;</button>
@@ -462,12 +468,12 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
       <p class="reason" id="reason"></p>
       <p class="notes" id="notes"></p>
       <p class="meta" id="meta"></p>
-      <button class="lnk" id="impBtn" hidden></button>
       <div class="actions">
         <button class="btn primary" id="wear"></button>
         <button class="btn" id="test"></button>
         <button class="btn icon" id="bMenu" aria-label="More for this bottle" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="4.5" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="15.5" cy="10" r="1.5"/></svg></button>
       </div>
+      <button class="impbtn" id="impBtn" aria-haspopup="dialog">Add how it wore</button>
     </section>
 
     <nav class="toolbar" id="toolbar" aria-label="Shelf controls">
@@ -483,15 +489,16 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
       </button>
     </nav>
 
-    <section class="welcome" id="welcome" aria-hidden="true" aria-labelledby="wT"><div class="w-in"><p class="w-eye">Arooma</p><h2 id="wT">Your cabinet</h2><p>Keep your own bottles on shelves, log what you wear, and remember how each one wore.</p><button class="btn primary" id="wStart">Start my collection</button><button class="btn" id="wDemo">Explore the demo</button><p class="w-note">Everything is saved on this device, in this browser. Nothing is uploaded. The demo uses fictional houses and is kept apart from your collection.</p></div></section>
-    <section class="over off" id="over" aria-label="All shelves" aria-hidden="true"><div class="over-scroll" id="overScroll"></div></section>
+    <section class="over off" id="over" aria-label="All shelves" aria-hidden="true">
+      <div class="ov-find"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>
+        <input class="in" id="findIn" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Find a fragrance or house" aria-label="Find a fragrance or house"><button class="fx" id="findX" aria-label="Clear the search">&times;</button></div>
+      <div class="over-scroll" id="overScroll"></div></section>
     <nav class="toolbar ovbar off" id="ovBar" aria-label="Shelf overview controls">
-      <button class="glass pickbtn" id="findBtn" aria-label="Find a bottle"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"/><path d="M10.5 10.5l3 3"/></svg>Find</button>
       <button class="glass pickbtn" id="addShelf" aria-label="Add a shelf">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 2.5v11M2.5 8h11"/></svg>
-        Add shelf
+        Add a shelf
       </button>
-      <button class="glass pickbtn" id="openShelf" aria-label="Open the shelf you were on">Open</button>
+      <button class="glass pickbtn" id="openShelf" aria-label="Open the shelf you were on">Open shelf</button>
     </nav>
   </div>
 
@@ -519,23 +526,25 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
   <div class="island" id="island" data-s="idle" aria-live="polite">
     <div class="i-c">
       <svg class="ring" viewBox="0 0 22 22"><circle class="bg" cx="11" cy="11" r="9"/><circle class="fg" cx="11" cy="11" r="9" stroke-dasharray="56.55" stroke-dashoffset="0"/></svg>
-      <span class="i-time">0:30</span>
+      <span class="i-time">0:00</span>
     </div>
     <div class="i-x">
       <div class="i-row">
         <svg class="ring big" viewBox="0 0 22 22"><circle class="bg" cx="11" cy="11" r="9"/><circle class="fg" cx="11" cy="11" r="9" stroke-dasharray="56.55" stroke-dashoffset="0"/></svg>
         <div class="i-lab"><small id="iPhase">Testing</small><strong id="iName">Fig Hour</strong></div>
-        <span class="i-big">0:30</span>
+        <span class="i-big">0:00</span>
       </div>
       <div class="i-prompt" id="iPrompt"></div>
       <div class="i-btns"><button class="ibtn" id="iEnd">End</button><button class="ibtn go" id="iLog">Log impression</button></div>
+      <div class="i-note">In-app timer. It runs while Arooma is open.</div>
     </div>
   </div>
 
   <div class="home"></div>
 </div>
-<input type="file" id="importFile" accept="application/json,.json" class="vh" tabindex="-1" aria-hidden="true">
 <label class="hx" id="hx" aria-hidden="true"><input type="checkbox" switch tabindex="-1"></label>
+<input class="vfile" id="importFile" type="file" accept="application/json,.json" tabindex="-1" aria-hidden="true">
+<input class="vfile" id="photoFile" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
 <div class="rotate" aria-hidden="true"><span>Arooma</span><b>Hold your iPhone upright</b></div>
 
 <script>
@@ -678,6 +687,32 @@ function bEarth(p,f){var body='M30 226 Q30 236 40 236 H100 Q110 236 110 226 V160
  +'<rect x="46" y="181" width="36" height="1.5" fill="#25231F" opacity=".7"/><rect x="46" y="188" width="22" height="1.5" fill="#25231F" opacity=".5"/>'
  +'<path d="M38 150 Q40 138 54 131" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" opacity=".28"/>'
  +sight(p,93,150,228,12,f,{frame:'#6A311C',glass:'#EEE2C8',liq:[[0,'#D9A55B'],[.5,'#B97B2E'],[1,'#7C4A14']],hl:'#FBE7C0'}))}
+
+/* 7. the owner's own photo of their own bottle. It stands in the same frame as the drawings: same table, same contact
+   shadow, same baseline (y 237), and the same soft key light from the left, laid over the photo's own shape. The image keeps
+   its aspect ratio ("meet", never stretched). x, y move it and s scales it about the base.
+   Like the opaque drawn vessels it carries a level window, so every bottle shows its liquid and it moves like the rest.
+   The window is placed from the photo's real outline (its aspect ratio, stored at import), sits in the lower body where
+   the liquid is, slides left or right with img.w, and moves and scales with the photo. Its liquid takes the colour sampled
+   from the photo, so an amber bottle holds amber. */
+function hexRgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function mixHex(h,t,a){var c=hexRgb(h),o=hexRgb(t);return '#'+c.map(function(v,i){return ('0'+Math.round(v+(o[i]-v)*a).toString(16)).slice(-2)}).join('')}
+var LIQ_DEFAULT='#C99A4E',HEAD=.92; /* a full bottle keeps a little air at the top of the window, as the drawings do, so its surface can move */
+function photoWin(img){
+  var ar=img.ar||.5,cw,ch;if(ar>96/203){cw=96;ch=96/ar}else{ch=203;cw=203*ar}
+  var x0=22+(96-cw)/2,top=237-ch,w=Math.max(8,Math.min(14,cw*.12)),y1=237-Math.max(4,ch*.07),y0=Math.min(top+ch*.42,y1-16);
+  return {x:n2(x0+(cw-w)*(img.w==null?.78:img.w)),y0:n2(Math.max(36,y0)),y1:n2(y1),w:n2(w)};
+}
+function photoArt(img){return function(p,f){
+  var t='translate('+n2(70+img.x)+' '+n2(237+img.y)+') scale('+img.s+') translate(-70 -237)',W=photoWin(img),c=img.c||LIQ_DEFAULT;
+  return wrap('<defs>'+sh(p+'s')+lg(p+'L',[[0,'#ffffff',.18],[.42,'#ffffff',0],[1,'#25231F',.08]])
+   +'<image id="'+p+'i" href="'+img.src+'" x="22" y="34" width="96" height="203" preserveAspectRatio="xMidYMax meet"/>'
+   +'<mask id="'+p+'m" maskUnits="userSpaceOnUse" x="0" y="0" width="140" height="260" style="mask-type:alpha"><use href="#'+p+'i" transform="'+t+'"/></mask></defs>'
+   +ground(p+'s')
+   +'<use class="ph" href="#'+p+'i" transform="'+t+'"/>'
+   +'<rect x="0" y="0" width="140" height="260" fill="url(#'+p+'L)" mask="url(#'+p+'m)"/>'
+   +'<g class="phw" transform="'+t+'">'+sight(p,W.x,W.y0,W.y1,W.w,f*HEAD,{frame:'#7C7F81',glass:'#E2E1DA',liq:[[0,mixHex(c,'#ffffff',.22)],[.5,c],[1,mixHex(c,'#000000',.38)]],hl:'#fff'})+'</g>');
+}}
 
 /* ---------- liquid physics ---------- */
 /* Every liquid is one path clipped to its vessel. At rest it is a flat surface at the true fill level, which is what the
@@ -849,61 +884,78 @@ function profileOf(text){
 function coolFrom(v){return v[2]+v[3]+v[4]+v[5]>=1.6}
 function overlap(a,b){var mn=0,mx=0;for(var i=0;i<8;i++){mn+=Math.min(a[i],b[i]);mx+=Math.max(a[i],b[i])}return mx?mn/mx:0}
 
-/* ---------- demo collection: every house is a fictional placeholder ---------- */
-/* Used only by the demo. It lives in its own saved slot and never mixes into the owner's collection. */
+/* sample collection: every house is a fictional placeholder */
 var SEED=[
  {id:'s0',shelf:'su',house:'Maison Aubrac',name:'Linen Rain',conc:'Eau de Toilette',ml:100,left:.78,notes:'Wet stone, white tea, clean linen',vessel:'clear',acq:540,first:531,last:41,wears:19,cool:false,note:'A summer bottle. Still the cleanest thing on the shelf.'},
- {id:'s1',shelf:'au',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.',imp:{p:'close',l:'long',o:'Smoky tea, very dry'}},
- {id:'s2',shelf:'au',house:'Hollis & Reed',name:'Fig Hour',conc:'Eau de Parfum',ml:75,left:.85,notes:'Fig leaf, cedar, warm milk',vessel:'green',acq:330,first:325,last:12,wears:31,cool:false,note:'From the market trip. Wear it with wool.',imp:{p:'moderate',l:'medium',o:'Green and milky',d:'Softer cedar after an hour'}},
- {id:'s3',shelf:'au',house:'Oru Studio',name:'Milk Paper',conc:'Eau de Parfum',ml:50,left:.7,notes:'Rice milk, white cedar, soft musk',vessel:'white',acq:95,first:90,last:6,wears:14,cool:false,note:'Quiet and close to the skin. The easiest decision.'},
+ {id:'s1',shelf:'au',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.'},
+ {id:'s2',shelf:'au',house:'Hollis & Reed',name:'Fig Hour',conc:'Eau de Parfum',ml:75,left:.85,notes:'Fig leaf, cedar, warm milk',vessel:'green',acq:330,first:325,last:12,wears:31,cool:false,note:'From the market trip. Wear it with wool.'},
+ {id:'s3',shelf:'sp',house:'Oru Studio',name:'Milk Paper',conc:'Eau de Parfum',ml:50,left:.7,notes:'Rice milk, white cedar, soft musk',vessel:'white',acq:95,first:90,last:6,wears:14,cool:false,note:'Quiet and close to the skin. The easiest decision.'},
  {id:'s4',shelf:'au',house:'Sable Lane',name:'Salt Cedar',conc:'Eau de Parfum',ml:50,left:.14,notes:'Cedar, sea salt, tobacco leaf',vessel:'amber',acq:610,first:600,last:3,wears:58,cool:true,note:'Nearly finished. Keep the box.'},
  {id:'s5',shelf:'au',house:'Kiln & Co.',name:'Smoke Orchard',conc:'Parfum',ml:50,left:.66,notes:'Orchard smoke, black pepper, amber',vessel:'smoke',acq:150,first:140,last:18,wears:12,cool:true,note:'Best in cold air and near a fire.'},
  {id:'s6',shelf:'au',house:'Terre Basse',name:'Dry Earth',conc:'Eau de Parfum',ml:100,left:.9,notes:'Warm clay, rain on dust, cork',vessel:'clay',acq:400,first:392,last:33,wears:22,cool:true,note:'Saved for slow weekends.'}
 ];
-var DEMO_ROTS=[{id:'r1',name:'Evenings',ids:['s1','s5','s6']},{id:'r2',name:'Five favorites',ids:['s0','s2','s3','s4','s6']}];
+/* the demo's saved rotation and a first impression on each sample's latest wear, so the demo shows the whole loop */
+var DEMO_ROT=['s1','s3','s5'];
+var SEED_IMP={s0:{o:'Cold and clean, like a window left open',p:1,l:1},s1:{o:'Smoky tea, then dry vetiver',p:2,l:3},s2:{o:'Green and milky',dv:'Softer and woodier after an hour',p:2,l:2},s3:{dv:'Sits close by lunch',p:1,l:2},s4:{o:'Salty cedar, very bright',p:3,l:3},s5:{o:'Pepper first',dv:'Warm amber by evening',p:2,l:3}};
 function seedLog(first,last,n){
   var out=[],seen={};
   for(var k=0;k<n;k++){var d=n>1?Math.round(last+(first-last)*k/(n-1)):last,s=agoStr(d);if(!seen[s]){seen[s]=1;out.push(s)}}
   return out;
 }
 function fromSeed(s){
-  var log=seedLog(s.first,s.last,s.wears),imp={};if(s.imp)imp[log[0]]=s.imp;
-  return {id:s.id,shelf:s.shelf,house:s.house,name:s.name,conc:s.conc,ml:s.ml,left:s.left,notes:s.notes,vessel:s.vessel,acq:agoStr(s.acq),log:log,imp:imp,auth:null,cool:s.cool,note:s.note,sample:true,photo:null};
+  var log=seedLog(s.first,s.last,s.wears),imp={};
+  if(SEED_IMP[s.id]&&log.length){var m=SEED_IMP[s.id];imp[log[0]]={o:m.o||'',dv:m.dv||'',p:m.p||0,l:m.l||0,at:log[0]}}
+  return {id:s.id,shelf:s.shelf,house:s.house,name:s.name,conc:s.conc,ml:s.ml,left:s.left,notes:s.notes,vessel:s.vessel,acq:agoStr(s.acq),log:log,imp:imp,auth:null,cool:s.cool,note:s.note,sample:true,img:null};
 }
 
-/* ---------- saved data: schema 3 ---------- */
-/* localStorage 'arooma.v1' holds {v:3, active:'own'|'demo'|null, own:{...}, demo:{...}}; each collection is
-   {shelves:[{id,name}], bottles:[...], rots:[{id,name,ids}], meta:{backupAt,changes}}. 'arooma.ui' holds the last
-   shelf, bottle, layout and rotation per collection, kept apart so a selection never rewrites photo data.
-   v1 and v2 saves migrate on load: the owner's bottles become their collection; sample bottles go to the demo. */
-var STORE_KEY='arooma.v1',UI_KEY='arooma.ui',SCHEMA=3,MAXN=150,MAXSH=12,MAXROT=12,ROTMAX=5;
+/* ---------- storage, schema v3 ----------
+   Your collection and the demo are kept apart, under different keys, so demo data never mixes into yours.
+     arooma.cabinet  your collection   {v:3, shelves, bottles, rot}
+     arooma.demo     the demo, only once you change it
+     arooma.prefs    {mode:'own'|'demo', backupAt}
+     arooma.v1       the v1 and v2 save. Migrated into arooma.cabinet once, then left untouched as a fallback copy.
+   What is saved is plain data. Drawing, scent profile and low stock are derived on load. */
+var SCHEMA=3,KEY_OWN='arooma.cabinet',KEY_DEMO='arooma.demo',KEY_PREFS='arooma.prefs',KEY_V1='arooma.v1';
 var DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
-var PHOTO_RE=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
-var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
-var PROJ={close:'Close to the skin',moderate:'Moderate',strong:'Strong'},LONGV={short:'Under 2 h',medium:'2 to 6 h',long:'All day'};
+var IMG_RE=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/,MAXIMG=600000;
+var MAXN=200,NAMEMAX=48;
 function str(v,d,max){return typeof v==='string'?v.slice(0,max):d}
-function cleanImp(x){
-  if(!x||typeof x!=='object')return null;
-  var o={o:str(x.o,'',60).trim(),d:str(x.d,'',60).trim(),p:PROJ[x.p]?x.p:'',l:LONGV[x.l]?x.l:'',n:str(x.n,'',140).trim()};
-  return (o.o||o.d||o.p||o.l||o.n)?o:null;
+function num(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d}
+function cleanImg(o){
+  if(!o||typeof o!=='object'||typeof o.src!=='string'||o.src.length>MAXIMG||!IMG_RE.test(o.src))return null;
+  return {src:o.src,x:Math.round(num(o.x,-40,40,0)*10)/10,y:Math.round(num(o.y,-60,40,0)*10)/10,s:Math.round(num(o.s,.5,2,1)*100)/100,
+    ar:Math.round(num(o.ar,.1,10,.5)*1000)/1000,c:typeof o.c==='string'&&/^#[0-9a-f]{6}$/i.test(o.c)?o.c.toLowerCase():LIQ_DEFAULT.toLowerCase(),w:Math.round(num(o.w,.05,.95,.78)*100)/100};
 }
-function cleanPhoto(p){
-  if(!p||typeof p!=='object'||typeof p.src!=='string'||p.src.length>600000||!PHOTO_RE.test(p.src))return null;
-  var n=function(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};
-  return {src:p.src,x:n(p.x,0,100,50),y:n(p.y,0,100,50),z:n(p.z,1,3,1)};
+function cleanImp(o,log){
+  var out={};if(!o||typeof o!=='object')return out;
+  log.forEach(function(d){
+    var m=o[d];if(!m||typeof m!=='object')return;
+    var r={o:str(m.o,'',100).trim(),dv:str(m.dv,'',100).trim(),p:Math.round(num(m.p,0,3,0)),l:Math.round(num(m.l,0,3,0)),at:DATE_RE.test(m.at)?m.at:d};
+    if(r.o||r.dv||r.p||r.l)out[d]=r;
+  });
+  return out;
 }
 function clean(s){
   if(!s||typeof s!=='object')return null;
-  var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),shelf:str(s.shelf,'',16).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',40).trim(),name:str(s.name,'',40).trim(),conc:str(s.conc,'Eau de Parfum',24),
-    ml:Math.max(1,Math.min(1000,Math.round(+s.ml)||50)),left:Math.max(0,Math.min(1,+s.left||0)),notes:str(s.notes,'',80),vessel:vessel(s.vessel).k,
-    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',80),sample:!!s.sample,photo:cleanPhoto(s.photo)};
+  var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),shelf:str(s.shelf,'',16).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',40).trim(),name:str(s.name,'',NAMEMAX).trim(),conc:str(s.conc,'Eau de Parfum',24),
+    ml:Math.max(1,Math.min(1000,Math.round(+s.ml)||50)),left:num(s.left,0,1,0),notes:str(s.notes,'',120),vessel:vessel(s.vessel).k,
+    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',120),sample:!!s.sample,img:cleanImg(s.img)};
   if(!b.id||!b.house||!b.name)return null;
   var seen={};(Array.isArray(s.log)?s.log:[]).forEach(function(d){if(typeof d==='string'&&DATE_RE.test(d)&&!seen[d]){seen[d]=1;b.log.push(d)}});
   b.log.sort().reverse();
-  if(s.imp&&typeof s.imp==='object')Object.keys(s.imp).forEach(function(d){if(seen[d]){var x=cleanImp(s.imp[d]);if(x)b.imp[d]=x}});
+  b.imp=cleanImp(s.imp,b.log);
   if(s.auth&&Array.isArray(s.auth.v)&&s.auth.v.length===5&&DATE_RE.test(s.auth.at))b.auth={v:s.auth.v.map(function(x){return x===1||x===2?x:0}),at:s.auth.at};
   return b;
 }
+function prep(b){
+  b.low=b.left<=.2;b.draw=b.img?photoArt(b.img):vessel(b.vessel).fn;b.dna=profileOf(b.notes).v;
+  b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
+  return b;
+}
+function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?{src:b.img.src,x:b.img.x,y:b.img.y,s:b.img.s,ar:b.img.ar,c:b.img.c,w:b.img.w}:null}}
+var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
+var MAXSH=12;
+function seasons(){return DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}})}
 function cleanShelves(a){
   var out=[],seen={};
   (Array.isArray(a)?a:[]).forEach(function(x){
@@ -913,131 +965,124 @@ function cleanShelves(a){
   });
   return out;
 }
-function cleanRots(a,ids){
-  var out=[],seen={};
-  (Array.isArray(a)?a:[]).forEach(function(r){
-    if(!r||typeof r!=='object'||out.length>=MAXROT)return;
-    var id=str(r.id,'',16).replace(/[^a-z0-9]/gi,''),name=str(r.name,'',28).trim(),m={};
-    var list=(Array.isArray(r.ids)?r.ids:[]).filter(function(x){if(typeof x!=='string'||!ids[x]||m[x])return false;m[x]=1;return true}).slice(0,ROTMAX);
-    if(id&&name&&!seen[id]){seen[id]=1;out.push({id:id,name:name,ids:list})}
-  });
-  return out;
-}
-function defShelves(){return DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}})}
-function emptyCol(){return {shelves:defShelves(),bottles:[],rots:[],meta:{backupAt:null,changes:0}}}
-function demoCol(){return {shelves:defShelves(),bottles:SEED.map(fromSeed),rots:DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}),meta:{backupAt:null,changes:0}}}
-/* returns a clean collection plus how many entries were dropped */
-function cleanCol(c){
-  if(!c||typeof c!=='object')return null;
-  var shelves=cleanShelves(c.shelves);if(!shelves.length)shelves=defShelves();
+/* Any saved or imported cabinet goes through here. v1 had no shelves (its bottles were shown on Autumn), v2 added shelves,
+   v3 adds impressions, photos and the saved rotation. Returns null when the data is not a cabinet at all. */
+function cleanState(s){
+  if(!s||typeof s!=='object'||!Array.isArray(s.bottles))return null;
+  var v=s.v===1||s.v===2||s.v===3?s.v:0;if(!v)return null;
+  var shelves=v>=2?cleanShelves(s.shelves):[];
+  if(!shelves.length)shelves=seasons();
+  var ids={},out=[];s.bottles.forEach(function(x){if(out.length>=MAXN)return;var b=clean(x);if(b&&!ids[b.id]){ids[b.id]=1;out.push(b)}});
+  if(v<3&&!out.length)return null; /* v1 and v2 never saved an empty cabinet, so an empty one is damage */
   var known={};shelves.forEach(function(h){known[h.id]=1});
-  var fallback=known.au?'au':shelves[0].id,ids={},out=[],raw=Array.isArray(c.bottles)?c.bottles:[];
-  raw.forEach(function(x){if(out.length>=MAXN)return;var b=clean(x);if(b&&!ids[b.id]){ids[b.id]=1;if(!known[b.shelf])b.shelf=fallback;out.push(b)}});
-  var m=c.meta&&typeof c.meta==='object'?c.meta:{};
-  return {shelves:shelves,bottles:out,rots:cleanRots(c.rots,ids),meta:{backupAt:DATE_RE.test(m.backupAt)?m.backupAt:null,changes:Math.max(0,Math.round(+m.changes)||0)},dropped:raw.length-out.length};
+  var fallback=known.au?'au':shelves[0].id;
+  out.forEach(function(b){if(!known[b.shelf])b.shelf=fallback});
+  var rot=(v===3?(Array.isArray(s.rot)?s.rot:[]):DEMO_ROT).filter(function(id,k,a){return typeof id==='string'&&ids[id]&&a.indexOf(id)===k}).slice(0,3);
+  return {shelves:shelves,bottles:out,rot:rot,skipped:s.bottles.length-out.length};
 }
-function loadDB(){
-  var db={active:null,own:null,demo:null};
-  try{
-    var raw=localStorage.getItem(STORE_KEY);if(!raw)return db;
-    var s=JSON.parse(raw);if(!s||typeof s!=='object')return db;
-    if(s.v===3){
-      db.own=cleanCol(s.own);db.demo=cleanCol(s.demo);
-      db.active=(s.active==='own'||s.active==='demo')&&(s.active==='own'||db.demo)?s.active:null;
-      if(db.active==='demo'&&!db.demo)db.active=null;
-    }else if((s.v===1||s.v===2)&&Array.isArray(s.bottles)){
-      var c=cleanCol({shelves:s.v===2?s.shelves:[],bottles:s.bottles,rots:[]});
-      if(c){
-        var mine=c.bottles.filter(function(b){return !b.sample});
-        if(mine.length){c.bottles=mine;db.own=c;db.active='own';db.migrated=1}
-        else if(c.bottles.length){var ids={};c.bottles.forEach(function(b){ids[b.id]=1});c.rots=cleanRots(DEMO_ROTS,ids);db.demo=c;db.active='demo';db.migrated=1}
-      }
-    }
-  }catch(e){}
-  return db;
+function readJSON(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null}catch(e){return null}}
+function emptyState(){return {shelves:seasons(),bottles:[],rot:[]}}
+function demoState(){return {shelves:seasons(),bottles:SEED.map(fromSeed),rot:DEMO_ROT.slice()}}
+function loadOwn(){return cleanState(readJSON(KEY_OWN))}
+function loadDemo(){return cleanState(readJSON(KEY_DEMO))||demoState()}
+var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null,remindAt:DATE_RE.test(p.remindAt)?p.remindAt:null}})();
+function savePrefs(){try{localStorage.setItem(KEY_PREFS,JSON.stringify(PREFS))}catch(e){}}
+/* A parallel build (main at 648a506, live for a few minutes on 2026-10-29) wrote its own v3 into arooma.v1:
+   {v:3, active, own:{shelves,bottles,rots,meta}, demo:{...}}. Its impressions used words (close, short) and its photos a
+   cover crop. This maps that shape onto ours so nothing saved there is lost; photo positions reset to the defaults. */
+function fromParallel(c){
+  if(!c||typeof c!=='object'||!Array.isArray(c.bottles))return null;
+  var P={close:1,moderate:2,strong:3},L={short:1,medium:2,long:3};
+  var bottles=c.bottles.map(function(b){
+    if(!b||typeof b!=='object')return b;
+    var o={};for(var k in b)o[k]=b[k];
+    var imp={};if(b.imp&&typeof b.imp==='object')Object.keys(b.imp).forEach(function(d){var m=b.imp[d]||{};imp[d]={o:m.o||'',dv:[m.d,m.n].filter(Boolean).join('. '),p:P[m.p]||0,l:L[m.l]||0,at:d}});
+    o.imp=imp;o.img=b.photo&&typeof b.photo.src==='string'?{src:b.photo.src,x:0,y:0,s:1}:null;delete o.photo;
+    return o;
+  });
+  var r=Array.isArray(c.rots)&&c.rots[0]&&Array.isArray(c.rots[0].ids)?c.rots[0].ids.slice(0,3):[];
+  return cleanState({v:3,shelves:c.shelves,bottles:bottles,rot:r});
 }
-var DB=loadDB(),SHELVES=defShelves(),BOTTLES=[],ROTS=[],META={backupAt:null,changes:0},N=0;
-function snapshot(){return {shelves:SHELVES.map(function(h){return {id:h.id,name:h.name}}),bottles:BOTTLES.map(plain),rots:ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}),meta:{backupAt:META.backupAt,changes:META.changes}}}
-function writeDB(){
-  if(!DB.active)return true;
-  DB[DB.active]=snapshot();
-  try{localStorage.setItem(STORE_KEY,JSON.stringify({v:SCHEMA,active:DB.active,own:DB.own,demo:DB.demo}));return true}
-  catch(e){toast('This browser is out of storage. Remove a photo, or back up and clear.');return false}
-}
-function saveState(){META.changes=(META.changes||0)+1;return writeDB()}
-function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,photo:b.photo}}
-function prep(b){
-  b.low=b.left<=.2;b.draw=vessel(b.vessel).fn;b.dna=profileOf(b.notes).v;
-  b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
-  if(!b.imp)b.imp={};
-  return b;
+/* migration from v1 and v2 (and the parallel v3): one way, once, and the old key is never deleted */
+(function migrate(){
+  if(readJSON(KEY_OWN))return;
+  var raw=readJSON(KEY_V1);
+  if(raw&&raw.v===3&&(raw.own||raw.demo)){
+    var o=fromParallel(raw.own),d=fromParallel(raw.demo);
+    try{
+      if(o)localStorage.setItem(KEY_OWN,JSON.stringify({v:SCHEMA,shelves:o.shelves,bottles:o.bottles,rot:o.rot}));
+      if(d&&!readJSON(KEY_DEMO))localStorage.setItem(KEY_DEMO,JSON.stringify({v:SCHEMA,shelves:d.shelves,bottles:d.bottles,rot:d.rot}));
+    }catch(e){return}
+    var bk=raw.own&&raw.own.meta&&DATE_RE.test(raw.own.meta.backupAt)?raw.own.meta.backupAt:null;
+    if(!PREFS.mode&&(raw.active==='own'||raw.active==='demo'))PREFS.mode=raw.active==='own'&&!o?null:raw.active;
+    if(bk&&!PREFS.backupAt)PREFS.backupAt=bk;
+    savePrefs();return;
+  }
+  var old=cleanState(raw);if(!old)return;
+  try{localStorage.setItem(KEY_OWN,JSON.stringify({v:SCHEMA,shelves:old.shelves,bottles:old.bottles,rot:old.rot}))}catch(e){return}
+  if(!PREFS.mode){PREFS.mode='own';savePrefs()}
+})();
+var MODE=PREFS.mode;
+var START=MODE==='demo'?loadDemo():MODE==='own'?(loadOwn()||emptyState()):emptyState();
+var SHELVES=START.shelves, BOTTLES=START.bottles.map(prep), ROT=START.rot;
+function stateNow(){return {v:SCHEMA,shelves:SHELVES.map(function(h){return {id:h.id,name:h.name}}),bottles:BOTTLES.map(plain),rot:ROT.slice()}}
+var saveWarned=false,persistAsked=false;
+/* Ask once per session for persistent storage, so the browser is less likely to evict the collection. No prompt on iOS. */
+function askPersist(){if(persistAsked||MODE!=='own')return;persistAsked=true;try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){})}catch(e){}}
+/* Returns false when the browser refuses (usually storage is full, often from photos). Says so once, never silently. */
+function saveState(){
+  if(!MODE)return true;
+  try{localStorage.setItem(MODE==='demo'?KEY_DEMO:KEY_OWN,JSON.stringify(stateNow()));saveWarned=false;askPersist();return true}
+  catch(e){if(!saveWarned){saveWarned=true;setTimeout(function(){toast('Could not save on this device. Storage may be full. Export a backup.')},0)}return false}
 }
 function shelfById(id){for(var i=0;i<SHELVES.length;i++)if(SHELVES[i].id===id)return SHELVES[i];return null}
 function shelfName(id){var h=shelfById(id);return h?h.name:'Shelf'}
+var N=BOTTLES.length;
 function idxOfId(id){for(var i=0;i<BOTTLES.length;i++)if(BOTTLES[i].id===id)return i;return -1}
-function loadUI(){try{var u=JSON.parse(localStorage.getItem(UI_KEY)||'{}');return u&&typeof u==='object'?u:{}}catch(e){return {}}}
-function saveUI(){
-  if(!DB.active)return;
-  var u=loadUI();u[DB.active]={sel:sel>=0&&BOTTLES[sel]?BOTTLES[sel].id:null,shelf:curShelf,mode:mode,rot:rotId};
-  try{localStorage.setItem(UI_KEY,JSON.stringify(u))}catch(e){}
-}
-function uid(p){return p+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36)}
+/* the saved rotation, up to three bottles. Fan shows it; it is not another view of everything. */
+function ROTI(){var out=[];ROT.forEach(function(id){var k=idxOfId(id);if(k>-1)out.push(k)});return out.slice(0,3)}
+function inRot(b){return ROT.indexOf(b.id)>-1}
 
-/* ---------- wear and impressions: the log is a list of dates, newest first; impressions are keyed by date ---------- */
+/* wear tracking: the log is a list of dates, newest first. An impression belongs to one wear, keyed by its date. */
 function lastDays(b){return b.log.length?daysSince(b.log[0]):null}
 function wornToday(b){return b.log.length>0&&b.log[0]===todayStr()}
 function addWear(b,date){if(b.log.indexOf(date)>-1)return false;b.log.push(date);b.log.sort().reverse();return true}
-function removeWear(b,date){var i=b.log.indexOf(date),x=b.imp[date]||null;if(i>-1)b.log.splice(i,1);delete b.imp[date];return x}
-function lastImp(b){for(var i=0;i<b.log.length;i++)if(b.imp[b.log[i]])return b.imp[b.log[i]];return null}
-function impSummary(x){
-  if(!x)return '';
-  var a=[];if(x.p)a.push(PROJ[x.p]);if(x.l)a.push(LONGV[x.l]);if(x.o)a.push(x.o);if(!a.length&&x.d)a.push(x.d);if(!a.length&&x.n)a.push(x.n);
-  return a.join(' · ');
+function removeWear(b,date){var i=b.log.indexOf(date);if(i>-1)b.log.splice(i,1);var m=b.imp[date];delete b.imp[date];return m||null}
+var PROJ=['','Close to the skin','Moderate','Strong'],LONG=['','Under 3 h','3 to 6 h','Over 6 h'];
+function impText(m){
+  if(!m)return '';
+  var a=[];if(m.p)a.push(PROJ[m.p]);if(m.l)a.push(LONG[m.l]);
+  var t=a.join(', '),w=[m.o,m.dv].filter(Boolean).join('. ');
+  return t&&w?t+'. '+w:t||w;
 }
+function lastImp(b){for(var i=0;i<b.log.length;i++)if(b.imp[b.log[i]])return {d:b.log[i],m:b.imp[b.log[i]]};return null}
 function authText(b){
-  if(!b.auth)return 'Not noted';
+  if(!b.auth)return 'Not checked';
   var checked=0,good=0;b.auth.v.forEach(function(x){if(x){checked++;if(x===1)good++}});
-  return checked?good+' of '+checked+' consistent, '+fmtShort(b.auth.at):'Not noted';
+  return checked?good+' of '+checked+' consistent, '+fmtShort(b.auth.at):'Not checked';
 }
+
 var LEAN=[-1.8,1.4,-.8,1.9,-1.4,.9,-1.1];
 
 /* ---------- state ---------- */
 var stage=$('#stage'), G={cw:216,ch:310};
-var sel=-1, mode='flow', rotId=null, pickIdx=null, pickPtr=-1, introDone=false;
-/* curShelf is the shelf in view. VIEW lists its bottles (indexes into BOTTLES), VPOS maps an index to its place on the shelf.
-   ORD is what the current layout shows: the shelf (Cover Flow), today's shortlist (Stack) or the saved rotation (Fan).
-   When a bottle is selected, its shelf is in view, so selection survives every layout and every zoom. */
-var curShelf='au', VIEW=[], VPOS=[], ORD=[], OPOS=[], shelfLast={};
-function activeRot(){for(var i=0;i<ROTS.length;i++)if(ROTS[i].id===rotId)return ROTS[i];return ROTS[0]||null}
-function rotIdx(r){var out=[];(r?r.ids:[]).forEach(function(id){var k=idxOfId(id);if(k>-1)out.push(k)});return out}
-function rankShelf(){
-  return VIEW.map(function(i){var b=BOTTLES[i],d=lastDays(b);return {i:i,s:(d===null?400:d)+(b.cool?20:0)-(b.low?1000:0)-(wornToday(b)?2000:0)}})
-    .sort(function(a,b){return b.s-a.s}).map(function(x){return x.i});
-}
-function orderFor(m){
-  if(m==='stack'){var r=rankShelf().slice(0,5);if(sel>=0&&VPOS[sel]>=0&&r.indexOf(sel)<0)r.unshift(sel);return r}
-  if(m==='fan'){var f=rotIdx(activeRot());if(sel>=0&&f.indexOf(sel)<0)f.push(sel);return f}
-  return VIEW.slice();
-}
+function startSel(){if(!N)return -1;var k=idxOfId('s2');return k>-1?k:0}
+var sel=startSel();
+var mode='flow', pickIdx=null, pickPtr=-1, introDone=false;
+/* One shelf is in view at a time. VIEW lists its bottles (indexes into BOTTLES) and VPOS maps an index to its place
+   on the shelf, or -1. The selected bottle decides which shelf is in view, so selection survives every change. */
+var curShelf=sel>-1?BOTTLES[sel].shelf:SHELVES[0].id, VIEW=[], VPOS=[], shelfLast={};
 function refreshView(){
-  if(sel>=N)sel=N-1;
-  if(sel>=0)curShelf=BOTTLES[sel].shelf;
-  if(!shelfById(curShelf))curShelf=SHELVES[0].id;
-  VIEW=[];VPOS=[];
-  for(var i=0;i<N;i++){if(BOTTLES[i].shelf===curShelf){VPOS[i]=VIEW.length;VIEW.push(i)}else VPOS[i]=-1}
-  if(sel>=0)shelfLast[curShelf]=BOTTLES[sel].id;
-  ORD=orderFor(mode);OPOS=[];for(var k=0;k<N;k++)OPOS[k]=-1;ORD.forEach(function(i,p){OPOS[i]=p});
+  var prev=curShelf;
+  if(sel>-1&&BOTTLES[sel])curShelf=BOTTLES[sel].shelf;else if(!shelfById(curShelf))curShelf=SHELVES[0].id;
+  VIEW=[];VPOS=new Array(BOTTLES.length);
+  BOTTLES.forEach(function(b,i){if(b.shelf===curShelf){VPOS[i]=VIEW.length;VIEW.push(i)}else VPOS[i]=-1});
+  if(sel>-1)shelfLast[curShelf]=BOTTLES[sel].id;
+  return prev!==curShelf;
 }
 function shareDirty(){edBuilt=false;shelfBlob=null;shelfPromise=null;shelfRev++}
-function setTitle(){var t=$('#title');if(t){var v=(typeof Z!=='undefined'&&Z>.5)?'All shelves':shelfName(curShelf);if(t.textContent!==v)t.textContent=v}}
-function syncShelf(){var prev=curShelf;refreshView();if(prev!==curShelf)shareDirty();setTitle();return prev!==curShelf}
-/* show a shelf even when it is empty */
-function showShelf(id){
-  if(!shelfById(id))return;
-  slots.forEach(unflip);
-  var k=pickInShelf(id);sel=k;if(k<0)curShelf=id;
-  syncShelf();render();updateInfo();saveUI();
-}
+function setTitle(){var t=$('#title');if(t){var v=(typeof Z!=='undefined'&&Z>.5)?'All shelves':N?shelfName(curShelf):'Your cabinet';if(t.textContent!==v)t.textContent=v}}
+function syncShelf(){var moved=refreshView();if(moved)shareDirty();setTitle();return moved}
 var slots=[], infoTok=0, settleTimer=null;
 
 var touched=false;
@@ -1065,56 +1110,41 @@ function toast(msg,act){
     var a=$('.info .actions'),d=$('#device'),ar=a.getBoundingClientRect(),dr=d.getBoundingClientRect(),sc=dr.width/d.offsetWidth||1;
     t.style.setProperty('--tb',Math.max(70,Math.round((dr.bottom-ar.top)/sc+8))+'px');
   }catch(e){}
-  t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on')},act?6000:2600);
+  t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on')},act?6000:2300);
 }
 
-/* ---------- bottle art: the owner's photo when there is one, else the neutral drawn vessel ---------- */
-function photoHtml(ph){return '<span class="pimg"><img src="'+ph.src+'" alt="" draggable="false" style="object-position:'+ph.x+'% '+ph.y+'%;transform:scale('+ph.z+');transform-origin:'+ph.x+'% '+ph.y+'%"></span>'}
-function art(b,p){return b.photo?photoHtml(b.photo):b.draw(p,b.left)}
-var PEN='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 3.8l3 3L7.4 15.6l-3.9.9.9-3.9z"/><path d="M11.6 5.4l3 3"/></svg>';
-
 /* ---------- build cards ---------- */
-function pctLeft(b){return Math.round(b.left*100)}
-function remainText(b){return b.low?'about '+Math.round(b.left*b.ml)+' ml':pctLeft(b)+'%'}
 function recordRows(b){
-  return [['Acquired',fmtDate(b.acq)],['Size',b.ml+' ml'],['Estimated remaining',remainText(b)],['Wears logged',b.log.length],['Authenticity notes',authText(b)]];
+  return [['Acquired',fmtDate(b.acq)],['Size',b.ml+' ml'],['Wears logged',b.log.length],
+    ['Estimated remaining',b.low?'about '+Math.round(b.left*b.ml)+' ml':'about '+Math.round(b.left*100)+'%'],['Your checks',authText(b)]];
+}
+/* the short timeline on the record: the three latest wears and what was noted about each */
+function timelineHtml(b){
+  if(!b.log.length)return '<li><span>Not worn yet. Wear today logs the first one.</span></li>';
+  return b.log.slice(0,3).map(function(d){var t=impText(b.imp[d]);return '<li><b>'+fmtShort(d)+'</b><span>'+(t?esc(t):'No impression noted')+'</span></li>'}).join('');
 }
 function fillRecord(el,b){
   $('.rec-dl',el).innerHTML=recordRows(b).map(function(r){return '<dt>'+r[0]+'</dt><dd>'+esc(r[1])+'</dd>'}).join('');
-  var recent=b.log.slice(0,3).map(function(d){var x=b.imp[d];return '<li><span>'+fmtShort(d)+'</span><em>'+(x?esc(impSummary(x)):'No impression')+'</em></li>'}).join('');
-  $('.rec-tl',el).innerHTML='<b>Recent wears</b>'+(recent?'<ul>'+recent+'</ul>':'<p>Not worn yet</p>');
+  $('.rec-tl ul',el).innerHTML=timelineHtml(b);
   $('.rec-n',el).innerHTML='&ldquo;'+esc(b.note||'Added to the cabinet.')+'&rdquo;';
 }
 function buildSlot(b,i){
   var el=document.createElement('div');
-  el.className='slot'+(b.photo?' has-photo':'');el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
-  el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':''));
-  var lowHtml=b.low?'<div class="low">Running low<i><b style="width:'+pctLeft(b)+'%"></b></i></div>':'';
+  el.className='slot';el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
+  el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':'')+(b.sample&&MODE==='own'?', sample bottle':''));
+  var lowHtml=b.low?'<div class="low">Running low<i><b style="width:'+Math.round(b.left*100)+'%"></b></i></div>':'';
   el.innerHTML='<div class="card-inner">'
-   +'<div class="face front"><div class="photo"><span class="num">N&deg; 01</span>'+art(b,'c'+b.id)
-   +'<button class="cpen" tabindex="-1" aria-label="Edit '+esc(b.name)+'"><i>'+PEN+'</i></button></div>'
-   +'<div class="capn"><div class="cap-t"><div class="house">'+esc(b.house)+'</div><div class="nm">'+esc(b.name)+'</div><div class="spec">'+esc(b.conc)+' &middot; '+b.ml+' ml</div></div>'+lowHtml+'</div><div class="shade"></div></div>'
-   +'<div class="face back"><div class="rec-h"><span>Ownership record</span><span class="rec-no">N&deg; 01</span></div>'
+   +'<div class="face front"><div class="photo"><span class="num">N&deg; '+pad(i+1)+'</span>'+b.draw('c'+b.id,b.left)+'</div>'
+   +'<div class="capn"><div><div class="house">'+esc(b.house)+'</div><div class="nm">'+esc(b.name)+'</div><div class="spec">'+esc(b.conc)+' &middot; '+b.ml+' ml</div></div>'+lowHtml+'</div><div class="shade"></div></div>'
+   +'<div class="face back"><div class="rec-h"><span>Ownership record</span><span class="rec-no">N&deg; '+pad(i+1)+'</span></div>'
    +'<div class="rec-t">'+esc(b.name)+'</div><div class="rec-s">'+esc(b.house)+'</div>'
-   +'<dl class="rec-dl"></dl><div class="rec-tl"></div><div class="rec-n"></div></div></div>'
+   +'<dl class="rec-dl"></dl><div class="rec-tl"><h4>Recent wears</h4><ul></ul></div><div class="rec-n"></div><button class="rec-edit" tabindex="-1">Edit details</button></div></div>'
    +'<div class="tab">Today&rsquo;s pick</div>';
   fillRecord(el,b);LQ.regSlot(el);
   return el;
 }
-/* swap a card for a freshly built one in place, keeping its position so nothing jumps */
-function replaceSlot(i){
-  var old=slots[i],el=buildSlot(BOTTLES[i],i);
-  el.style.cssText=old.style.cssText;el._k=old._k;
-  LQ.dropSlot(old);stage.replaceChild(el,old);slots[i]=el;
-  return el;
-}
-/* move bottle from index a to index b in BOTTLES and slots together */
-function moveIndex(a,b){
-  if(a===b)return;
-  var x=BOTTLES.splice(a,1)[0],s=slots.splice(a,1)[0];
-  BOTTLES.splice(b,0,x);slots.splice(b,0,s);
-}
-function lastOfShelf(id){var k=-1;for(var i=0;i<N;i++)if(BOTTLES[i].shelf===id)k=i;return k}
+BOTTLES.forEach(function(b,i){var el=buildSlot(b,i);stage.appendChild(el);slots.push(el)});
+renumber();refreshView();
 
 /* ---------- geometry ---------- */
 function geo(){
@@ -1129,7 +1159,7 @@ function geo(){
 
 /* ---------- layouts: one DOM, three arrangements, same transform grammar ---------- */
 function place(i,pos){
-  var W=G.cw,H=G.ch,v=OPOS[i],d=v-pos,ad=Math.abs(d),s=d<0?-1:1;
+  var W=G.cw,H=G.ch,v=VPOS[i],d=v-pos,ad=Math.abs(d),s=d<0?-1:1;
   var o={x:0,y:0,z:0,ry:0,p:0,rz:0,s:1,op:1,shade:0,zi:10};
   if(!introDone||v<0){o.y=H*.16;o.z=-60;o.s=.96;o.op=0;o.shade=.2;o.zi=v<0?5:10-Math.round(ad);return o}
   if(mode==='flow'){
@@ -1150,45 +1180,38 @@ function place(i,pos){
   if(i===pickIdx&&i===sel&&mode!=='fan'){o.y-=H*.025;o.z+=24;o.s*=1.02}
   return o;
 }
-/* Fan: the saved rotation (up to five) opens into an arc around the selected bottle */
+/* Fan presents the saved rotation (up to three). A selected bottle that is not in it visits in front, labelled, so the
+   selection still survives the layout change; it does not join the rotation unless the owner adds it. */
+function fanSet(){var r=ROTI();if(sel<0)return r;return r.indexOf(sel)>-1?r:[sel].concat(r.slice(0,2))}
+function rightOf(){var set=fanSet(),k=set.indexOf(sel);return set.length<2?sel:set[(k+1)%set.length]}
+function leftOf(){var set=fanSet(),k=set.indexOf(sel);return set.length<2?sel:set[(k+set.length-1)%set.length]}
 function fanPlace(i){
-  var W=G.cw,H=G.ch,k=ORD.length,v=OPOS[i];
-  if(v<0||sel<0)return {x:0,y:H*.16,z:-90,ry:0,p:0,rz:0,s:.9,op:0,shade:.2,zi:5};
-  var off=v-OPOS[sel];if(off>k/2)off-=k;if(off<-k/2)off+=k;
-  var a=Math.abs(off),deg=k<=3?14:11;
-  return {x:off*W*.035,y:a*H*.03-(off===0?H*.02:0),z:off===0?40:-a*8,ry:0,p:H*.85,rz:off*deg,s:off===0?1:.92-(a-1)*.04,op:1,shade:off===0?0:.06*a,zi:120-a*10-(off<0?5:0)};
+  var W=G.cw,H=G.ch,set=fanSet(),k=set.indexOf(i);
+  if(k<0)return {x:0,y:H*.16,z:-90,ry:0,p:0,rz:0,s:.9,op:0,shade:.2,zi:5};
+  var sp=i===sel?0:(i===rightOf()?1:-1);
+  if(set.length===2&&i!==sel)sp=1;
+  return {x:sp*W*.03,y:Math.abs(sp)*H*.03-(sp===0?H*.02:0),z:sp===0?40:0,ry:0,p:H*.85,rz:sp*14,s:sp===0?1:.9,op:1,shade:sp===0?0:.07,zi:sp===0?120:(sp===1?110:100)};
 }
 function render(pos){
-  if(pos==null)pos=OPOS[sel]>=0?OPOS[sel]:0;
+  if(pos==null)pos=sel>-1?VPOS[sel]:0;
   var live=stage.classList.contains('dragging');
   slots.forEach(function(el,i){
     var o=(mode==='fan'&&introDone)?fanPlace(i):place(i,pos);
     el.style.transform='translate3d('+o.x.toFixed(1)+'px,'+o.y.toFixed(1)+'px,'+o.z.toFixed(1)+'px) rotateY('+o.ry.toFixed(1)+'deg) translateY('+o.p.toFixed(1)+'px) rotateZ('+o.rz.toFixed(2)+'deg) translateY('+(-o.p).toFixed(1)+'px) scale('+o.s.toFixed(3)+')';
     el.style.opacity=o.op;el.style.zIndex=o.zi;el.style.setProperty('--shade',o.shade);
     el.style.pointerEvents=o.op<.2?'none':'auto';
-    /* cards that are fully away are hidden after they fade, so a 150-bottle cabinet stays light */
-    if(o.op===0){if(!el._hid){el._hid=true;clearTimeout(el._ht);el._ht=setTimeout(function(){if(el._hid)el.style.visibility='hidden'},700)}}
-    else{el._hid=false;clearTimeout(el._ht);el.style.visibility=''}
-    el.tabIndex=i===sel?0:-1;el.classList.toggle('is-sel',i===sel);
+    el.tabIndex=i===sel?0:-1;
     LQ.move(el,o,live);
   });
-  stage.classList.toggle('fan',mode==='fan');
-  var em=$('#empty'),on=introDone&&sel<0&&!!DB.active;
-  if(em){em.classList.toggle('on',on);if(on){var first=N===0;$('#eEye').textContent=first?'Your collection':shelfName(curShelf);$('#eTitle').textContent=first?'Your cabinet is empty':'Nothing on this shelf yet';
-    $('#eSub').textContent=first?'Add your first bottle, with your own photo if you like. Everything stays on this device.':'Add a bottle here, or move one from another shelf.';$('#eAll').textContent=first?'Explore the demo':'See all shelves'}}
   capUpdate();
 }
 function capUpdate(){
-  var c=$('#cap'),t='';
-  if(sel>=0){
-    var V=ORD.length,p=pad(OPOS[sel]+1);
-    if(mode==='flow')t=p+' / '+pad(V);
-    else if(mode==='stack')t='Shortlist for today · '+p+' of '+pad(V);
-    else{var r=activeRot(),guest=r&&r.ids.indexOf(BOTTLES[sel].id)<0;t=(r?r.name:'Rotation')+' · '+(guest?'with a guest':p+' of '+pad(V))}
+  var c=$('#cap'),V=VIEW.length,t='';
+  if(sel>-1){
+    var p=pad(VPOS[sel]+1),r=ROTI();
+    t=mode==='flow'?p+' / '+pad(V):mode==='stack'?'Shortlist · '+p+' of '+pad(V):(r.indexOf(sel)>-1?'Your rotation · '+r.length+(r.length===1?' bottle':' bottles'):'Visiting · not in your rotation');
   }
   if(c.textContent!==t){c.textContent=t}
-  c.setAttribute('aria-label',mode==='fan'?'Rotation: '+t+'. Choose a rotation':t);
-  c.tabIndex=mode==='fan'?0:-1;
 }
 
 /* ---------- selection ---------- */
@@ -1202,80 +1225,87 @@ function settleFx(){
   },560);
 }
 function select(i){
-  if(!N||i==null||i<0)return;
+  if(!N)return;
   i=clamp(i,0,N-1);
   if(i===sel){render();return}
-  slots.forEach(unflip);
-  sel=i;syncShelf();render();updateInfo();settleFx();saveUI();
+  slots.forEach(function(el){el.classList.remove('flipped')});
+  sel=i;syncShelf();render();updateInfo();settleFx();
 }
-function flip(){if(sel>=0)slots[sel].classList.toggle('flipped')}
-function stepFan(dir){var k=ORD.length;if(k<2)return;select(ORD[(OPOS[sel]+dir+k)%k])}
-function setModeButtons(){
-  $$('#seg button').forEach(function(b,k){var on=b.dataset.mode===mode;b.setAttribute('aria-pressed',on);if(on)$('#seg').dataset.i=k});
-}
+function flip(){if(sel<0)return;slots[sel].classList.toggle('flipped');haptic('settle')}
+function stepFan(dir){select(dir>0?rightOf():leftOf())}
 function setMode(m){
-  if(m==='fan'&&!activeRot()){openRotations(true);return}
-  if(m===mode)return;mode=m;
-  slots.forEach(unflip);setModeButtons();refreshView();render();settleFx();saveUI();
+  if(m===mode||!N)return;mode=m;
+  slots.forEach(function(el){el.classList.remove('flipped')});
+  $$('#seg button').forEach(function(b,k){var on=b.dataset.mode===m;b.setAttribute('aria-pressed',on);if(on)$('#seg').dataset.i=k});
+  shareDirty();render();updateInfo();settleFx();
 }
 
 /* ---------- info block ---------- */
+/* The reason line only cites what the log and the owner's own notes say. */
 function reasonText(b){
-  var d=lastDays(b),t,x=lastImp(b);
-  if(d===null)t='Not worn since you added it.';
+  var d=lastDays(b),t;
+  if(d===null)t='Not worn yet.';
   else if(d===0)t='Worn today.';
   else if(d===1)t='Last worn yesterday.';
-  else if(d<14)t='Last worn '+d+' days ago.';
-  else t='You haven’t worn this in '+Math.round(d/7)+' weeks.';
-  if(x&&x.l)return t+' Last time you noted: '+LONGV[x.l].toLowerCase()+'.';
+  else if(d>=21)t='You haven’t worn this in a while: '+d+' days.';
+  else t='Last worn '+d+' days ago.';
+  var li=lastImp(b);
+  if(li&&li.m.l)t+=' Last time you noted '+LONG[li.m.l].toLowerCase().replace(' h',' hours')+'.';
   return t+' '+b.fit;
 }
 function updateInfo(){
   var info=$('#info'),tok=++infoTok;info.classList.add('swap');
   setTimeout(function(){
     if(tok!==infoTok)return;
-    var has=sel>=0&&!!BOTTLES[sel],w=$('#wear'),ib=$('#impBtn');
-    info.classList.toggle('none',!has);
-    ['#wear','#test','#bMenu'].forEach(function(q){$(q).disabled=!has||(q==='#test'&&!!test)});
-    $('#pick').disabled=!VIEW.length;
-    if(!has){$('#reason').textContent='';$('#notes').textContent='';$('#meta').textContent='';ib.hidden=true;w.classList.remove('done');w.textContent='Wear today';info.classList.remove('swap');return}
-    var b=BOTTLES[sel];
-    $('#reason').textContent=sel===pickIdx?'Today’s pick. '+reasonText(b):'';
-    var nt=$('#notes');nt.textContent=b.notes||'No notes yet';nt.classList.toggle('muted',!b.notes);
+    var b=BOTTLES[sel],w=$('#wear'),ib=$('#impBtn');
+    info.classList.toggle('is-empty',!b);
+    if(!b){$('#reason').textContent='';$('#notes').textContent='';$('#meta').textContent='';ib.classList.remove('on');info.classList.remove('swap');return}
+    var guest=mode==='fan'&&ROTI().indexOf(sel)<0;
+    $('#reason').textContent=sel===pickIdx?'Today’s pick. '+reasonText(b):guest?'Not in your rotation. Add it from More.':'';
+    $('#notes').textContent=b.notes;
     var ld=lastDays(b),lastTxt=ld===null?'Not worn yet':ld===0?'Worn today':'Last worn '+agoText(ld);
-    var left=b.low?'<span class="lw">Running low, about '+Math.round(b.left*b.ml)+' ml (estimated)</span>':'Estimated '+pctLeft(b)+'% left';
+    var left=b.low?'<span class="lw">Running low, about '+Math.round(b.left*b.ml)+' ml (estimate)</span>':'Estimated remaining: about '+Math.round(b.left*100)+'%';
     $('#meta').innerHTML=lastTxt+' &middot; '+left;
-    var today=wornToday(b),x=today?b.imp[todayStr()]:null;
-    ib.hidden=!today;ib.textContent=x?'Today: '+impSummary(x)+'. Edit':'Add how it wore today';
-    w.classList.toggle('done',today);
-    if(today){w.disabled=true;w.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.5"/></svg>Worn today'}
+    w.classList.toggle('done',wornToday(b));
+    if(wornToday(b)){w.disabled=true;w.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.5"/></svg>Worn today'}
     else{w.disabled=false;w.textContent='Wear today'}
+    ib.classList.toggle('on',wornToday(b));
+    ib.textContent=wornToday(b)&&b.imp[todayStr()]?'Edit today’s impression':'Add how it wore';
     info.classList.remove('swap');
   },130);
 }
+function updateTestBtn(){
+  var t=$('#test');
+  if(test){t.disabled=true;t.innerHTML='Testing…'}
+  else{t.disabled=!N;t.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.5h6v8.5L7 12.5 4 10z"/></svg>Test'}
+  t.setAttribute('aria-label',test?'Testing session running':'Start a testing session');
+}
 $('#wear').addEventListener('click',doWear);
-$('#impBtn').addEventListener('click',function(){if(sel>=0)openImpression(BOTTLES[sel],todayStr())});
+$('#impBtn').addEventListener('click',function(){var b=BOTTLES[sel];if(b)openImpression(b,todayStr())});
 
-/* ---------- daily pick: from the shelf in view, ranked by the wear history ---------- */
+/* ---------- daily pick ---------- */
 $('#pick').addEventListener('click',function(){
-  if(!VIEW.length){toast('Add a bottle to this shelf first.');return}
-  var r=rankShelf(),c=r.filter(function(i){return !BOTTLES[i].low&&!wornToday(BOTTLES[i])});
-  if(!c.length)c=r.filter(function(i){return !BOTTLES[i].low});
-  if(!c.length)c=r;
+  if(!VIEW.length)return;
+  var all=VIEW.map(function(i){var b=BOTTLES[i],d=lastDays(b);return {i:i,s:(d===null?400:d)+(b.cool?20:0),low:b.low,w:wornToday(b)}});
+  var c=all.filter(function(x){return !x.low&&!x.w});
+  if(!c.length)c=all.filter(function(x){return !x.low});
+  if(!c.length)c=all;
+  c=c.sort(function(a,b){return b.s-a.s}).map(function(x){return x.i});
   pickPtr=(pickPtr+1)%c.length;
   if(c[pickPtr]===sel&&c.length>1&&pickIdx!==null)pickPtr=(pickPtr+1)%c.length;
   pickIdx=c[pickPtr];
-  markPick();slots.forEach(unflip);
-  var same=pickIdx===sel;sel=pickIdx;syncShelf();render();updateInfo();settleFx();saveUI();
+  slots.forEach(function(el,i){el.classList.toggle('is-pick',i===pickIdx)});
+  slots.forEach(function(el){el.classList.remove('flipped')});
+  var same=pickIdx===sel;sel=pickIdx;render();updateInfo();settleFx();
   if(same)haptic('settle');
 });
 
-/* ---------- gestures: a drag always has a tap and a key ---------- */
+/* ---------- gestures ---------- */
 var drag=null;
 stage.addEventListener('pointerdown',function(e){
   if(!introDone||pz||sel<0)return;
-  var p=OPOS[sel];
-  drag={x:e.clientX,id:e.pointerId,start:p,live:p,moved:false,slot:e.target.closest?e.target.closest('.slot'):null,pen:e.target.closest?e.target.closest('.cpen'):null,lastX:e.clientX,lastT:performance.now(),v:0};
+  if(e.target.closest&&e.target.closest('.empty'))return;
+  drag={x:e.clientX,id:e.pointerId,start:VPOS[sel],live:VPOS[sel],moved:false,slot:e.target.closest?e.target.closest('.slot'):null,edit:!!(e.target.closest&&e.target.closest('.rec-edit')),lastX:e.clientX,lastT:performance.now(),v:0};
 });
 stage.addEventListener('pointermove',function(e){
   if(!drag||e.pointerId!==drag.id)return;
@@ -1285,7 +1315,7 @@ stage.addEventListener('pointermove',function(e){
   var now=performance.now();drag.v=(e.clientX-drag.lastX)/Math.max(1,now-drag.lastT);drag.lastX=e.clientX;drag.lastT=now;
   if(mode!=='fan'){
     var unit=mode==='stack'?G.cw*.85:G.cw*.55;
-    drag.live=clamp(drag.start-dx/unit,0,ORD.length-1);render(drag.live);
+    drag.live=clamp(drag.start-dx/unit,0,VIEW.length-1);render(drag.live);
   }
 });
 function endDrag(e,cancel){
@@ -1297,73 +1327,87 @@ function endDrag(e,cancel){
     if(mode==='fan'){if(Math.abs(dx)>30){stepFan(dx<0?1:-1)}else{render()}}
     else{
       var unit=mode==='stack'?G.cw*.85:G.cw*.55;
-      select(ORD[Math.round(clamp(d.live-(d.v*180)/unit,0,ORD.length-1))]);
+      select(VIEW[Math.round(clamp(d.live-(d.v*180)/unit,0,VIEW.length-1))]);
     }
   }else if(d.slot){
     var i=+d.slot.dataset.i;
-    if(d.pen&&i===sel){openBottleForm(BOTTLES[sel]);return}
-    if(i===sel)flip();else select(i);
+    if(d.edit&&i===sel&&d.slot.classList.contains('flipped'))openAdd(null,sel);
+    else if(i===sel)flip();else select(i);
   }
 }
 stage.addEventListener('pointerup',function(e){endDrag(e,false)});
 stage.addEventListener('pointercancel',function(e){endDrag(e,true)});
 stage.addEventListener('keydown',function(e){
   if(!introDone||sel<0)return;
-  var p=OPOS[sel];
-  if(e.key==='ArrowRight'){e.preventDefault();mode==='fan'?stepFan(1):select(ORD[Math.min(ORD.length-1,p+1)])}
-  else if(e.key==='ArrowLeft'){e.preventDefault();mode==='fan'?stepFan(-1):select(ORD[Math.max(0,p-1)])}
+  if(e.key==='ArrowRight'){e.preventDefault();mode==='fan'?stepFan(1):select(VIEW[Math.min(VIEW.length-1,VPOS[sel]+1)])}
+  else if(e.key==='ArrowLeft'){e.preventDefault();mode==='fan'?stepFan(-1):select(VIEW[Math.max(0,VPOS[sel]-1)])}
   else if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}
-  else if(e.key==='e'||e.key==='E'){e.preventDefault();openBottleForm(BOTTLES[sel])}
 });
 $$('#seg button').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
-$('#cap').addEventListener('click',function(){if(mode==='fan')openRotations()});
-$('#cap').addEventListener('keydown',function(e){if(mode==='fan'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openRotations()}});
 
-/* ---------- test timer: an in-app testing aid, not a Live Activity ---------- */
-/* A started test checks in at 15 min, 1 h and 3 h, only while Arooma is open. The chip borrows the shape of the
-   iPhone's Dynamic Island but is drawn by this page and cannot appear outside the app. ?clock=N speeds it up for tests. */
-var isl=$('#island'), test=null, C=56.55;
-var CHECKS=[{t:900,k:'o',label:'15 min · Opening',q:'How does it open?'},{t:3600,k:'d',label:'1 h · Heart',q:'How has it developed?'},{t:10800,k:'l',label:'3 h · Dry-down',q:'What is left, and how long has it lasted?'}];
-var CLOCK=(function(){var v=+(new URLSearchParams(location.search).get('clock'));return v>1?Math.min(10000,v):1})();
+/* ---------- testing session: an in-app timer shown in the Island chip ----------
+   A skin test has three moments worth noting, and they are minutes and hours apart, not seconds: the opening (now), the heart
+   (about 20 minutes in) and the dry-down (about 2 hours in). The chip counts down to the next check-in. It runs on the wall
+   clock, so it survives the screen locking and a reload, but it only shows while Arooma is open; it is not a system Live
+   Activity. It is a reminder to notice, not a measure of longevity. */
+var isl=$('#island'), test=null, C=56.55, TEST_KEY='arooma.test';
+var CHECKS=[[0,'Opening','Note the first impression.'],[20*60,'Heart','How has it settled?'],[120*60,'Dry-down','What is left on the skin?']];
+var TEST_END=CHECKS[2][0];
 function setIsl(s){isl.dataset.s=s}
-function fmtT(s){s=Math.max(0,Math.ceil(s));var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?h+':'+pad(m)+':'+pad(x):m+':'+pad(x)}
-function elapsed(){return (performance.now()-test.t0)/1000*CLOCK}
-function setTestBtns(){var due=!!(test&&test.due);$('#iLog').style.display=due?'':'none';$('#iEnd').style.display=due?'none':''}
+function clock(sec){sec=Math.max(0,Math.ceil(sec));var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60;return h?h+':'+pad(m)+':'+pad(x):m+':'+pad(x)}
+function phaseAt(el){var k=0;for(var i=0;i<CHECKS.length;i++)if(el>=CHECKS[i][0])k=i;return k}
 function tick(){
   if(!test)return;
-  var c=CHECKS[test.ci];if(!c){endTest();return}
-  var el=elapsed(),prev=test.ci?CHECKS[test.ci-1].t:0,left=c.t-el,txt=fmtT(left);
+  var el=(Date.now()-test.t0)/1000;
+  if(el>=TEST_END){if(!test.done)finishTest();return}
+  var k=phaseAt(el),next=CHECKS[k+1],span=next[0]-CHECKS[k][0],left=next[0]-el,txt=clock(left);
   $('.i-time').textContent=txt;$('.i-big').textContent=txt;
-  $$('.ring .fg').forEach(function(r){r.style.strokeDashoffset=(C*clamp((el-prev)/(c.t-prev),0,1)).toFixed(2)});
-  if(!test.due){$('#iPhase').textContent='Testing · next '+c.label;$('#iPrompt').textContent='Runs while Arooma is open.'}
-  if(left<=0&&!test.due)dueCheck();
+  $$('.ring .fg').forEach(function(r){r.style.strokeDashoffset=(C*clamp(1-left/span,0,1)).toFixed(2)});
+  $('#iPhase').textContent='Testing · '+CHECKS[k][1];
+  $('#iPrompt').textContent=CHECKS[k][2]+' '+next[1]+' check-in in '+txt+'.';
+  if(k!==test.k){test.k=k;if(k>0&&isl.dataset.s==='compact'){setIsl('expanded');clearTimeout(test.fold);test.fold=setTimeout(function(){if(test&&!test.done&&isl.dataset.s==='expanded')setIsl('compact')},8000)}}
+}
+function runTest(b,t0){
+  test={b:b,t0:t0,done:false,k:-1};
+  $('#iName').textContent=b.name;$('#iEnd').textContent='End';$('#iLog').style.display='';
+  setIsl('compact');updateTestBtn();
+  test.timer=setInterval(tick,250);tick();
 }
 function startTest(){
   if(test||sel<0)return;
-  var b=BOTTLES[sel];
-  test={b:b,t0:performance.now(),ci:0,due:false};
-  $('#iName').textContent=b.name;setTestBtns();setIsl('compact');updateTestBtn();
-  test.timer=setInterval(tick,250);tick();
-  toast('Test started. Check-ins at 15 min, 1 h and 3 h, while Arooma is open.');
+  var b=BOTTLES[sel],t0=Date.now();
+  try{localStorage.setItem(TEST_KEY,JSON.stringify({id:b.id,t0:t0}))}catch(e){}
+  runTest(b,t0);
 }
-function dueCheck(){test.due=true;var c=CHECKS[test.ci];$('#iPhase').textContent=c.label;$('#iPrompt').textContent=c.q;setTestBtns();setIsl('done');haptic('complete')}
-function nextCheck(){
-  if(!test)return;test.ci++;test.due=false;
-  if(test.ci>=CHECKS.length){var n=test.b.name;endTest();toast('Test finished for '+n+'.');return}
-  setTestBtns();setIsl('compact');tick();
+function endTest(){
+  if(!test)return;clearInterval(test.timer);clearTimeout(test.fold);test=null;setIsl('idle');updateTestBtn();
+  try{localStorage.removeItem(TEST_KEY)}catch(e){}
 }
-function endTest(){if(!test)return;clearInterval(test.timer);test=null;setIsl('idle');updateTestBtn()}
-function logImpression(){if(!test)return;openImpression(test.b,todayStr(),CHECKS[test.ci].k,nextCheck)}
-function updateTestBtn(){
-  var t=$('#test');
-  if(test){t.disabled=true;t.innerHTML='Testing…'}
-  else{t.disabled=sel<0;t.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M4 1.5h6v8.5L7 12.5 4 10z"/></svg>Test'}
+function finishTest(){
+  test.done=true;clearInterval(test.timer);
+  $$('.ring .fg').forEach(function(r){r.style.strokeDashoffset=C.toFixed(2)});
+  $('.i-time').textContent='Done';$('.i-big').textContent='Done';
+  $('#iPhase').textContent='Test complete';$('#iPrompt').textContent='Two hours in. Note what stayed with you.';$('#iEnd').textContent='Close';
+  setIsl('done');haptic('complete');
+}
+/* Log impression opens the impression for today's wear of the bottle under test, starting at the field for this moment. */
+function logImpression(){
+  if(!test)return;
+  var b=test.b,k=phaseAt((Date.now()-test.t0)/1000);
+  if(BOTTLES.indexOf(b)<0){endTest();return}
+  if(isl.dataset.s!=='done')setIsl('compact');
+  openImpression(b,todayStr(),{focus:k===0?'o':'dv'});
+}
+function resumeTest(){
+  var t=readJSON(TEST_KEY);if(!t||typeof t.t0!=='number')return;
+  var k=idxOfId(t.id);
+  if(k<0||Date.now()-t.t0>TEST_END*1000+600000||t.t0>Date.now()){try{localStorage.removeItem(TEST_KEY)}catch(e){}return}
+  runTest(BOTTLES[k],t.t0);
 }
 $('#test').addEventListener('click',startTest);
-/* tapping the chip opens it; tapping an open check-in moves on to the next one */
 isl.addEventListener('click',function(){
   var s=isl.dataset.s;
-  if(s==='compact')setIsl('expanded');else if(s==='expanded')setIsl('compact');else if(s==='done')nextCheck();
+  if(s==='compact')setIsl('expanded');else if(s==='expanded'&&test&&!test.done)setIsl('compact');
 });
 $('#iEnd').addEventListener('click',function(e){e.stopPropagation();endTest()});
 $('#iLog').addEventListener('click',function(e){e.stopPropagation();logImpression()});
@@ -1373,9 +1417,9 @@ var edBuilt=false;
 function buildEditorial(){
   if(edBuilt)return;edBuilt=true;
   var tiers=tiersOf();
-  $('#ed').innerHTML='<div class="ed-top"><span>Arooma</span><span>'+(DB.active==='demo'?'Demo collection':new Date().getFullYear())+'</span></div><h3 class="ed-title">'+esc(shelfName(curShelf))+'</h3>'
-   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+art(b,'e'+i)+'<figcaption>'+pad(VPOS[i]+1)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
-   +'<div class="ed-foot"><span>'+footTxt()+'</span><span>N&deg; '+pad(VIEW.length)+'</span></div>';
+  $('#ed').innerHTML='<div class="ed-top"><span>Arooma</span><span>'+new Date().getFullYear()+'</span></div><h3 class="ed-title">'+esc(shareTitle())+'</h3>'
+   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+b.draw('e'+i,b.left)+'<figcaption>'+shareNum(i)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
+   +'<div class="ed-foot"><span>'+footTxt()+'</span><span>N&deg; '+pad(shareList().length)+'</span></div>';
 }
 function fitEditorial(){
   var dev=$('#device'),avail=dev.clientHeight-250,s=clamp(avail/380,.55,1);
@@ -1383,7 +1427,7 @@ function fitEditorial(){
   var w=$('#edWrap');w.style.height=Math.round(380*s)+'px';w.style.width='300px';
   $('#ed').style.left=Math.round((300-300*s)/2)+'px';
 }
-function openSheet(){buildEditorial();fitEditorial();prepShelf();$('#sheet').classList.add('on');$('#scrim').classList.add('on')}
+function openSheet(){if(!shareList().length){toast('Nothing on this shelf to share yet.');return}buildEditorial();fitEditorial();prepShelf();$('#sheet').classList.add('on');$('#scrim').classList.add('on')}
 function closeSheet(){$('#sheet').classList.remove('on');$('#scrim').classList.remove('on')}
 $('#closeSheet').addEventListener('click',closeSheet);
 $('#scrim').addEventListener('click',function(){closeSheet();closePanel()});
@@ -1394,13 +1438,6 @@ function svgImg(svg,w,h){return new Promise(function(res,rej){
   im.onload=function(){res(im)};im.onerror=function(){rej(new Error('svg'))};
   im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 })}
-function loadImg(src){return new Promise(function(res,rej){var im=new Image();im.onload=function(){res(im)};im.onerror=function(){rej(new Error('img'))};im.src=src})}
-/* the owner's photo, cropped the way they set it on the card, never stretched */
-function drawPhoto(ctx,im,x,y,w,h,ph){
-  var iw=im.naturalWidth,ih=im.naturalHeight,sc=Math.max(w/iw,h/ih)*ph.z,sw=w/sc,sh=h/sc,sx=(iw-sw)*ph.x/100,sy=(ih-sh)*ph.y/100,r=12;
-  ctx.save();ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.clip();
-  ctx.drawImage(im,sx,sy,sw,sh,x,y,w,h);ctx.restore();
-}
 function spaced(ctx,t,x,y,sp,align){
   var ws=[],w=0,i;
   for(i=0;i<t.length;i++){var cw=ctx.measureText(t.charAt(i)).width;ws.push(cw);w+=cw+(i<t.length-1?sp:0)}
@@ -1414,15 +1451,15 @@ function renderShelfPNG(){
   var SANS='-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Helvetica,Arial,sans-serif';
   var SERIF='ui-serif,"New York","Iowan Old Style","Palatino Linotype",Georgia,serif';
   var tiers=tiersOf(),baseY=tiers.length===1?[980]:[790,1170],jobs=[];
-  tiers.forEach(function(t){t.forEach(function(i){var b=BOTTLES[i];jobs.push(b.photo?loadImg(b.photo.src):svgImg(b.draw('x'+i,b.left),150,330))})});
+  tiers.forEach(function(t){t.forEach(function(i){jobs.push(svgImg(BOTTLES[i].draw('x'+i,BOTTLES[i].left),150,330))})});
   return Promise.all(jobs).then(function(imgs){
     var g=ctx.createLinearGradient(0,0,W,H*.35);
     g.addColorStop(0,'#FCF8F0');g.addColorStop(.55,'#F4EFE4');g.addColorStop(1,'#EDE7DA');
     ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#575A44';ctx.font='600 24px '+SANS;
-    spaced(ctx,'AROOMA',88,100,5,'left');spaced(ctx,DB.active==='demo'?'DEMO COLLECTION':String(new Date().getFullYear()),W-88,100,5,'right');
+    spaced(ctx,'AROOMA',88,100,5,'left');spaced(ctx,String(new Date().getFullYear()),W-88,100,5,'right');
     ctx.fillStyle='#25231F';ctx.textAlign='left';
-    var ttl=shelfName(curShelf),fs=150;ctx.font='500 '+fs+'px '+SERIF;
+    var ttl=shareTitle(),fs=150;ctx.font='500 '+fs+'px '+SERIF;
     while(fs>60&&ctx.measureText(ttl).width>W-168){fs-=6;ctx.font='500 '+fs+'px '+SERIF}
     ctx.fillText(ttl,84,300);
     var idx=0;
@@ -1434,12 +1471,12 @@ function renderShelfPNG(){
       ctx.fillStyle=sg;ctx.fillRect(88,y+2,W-176,14);
       t.forEach(function(i,k){
         var cx=88+(W-176)*(k+.5)/t.length;
-        var bi=BOTTLES[i],im=imgs[idx++];if(bi.photo)drawPhoto(ctx,im,cx-66,y-296,132,300,bi.photo);else ctx.drawImage(im,cx-75,y-330+10,150,330);
-        ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;spaced(ctx,pad(VPOS[i]+1),cx,y+52,3,'center');
+        ctx.drawImage(imgs[idx++],cx-75,y-330+10,150,330);
+        ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;spaced(ctx,shareNum(i),cx,y+52,3,'center');
       });
     });
     ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;
-    spaced(ctx,footTxt().toUpperCase(),88,1298,3,'left');spaced(ctx,'N° '+pad(VIEW.length),W-88,1298,3,'right');
+    spaced(ctx,footTxt().toUpperCase(),88,1298,3,'left');spaced(ctx,'N° '+pad(shareList().length),W-88,1298,3,'right');
     return new Promise(function(res,rej){c.toBlob(function(b){b?res(b):rej(new Error('toBlob'))},'image/png')});
   });
 }
@@ -1449,11 +1486,11 @@ function prepShelf(){
   var rev=shelfRev;
   shelfPromise=renderShelfPNG().then(function(b){if(rev===shelfRev)shelfBlob=b;shelfPromise=null}).catch(function(){shelfPromise=null});
 }
-function shelfFile(){return 'arooma-'+(shelfName(curShelf).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'shelf')+'.png'}
+function shelfFile(){return 'arooma-'+(shareTitle().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'shelf')+'.png'}
 function deliverShelf(blob){
   var file=null;try{file=new File([blob],shelfFile(),{type:'image/png'})}catch(e){}
   if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-    return navigator.share({files:[file],title:shelfName(curShelf)}).then(function(){haptic('complete')},function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
+    return navigator.share({files:[file],title:shareTitle()}).then(function(){haptic('complete')},function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
   }
   var url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=shelfFile();document.body.appendChild(a);a.click();a.remove();
@@ -1483,7 +1520,7 @@ function openCabinet(){
     render();
     setTimeout(function(){slots.forEach(function(el){el.style.transitionDelay=''})},1600);
     setTimeout(function(){haptic('settle')},1500);
-    setTimeout(maybeShowInstallHint,2800);setTimeout(maybeShowPinchHint,5200);
+    setTimeout(maybeShowInstallHint,2800);setTimeout(maybeRemindBackup,3400);if(N)setTimeout(maybeShowPinchHint,6800);
   },RM?0:650);
   setTimeout(function(){cab.classList.add('gone')},RM?50:2100);
 }
@@ -1499,22 +1536,20 @@ function doReopen(){
   openT=setTimeout(openCabinet,RM?0:1500);
 }
 
-/* ---------- panels: menus, bottle form, wear and impressions, rotations, find, backup ---------- */
-var panel=$('#panel'), panelBody=$('#panelBody'), panelClick=null, panelInput=null, panelChange=null;
+/* ---------- panels: cabinet menu, add, delete, wear history, authenticity, compare ---------- */
+var panel=$('#panel'), panelBody=$('#panelBody'), panelClick=null, panelInput=null;
 function actOf(e){var el=e.target.closest?e.target.closest('[data-act]'):null;return el?el.getAttribute('data-act'):null}
 var lastFocus=null;
-function openPanel(html,onClick,onInput,onChange){
+function openPanel(html,onClick,onInput){
   closeSheet();
   if(!panel.classList.contains('on'))lastFocus=document.activeElement;
-  panelBody.innerHTML=html;panelClick=onClick||null;panelInput=onInput||null;panelChange=onChange||null;panelBody.scrollTop=0;
+  panelBody.innerHTML=html;panelClick=onClick||null;panelInput=onInput||null;panelBody.scrollTop=0;
   panel.classList.add('on');$('#scrim').classList.add('on');$('#device').classList.add('paneled');
   try{panel.focus({preventScroll:true})}catch(e){}
 }
 function closePanel(){
   if(!panel.classList.contains('on'))return;
   panel.classList.remove('on');$('#device').classList.remove('paneled');
-  /* an input focused inside a panel can scroll the page on iOS; put the cabinet back */
-  setTimeout(function(){if(window.scrollY)window.scrollTo(0,0);var d=$('#device');if(d.scrollTop)d.scrollTop=0;if(d.scrollLeft)d.scrollLeft=0},60);
   if(!$('#sheet').classList.contains('on'))$('#scrim').classList.remove('on');
   if(document.activeElement&&panel.contains(document.activeElement))document.activeElement.blur();
   if(lastFocus&&document.body.contains(lastFocus)&&lastFocus.focus){try{lastFocus.focus({preventScroll:true})}catch(e){}}
@@ -1522,318 +1557,466 @@ function closePanel(){
 }
 panelBody.addEventListener('click',function(e){if(panelClick)panelClick(e)});
 panelBody.addEventListener('input',function(e){if(panelInput)panelInput(e)});
-panelBody.addEventListener('change',function(e){if(panelChange)panelChange(e)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var had=panel.classList.contains('on')||$('#sheet').classList.contains('on');closePanel();closeSheet();if(!had&&Z>.5)closeOver()}});
 /* keep the panel above the iOS keyboard */
 if(window.visualViewport){var vv=window.visualViewport;var kbFix=function(){panel.style.bottom=Math.max(0,window.innerHeight-vv.height-vv.offsetTop)+'px'};vv.addEventListener('resize',kbFix);vv.addEventListener('scroll',kbFix)}
 
 function rowHtml(act,title,sub,cls){return '<button class="prow'+(cls?' '+cls:'')+'" id="'+act+'" data-act="'+act+'"><span><b>'+title+'</b><small>'+sub+'</small></span><i aria-hidden="true">&rsaquo;</i></button>'}
-function btns(a){return '<div class="pbtns">'+a.map(function(x){return '<button class="btn'+(x[2]?' '+x[2]:'')+'" data-act="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'}
-function confirmPanel(title,sub,yes,fn,no){
-  openPanel('<h2>'+title+'</h2><p class="sub">'+sub+'</p>'+btns([['cancel',no||'Cancel'],['yes',yes,'primary']]),
-  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();fn()}});
-}
 
 /* shelf image helpers (the share sheet reads these) */
-function tiersOf(){var v=VIEW.slice(0,8),a=v.slice(0,4),b=v.slice(4);return b.length?[a,b]:[a]}
+/* In Fan the image is the saved rotation, one row. Otherwise it is the shelf in view, one or two tiers of up to four. */
+function shareRot(){return mode==='fan'&&ROTI().length>0}
+function shareList(){return shareRot()?ROTI():VIEW}
+function shareTitle(){return shareRot()?'Current rotation':shelfName(curShelf)}
+function shareNum(i){return shareRot()?pad(ROTI().indexOf(i)+1):pad(VPOS[i]+1)}
+function tiersOf(){var v=shareList().slice(0,8),a=v.slice(0,4),b=v.slice(4);return b.length?[a,b]:[a]}
 var NUMW=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight'];
-function footTxt(){var V=VIEW.length;return V<=8?NUMW[V]+(V===1?' object':' objects')+', kept close':'Eight of '+V+' objects'}
+function footTxt(){var V=shareList().length;return shareRot()?NUMW[V]+(V===1?' bottle':' bottles')+' in rotation':V<=8?NUMW[V]+(V===1?' object':' objects')+', kept close':'Eight of '+V+' objects'}
 
-/* bookkeeping after any add, delete, move or switch */
-function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(n);$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
+/* shelf bookkeeping after any add, delete, move or mode change */
+function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
 function updateCounts(){
-  var demo=DB.active==='demo',n=pad(N)+(N===1?' object':' objects');
-  $('#eyebrow').innerHTML=(demo?'Demo &middot; ':'The cabinet &middot; ')+n;
-  $('#device').classList.toggle('is-demo',demo);
-  var s=$('#cabinet .label span:last-child');if(s)s.textContent=DB.active?n:'Personal cabinet';
+  var demo=MODE==='demo',cnt=pad(N)+(N===1?' object':' objects');
+  $('#eyebrow').innerHTML=!MODE?'Arooma &middot; personal cabinet':(demo?'Demo':'The cabinet')+' &middot; '+cnt;
+  var l=$$('#cabinet .label span');
+  if(l.length>1){l[0].textContent=demo?'Demo collection':'Personal cabinet';l[1].textContent=MODE?cnt:'Ready to open'}
 }
-function setFanState(){var f=$('#seg button[data-mode="fan"]');f.disabled=N===0}
-function shelfChanged(){shareDirty();updateCounts();setFanState();syncShelf();if(typeof ovBuilt!=='undefined'&&ovBuilt&&Z>.03)buildOver()}
-function refreshBottle(b){var i=BOTTLES.indexOf(b);if(i<0)return;fillRecord(slots[i],b);if(i===sel)updateInfo();if(mode==='stack'){refreshView();render()}}
+function setFanState(){$$('#seg button').forEach(function(b){b.disabled=!N});$('#pick').disabled=!N}
+function shelfChanged(){shareDirty();updateCounts();setFanState();syncShelf();updateEmpty();if(ovBuilt)buildOver()}
+function refreshBottle(b){var i=BOTTLES.indexOf(b);if(i<0)return;fillRecord(slots[i],b);if(i===sel)updateInfo();shareDirty()}
 function markPick(){slots.forEach(function(el,k){el.classList.toggle('is-pick',k===pickIdx)})}
-function pickId(){return pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null}
+/* reorder one bottle, keeping the selection and the pick on the same bottles */
+function moveIdx(from,to){
+  if(from===to)return;
+  var sid=sel>-1&&BOTTLES[sel]?BOTTLES[sel].id:null,pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null;
+  var b=BOTTLES.splice(from,1)[0];BOTTLES.splice(to,0,b);var el=slots.splice(from,1)[0];slots.splice(to,0,el);
+  sel=sid?idxOfId(sid):-1;pickIdx=pid?idxOfId(pid):null;
+}
+function rebuildSlot(i){
+  var old=slots[i];LQ.dropSlot(old);
+  var el=buildSlot(BOTTLES[i],i);el.style.transition='none';el.style.transform=old.style.transform;el.style.opacity=old.style.opacity;el.style.zIndex=old.style.zIndex;
+  old.parentNode.replaceChild(el,old);slots[i]=el;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.transition=''})});
+}
 
-/* ---------- collections: the owner's own, or the demo. They never mix. ---------- */
-function mount(kind){
-  slots.forEach(function(el){LQ.dropSlot(el);el.parentNode.removeChild(el)});slots=[];
-  if(test)endTest();
-  DB.active=kind;
-  if(!DB[kind])DB[kind]=kind==='demo'?demoCol():emptyCol();
-  var c=DB[kind];
-  SHELVES=c.shelves.map(function(h){return {id:h.id,name:h.name}});
-  BOTTLES=c.bottles.map(function(b){return prep(clean(b)||b)});
-  ROTS=c.rots.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}});
-  META={backupAt:c.meta?c.meta.backupAt:null,changes:c.meta?c.meta.changes:0};
-  N=BOTTLES.length;
+/* ---- empty cabinet and first run ---- */
+var emptyEl=$('#empty');
+function updateEmpty(){
+  var on=!N||!MODE,h;
+  stage.classList.toggle('is-empty',on);emptyEl.classList.toggle('on',on);
+  if(!on){emptyEl.innerHTML='';return}
+  if(!MODE)h='<div class="eb">Personal cabinet</div><h2>Your cabinet is open</h2><p>Start with an empty cabinet for your own bottles, or look around a demo of fictional houses first. Nothing leaves this device.</p>'
+    +'<div class="actions"><button class="btn primary" data-er="start">Start my collection</button><button class="btn" data-er="demo">Explore demo</button></div>';
+  else if(MODE==='demo')h='<div class="eb">Demo collection</div><h2>The demo is empty</h2><p>Every sample bottle was deleted. Bring them back, or return to your own collection.</p>'
+    +'<div class="actions"><button class="btn primary" data-er="resetdemo">Reset the demo</button><button class="btn" data-er="own">Back to my collection</button></div>';
+  else h='<div class="eb">Nothing on the shelves yet</div><h2>An empty cabinet</h2><p>Add your first bottle. It is kept in this browser on this device, so export a backup now and then.</p>'
+    +'<div class="actions"><button class="btn primary" data-er="add">Add a bottle</button><button class="btn" data-er="import">Restore a backup</button><button class="lnk" data-er="demo">Explore the demo instead</button></div>';
+  if(emptyEl.innerHTML!==h)emptyEl.innerHTML=h;
+}
+emptyEl.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-er]'):null;if(!b)return;var a=b.getAttribute('data-er');
+  if(a==='start')startOwn();else if(a==='demo'){if(MODE)confirmLoadDemo();else enterDemo()}
+  else if(a==='add')openAdd();else if(a==='import')pickImport();else if(a==='resetdemo')confirmResetDemo();else if(a==='own')leaveDemo();
+});
+
+/* ---- your collection and the demo: one cabinet on screen at a time ---- */
+function mount(st){
+  closeSheet();endTest();
+  if(Z>.5){cancelZ();setZ(0)}
+  slots.forEach(function(el){LQ.dropSlot(el);if(el.parentNode)el.parentNode.removeChild(el)});slots=[];
+  SHELVES=st.shelves;ROT=st.rot.slice();BOTTLES=st.bottles.map(function(b){return prep(clean(b)||b)});N=BOTTLES.length;
   BOTTLES.forEach(function(b,i){var el=buildSlot(b,i);stage.appendChild(el);slots.push(el)});
-  var u=loadUI()[kind]||{};
-  sel=u.sel?idxOfId(u.sel):-1;
-  if(sel<0&&N)sel=kind==='demo'&&idxOfId('s2')>-1?idxOfId('s2'):0;
-  curShelf=sel>=0?BOTTLES[sel].shelf:(u.shelf&&shelfById(u.shelf)?u.shelf:(shelfById('au')?'au':SHELVES[0].id));
-  rotId=u.rot&&ROTS.some(function(r){return r.id===u.rot})?u.rot:(ROTS[0]?ROTS[0].id:null);
-  mode=(u.mode==='stack'||u.mode==='fan')?u.mode:'flow';if(mode==='fan'&&!activeRot())mode='flow';
-  pickIdx=null;pickPtr=-1;shelfLast={};
-  renumber();refreshView();setModeButtons();updateCounts();setFanState();shareDirty();setTitle();
-  if(typeof ovBuilt!=='undefined'&&ovBuilt)buildOver();
-  render();updateInfo();updateTestBtn();
+  pickIdx=null;pickPtr=-1;shelfLast={};sel=startSel();curShelf=sel>-1?BOTTLES[sel].shelf:SHELVES[0].id;
+  renumber();shelfChanged();render();updateInfo();updateTestBtn();
 }
-function showWelcome(on){var w=$('#welcome');w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');$('#screen').classList.toggle('welcoming',on)}
-function startOwn(){showWelcome(false);mount('own');writeDB();saveUI();if(!N)toast('Your cabinet is ready. Add your first bottle.')}
-function startDemo(){showWelcome(false);mount('demo');writeDB();saveUI();toast('Demo collection: fictional houses, kept apart from your own.')}
-$('#wStart').addEventListener('click',startOwn);
-$('#wDemo').addEventListener('click',startDemo);
-$('#eAdd').addEventListener('click',function(){openBottleForm()});
-$('#eAll').addEventListener('click',function(){if(!N&&DB.active==='own'){mount('demo');writeDB();saveUI();toast('Demo collection: fictional houses, kept apart from your own.')}else openOver()});
-function clearMine(){
-  var prev=snapshot(),prevUI=loadUI().own;
-  DB.own=emptyCol();mount('own');writeDB();saveUI();
-  toast('Your collection is cleared.',{label:'Undo',fn:function(){
-    DB.own=prev;if(prevUI){var u=loadUI();u.own=prevUI;try{localStorage.setItem(UI_KEY,JSON.stringify(u))}catch(e){}}
-    mount('own');writeDB();toast('Collection restored.');
+function setPrefMode(m){MODE=m;PREFS.mode=m;savePrefs()}
+function startOwn(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();haptic('complete');toast(N?'Your collection.':'Your cabinet is ready. Add your first bottle.')}
+function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Demo collection. The houses are fictional.')}
+function leaveDemo(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();toast(N?'Back to your collection.':'Back to your collection. It is empty.')}
+function confirmLoadDemo(){
+  openPanel('<h2>Open the demo collection?</h2><p class="sub">Seven sample bottles from fictional houses. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Stay here</button><button class="btn primary" data-act="yes">Open the demo</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();enterDemo()}});
+}
+function confirmResetDemo(){
+  openPanel('<h2>Reset the demo?</h2><p class="sub">This brings back the seven sample bottles and clears what you changed in the demo. Your own collection is not touched.</p>'
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Reset</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();try{localStorage.removeItem(KEY_DEMO)}catch(_){}mount(demoState());toast('Demo reset.')}});
+}
+function wearCount(){return BOTTLES.reduce(function(n,b){return n+b.log.length},0)}
+function confirmClear(){
+  var w=wearCount();
+  openPanel('<h2>Clear your collection?</h2><p class="sub">This removes '+N+(N===1?' bottle':' bottles')+', '+w+(w===1?' wear':' wears')+' and every note and photo from this device. Export a backup first if you might want them back.</p>'
+   +'<div class="pbtns"><button class="btn" data-act="exp">Export first</button><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Clear</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='exp')exportBackup();else if(a==='yes'){closePanel();clearOwn()}});
+}
+function clearOwn(){
+  var prev=stateNow();
+  mount(emptyState());saveState();haptic('complete');
+  toast('Collection cleared.',{label:'Undo',fn:function(){if(MODE!=='own')return;mount(cleanState(prev)||emptyState());saveState()}});
+}
+function confirmRemoveSamples(){
+  var n=BOTTLES.filter(function(b){return b.sample}).length;
+  openPanel('<h2>Remove '+n+' sample '+(n===1?'bottle':'bottles')+'?</h2><p class="sub">They came from the demo in an earlier version of Arooma and are marked Sample on their cards. Bottles you added stay.</p>'
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Keep them</button><button class="btn primary" data-act="yes">Remove</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){
+    closePanel();var prev=stateNow(),st=stateNow();st.bottles=st.bottles.filter(function(b){return !b.sample});
+    mount(cleanState(st)||emptyState());saveState();haptic('complete');
+    toast('Removed the sample bottles.',{label:'Undo',fn:function(){if(MODE!=='own')return;mount(cleanState(prev));saveState()}});
   }});
-}
-function resetDemo(){DB.demo=demoCol();try{var u=loadUI();delete u.demo;localStorage.setItem(UI_KEY,JSON.stringify(u))}catch(e){}mount('demo');writeDB();toast('Demo collection reset.')}
-function backupLine(){
-  if(DB.active==='demo')return 'This is the demo. Your own collection, if you have one, is kept apart.';
-  return 'Saved on this device, in this browser only. Nothing is uploaded. '+(META.backupAt?'Last backup '+fmtDate(META.backupAt)+'.':'No backup yet. Back up from time to time.');
 }
 
 /* ---- cabinet menu ---- */
 function openMenu(){
-  var demo=DB.active==='demo',hasOwn=!!DB.own&&(DB.own.bottles||[]).length>0;
-  openPanel('<h2>Cabinet</h2><p class="sub" id="storeNote">'+backupLine()+'</p>'
-   +rowHtml('find','Find a bottle','Search by house or fragrance')
-   +rowHtml('rots','Rotations','Saved sets for Fan: up to five bottles you wear together')
-   +rowHtml('compare','Compare notes before buying','How a bottle you might buy overlaps with yours, by listed notes')
-   +rowHtml('share','Share shelf image','An editorial picture of this shelf, no app chrome')
-   +(demo?'':rowHtml('backup','Back up my collection','Save a file with every shelf, bottle, photo, wear and impression'))
-   +rowHtml('restore','Restore from a backup','Review a backup file, then choose to add it or replace')
-   +(demo?rowHtml('mine',hasOwn?'Back to my collection':'Start my own collection',hasOwn?'Your collection is just as you left it':'An empty cabinet for your own bottles')
-         +rowHtml('resetdemo','Reset the demo','Bring the demo back to how it started')
-         :rowHtml('demo','Explore the demo','Fictional houses, kept apart. Your collection stays as it is')
-         +rowHtml('clear','Clear my collection','Remove every bottle and shelf name. You can undo for a few seconds','danger'))
+  var demo=MODE==='demo',samples=MODE==='own'&&BOTTLES.some(function(b){return b.sample});
+  openPanel('<h2>Cabinet</h2>'+(demo?'<p class="sub">You are in the demo collection. Its houses are fictional, and nothing in it mixes into your own collection.</p>':'')
+   +(demo?rowHtml('leave','Back to my collection','Leave the demo. Your collection is as you left it'):'')
+   +rowHtml('find','Find a bottle','Search fragrance names and houses on every shelf')
+   +rowHtml('compare','Compare notes before buying','Overlap between notes you type and the notes on your bottles')
+   +rowHtml('share','Share shelf image','An editorial picture of the shelf, no app chrome')
+   +rowHtml('backup','Backup and restore',PREFS.backupAt?'Kept on this device only. Last export '+fmtDate(PREFS.backupAt):'Kept on this device only. No backup exported yet')
+   +(demo?rowHtml('reset','Reset the demo','Bring back the seven sample bottles'):(MODE?rowHtml('demo','Explore the demo collection','Fictional sample bottles, kept apart from yours'):''))
+   +(samples?rowHtml('samples','Remove sample bottles','Sample bottles from an earlier version are on your shelves'):'')
+   +(MODE==='own'&&N?rowHtml('clear','Clear my collection','Remove every bottle from this device','danger'):'')
    +rowHtml('reopen','Replay the cabinet doors','Close the doors and open them again'),
   function(e){var a=actOf(e);if(!a)return;
-    if(a==='find')openFind();
-    else if(a==='rots')openRotations();
+    if(a==='leave'){closePanel();leaveDemo()}
+    else if(a==='find'){closePanel();openFind()}
     else if(a==='compare')openCompare();
-    else if(a==='share'){closePanel();if(!VIEW.length){toast('This shelf is empty. Add a bottle first.');return}openSheet()}
-    else if(a==='backup'){closePanel();doBackup()}
-    else if(a==='restore'){closePanel();$('#importFile').value='';$('#importFile').click()}
-    else if(a==='mine'){closePanel();mount('own');writeDB();saveUI();toast(N?'Your collection.':'Your cabinet is empty. Add your first bottle.')}
-    else if(a==='demo')confirmPanel('Explore the demo?','The demo uses fictional houses and is saved apart from your collection. Your bottles stay exactly as they are.','Explore the demo',function(){mount('demo');writeDB();saveUI()});
-    else if(a==='resetdemo')confirmPanel('Reset the demo?','This undoes your changes to the demo only.','Reset the demo',resetDemo);
-    else if(a==='clear')confirmPanel('Clear your collection?','This removes all '+N+(N===1?' bottle':' bottles')+', their history and photos from this device. Back up first if you might want them again.','Clear my collection',clearMine);
+    else if(a==='share'){closePanel();openSheet()}
+    else if(a==='backup')openBackup();
+    else if(a==='demo')confirmLoadDemo();
+    else if(a==='reset')confirmResetDemo();
+    else if(a==='samples')confirmRemoveSamples();
+    else if(a==='clear')confirmClear();
     else if(a==='reopen'){closePanel();doReopen()}
   });
 }
 function openBottleMenu(){
-  if(sel<0)return;
-  var b=BOTTLES[sel],n=b.log.length;
-  openPanel('<h2>'+esc(b.name)+'</h2><p class="sub">'+esc(b.house)+' &middot; '+esc(shelfName(b.shelf))+'</p>'
-   +rowHtml('edit','Edit bottle','Name, size, estimate, notes, shelf, photo')
+  var b=BOTTLES[sel];if(!b)return;
+  var n=b.log.length,r=inRot(b),full=ROTI().length>=3;
+  openPanel('<h2>'+esc(b.name)+'</h2><p class="sub">'+esc(b.house)+(b.sample?' &middot; sample bottle':'')+'</p>'
+   +rowHtml('edit','Edit details','Name, size, estimated remaining, notes and your own photo')
    +rowHtml('history','Wear history',n?n+(n===1?' wear':' wears')+', last '+agoText(lastDays(b))+'. Add how each one wore':'No wears logged yet')
-   +(SHELVES.length>1?rowHtml('move','Move to another shelf','Now on '+esc(shelfName(b.shelf))):'')
-   +rowHtml('auth','Authenticity notes','Your own record of what you checked. Arooma cannot verify it')
-   +rowHtml('del','Delete bottle','Removes it, its history and photo. You can undo for a few seconds','danger'),
+   +rowHtml('rot',r?'Remove from rotation':'Add to rotation',r?'Fan shows your saved rotation of up to three':full?'Your rotation has three. This replaces the oldest':'Fan shows your saved rotation of up to three')
+   +(SHELVES.length>1?rowHtml('move','Move to another shelf','Now on '+esc(shelfName(b.shelf))+'. It goes to the end of the new shelf'):'')
+   +rowHtml('auth','Authenticity notes','Your own record of what you checked. It cannot verify')
+   +rowHtml('del','Delete bottle','Removes it and its wear history. You can undo for a few seconds.','danger'),
   function(e){var a=actOf(e);if(!a)return;
-    if(a==='edit')openBottleForm(b);
-    else if(a==='move')openMove();
+    if(a==='edit')openAdd(null,sel);
     else if(a==='history')openHistory();
+    else if(a==='rot'){closePanel();toggleRot(b)}
+    else if(a==='move')openMove();
     else if(a==='auth')openAuth();
     else if(a==='del')confirmDelete(sel);
   });
 }
+function toggleRot(b){
+  var before=ROT.slice(),msg;
+  if(inRot(b)){ROT=ROT.filter(function(id){return id!==b.id});msg='Removed '+b.name+' from your rotation.'}
+  else{ROT=ROT.filter(function(id){return idxOfId(id)>-1});if(ROT.length>=3)ROT.shift();ROT.push(b.id);msg='Added '+b.name+' to your rotation.'}
+  saveState();shareDirty();render();updateInfo();haptic('complete');
+  toast(msg,{label:'Undo',fn:function(){ROT=before;saveState();shareDirty();render();updateInfo()}});
+}
 
 /* ---- add or edit a bottle, with an optional photo of the owner's own bottle ---- */
-var CONCS=['Eau de Parfum','Eau de Toilette','Eau de Cologne','Parfum','Extrait'];
-function readPhoto(file,cb){
-  if(!file||!/^image\//.test(file.type||'')){cb(null,'That file is not an image.');return}
-  var url=URL.createObjectURL(file),im=new Image();
-  im.onload=function(){
-    try{
-      var M=640,w=im.naturalWidth,h=im.naturalHeight,s=Math.min(1,M/Math.max(w,h)),c=document.createElement('canvas');
-      c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));
-      var x=c.getContext('2d');x.fillStyle='#FBF8F1';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
-      URL.revokeObjectURL(url);cb(c.toDataURL('image/jpeg',.8));
-    }catch(e){URL.revokeObjectURL(url);cb(null,'Could not read that image.')}
-  };
-  im.onerror=function(){URL.revokeObjectURL(url);cb(null,'Could not read that image.')};
-  im.src=url;
+var fImg=null,fDup=false,pvN=0,phDrag=null;
+function formVessel(){var v=$('#fVessel .vopt[aria-pressed="true"]');return v?v.getAttribute('data-v'):'clear'}
+function formLeft(){var r=$('#fLeft');return r?(+r.value)/100:.8}
+function drawPreview(){var f=$('#phFrame');if(f)f.innerHTML=(fImg?photoArt(fImg):vessel(formVessel()).fn)('pv'+(++pvN),formLeft())}
+function photoCtlHtml(){
+  if(!fImg)return '<p class="sub" style="margin-top:0">Your own photo of your own bottle. A cut-out on a clear background sits best on the shelf. A small level window shows its liquid; slide it onto the glass. Kept on this device.</p><div class="ph-btns"><button type="button" class="btn" data-act="phpick">Choose a photo</button></div>';
+  return '<label class="fl" for="phS">Size</label><input class="range" id="phS" type="range" min="50" max="200" step="2" value="'+Math.round(fImg.s*100)+'">'
+   +'<label class="fl" for="phX">Left and right</label><input class="range" id="phX" type="range" min="-40" max="40" step="1" value="'+Math.round(fImg.x)+'">'
+   +'<label class="fl" for="phY">Up and down</label><input class="range" id="phY" type="range" min="-60" max="40" step="1" value="'+Math.round(fImg.y)+'">'
+   +'<label class="fl" for="phW">Level window</label><input class="range" id="phW" type="range" min="5" max="95" step="1" value="'+Math.round((fImg.w==null?.78:fImg.w)*100)+'" aria-label="Level window, left to right">'
+   +'<div class="ph-btns"><button type="button" class="btn" data-act="phpick">Replace</button><button type="button" class="btn" data-act="phrm">Remove</button></div>';
 }
-function openBottleForm(b){
-  var edit=!!b;
+function photoEdRefresh(){var c=$('#phCtl');if(c)c.innerHTML=photoCtlHtml();drawPreview()}
+function openAdd(shelfId,editIdx){
+  var edit=editIdx!=null&&BOTTLES[editIdx]?BOTTLES[editIdx]:null;
   if(!edit&&N>=MAXN){toast('The cabinet holds '+MAXN+' bottles.');return}
-  var pre=arguments[1]&&shelfById(arguments[1])?arguments[1]:curShelf;
-  var v=edit?{house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:Math.max(5,Math.round(b.left*100/5)*5),notes:b.notes,acq:b.acq,vessel:b.vessel,note:b.note,shelf:b.shelf,photo:b.photo?{src:b.photo.src,x:b.photo.x,y:b.photo.y,z:b.photo.z}:null}
-           :{house:'',name:'',conc:'Eau de Parfum',ml:50,left:100,notes:'',acq:todayStr(),vessel:'clear',note:'',shelf:pre,photo:null};
-  function photoSec(){
-    var ph=v.photo;
-    return '<div class="phbox"><div class="phprev" id="phPrev" aria-hidden="true">'+(ph?photoHtml(ph):vessel(v.vessel).fn('pv',v.left/100))+'</div><div class="phctl">'
-     +'<label class="btn" for="fPhoto">'+(ph?'Replace photo':'Add a photo')+'</label><input type="file" id="fPhoto" accept="image/*" class="vh">'
-     +(ph?'<label class="fl" for="pZ">Zoom</label><input class="range" id="pZ" type="range" min="1" max="3" step=".05" value="'+ph.z+'">'
-         +'<label class="fl" for="pX">Across</label><input class="range" id="pX" type="range" min="0" max="100" value="'+ph.x+'">'
-         +'<label class="fl" for="pY">Up and down</label><input class="range" id="pY" type="range" min="0" max="100" value="'+ph.y+'">'
-         +'<button class="lnk" data-act="rmphoto">Remove photo, use a drawn vessel</button>'
-        :'<p class="sub">Your own photo of your bottle, if you like. It stays on this device. Without one, Arooma draws a neutral vessel.</p>')
-     +'<p class="err" id="phErr" role="alert"></p></div></div>';
-  }
-  function vesselSec(){
-    return VESSELS.map(function(x,k){return '<button type="button" class="vopt" data-v="'+x.k+'" aria-pressed="'+(x.k===v.vessel)+'" aria-label="'+x.label+'">'+x.fn('v'+k,.8)+'<span>'+x.label.split(',')[0]+'</span></button>'}).join('');
-  }
-  openPanel('<h2>'+(edit?'Edit bottle':'Add a bottle')+'</h2><p class="sub">'+(edit?'Changes are saved on this device.':'Use your own bottles. Add a photo of yours, or pick a neutral vessel.')+'</p>'
-   +'<label class="fl" for="fHouse">House</label><input class="in" id="fHouse" maxlength="40" autocomplete="off" autocapitalize="words" placeholder="For example, Maison Aubrac" value="'+esc(v.house)+'">'
-   +'<label class="fl" for="fName">Fragrance</label><input class="in" id="fName" maxlength="40" autocomplete="off" autocapitalize="words" placeholder="For example, Linen Rain" value="'+esc(v.name)+'">'
-   +'<label class="fl" for="fShelf">Shelf</label><select class="in" id="fShelf">'+SHELVES.map(function(h){return '<option value="'+h.id+'"'+(h.id===v.shelf?' selected':'')+'>'+esc(h.name)+'</option>'}).join('')+'</select>'
-   +'<div class="two"><div><label class="fl" for="fConc">Concentration</label><select class="in" id="fConc">'+CONCS.map(function(c){return '<option'+(c===v.conc?' selected':'')+'>'+c+'</option>'}).join('')+'</select></div>'
-   +'<div><label class="fl" for="fMl">Size, ml</label><input class="in" id="fMl" type="number" inputmode="numeric" min="5" max="500" value="'+v.ml+'"></div></div>'
-   +'<label class="fl" for="fLeft">Estimated remaining: <span id="fLeftV">'+v.left+'%</span></label><input class="range" id="fLeft" type="range" min="5" max="100" step="5" value="'+v.left+'">'
-   +'<label class="fl" for="fNotes">Notes, optional</label><input class="in" id="fNotes" maxlength="80" autocomplete="off" placeholder="cedar, fig leaf, warm milk" value="'+esc(v.notes)+'">'
-   +'<label class="fl" for="fAcq">Acquired</label><input class="in" id="fAcq" type="date" value="'+v.acq+'" max="'+todayStr()+'">'
-   +'<div class="fl">Photo, optional</div><div id="phSec">'+photoSec()+'</div>'
-   +'<div class="fl" id="vLab">'+(v.photo?'Drawn vessel, used if you remove the photo':'Vessel')+'</div><div class="vgrid" id="fVessel">'+vesselSec()+'</div>'
-   +'<label class="fl" for="fNote">A line for the record, optional</label><input class="in" id="fNote" maxlength="80" autocomplete="off" value="'+esc(v.note)+'">'
+  if(!MODE)setPrefMode('own');
+  fImg=edit&&edit.img?{src:edit.img.src,x:edit.img.x,y:edit.img.y,s:edit.img.s,ar:edit.img.ar,c:edit.img.c,w:edit.img.w}:null;fDup=false;
+  var pre=edit?edit.shelf:shelfById(shelfId)?shelfId:curShelf,vk=edit?edit.vessel:'clear',val=function(k,d){return edit?esc(edit[k]):(d||'')};
+  var vopts=VESSELS.map(function(v,k){return '<button type="button" class="vopt" data-v="'+v.k+'" aria-pressed="'+(v.k===vk)+'" aria-label="'+v.label+'">'+v.fn('v'+k,.8)+'<span>'+v.label.split(',')[0]+'</span></button>'}).join('');
+  var concs=['Eau de Parfum','Eau de Toilette','Eau de Cologne','Parfum','Extrait'];if(edit&&concs.indexOf(edit.conc)<0)concs.push(edit.conc);
+  openPanel('<h2>'+(edit?'Edit '+esc(edit.name):'Add a bottle')+'</h2><p class="sub">'+(edit?esc(edit.house)+'. Changes are saved on this device.':'Use your own bottles. Arooma draws a neutral vessel, or shows your own photo, and never adds a house&rsquo;s logo or label.')+'</p>'
+   +'<label class="fl" for="fHouse">House</label><input class="in" id="fHouse" maxlength="40" autocomplete="off" autocapitalize="words" placeholder="For example, Maison Aubrac" value="'+val('house')+'">'
+   +'<label class="fl" for="fName">Fragrance</label><input class="in" id="fName" maxlength="'+NAMEMAX+'" autocomplete="off" autocapitalize="words" placeholder="For example, Linen Rain" value="'+val('name')+'">'
+   +'<div class="two"><div><label class="fl" for="fConc">Concentration</label><select class="in" id="fConc">'+concs.map(function(c){return '<option'+(edit&&edit.conc===c?' selected':'')+'>'+esc(c)+'</option>'}).join('')+'</select></div>'
+   +'<div><label class="fl" for="fMl">Size, ml</label><input class="in" id="fMl" type="number" inputmode="numeric" min="5" max="500" value="'+(edit?edit.ml:50)+'"></div></div>'
+   +'<label class="fl" for="fLeft">Estimated remaining: <span id="fLeftV">'+(edit?Math.round(edit.left*100):100)+'%</span></label><input class="range" id="fLeft" type="range" min="0" max="100" step="5" value="'+(edit?Math.round(edit.left*20)*5:100)+'">'
+   +'<label class="fl" for="fShelf">Shelf</label><select class="in" id="fShelf">'+SHELVES.map(function(h){return '<option value="'+h.id+'"'+(h.id===pre?' selected':'')+'>'+esc(h.name)+'</option>'}).join('')+'</select>'
+   +'<label class="fl" for="fNotes">Notes <span>(optional)</span></label><input class="in" id="fNotes" maxlength="120" autocomplete="off" placeholder="cedar, fig leaf, warm milk" value="'+val('notes')+'">'
+   +'<label class="fl" for="fAcq">Acquired</label><input class="in" id="fAcq" type="date" value="'+(edit?edit.acq:todayStr())+'" max="'+todayStr()+'">'
+   +'<div class="fl">Photo <span>(optional)</span></div><div class="ph-ed"><div class="ph-frame" id="phFrame" aria-hidden="true"></div><div class="ph-ctl" id="phCtl"></div></div>'
+   +'<div class="fl">Drawing <span>(used when there is no photo)</span></div><div class="vgrid" id="fVessel">'+vopts+'</div>'
+   +'<label class="fl" for="fNote">A line for the record <span>(optional)</span></label><input class="in" id="fNote" maxlength="120" autocomplete="off" value="'+val('note')+'">'
    +'<p class="err" id="fErr" role="alert"></p>'
-   +btns([['cancel','Cancel'],['save',edit?'Save':'Add to cabinet','primary']])
-   +(edit?rowHtml('fdel','Delete this bottle','Removes it, its history and photo. You can undo for a few seconds','danger'):''),
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Cancel</button><button class="btn primary" data-act="save">'+(edit?'Save changes':'Add to cabinet')+'</button></div>',
   function(e){
-    var vo=e.target.closest?e.target.closest('.vopt'):null;
-    if(vo){v.vessel=vo.getAttribute('data-v');$$('#fVessel .vopt').forEach(function(x){x.setAttribute('aria-pressed',x===vo)});if(!v.photo)$('#phSec').innerHTML=photoSec();return}
+    var v=e.target.closest?e.target.closest('.vopt'):null;
+    if(v){$$('#fVessel .vopt').forEach(function(x){x.setAttribute('aria-pressed',x===v)});drawPreview();return}
     var a=actOf(e);
     if(a==='cancel')closePanel();
-    else if(a==='save')saveForm();
-    else if(a==='rmphoto'){v.photo=null;$('#phSec').innerHTML=photoSec();$('#vLab').textContent='Vessel'}
-    else if(a==='fdel'){var i=BOTTLES.indexOf(b);if(i>-1)confirmDelete(i)}
+    else if(a==='save')saveForm(edit?editIdx:null);
+    else if(a==='phpick'){var f=$('#photoFile');f.value='';f.click()}
+    else if(a==='phrm'){fImg=null;photoEdRefresh()}
   },
   function(e){
     var id=e.target.id;
-    if(id==='fLeft'){v.left=+e.target.value;$('#fLeftV').textContent=v.left+'%';if(!v.photo)$('#phPrev').innerHTML=vessel(v.vessel).fn('pv',v.left/100)}
-    else if(v.photo&&(id==='pZ'||id==='pX'||id==='pY')){
-      v.photo[id==='pZ'?'z':id==='pX'?'x':'y']=+e.target.value;
-      var im=$('#phPrev img');if(im){im.style.objectPosition=v.photo.x+'% '+v.photo.y+'%';im.style.transformOrigin=v.photo.x+'% '+v.photo.y+'%';im.style.transform='scale('+v.photo.z+')'}
-    }
-  },
-  function(e){
-    if(e.target.id!=='fPhoto')return;
-    var f=e.target.files&&e.target.files[0];
-    readPhoto(f,function(src,err){
-      if(!src){$('#phErr').textContent=err;return}
-      v.photo={src:src,x:50,y:50,z:1};$('#phSec').innerHTML=photoSec();$('#vLab').textContent='Drawn vessel, used if you remove the photo';
-    });
+    if(id==='fLeft'){$('#fLeftV').textContent=e.target.value+'%';drawPreview()}
+    else if(fImg&&(id==='phS'||id==='phX'||id==='phY'||id==='phW')){fImg.s=+$('#phS').value/100;fImg.x=+$('#phX').value;fImg.y=+$('#phY').value;fImg.w=+$('#phW').value/100;drawPreview()}
+    else if(id==='fHouse'||id==='fName')fDup=false;
   });
-  function saveForm(){
-    var house=$('#fHouse').value.trim(),name=$('#fName').value.trim(),err=$('#fErr');
-    if(!house||!name){err.textContent='Add the house and the fragrance name.';(house?$('#fName'):$('#fHouse')).focus();return}
-    var ml=Math.round(+$('#fMl').value);
-    if(!(ml>=5&&ml<=500)){err.textContent='Size must be between 5 and 500 ml.';return}
-    var acq=$('#fAcq').value;if(!DATE_RE.test(acq)||acq>todayStr())acq=edit?b.acq:todayStr();
-    var notes=$('#fNotes').value.trim(),spec={house:house,name:name,conc:$('#fConc').value,ml:ml,left:v.left/100,notes:notes,vessel:v.vessel,acq:acq,note:$('#fNote').value.trim(),shelf:$('#fShelf').value,photo:v.photo,cool:coolFrom(profileOf(notes).v)};
-    closePanel();
-    if(edit)updateBottle(b,spec);else addBottle(spec);
-  }
+  photoEdRefresh();
 }
-function openAdd(shelfId){openBottleForm(undefined,shelfId)}
+/* drag the photo inside its frame; the sliders are the tap and keyboard path */
+panelBody.addEventListener('pointerdown',function(e){
+  var f=e.target.closest?e.target.closest('#phFrame'):null;if(!f||!fImg)return;
+  phDrag={x:e.clientX,y:e.clientY,ix:fImg.x,iy:fImg.y,k:220/f.clientHeight};try{f.setPointerCapture(e.pointerId)}catch(_){}
+});
+panelBody.addEventListener('pointermove',function(e){
+  if(!phDrag||!fImg)return;
+  fImg.x=clamp(Math.round(phDrag.ix+(e.clientX-phDrag.x)*phDrag.k),-40,40);fImg.y=clamp(Math.round(phDrag.iy+(e.clientY-phDrag.y)*phDrag.k),-60,40);
+  var x=$('#phX'),y=$('#phY');if(x)x.value=fImg.x;if(y)y.value=fImg.y;drawPreview();
+});
+['pointerup','pointercancel'].forEach(function(n){panelBody.addEventListener(n,function(){phDrag=null})});
+/* The liquid colour is the average of the opaque, coloured pixels in the lower middle of the bottle. Glass, labels and
+   very dark or pale bottles give no reliable colour, so those keep a neutral amber. */
+function liquidColor(im,w,h){
+  try{
+    var c=document.createElement('canvas'),S=48;c.width=S;c.height=S;var x=c.getContext('2d');x.drawImage(im,0,0,S,S);
+    var d=x.getImageData(0,0,S,S).data,r=0,g=0,b=0,n=0;
+    for(var yy=Math.round(S*.5);yy<Math.round(S*.92);yy++)for(var xx=Math.round(S*.28);xx<Math.round(S*.72);xx++){
+      var i=(yy*S+xx)*4;if(d[i+3]<200)continue;
+      var mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);if(mx<40||mn>235||mx-mn<28)continue;
+      r+=d[i];g+=d[i+1];b+=d[i+2];n++;
+    }
+    if(n<12)return LIQ_DEFAULT;
+    return '#'+[r,g,b].map(function(v){return ('0'+Math.round(v/n).toString(16)).slice(-2)}).join('');
+  }catch(e){return LIQ_DEFAULT}
+}
+/* the photo is decoded, oriented by the browser, shrunk and re-encoded here, so the stored copy is small. Transparency is kept. */
+function readPhoto(file){return new Promise(function(res,rej){
+  if(file.type&&!/^image\//.test(file.type))return rej(new Error('type'));
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){
+    URL.revokeObjectURL(url);
+    var w=im.naturalWidth,h=im.naturalHeight;if(!w||!h)return rej(new Error('size'));
+    function enc(max){
+      var k=Math.min(1,max/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+      var ctx=c.getContext('2d');ctx.drawImage(im,0,0,c.width,c.height);
+      var alpha=false;try{var d=ctx.getImageData(0,0,c.width,c.height).data;for(var i=3;i<d.length;i+=16)if(d[i]<250){alpha=true;break}}catch(_){}
+      if(!alpha)return c.toDataURL('image/jpeg',.84);
+      var wp=c.toDataURL('image/webp',.86);return wp.indexOf('data:image/webp')===0?wp:c.toDataURL('image/png');
+    }
+    var out=enc(480),m=480;while(out.length>120000&&m>240){m-=80;out=enc(m)}
+    if(out.length>MAXIMG||!IMG_RE.test(out))return rej(new Error('big'));
+    res({src:out,x:0,y:0,s:1,ar:w/h,c:liquidColor(im,w,h),w:.78});
+  };
+  im.onerror=function(){URL.revokeObjectURL(url);rej(new Error('decode'))};
+  im.src=url;
+})}
+$('#photoFile').addEventListener('change',function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  var err=$('#fErr');if(err)err.textContent='';
+  readPhoto(f).then(function(img){fImg=img;photoEdRefresh()},function(){var e2=$('#fErr');if(e2)e2.textContent='Could not read that image. Try a JPEG or PNG.'});
+});
+function saveForm(editIdx){
+  var house=$('#fHouse').value.trim(),name=$('#fName').value.trim(),err=$('#fErr'),edit=editIdx!=null;
+  if(!house||!name){err.textContent='Add the house and the fragrance name.';(house?$('#fName'):$('#fHouse')).focus();return}
+  var ml=Math.round(+$('#fMl').value);
+  if(!(ml>=5&&ml<=500)){err.textContent='Size must be between 5 and 500 ml.';return}
+  var lc=function(x){return x.toLowerCase()},dup=BOTTLES.filter(function(x,k){return k!==editIdx&&lc(x.house)===lc(house)&&lc(x.name)===lc(name)})[0];
+  if(dup&&!fDup){fDup=true;err.textContent='You already have '+name+' by '+house+'. Tap '+(edit?'Save changes':'Add to cabinet')+' again to keep both.';return}
+  var acq=$('#fAcq').value;if(!DATE_RE.test(acq)||acq>todayStr())acq=todayStr();
+  var notes=$('#fNotes').value.trim();
+  var f={shelf:$('#fShelf').value,house:house,name:name,conc:$('#fConc').value,ml:ml,left:formLeft(),notes:notes,vessel:formVessel(),acq:acq,cool:coolFrom(profileOf(notes).v),note:$('#fNote').value.trim(),img:fImg?{src:fImg.src,x:fImg.x,y:fImg.y,s:fImg.s,ar:fImg.ar,c:fImg.c,w:fImg.w}:null};
+  closePanel();
+  if(edit)updateBottle(editIdx,f);
+  else{f.id='u'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36);f.log=[];f.imp={};f.auth=null;f.sample=false;addBottle(f)}
+}
 function addBottle(spec){
   if(N>=MAXN){toast('The cabinet holds '+MAXN+' bottles.');return}
-  var b=clean({id:uid('u'),shelf:spec.shelf,house:spec.house,name:spec.name,conc:spec.conc,ml:spec.ml,left:spec.left,notes:spec.notes,vessel:spec.vessel,acq:spec.acq,log:[],note:spec.note,cool:spec.cool,sample:DB.active==='demo',photo:spec.photo});
-  if(!b)return;prep(b);if(!shelfById(b.shelf))b.shelf=curShelf;
-  /* a new bottle goes to the end of its shelf */
-  var pid=pickId(),at=lastOfShelf(b.shelf)+1;if(at<=0)at=N;
-  BOTTLES.splice(at,0,b);N=BOTTLES.length;
-  var el=buildSlot(b,at);el.style.opacity='0';stage.appendChild(el);slots.splice(at,0,el);
-  pickIdx=pid?idxOfId(pid):null;
-  slots.forEach(unflip);
-  sel=at;renumber();shelfChanged();if(!saveState())return;render();updateInfo();settleFx();haptic('complete');saveUI();
-  toast('Added '+b.name+' to '+shelfName(b.shelf)+'.');
+  var b=clean(spec);if(!b)return;prep(b);if(!shelfById(b.shelf))b.shelf=curShelf;
+  BOTTLES.push(b);N=BOTTLES.length;
+  var el=buildSlot(b,N-1);el.style.opacity='0';stage.appendChild(el);slots.push(el);
+  slots.forEach(function(s){s.classList.remove('flipped')});
+  sel=N-1;renumber();shelfChanged();var ok=saveState();render();updateInfo();settleFx();haptic('complete');
+  if(ok)toast('Added '+b.name+' to the end of '+shelfName(b.shelf)+'.'+(MODE==='own'&&!PREFS.backupAt&&N%5===0?' Export a backup from the menu.':''));
 }
-function updateBottle(b,spec){
-  var i=BOTTLES.indexOf(b);if(i<0)return;
-  ['house','name','conc','ml','left','notes','vessel','acq','note','cool'].forEach(function(k){b[k]=spec[k]});
-  b.photo=cleanPhoto(spec.photo);prep(b);
-  var moved=spec.shelf!==b.shelf&&shelfById(spec.shelf);
-  replaceSlot(i);
-  if(moved){placeOnShelf(b,spec.shelf)}else{sel=i;renumber();shelfChanged()}
-  if(!saveState())return;
-  render();updateInfo();haptic('complete');toast('Saved '+b.name+'.');
-}
-/* move a bottle to the end of another shelf, keeping it selected */
-function placeOnShelf(b,id){
-  var pid=pickId(),from=BOTTLES.indexOf(b);
-  b.shelf=id;
-  var to=lastOfShelf(id);if(to<0)to=N-1;
-  if(to<from)to++;
-  moveIndex(from,to);
-  pickIdx=pid?idxOfId(pid):null;markPick();
-  sel=BOTTLES.indexOf(b);slots.forEach(unflip);renumber();shelfChanged();
+function updateBottle(i,f){
+  var b=BOTTLES[i],before=plain(b);
+  ['house','name','conc','ml','left','notes','vessel','acq','cool','note','img'].forEach(function(k){b[k]=f[k]});
+  var c=clean(plain(b));if(!c){Object.keys(before).forEach(function(k){b[k]=before[k]});return}
+  b.img=c.img;prep(b);
+  if(f.shelf!==b.shelf&&shelfById(f.shelf)){b.shelf=f.shelf;moveIdx(i,N-1);i=N-1;sel=i}
+  rebuildSlot(i);renumber();markPick();shelfChanged();var ok=saveState();render();updateInfo();haptic('complete');
+  if(ok)toast('Saved changes to '+b.name+'.');
 }
 
-/* ---- delete, with undo. Any bottle can go, including the last one and the demo's. ---- */
+/* ---- delete, with undo. Any bottle can go, including the last one. ---- */
 function confirmDelete(i){
-  var b=BOTTLES[i];if(!b)return;var n=b.log.length;
-  confirmPanel('Delete '+esc(b.name)+'?','Its '+n+(n===1?' wear':' wears')+', impressions, note, photo and evidence go with it. You can undo for a few seconds.','Delete',function(){deleteBottle(i)},'Keep it');
+  var b=BOTTLES[i],n=b.log.length;
+  openPanel('<h2>Delete '+esc(b.name)+'?</h2><p class="sub">Its '+n+(n===1?' wear':' wears')+', its impressions, its note, its photo and its evidence go with it. You can undo for a few seconds.</p>'
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Delete</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();deleteBottle(i)}});
 }
 function deleteBottle(i){
   var b=BOTTLES[i];if(!b)return;
-  var pid=pickId(),wasSel=(i===sel);
+  var pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null,wasSel=(i===sel);
   BOTTLES.splice(i,1);var el=slots.splice(i,1)[0];LQ.dropSlot(el);el.parentNode.removeChild(el);N=BOTTLES.length;
   pickIdx=pid&&pid!==b.id?idxOfId(pid):null;markPick();
   if(sel>i)sel--;
   else if(wasSel){
-    /* stay on the same shelf: the bottle that slid into this place, else the one before it, else the shelf is empty */
+    /* stay on the same shelf when it still has bottles: the one that slid into this place, else the last one before it */
     var k=-1,j;for(j=i;j<N;j++)if(BOTTLES[j].shelf===b.shelf){k=j;break}
     if(k<0)for(j=Math.min(i,N)-1;j>=0;j--)if(BOTTLES[j].shelf===b.shelf){k=j;break}
-    sel=k;if(k<0)curShelf=b.shelf;
+    sel=k>=0?k:Math.min(i,N-1);
   }
   if(sel>=N)sel=N-1;
-  slots.forEach(unflip);
-  renumber();shelfChanged();saveState();render();updateInfo();haptic('complete');saveUI();
+  slots.forEach(function(s){s.classList.remove('flipped')});
+  if(test&&test.b===b)endTest();
+  renumber();shelfChanged();saveState();render();updateInfo();updateTestBtn();haptic('complete');
   toast('Deleted '+b.name+'.',{label:'Undo',fn:function(){restoreBottle(b,i)}});
 }
 function restoreBottle(b,i){
-  var pid=pickId();
+  var pid=pickIdx!=null&&BOTTLES[pickIdx]?BOTTLES[pickIdx].id:null;
   if(!shelfById(b.shelf))b.shelf=SHELVES[0].id;
   i=Math.min(i,BOTTLES.length);BOTTLES.splice(i,0,b);N=BOTTLES.length;
   var el=buildSlot(b,i);slots.splice(i,0,el);stage.appendChild(el);
   pickIdx=pid?idxOfId(pid):null;markPick();
-  renumber();sel=i;shelfChanged();saveState();render();updateInfo();haptic('complete');saveUI();
+  renumber();sel=i;shelfChanged();saveState();render();updateInfo();updateTestBtn();haptic('complete');
 }
 
-/* ---- wear tracking: one tap, a quiet confirmation, an optional impression later ---- */
-function doWear(){
-  if(sel<0)return;
-  var b=BOTTLES[sel];if(!b||wornToday(b))return;
-  var d=todayStr();addWear(b,d);saveState();haptic('confirm');LQ.kick(slots[sel],{s:.22,A:1.3,b:.3});refreshBottle(b);
-  toast('Logged. '+b.name+' worn today.',{label:'Undo',fn:function(){var x=removeWear(b,d);saveState();refreshBottle(b)}});
+/* ---- backup and restore: one JSON file of the owner's collection ---- */
+function ownState(){
+  if(MODE==='own')return stateNow();
+  var o=loadOwn()||emptyState();return {v:SCHEMA,shelves:o.shelves,bottles:o.bottles.map(plain),rot:o.rot};
 }
-function segRow(name,key,map,val){
-  return '<div class="fl">'+name+'</div><div class="seg3 imp" data-k="'+key+'">'+Object.keys(map).map(function(k){return '<button data-val="'+k+'" aria-pressed="'+(val===k)+'">'+map[k]+'</button>'}).join('')+'</div>';
+function backupText(){var st=ownState();return JSON.stringify({app:'arooma',kind:'backup',v:SCHEMA,exported:new Date().toISOString(),shelves:st.shelves,bottles:st.bottles,rot:st.rot})}
+function exportBackup(){
+  var text=backupText(),name='arooma-backup-'+todayStr()+'.json',blob=new Blob([text],{type:'application/json'}),file=null;
+  try{file=new File([blob],name,{type:'application/json'})}catch(e){}
+  function done(){PREFS.backupAt=todayStr();savePrefs();haptic('complete');toast('Backup exported. Keep it in Files or iCloud Drive.')}
+  if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    return navigator.share({files:[file],title:'Arooma backup'}).then(done,function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
+  }
+  var url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url)},4000);done();
+  return Promise.resolve();
 }
-/* an impression is optional, private and attached to one wear */
-function openImpression(b,date,focus,after){
-  var x=Object.assign({o:'',d:'',p:'',l:'',n:''},b.imp[date]||{}),logged=b.log.indexOf(date)>-1,had=!!b.imp[date];
-  openPanel('<h2>How it wore</h2><p class="sub">'+esc(b.name)+', '+fmtDate(date)+'. Your own observations, all optional.'+(logged?'':' Saving also logs this as a wear.')+'</p>'
-   +'<label class="fl" for="iO">Opening</label><input class="in" id="iO" maxlength="60" autocomplete="off" placeholder="First minutes, for example bright citrus" value="'+esc(x.o)+'">'
-   +'<label class="fl" for="iD">Development</label><input class="in" id="iD" maxlength="60" autocomplete="off" placeholder="After an hour or so" value="'+esc(x.d)+'">'
-   +segRow('Projection, as you noticed it','p',{close:'Close',moderate:'Moderate',strong:'Strong'},x.p)
-   +segRow('Longevity, as you noticed it','l',{short:'Under 2 h',medium:'2 to 6 h',long:'All day'},x.l)
-   +'<label class="fl" for="iN">Note</label><input class="in" id="iN" maxlength="140" autocomplete="off" value="'+esc(x.n)+'">'
-   +btns([['cancel','Cancel'],['saveI','Save','primary']])+(had?'<button class="lnk" data-act="rmI">Remove this impression</button>':''),
-  function(e){
-    var s=e.target.closest?e.target.closest('.seg3.imp button'):null;
-    if(s){var k=s.parentNode.getAttribute('data-k'),val=s.getAttribute('data-val');x[k]=x[k]===val?'':val;$$('button',s.parentNode).forEach(function(q){q.setAttribute('aria-pressed',q.getAttribute('data-val')===x[k])});return}
-    var a=actOf(e);
-    if(a==='cancel')closePanel();
-    else if(a==='rmI'){delete b.imp[date];saveState();refreshBottle(b);closePanel();toast('Impression removed.')}
-    else if(a==='saveI'){
-      x.o=$('#iO').value;x.d=$('#iD').value;x.n=$('#iN').value;
-      var c=cleanImp(x);
-      if(!logged)addWear(b,date);
-      if(c)b.imp[date]=c;else delete b.imp[date];
-      saveState();refreshBottle(b);closePanel();haptic('complete');toast(c?'Impression saved.':'Wear saved, no impression.');
-      if(after)after();
+function openBackup(){
+  openPanel('<h2>Backup and restore</h2><p class="sub">Your collection lives only in this browser on this device. There is no account and no server, so clearing Safari&rsquo;s website data or removing the Home Screen app deletes it. Safari and the Home Screen app keep separate copies.</p>'
+   +'<p class="sub">Export a backup now and then and keep it in Files. '+(PREFS.backupAt?'Last export: '+fmtDate(PREFS.backupAt)+'.':'No backup exported yet.')+' Your collection uses about '+usageText()+' on this device.</p>'
+   +(MODE==='demo'?'<p class="sub">You are in the demo. A backup always holds your own collection, never the demo.</p>':'')
+   +rowHtml('export','Export a backup','One file with your shelves, bottles, notes, photos, wears and impressions')
+   +rowHtml('import','Restore from a backup','Choose a file. You see what is in it, then choose to replace or add')
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Done</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='export')exportBackup();else if(a==='import')pickImport()});
+}
+function usageText(){var n=0;try{n=(localStorage.getItem(KEY_OWN)||'').length*2}catch(e){}return n<1e6?Math.max(1,Math.round(n/1024))+' KB':(n/1048576).toFixed(1)+' MB'}
+/* A quiet reminder, at most once a week, once the collection is worth losing: five bottles and no export in 30 days. */
+function maybeRemindBackup(){
+  if(MODE!=='own'||N<5)return;
+  var since=PREFS.backupAt?daysSince(PREFS.backupAt):999,asked=PREFS.remindAt?daysSince(PREFS.remindAt):999;
+  if(since<30||asked<7)return;
+  PREFS.remindAt=todayStr();savePrefs();
+  toast(PREFS.backupAt?'Last backup was '+since+' days ago.':'Your collection is only on this device.',{label:'Back up',fn:exportBackup});
+}
+function pickImport(){var f=$('#importFile');f.value='';f.click()}
+function parseBackup(text){
+  var s;try{s=JSON.parse(text)}catch(e){return {err:'This file is not readable, so nothing was changed.'}}
+  if(!s||typeof s!=='object'||(s.app!=null&&s.app!=='arooma'))return {err:'This is not an Arooma backup, so nothing was changed.'};
+  if(typeof s.v==='number'&&s.v>SCHEMA)return {err:'This backup is from a newer version of Arooma, so nothing was changed.'};
+  var st=cleanState(s);
+  if(!st)return {err:'No collection was found in this file, so nothing was changed.'};
+  return {st:st};
+}
+function statsText(st){
+  var w=0,im=0,ph=0;st.bottles.forEach(function(b){w+=b.log.length;im+=Object.keys(b.imp||{}).length;if(b.img)ph++});
+  var n=st.bottles.length,pl=function(k,a,b){return k+' '+(k===1?a:b)};
+  return pl(n,'bottle','bottles')+' on '+pl(st.shelves.length,'shelf','shelves')+', '+pl(w,'wear','wears')+', '+pl(im,'impression','impressions')+' and '+pl(ph,'photo','photos');
+}
+$('#importFile').addEventListener('change',function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){var r=parseBackup(String(rd.result||''));if(r.err)openPanel('<h2>Nothing was restored</h2><p class="sub" id="impErr">'+r.err+'</p><div class="pbtns"><button class="btn primary" data-act="cancel">OK</button></div>',function(e){if(actOf(e)==='cancel')closePanel()});else openImportReview(r.st)};
+  rd.onerror=function(){toast('Could not read that file.')};
+  rd.readAsText(f);
+});
+function openImportReview(st){
+  var cur=ownState(),curN=cur.bottles.length,have={};cur.bottles.forEach(function(b){have[b.id]=1});
+  var dup=st.bottles.filter(function(b){return have[b.id]}).length,fresh=st.bottles.length-dup;
+  openPanel('<h2>Restore this backup?</h2><p class="sub" id="impSum">The file holds '+statsText(st)+'.'+(st.skipped?' '+st.skipped+(st.skipped===1?' entry is':' entries are')+' damaged and will be left out.':'')+'</p>'
+   +'<p class="sub">Your collection now has '+curN+(curN===1?' bottle':' bottles')+'. Nothing changes until you choose.</p>'
+   +rowHtml('replace','Replace my collection',curN?'Your '+curN+(curN===1?' bottle is':' bottles are')+' swapped for the backup. You can undo for a few seconds':'Your collection is empty, so nothing is lost')
+   +rowHtml('merge','Add to my collection',dup?fresh+(fresh===1?' bottle is':' bottles are')+' added. '+dup+' already here '+(dup===1?'stays':'stay')+' as '+(dup===1?'it is':'they are'):'Every bottle in the file is added. Nothing of yours changes')
+   +'<div class="pbtns"><button class="btn" data-act="cancel">Cancel</button></div>',
+  function(e){var a=actOf(e);if(a==='cancel')closePanel();
+    else if(a==='merge'){closePanel();applyImport(st,'merge')}
+    else if(a==='replace'){
+      if(!curN){closePanel();applyImport(st,'replace');return}
+      openPanel('<h2>Replace '+curN+(curN===1?' bottle':' bottles')+'?</h2><p class="sub">Your current collection is swapped for the '+st.bottles.length+' in the backup. Wears, impressions, notes and photos that are not in the file are lost after the undo window.</p>'
+       +'<div class="pbtns"><button class="btn" data-act="cancel">Keep mine</button><button class="btn primary" data-act="yes">Replace</button></div>',
+      function(e2){var b=actOf(e2);if(b==='cancel')closePanel();else if(b==='yes'){closePanel();applyImport(st,'replace')}});
     }
   });
-  if(focus){setTimeout(function(){var f=focus==='o'?$('#iO'):focus==='d'?$('#iD'):null;if(f){try{f.focus()}catch(e){}}},60)}
+}
+function applyImport(st,how){
+  var prevMode=MODE,prev=ownState(),next,added=0,same=0;
+  if(how==='replace')next={shelves:st.shelves,bottles:st.bottles,rot:st.rot};
+  else{
+    var base=cleanState(prev)||emptyState(),ids={},known={},sh=base.shelves.slice();
+    base.bottles.forEach(function(b){ids[b.id]=1});sh.forEach(function(h){known[h.id]=1});
+    st.shelves.forEach(function(h){if(!known[h.id]&&sh.length<MAXSH){sh.push(h);known[h.id]=1}});
+    st.bottles.forEach(function(b){if(ids[b.id]){same++;return}if(base.bottles.length>=MAXN)return;if(!known[b.shelf])b.shelf=sh[0].id;base.bottles.push(b);ids[b.id]=1;added++});
+    next={shelves:sh,bottles:base.bottles,rot:base.rot.length?base.rot:st.rot.filter(function(id){return ids[id]})};
+  }
+  setPrefMode('own');mount(next);saveState();haptic('complete');
+  toast(how==='replace'?'Restored '+N+(N===1?' bottle':' bottles')+' from the backup.':'Added '+added+(added===1?' bottle':' bottles')+(same?'. '+same+' already here were left as they were.':'.'),
+    {label:'Undo',fn:function(){setPrefMode('own');mount(cleanState(prev)||emptyState());saveState();if(prevMode==='demo')enterDemo()}});
+}
+
+/* ---- wear, and how it wore ---- */
+function doWear(){
+  var b=BOTTLES[sel];if(!b||wornToday(b))return;
+  var d=todayStr();addWear(b,d);saveState();haptic('confirm');LQ.kick(slots[BOTTLES.indexOf(b)],{s:.22,A:1.3,b:.3});refreshBottle(b);
+  toast('Logged. '+b.name+' worn today.',{label:'Undo',fn:function(){removeWear(b,d);saveState();refreshBottle(b)}});
+}
+var PROJ_SHORT=['','Close','Moderate','Strong'];
+/* An impression belongs to one wear. Every field is optional and it is never asked for; the owner adds it when they want. */
+function openImpression(b,date,opts){
+  opts=opts||{};
+  var had=b.imp[date],m={o:had?had.o:'',dv:had?had.dv:'',p:had?had.p:0,l:had?had.l:0},logged=b.log.indexOf(date)>-1;
+  function seg(key,labels){return '<div class="seg3" data-k="'+key+'">'+labels.slice(1).map(function(t,k){return '<button type="button" data-val="'+(k+1)+'" aria-pressed="'+(m[key]===k+1)+'">'+t+'</button>'}).join('')+'</div>'}
+  function back(){if(opts.back)opts.back();else closePanel()}
+  openPanel('<h2>How it wore</h2><p class="sub">'+esc(b.name)+', '+(date===todayStr()?'today':fmtDate(date))+'. Every field is optional, and only you see it.</p>'
+   +'<label class="fl" for="iO">Opening</label><input class="in" id="iO" maxlength="100" autocomplete="off" placeholder="Bright, peppery, a little sharp" value="'+esc(m.o)+'">'
+   +'<label class="fl" for="iD">How it developed</label><input class="in" id="iD" maxlength="100" autocomplete="off" placeholder="Softer and woodier after an hour" value="'+esc(m.dv)+'">'
+   +'<div class="fl">Projection <span>(tap again to clear)</span></div>'+seg('p',PROJ_SHORT)
+   +'<div class="fl">Longevity <span>(tap again to clear)</span></div>'+seg('l',LONG)
+   +(logged?'':'<p class="note-sm">Saving also logs a wear for '+(date===todayStr()?'today':fmtShort(date))+'.</p>')
+   +'<div class="pbtns">'+(had?'<button class="btn" data-act="rm">Remove</button>':'')+'<button class="btn" data-act="cancel">Cancel</button><button class="btn primary" data-act="save">Save</button></div>',
+  function(e){
+    var btn=e.target.closest?e.target.closest('.seg3 button'):null;
+    if(btn){var key=btn.parentNode.getAttribute('data-k'),v=+btn.getAttribute('data-val');m[key]=m[key]===v?0:v;$$('button',btn.parentNode).forEach(function(x){x.setAttribute('aria-pressed',+x.getAttribute('data-val')===m[key])});return}
+    var a=actOf(e);
+    if(a==='cancel')back();
+    else if(a==='rm'){delete b.imp[date];saveState();refreshBottle(b);toast('Impression removed.');back()}
+    else if(a==='save'){
+      m.o=$('#iO').value.trim();m.dv=$('#iD').value.trim();
+      var empty=!m.o&&!m.dv&&!m.p&&!m.l;
+      if(empty&&!had){back();return}
+      if(empty)delete b.imp[date];
+      else{if(!logged)addWear(b,date);b.imp[date]={o:m.o,dv:m.dv,p:m.p,l:m.l,at:todayStr()}}
+      saveState();refreshBottle(b);haptic('complete');toast(empty?'Impression removed.':'Impression saved to the record.');back();
+    }
+  });
+  if(opts.focus)setTimeout(function(){var i=$(opts.focus==='o'?'#iO':'#iD');if(i){try{i.focus()}catch(_){}}},80);
 }
 function openHistory(){
   var b=BOTTLES[sel];if(!b)return;
@@ -1845,22 +2028,26 @@ function openHistory(){
       sum='Worn '+n+(n===1?' time':' times')+'. Last '+agoText(lastDays(b))+'. First '+fmtDate(first)+'.';
       if(n>2){var span=daysSince(first)-daysSince(b.log[0]);sum+=' About every '+Math.max(1,Math.round(span/(n-1)))+' days.'}
     }
-    var rows=b.log.slice(0,30).map(function(d){var x=b.imp[d];return '<div class="hrow"><span>'+fmtDate(d)+'<small>'+agoText(daysSince(d))+(x?' &middot; '+esc(impSummary(x)):'')+'</small></span>'
-      +'<span class="hb"><button class="lnk" data-imp="'+d+'" aria-label="'+(x?'Edit':'Add')+' the impression for '+fmtDate(d)+'">'+(x?'Edit':'How it wore')+'</button><button data-del="'+d+'" aria-label="Remove the wear on '+fmtDate(d)+'">&times;</button></span></div>'}).join('');
+    var rows=b.log.slice(0,30).map(function(d){
+      var t=impText(b.imp[d]);
+      return '<div class="hrow"><span>'+fmtDate(d)+'<small>'+agoText(daysSince(d))+'</small>'+(t?'<span class="imp">'+esc(t)+'</span>':'')+'</span>'
+       +'<span class="hb"><button class="imp-b" data-imp="'+d+'" aria-label="'+(t?'Edit the impression for ':'Add an impression for ')+fmtDate(d)+'">'+(t?'Edit':'Add impression')+'</button>'
+       +'<button data-del="'+d+'" aria-label="Remove the wear on '+fmtDate(d)+'">&times;</button></span></div>';
+    }).join('');
     if(n>30)rows+='<p class="sub">and '+(n-30)+' earlier</p>';
     return '<h2>Wear history</h2><p class="sub">'+esc(b.name)+' by '+esc(b.house)+'. '+sum+'</p>'
      +'<div class="two" style="align-items:end"><div><label class="fl" for="hDate">Log another date</label><input class="in" id="hDate" type="date" value="'+todayStr()+'" max="'+todayStr()+'"></div>'
      +'<div><button class="btn primary" data-act="addw" style="width:100%;justify-content:center">Add wear</button></div></div>'
-     +'<p class="err" id="hErr" role="alert"></p>'+rows+btns([['cancel','Done']]);
+     +'<p class="err" id="hErr" role="alert"></p>'+rows+'<div class="pbtns"><button class="btn" data-act="cancel">Done</button></div>';
   }
   openPanel(body(),function(e){
+    var im=e.target.closest?e.target.closest('[data-imp]'):null;
+    if(im){openImpression(b,im.getAttribute('data-imp'),{back:openHistory});return}
     var del=e.target.closest?e.target.closest('[data-del]'):null;
     if(del){
-      var d=del.getAttribute('data-del'),x=removeWear(b,d);saveState();refreshBottle(b);panelBody.innerHTML=body();
-      toast('Removed the wear on '+fmtShort(d)+'.',{label:'Undo',fn:function(){addWear(b,d);if(x)b.imp[d]=x;saveState();refreshBottle(b)}});return;
+      var d=del.getAttribute('data-del'),m=removeWear(b,d);saveState();refreshBottle(b);panelBody.innerHTML=body();
+      toast('Removed the wear on '+fmtShort(d)+'.',{label:'Undo',fn:function(){addWear(b,d);if(m)b.imp[d]=m;saveState();refreshBottle(b)}});return;
     }
-    var im=e.target.closest?e.target.closest('[data-imp]'):null;
-    if(im){openImpression(b,im.getAttribute('data-imp'));return}
     var a=actOf(e);
     if(a==='addw'){
       var v=$('#hDate').value,err=$('#hErr');
@@ -1871,24 +2058,24 @@ function openHistory(){
   });
 }
 
-/* ---- authenticity notes: a personal record of what the owner checked. It never says "authentic". ---- */
+/* ---- authenticity: an evidence checklist. It never says "authentic". ---- */
 var AUTH_ITEMS=['The batch code on the box matches the one on the bottle','The label print is sharp and evenly spaced','The cap sits straight and the seal is clean','The liquid is the color the house normally uses','You bought it from the house or an authorized seller'];
 function authSummary(v){
   var checked=0,good=0,bad=0;v.forEach(function(x){if(x){checked++;if(x===1)good++;else bad++}});
   var det=function(n){return n===1?'detail':'details'};
-  if(!checked)return {t:'Nothing noted yet',p:'Go through the five details with the bottle and the box in front of you.'};
-  if(bad)return {t:'Differs on '+bad+' of '+checked+' checked '+det(checked),p:'Your note, not a verdict. It does not prove the bottle is fake. Compare it with the house’s own guide, or ask the seller.'};
+  if(!checked)return {t:'Nothing checked yet',p:'Go through the five details with the bottle and the box in front of you.'};
+  if(bad)return {t:'Differs on '+bad+' of '+checked+' checked '+det(checked),p:'This does not prove the bottle is fake and it is not a verdict. Compare it with the house\u2019s own guide, or ask the seller.'};
   if(checked<5)return {t:'Consistent on '+good+' of '+checked+' checked '+det(checked),p:'Check the remaining '+(5-checked)+' to finish.'};
-  return {t:'Consistent on all 5 details',p:'Your note only. It does not verify authenticity. Only the house or an authorized seller can.'};
+  return {t:'Consistent on all 5 details',p:'This does not verify authenticity. Only the house or an authorized seller can.'};
 }
 function openAuth(){
   var b=BOTTLES[sel],v=b.auth?b.auth.v.slice():[0,0,0,0,0];
   function sumHtml(){var s=authSummary(v);return '<b>'+s.t+'</b><p>'+s.p+'</p>'}
   var rows=AUTH_ITEMS.map(function(t,k){return '<div class="obs">'+t+'<div class="seg3" data-k="'+k+'">'
     +'<button data-val="1" aria-pressed="'+(v[k]===1)+'">Matches</button><button data-val="2" aria-pressed="'+(v[k]===2)+'">Differs</button><button data-val="0" aria-pressed="'+(v[k]===0)+'">Not checked</button></div></div>'}).join('');
-  openPanel('<h2>Authenticity notes</h2><p class="sub">'+esc(b.name)+' by '+esc(b.house)+'. A personal record of what you looked at. No scan and no database lookup: Arooma cannot verify authenticity.</p>'
+  openPanel('<h2>Authenticity notes</h2><p class="sub">'+esc(b.name)+' by '+esc(b.house)+'. Your own record of what you checked, with the bottle and the box in front of you. There is no scan and no database lookup, so Arooma cannot verify authenticity.</p>'
     +rows+'<div class="result" id="aRes" aria-live="polite">'+sumHtml()+'</div>'
-    +btns([['clear','Clear'],['saveA','Save to record','primary']]),
+    +'<div class="pbtns"><button class="btn" data-act="clear">Clear</button><button class="btn primary" data-act="saveA">Save to record</button></div>',
   function(e){
     var btn=e.target.closest?e.target.closest('.seg3 button'):null;
     if(btn){
@@ -1899,20 +2086,20 @@ function openAuth(){
     if(a==='clear'){v=[0,0,0,0,0];$$('.seg3 button').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-val')==='0')});$('#aRes').innerHTML=sumHtml()}
     else if(a==='saveA'){
       b.auth=v.some(function(x){return x})?{v:v.slice(),at:todayStr()}:null;
-      saveState();refreshBottle(b);closePanel();haptic('complete');toast('Your notes are saved to the record.');
+      saveState();refreshBottle(b);closePanel();haptic('complete');toast('Your checks are saved to the record.');
     }
   });
 }
 
-/* ---- blind-buy compare: overlap in the notes entered, never proof of similarity or enjoyment ---- */
+/* ---- blind-buy compare: overlap in listed notes, never a promise ---- */
 var EXAMPLES=['bergamot, vetiver, smoked tea','fig leaf, cedar, vanilla','rose, musk, amber','sea salt, cedar, grapefruit'];
 function listOf(a){return a.length<3?a.join(' and '):a.slice(0,-1).join(', ')+' and '+a[a.length-1]}
 function compareText(cand,own,name){
   var shared=[],more=[],less=[];
   AXES.forEach(function(ax,i){var a=ax.toLowerCase();if(cand[i]>=.4&&own[i]>=.4)shared.push(a);else if(cand[i]-own[i]>=.4)more.push(a);else if(own[i]-cand[i]>=.4)less.push(a)});
-  var out=[shared.length?'Both lists lean '+listOf(shared)+'.':'The two lists share no strong note family.'];
-  if(more.length)out.push('The new one’s notes lean more toward '+listOf(more)+'.');
-  if(less.length)out.push(esc(name)+'’s notes lean more toward '+listOf(less)+'.');
+  var out=[shared.length?'Both lean '+listOf(shared)+'.':'They share no strong note family.'];
+  if(more.length)out.push('The new one leans more toward '+listOf(more)+'.');
+  if(less.length)out.push(esc(name)+' leans more toward '+listOf(less)+'.');
   return out.join(' ');
 }
 function radar(own,cand){
@@ -1924,29 +2111,29 @@ function radar(own,cand){
     var e=pt(i,1),l=pt(i,1.22),c=Math.cos((-90+i*45)*Math.PI/180),anchor=Math.abs(c)<.2?'middle':(c>0?'start':'end');
     return '<line x1="'+cx+'" y1="'+cy+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'" style="stroke:var(--hair)"/><text x="'+l[0].toFixed(1)+'" y="'+(l[1]+4).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11" style="fill:var(--soft)">'+n+'</text>';
   }).join('');
-  return '<svg class="radar" viewBox="0 0 260 236" role="img" aria-label="Note family comparison">'+rings+axes
+  return '<svg class="radar" viewBox="0 0 260 236" role="img" aria-label="Scent profile comparison">'+rings+axes
    +'<polygon points="'+poly(own,.04)+'" style="fill:rgba(37,35,31,.10);stroke:var(--ink);stroke-width:1.6"/>'
    +'<polygon points="'+poly(cand,.04)+'" style="fill:rgba(115,118,95,.22);stroke:var(--olive);stroke-width:1.6"/></svg>';
 }
 function openCompare(){
   var text='',pick=-1;
   function results(){
-    if(!N)return '<p class="sub">Add bottles to your cabinet first, then compare against them.</p>';
-    if(!text.trim())return '<p class="sub">Type the notes from the box or the website. Arooma looks for overlap with the notes you entered for your own bottles.</p>';
+    if(!text.trim())return '<p class="sub">Type the notes from the box or the website, then see which bottle in your cabinet it overlaps with most.</p>';
     var p=profileOf(text);
     if(!p.hits.length)return '<div class="result"><b>No notes recognized</b><p>Try note names such as cedar, fig leaf, amber, musk or bergamot.</p></div>';
+    if(!N)return '<div class="result"><b>Nothing to compare with yet</b><p>Add bottles with their notes, then compare.</p></div>';
     var ranked=BOTTLES.map(function(b,i){return {i:i,o:overlap(p.v,b.dna)}}).sort(function(a,b){return b.o-a.o}).slice(0,3);
     var cur=ranked.filter(function(r){return r.i===pick})[0]||ranked[0],b=BOTTLES[cur.i];
     var list=ranked.map(function(r){var x=BOTTLES[r.i];return '<button class="prow" data-i="'+r.i+'" aria-pressed="'+(r===cur)+'"><span><b>'+esc(x.name)+'<span class="pct">'+Math.round(r.o*100)+'%</span></b><small>'+esc(x.house)+'</small></span></button>'}).join('');
-    return '<p class="sub">Recognized: '+esc(p.hits.join(', '))+'.</p><div class="cmp"><div class="fl" style="margin-top:6px">Overlap in the notes entered</div>'+list+'</div>'
+    return '<p class="sub">Recognized: '+esc(p.hits.join(', '))+'.</p><div class="cmp"><div class="fl" style="margin-top:6px">Overlap in listed notes</div>'+list+'</div>'
       +radar(b.dna,p.v)+'<div class="legend"><span><i style="background:var(--ink)"></i>'+esc(b.name)+'</span><span><i style="background:var(--olive)"></i>The new bottle</span></div>'
       +'<div class="result"><b>'+Math.round(cur.o*100)+'% overlap with '+esc(b.name)+'</b><p>'+compareText(p.v,b.dna,b.name)+'</p>'
-      +'<p>Based on listed notes only: it compares words, not smells. Skin, concentration and batch change how a scent wears. It is not proof the two are similar, and it cannot tell you whether you will enjoy it.</p></div>';
+      +'<p>Based on listed notes only. Skin, concentration and batch change how a scent wears. This does not predict whether you will like it.</p></div>';
   }
-  openPanel('<h2>Compare before you buy</h2><p class="sub">Overlap in listed notes. It cannot tell you how a scent will wear on you.</p>'
+  openPanel('<h2>Compare before you buy</h2><p class="sub">Compares the notes you type with the notes entered for your bottles. Notes only: it cannot tell you how a scent will wear on you, or whether you will like it.</p>'
    +'<label class="fl" for="cNotes">Notes of the bottle you are considering</label><input class="in" id="cNotes" autocomplete="off" maxlength="120" placeholder="cedar, fig leaf, warm milk">'
    +'<div class="chips">'+EXAMPLES.map(function(x,k){return '<button class="chip" data-ex="'+k+'">'+esc(x)+'</button>'}).join('')+'</div>'
-   +'<div id="cRes">'+results()+'</div>'+btns([['cancel','Done']]),
+   +'<div id="cRes">'+results()+'</div><div class="pbtns"><button class="btn" data-act="cancel">Done</button></div>',
   function(e){
     var ex=e.target.closest?e.target.closest('[data-ex]'):null;
     if(ex){text=EXAMPLES[+ex.getAttribute('data-ex')];$('#cNotes').value=text;pick=-1;$('#cRes').innerHTML=results();return}
@@ -1957,156 +2144,10 @@ function openCompare(){
   function(e){if(e.target.id==='cNotes'){text=e.target.value;pick=-1;$('#cRes').innerHTML=results()}});
 }
 
-/* ---- rotations: Fan presents one saved set of up to five bottles ---- */
-function openRotations(fromFan){
-  var list=ROTS.map(function(r){var n=rotIdx(r).length;return '<div class="rrow"><button class="prow" data-rot="'+r.id+'" aria-pressed="'+(r.id===(activeRot()||{}).id&&mode==='fan')+'"><span><b>'+esc(r.name)+'</b><small>'+n+(n===1?' bottle':' bottles')+'</small></span><i aria-hidden="true">&rsaquo;</i></button><button class="lnk" data-redit="'+r.id+'" aria-label="Edit '+esc(r.name)+'">Edit</button></div>'}).join('');
-  openPanel('<h2>Rotations</h2><p class="sub">'+(ROTS.length?'Fan shows one saved rotation: up to five bottles you wear together. Pick one to see it in Fan.':(fromFan?'Fan shows a saved rotation. Make one first: up to five bottles you wear together, like Evenings or Travel.':'No rotations yet. Make one: up to five bottles you wear together.'))+'</p>'
-   +list+btns([['cancel','Done'],['newrot','New rotation','primary']]),
-  function(e){
-    var r=e.target.closest?e.target.closest('[data-rot]'):null;
-    if(r){rotId=r.getAttribute('data-rot');closePanel();if(mode!=='fan'){mode='fan';setModeButtons()}slots.forEach(unflip);refreshView();render();settleFx();saveUI();return}
-    var ed=e.target.closest?e.target.closest('[data-redit]'):null;
-    if(ed){openRotEditor(ROTS.filter(function(x){return x.id===ed.getAttribute('data-redit')})[0]);return}
-    var a=actOf(e);
-    if(a==='cancel')closePanel();else if(a==='newrot'){if(!N){toast('Add a bottle first.');return}openRotEditor()}
-  });
-}
-function openRotEditor(r){
-  var edit=!!r;
-  if(!edit&&ROTS.length>=MAXROT){toast('Keep it to '+MAXROT+' rotations.');return}
-  var picked=edit?rotIdx(r).map(function(i){return BOTTLES[i].id}):(sel>=0?[BOTTLES[sel].id]:[]);
-  function rows(){
-    return SHELVES.map(function(h){
-      var items=BOTTLES.filter(function(b){return b.shelf===h.id});if(!items.length)return '';
-      return '<div class="fl">'+esc(h.name)+'</div>'+items.map(function(b){var k=picked.indexOf(b.id);return '<button class="prow chk" data-pick="'+b.id+'" aria-pressed="'+(k>-1)+'"><span><b>'+esc(b.name)+'</b><small>'+esc(b.house)+'</small></span><i aria-hidden="true">'+(k>-1?k+1:'')+'</i></button>'}).join('');
-    }).join('');
-  }
-  openPanel('<h2>'+(edit?'Edit rotation':'New rotation')+'</h2><p class="sub">Up to five bottles, in the order you pick them. <span id="rCount">'+picked.length+' of 5</span></p>'
-   +'<label class="fl" for="rName">Name</label><input class="in" id="rName" maxlength="28" autocomplete="off" autocapitalize="words" placeholder="For example, Evenings" value="'+(edit?esc(r.name):'')+'">'
-   +'<p class="err" id="rErr" role="alert"></p><div id="rList">'+rows()+'</div>'
-   +btns([['cancel','Cancel'],['saveR','Save rotation','primary']])+(edit?rowHtml('delR','Delete this rotation','The bottles stay where they are. You can undo for a few seconds','danger'):''),
-  function(e){
-    var p=e.target.closest?e.target.closest('[data-pick]'):null;
-    if(p){
-      var id=p.getAttribute('data-pick'),k=picked.indexOf(id);
-      if(k>-1)picked.splice(k,1);else{if(picked.length>=ROTMAX){$('#rErr').textContent='A rotation holds up to five bottles.';return}picked.push(id)}
-      $('#rErr').textContent='';$('#rList').innerHTML=rows();$('#rCount').textContent=picked.length+' of 5';return;
-    }
-    var a=actOf(e);
-    if(a==='cancel')closePanel();
-    else if(a==='saveR'){
-      var name=$('#rName').value.trim();
-      if(!name){$('#rErr').textContent='Give the rotation a name.';$('#rName').focus();return}
-      if(!picked.length){$('#rErr').textContent='Pick at least one bottle.';return}
-      if(edit){r.name=name.slice(0,28);r.ids=picked.slice()}else{r={id:uid('r'),name:name.slice(0,28),ids:picked.slice()};ROTS.push(r)}
-      rotId=r.id;saveState();closePanel();
-      if(mode!=='fan'){mode='fan';setModeButtons()}
-      if(sel<0||picked.indexOf(BOTTLES[sel].id)<0)sel=idxOfId(picked[0]);
-      slots.forEach(unflip);syncShelf();render();updateInfo();settleFx();saveUI();haptic('complete');toast('Saved '+r.name+'.');
-    }
-    else if(a==='delR'){
-      var at=ROTS.indexOf(r);ROTS.splice(at,1);if(rotId===r.id)rotId=ROTS[0]?ROTS[0].id:null;
-      if(mode==='fan'&&!activeRot()){mode='flow';setModeButtons()}
-      saveState();closePanel();refreshView();render();saveUI();
-      toast('Deleted '+r.name+'.',{label:'Undo',fn:function(){ROTS.splice(Math.min(at,ROTS.length),0,r);saveState();refreshView();render()}});
-    }
-  });
-}
-
-/* ---- find a bottle by house or fragrance ---- */
-function norm(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
-function openFind(){
-  function results(q){
-    q=norm(q.trim());
-    if(!q)return '<p class="sub">Type part of a house or fragrance name.</p>';
-    var hits=[];BOTTLES.forEach(function(b,i){if(norm(b.name+' '+b.house).indexOf(q)>-1)hits.push(i)});
-    if(!hits.length)return '<p class="sub">Nothing matches.</p>';
-    return hits.slice(0,40).map(function(i){var b=BOTTLES[i];return '<button class="prow" data-go="'+i+'"><span><b>'+esc(b.name)+'</b><small>'+esc(b.house)+' &middot; '+esc(shelfName(b.shelf))+'</small></span><i aria-hidden="true">&rsaquo;</i></button>'}).join('')
-      +(hits.length>40?'<p class="sub">and '+(hits.length-40)+' more. Type more of the name.</p>':'');
-  }
-  openPanel('<h2>Find a bottle</h2><label class="fl" for="qFind">House or fragrance</label><input class="in" id="qFind" type="search" autocomplete="off" enterkeyhint="search" maxlength="40">'
-   +'<div id="qRes">'+results('')+'</div>'+btns([['cancel','Done']]),
-  function(e){
-    var g=e.target.closest?e.target.closest('[data-go]'):null;
-    if(g){var i=+g.getAttribute('data-go');closePanel();if(Z>.5)zoomToBottle(i);else select(i);return}
-    if(actOf(e)==='cancel')closePanel();
-  },
-  function(e){if(e.target.id==='qFind')$('#qRes').innerHTML=results(e.target.value)});
-  setTimeout(function(){var q=$('#qFind');if(q){try{q.focus()}catch(e){}}},60);
-}
-document.addEventListener('keydown',function(e){
-  if(e.key!=='/'||/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||'')||panel.classList.contains('on')||!DB.active)return;
-  e.preventDefault();openFind();
-});
-
-/* ---- backup and restore: a JSON file the owner keeps. Nothing leaves the device unless they send it. ---- */
-function backupData(){var s=snapshot();return {app:'Arooma',kind:'backup',schema:SCHEMA,exportedAt:new Date().toISOString(),collection:{shelves:s.shelves,bottles:s.bottles,rots:s.rots}}}
-function deliverFile(blob,name,title,done){
-  var file=null;try{file=new File([blob],name,{type:blob.type})}catch(e){}
-  if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-    return navigator.share({files:[file],title:title}).then(function(){haptic('complete');if(done)done()},function(err){if(!err||err.name!=='AbortError')toast('Could not open the share sheet')});
-  }
-  var url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(function(){URL.revokeObjectURL(url)},4000);haptic('complete');if(done)done();
-  return Promise.resolve();
-}
-function doBackup(){
-  if(DB.active!=='own')return;
-  var data=backupData(),blob=new Blob([JSON.stringify(data)],{type:'application/json'}),name='arooma-backup-'+todayStr()+'.json';
-  deliverFile(blob,name,'Arooma backup',function(){META.backupAt=todayStr();META.changes=0;writeDB();toast('Backup saved: '+N+(N===1?' bottle':' bottles')+'. Keep the file somewhere safe.')});
-}
-function parseBackup(text){
-  var o;try{o=JSON.parse(text)}catch(e){return {err:'That file is not a backup Arooma can read.'}}
-  if(!o||o.app!=='Arooma'||o.kind!=='backup'||typeof o.schema!=='number'||!o.collection||!Array.isArray(o.collection.bottles))return {err:'That file is not an Arooma backup.'};
-  if(o.schema>SCHEMA)return {err:'This backup was made by a newer version of Arooma.'};
-  var c=cleanCol(o.collection);if(!c)return {err:'Nothing in that backup could be read.'};
-  return {col:c,at:typeof o.exportedAt==='string'?o.exportedAt.slice(0,10):null,photos:c.bottles.filter(function(b){return b.photo}).length};
-}
-$('#importFile').addEventListener('change',function(e){
-  var f=e.target.files&&e.target.files[0];if(!f)return;
-  if(f.size>40*1024*1024){toast('That file is too large to be a backup.');return}
-  var r=new FileReader();r.onload=function(){openImportReview(parseBackup(String(r.result)))};r.onerror=function(){toast('Could not read that file.')};r.readAsText(f);
-});
-function openImportReview(p){
-  if(p.err){openPanel('<h2>Can’t restore</h2><p class="sub">'+p.err+' Nothing was changed.</p>'+btns([['cancel','OK','primary']]),function(e){if(actOf(e))closePanel()});return}
-  var c=p.col,own=DB.own?(DB.active==='own'?N:DB.own.bottles.length):0;
-  var ex={};if(DB.active==='own')BOTTLES.forEach(function(b){ex[b.id]=1});else if(DB.own)DB.own.bottles.forEach(function(b){ex[b.id]=1});
-  var fresh=c.bottles.filter(function(b){return !ex[b.id]}).length;
-  openPanel('<h2>Restore a backup</h2><p class="sub">'+(p.at&&DATE_RE.test(p.at)?'Made '+fmtDate(p.at)+'. ':'')+'It holds '+c.bottles.length+(c.bottles.length===1?' bottle':' bottles')+' on '+c.shelves.length+(c.shelves.length===1?' shelf':' shelves')+', '+c.rots.length+(c.rots.length===1?' rotation':' rotations')+' and '+p.photos+(p.photos===1?' photo':' photos')+'.'
-   +(c.dropped?' '+c.dropped+(c.dropped===1?' entry':' entries')+' could not be read and will be skipped.':'')+' It goes into your own collection, never the demo.</p>'
-   +rowHtml('merge','Add to my collection',fresh+(fresh===1?' new bottle is':' new bottles are')+' added. Bottles you already have stay as they are')
-   +rowHtml('replace','Replace my collection','Your current '+own+(own===1?' bottle is':' bottles are')+' removed and the backup takes their place','danger')
-   +btns([['cancel','Cancel']]),
-  function(e){var a=actOf(e);if(!a)return;
-    if(a==='cancel')closePanel();
-    else if(a==='merge'){closePanel();applyImport(c,false)}
-    else if(a==='replace')confirmPanel('Replace your collection?','Your '+own+(own===1?' bottle':' bottles')+' will be replaced by the '+c.bottles.length+' in the backup. Back up first if you are not sure.','Replace',function(){applyImport(c,true)});
-  });
-}
-function applyImport(c,replace){
-  if(DB.active!=='own'){mount('own')}
-  var added=0,kept=0;
-  if(replace){
-    DB.own={shelves:c.shelves,bottles:c.bottles,rots:c.rots,meta:{backupAt:META.backupAt,changes:0}};
-    try{var u=loadUI();delete u.own;localStorage.setItem(UI_KEY,JSON.stringify(u))}catch(e){}
-    mount('own');added=N;
-  }else{
-    var base=snapshot(),ids={},sh={};
-    base.bottles.forEach(function(b){ids[b.id]=1});base.shelves.forEach(function(h){sh[h.id]=1});
-    c.shelves.forEach(function(h){if(!sh[h.id]&&base.shelves.length<MAXSH){base.shelves.push(h);sh[h.id]=1}});
-    c.bottles.forEach(function(b){if(ids[b.id]){kept++;return}if(base.bottles.length>=MAXN)return;if(!sh[b.shelf])b.shelf=base.shelves[0].id;base.bottles.push(b);ids[b.id]=1;added++});
-    var rid={};base.rots.forEach(function(r){rid[r.id]=1});
-    c.rots.forEach(function(r){if(!rid[r.id]&&base.rots.length<MAXROT)base.rots.push(r)});
-    DB.own=cleanCol(base);mount('own');
-  }
-  saveState();saveUI();haptic('complete');
-  toast(replace?'Restored '+added+(added===1?' bottle':' bottles')+' from the backup.':'Added '+added+(added===1?' bottle':' bottles')+(kept?'. '+kept+' were already here':'')+'.');
-}
-
-$('#addBtn').addEventListener('click',function(){if(!DB.active)return;openBottleForm()});
-$('#menu').addEventListener('click',function(){if(!DB.active)return;openMenu()});
+$('#addBtn').addEventListener('click',function(){openAdd()});
+$('#menu').addEventListener('click',openMenu);
 $('#bMenu').addEventListener('click',openBottleMenu);
+
 
 /* ---------- all shelves: pinch out to see every shelf, pinch in to go back ---------- */
 /* Paths to the same thing: pinch (touch), ctrl+wheel (trackpad), WebKit gesture events, the header Shelves button,
@@ -2148,13 +2189,36 @@ function pickInShelf(id){
   for(var i=0;i<BOTTLES.length;i++)if(BOTTLES[i].shelf===id)return i;
   return -1;
 }
-function goTo(i){if(i===sel||!BOTTLES[i])return;slots.forEach(unflip);sel=i;syncShelf();render();updateInfo();saveUI()}
+function goTo(i){if(i===sel||!BOTTLES[i])return;slots.forEach(unflip);sel=i;syncShelf();render();updateInfo()}
 function shelfAtPoint(x,y){var el=document.elementFromPoint(x,y),h=el&&el.closest?el.closest('.shelf'):null;return h?h.getAttribute('data-id'):curShelf}
-function canZoom(){return introDone&&!!DB.active&&!panel.classList.contains('on')&&!$('#sheet').classList.contains('on')}
+function canZoom(){return introDone&&!panel.classList.contains('on')&&!$('#sheet').classList.contains('on')}
 
 /* the overview: every shelf as a row of miniature bottles. Bottles keep their true liquid level. */
 var PENCIL='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 3.8l3 3L7.4 15.6l-3.9.9.9-3.9z"/><path d="M11.6 5.4l3 3"/></svg>';
+/* search: every term must appear in the house or the name; accents and case are ignored */
+var findIn=$('#findIn'),Q='';
+function norm(t){t=String(t);return (t.normalize?t.normalize('NFD').replace(/[\u0300-\u036f]/g,''):t).toLowerCase()}
+function terms(q){return norm(q).split(/\s+/).filter(Boolean)}
+function findHits(q){var ts=terms(q);if(!ts.length)return [];var out=[];BOTTLES.forEach(function(b,i){var h=norm(b.house+' '+b.name);if(ts.every(function(t){return h.indexOf(t)>-1}))out.push(i)});return out}
+function hl(text,t){var k=t?norm(text).indexOf(t):-1;if(k<0||norm(text).length!==text.length)return esc(text);return esc(text.slice(0,k))+'<mark>'+esc(text.slice(k,k+t.length))+'</mark>'+esc(text.slice(k+t.length))}
+function renderHits(){
+  ovBuilt=true;LQ.dropGroup('ov');
+  var hits=findHits(Q),t=terms(Q).sort(function(a,b){return b.length-a.length})[0]||'';
+  overScroll.innerHTML=hits.length?'<p class="sub" style="margin:0 2px 8px" role="status">'+hits.length+(hits.length===1?' bottle matches':' bottles match')+'</p>'+hits.slice(0,80).map(function(i){var b=BOTTLES[i];
+      return '<button class="hit" data-b="'+i+'"><span class="mb" aria-hidden="true">'+b.draw('f'+b.id,b.left)+'</span><span><b>'+hl(b.name,t)+'</b><small>'+hl(b.house,t)+' &middot; <i>'+esc(shelfName(b.shelf))+'</i>'+(b.low?' &middot; running low':'')+'</small></span></button>'}).join('')
+    :'<p class="nohit" role="status">Nothing on your shelves matches &ldquo;'+esc(Q.trim())+'&rdquo;.</p>';
+  $$('.lq',overScroll).forEach(function(p){LQ.regStatic(p,'ov')});
+}
+findIn.addEventListener('input',function(){Q=findIn.value;$('#findX').classList.toggle('on',!!Q);buildOver();overScroll.scrollTop=0});
+$('#findX').addEventListener('click',function(){findIn.value='';Q='';$('#findX').classList.remove('on');buildOver();try{findIn.focus()}catch(_){}});
+findIn.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&findIn.value){e.preventDefault();e.stopPropagation();clearFind();buildOver();try{findIn.focus()}catch(_){}}
+  else if(e.key==='Enter'){var h=findHits(Q);if(h.length===1){e.preventDefault();clearFind();zoomToBottle(h[0])}else findIn.blur()}
+});
+function clearFind(){Q='';findIn.value='';$('#findX').classList.remove('on');if(document.activeElement===findIn)findIn.blur()}
+function openFind(){if(!introDone)return;openOver();setTimeout(function(){try{findIn.focus()}catch(_){}},RM?0:420)}
 function buildOver(){
+  if(Q.trim()){renderHits();return}
   ovBuilt=true;LQ.dropGroup('ov');
   var per=Math.max(4,Math.floor(((overScroll.clientWidth||366)-56+6)/46)),h='';
   SHELVES.forEach(function(sh){
@@ -2168,7 +2232,7 @@ function buildOver(){
     else for(var k=0;k<idxs.length;k+=per){
       h+='<div class="tier">'+idxs.slice(k,k+per).map(function(i){
         var b=BOTTLES[i];
-        return '<button class="mb'+(i===sel?' is-sel':'')+'" data-b="'+i+'" aria-label="'+esc(b.house+', '+b.name)+(i===sel?', selected':'')+'">'+art(b,'o'+b.id)+'</button>';
+        return '<button class="mb'+(i===sel?' is-sel':'')+'" data-b="'+i+'" aria-label="'+esc(b.house+', '+b.name)+(i===sel?', selected':'')+'">'+b.draw('o'+b.id,b.left)+'</button>';
       }).join('')+'</div><div class="pl"></div>';
     }
     h+='</section>';
@@ -2179,7 +2243,7 @@ function buildOver(){
 overScroll.addEventListener('click',function(e){
   if(performance.now()<noClickUntil)return;
   var t=e.target.closest?e.target.closest('button'):null;if(!t)return;
-  if(t.getAttribute('data-b')!==null)zoomToBottle(+t.getAttribute('data-b'));
+  if(t.getAttribute('data-b')!==null){if(t.classList.contains('hit'))clearFind();zoomToBottle(+t.getAttribute('data-b'))}
   else if(t.getAttribute('data-open'))zoomInto(t.getAttribute('data-open'));
   else if(t.getAttribute('data-pen'))openRename(t.getAttribute('data-pen'));
   else if(t.getAttribute('data-addto'))openAdd(t.getAttribute('data-addto'));
@@ -2190,14 +2254,13 @@ function openOver(){
   var cur=$('.shelf.cur',overScroll);if(cur)overScroll.scrollTop=Math.max(0,cur.offsetTop-8);
   tweenZ(1,640);
 }
-function closeOver(){tweenZ(0,560)}
+function closeOver(){clearFind();tweenZ(0,560)}
 function toggleOver(){if(Z>.5)closeOver();else openOver()}
 function zoomToBottle(i){goTo(i);tweenZ(0,560)}
-function zoomInto(id){var k=pickInShelf(id);if(k<0){showShelf(id);tweenZ(0,560);return}zoomToBottle(k)}
+function zoomInto(id){var k=pickInShelf(id);if(k<0){openAdd(id);return}zoomToBottle(k)}
 $('#shelvesBtn').addEventListener('click',toggleOver);
 $('#addShelf').addEventListener('click',function(){openNewShelf()});
 $('#openShelf').addEventListener('click',function(){zoomInto(curShelf)});
-$('#findBtn').addEventListener('click',function(){openFind()});
 
 /* gestures. zs is the zoom in progress, pz the pinch driving it. */
 function zoomStart(mx,my){
@@ -2206,14 +2269,14 @@ function zoomStart(mx,my){
   if(zs.from===0){slots.forEach(unflip);buildOver();fitOver()}
   else{
     var id=shelfAtPoint(mx,my),k=pickInShelf(id);zs.target=id;
-    if(k<0)zs.empty=id;else goTo(k);
+    if(k<0)zs.blocked=true;else goTo(k);
   }
 }
 function pinchTo(scale){if(zs)setZ(zs.z0+(1-scale)/.5)}
 function zoomFinish(){
   var z=zs;zs=null;
   var to=z&&z.from===1?(Z<.7?0:1):(Z>.3?1:0);
-  if(z&&z.empty&&to===0)showShelf(z.empty);
+  if(z&&z.blocked&&to===0){to=1;toast('That shelf is empty. Tap Add a bottle on it.')}
   if(z&&z.from===1&&to===1&&z.prevSel!==sel)goTo(z.prevSel);
   tweenZ(to,380);
 }
@@ -2263,7 +2326,8 @@ dev.addEventListener('wheel',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape')return;
   if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||''))return;
-  if(e.key==='-'||e.key==='_'){if(Z<.5)openOver()}
+  if(e.key==='/'&&!e.metaKey&&!e.ctrlKey){e.preventDefault();openFind()}
+  else if(e.key==='-'||e.key==='_'){if(Z<.5)openOver()}
   else if(e.key==='='||e.key==='+'){if(Z>.5)closeOver()}
 });
 
@@ -2325,20 +2389,17 @@ function openMove(){
   });
 }
 function moveBottle(b,id){
-  var from=b.shelf,fromIdx=BOTTLES.indexOf(b);
-  placeOnShelf(b,id);saveState();render();updateInfo();saveUI();
-  toast('Moved '+b.name+' to '+shelfName(id)+'.',{label:'Undo',fn:function(){
-    var cur=BOTTLES.indexOf(b);if(cur<0)return;
-    if(shelfById(from))b.shelf=from;moveIndex(cur,Math.min(fromIdx,N-1));
-    sel=BOTTLES.indexOf(b);slots.forEach(unflip);renumber();shelfChanged();saveState();render();updateInfo();saveUI();
-  }});
+  var from=b.shelf;b.shelf=id;
+  function after(){saveState();renumber();shelfChanged();render();updateInfo()}
+  after();
+  toast('Moved '+b.name+' to '+shelfName(id)+'.',{label:'Undo',fn:function(){if(shelfById(from))b.shelf=from;after()}});
 }
 panelBody.addEventListener('keydown',function(e){
   if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;
   var b=$('[data-act="save"]',panelBody);if(b){e.preventDefault();b.click()}
 });
 function maybeShowPinchHint(){
-  if(!DB.active||lsGet('arooma-pinch')==='1'||Z>.5||panel.classList.contains('on')||SHELVES.length<2)return;
+  if(lsGet('arooma-pinch')==='1'||Z>.5||panel.classList.contains('on')||SHELVES.length<2)return;
   lsSet('arooma-pinch','1');toast('Pinch to see every shelf');
 }
 
@@ -2362,18 +2423,17 @@ function maybeShowInstallHint(){
   var el=$('#a2hs');
   if(!isIOS||standalone||lsGet('arooma-a2hs')==='1')return;
   el.classList.add('show');
-  requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('in')})});
+  requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('vis')})});
 }
 $('#a2hsx').addEventListener('click',function(){
-  lsSet('arooma-a2hs','1');var el=$('#a2hs');el.classList.remove('in');
+  lsSet('arooma-a2hs','1');var el=$('#a2hs');el.classList.remove('vis');
   setTimeout(function(){el.classList.remove('show')},600);
 });
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 }
 
-fit();geo();fitOver();setZ(0);
-if(DB.active){mount(DB.active);if(DB.migrated){delete DB.migrated;writeDB()}}else{showWelcome(true);updateCounts();setFanState();render();updateInfo();updateTestBtn()}
+fit();geo();fitOver();setZ(0);updateCounts();setFanState();updateEmpty();markPick();render();updateInfo();updateTestBtn();resumeTest();
 openT=setTimeout(openCabinet,RM?0:1700);
 })();
 </script>

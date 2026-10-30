@@ -5,28 +5,16 @@
 Spec and acceptance report: [docs/design/specs/2026-10-29-polish-pass.md](docs/design/specs/2026-10-29-polish-pass.md).
 
 **Changed**
-- First run asks: Start my collection (empty) or Explore the demo. The demo is labeled and stored apart.
-- Storage schema 3 (`own` and `demo` collections, rotations, photos, impressions). v1 and v2 saves migrate on load and are written back.
-- Every bottle can be deleted, including the last. Empty shelves have a proper empty state.
-- Back up to a JSON file; restore with validation and an explicit merge or replace.
-- Find across shelves (`/`). Pencil on the selected card for edit.
-- Optional impressions on each wear; recent wears on the record; honest pick reasons.
-- Owner photos per bottle, cropped to cover with zoom and position.
-- Stack is today's shortlist. Fan presents a saved rotation of up to five.
+- First run asks: Start my collection (empty) or Explore demo. The demo is labelled and stored apart (`arooma.cabinet`, `arooma.demo`, `arooma.prefs`).
+- Storage schema 3. v1 and v2 saves, and saves from the short-lived parallel build (648a506), migrate once; `arooma.v1` is never modified.
+- Every bottle can be deleted, including the last. The empty cabinet offers Add a bottle and Restore a backup.
+- Backup to one JSON file; restore shows what the file holds, then replace (confirmed) or add.
+- Search in All shelves (`/`), Edit details in the bottle menu and on the record, added and moved bottles go to the end of their shelf.
+- Optional impressions on each wear, recent wears on the record, Daily Pick reasons from your own log.
+- Owner photos on the shared table, aspect ratio kept, with a level window whose liquid is coloured from the photo and moves like every other bottle.
+- Fan presents a saved rotation of three. Testing session check-ins at 20 minutes and 2 hours; the 30 s default is gone.
+- Persistent-storage request, storage usage in Backup, a weekly-at-most backup reminder at five bottles.
 - Wording: Estimated remaining, Authenticity notes, overlap in listed notes.
-- Timer: in-app aid, check-ins at 15 min, 1 h, 3 h. The 30 s default is gone.
-- Haptics: none on flips; added for a due check-in and a saved backup.
-- Closing a panel resets page scroll left by a focused input.
 
-**Decided**
-- Clay is the single accent, used only for states. No new colors.
-- Photos skip the liquid simulation; the estimate stays in text.
-- Backup goes through the share sheet when available, otherwise a download. No network.
-- Bottle cap raised from 40 to 150; photos are 640 px JPEG to stay inside `localStorage`.
-
-**Deferred**
-- Real Dynamic Island and widgets (native build).
-- IndexedDB for photos at scale, night palette, device testing (checklist in the spec, untested).
-
-**Tests**
-- `tests/smoke.cjs` enters the demo through the new first run and adds checks for every acceptance ID it can exercise in Chromium: empty start, migration, delete-last, backup round-trip, merge, invalid files, search, edit, photos, impressions, rotations, Stack, timer and a 60-bottle shelf. The liquid swipe check takes the best of three swipes because swipe timing is unreliable on a loaded runner.
+**Superseded**
+- The parallel polish pass (648a506) was replaced by this one at the owner's direction. Its commit stays in history.

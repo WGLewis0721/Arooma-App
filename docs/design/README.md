@@ -30,7 +30,7 @@ Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
-| A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
+| Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6; this is **not** the normal cabinet card style |\n| A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
 | The shelf, cards, bottle art, layouts, Daily Pick, low stock, ownership record, test timer, share image | [packs/shelf-change.md](packs/shelf-change.md) | [brand/BRAND_BOARD.md](brand/BRAND_BOARD.md) sections named in the pack |
 | Layout for iPhone or iPad, safe areas, Home Screen install, status bar, App Store screenshots | [packs/device-layout.md](packs/device-layout.md) | The Spread device guides named in the pack |
 | Making the UI feel native: materials, color, sheets, motion | [packs/apple-native-feel.md](packs/apple-native-feel.md) | [platforms/APPLE_DESIGN_PRINCIPLES.md](platforms/APPLE_DESIGN_PRINCIPLES.md) |
@@ -55,7 +55,7 @@ All paths are under `docs/design/`.
 | AI_TOOL_SETUP.md | How AI tools reach these documents | Advisory. Vendor file conventions not re-verified |
 | specs/ (README.md is the index) | One spec per request | Plans, not approval |
 | packs/ | One digest per kind of task | Derived. The long documents win if they differ |
-| tokens.json | Design tokens | Generated from `index.html` |
+| packs/collectible-image-generation.md | Task instructions for AI-generated collectible art, not production cabinet cards | Task pack, derived from the collectible guide |\n| brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Owner-approved quiet Archive Foil **concept image** composition, prompt, source ledger and QA | Highest only for the optional collectible image asset; does not override Warm Archive app UI |\n| tokens.json | Design tokens | Generated from `index.html` |
 | brand/BRAND_BOARD.md | Palette, type, materials, motion, icon, share image, low stock, daily pick | Highest for visual and motion decisions |
 | brand/ICON_HANDOFF.md | Icon files, generation and placement | Highest for icon files |
 | platforms/APPLE_DESIGN_PRINCIPLES.md | Native feel: materials, color, sheets | Advisory, below the brand board. Apple facts carried over from Spread, not re-read |
@@ -66,7 +66,7 @@ All paths are under `docs/design/`.
 
 ## 4. Where the design truth lives in code
 
-All in `index.html`:
+All current app behavior is in `index.html`. The Archive Foil collectible visual standard is **documentation only**, with no runtime integration.\n\nAll in `index.html`:
 - Tokens: the `:root` block at the top of the `<style>`. Read them as data in [tokens.json](tokens.json).
 - Bottle art: `bLinen`, `bInk`, `bFig`, `bMilk`, `bCedar`, `bSmoke`, `bEarth` (SVG, one per material family). Sample data: `BOTTLES`.
 - Layouts: `place` (Cover Flow and Stack) and `fanPlace` (Fan). One DOM, three arrangements.

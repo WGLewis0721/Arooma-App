@@ -1527,7 +1527,7 @@ function updateInfo(){
     $('#meta').innerHTML=lastTxt+' &middot; '+left;
     w.classList.toggle('done',wornToday(b));
     if(wornToday(b)){w.disabled=true;w.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.5"/></svg>Worn today'}
-    else{w.disabled=false;w.textContent=MODE==='demo'&&CARDS[b.id]?'Add to my collection':'Wear today'}
+    else{w.disabled=false;w.textContent=MODE==='demo'&&CARDS[b.id]?'Add to Mine':'Wear today'}
     var today=wornToday(b),x=today?b.imp[todayStr()]:null;
     ib.classList.toggle('on',today);
     ib.textContent=x?'Today: '+impText(x)+'. Edit ›':'Add how it wore today ›';
@@ -1797,7 +1797,7 @@ function openCabinet(){
   if(cab.classList.contains('gone'))return;
   clearTimeout(openT);cab.classList.add('gone','open');dim.classList.add('off');
   introDone=true;stage.classList.add('lit');render();
-  setTimeout(maybeShowInstallHint,3200);
+  // Installation is an explicit menu choice, never an unsolicited overlay on a card.
   setTimeout(maybeRemindBackup,3600);
   return;
   if(cab.classList.contains('open'))return;
@@ -1863,7 +1863,7 @@ function footTxt(){var V=shareList().length;return shareRot()?NUMW[V]+(V===1?' b
 /* shelf bookkeeping after any add, delete, move or mode change */
 function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;var label='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');if($('.num',el))$('.num',el).innerHTML=label;if($('.rec-no',el))$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
 function updateCounts(){
-  var quick=$('#demoQuick');if(quick)quick.textContent=MODE==='demo'?'My collection':'Demo';
+  var quick=$('#demoQuick');if(quick)quick.textContent=MODE==='demo'?'Mine':'Demo';
   var demo=MODE==='demo',cnt=pad(N)+(N===1?' object':' objects');
   $('#eyebrow').innerHTML=!MODE?'Arooma &middot; personal cabinet':(demo?'Demo':'The cabinet')+' &middot; '+cnt;
   $('#device').classList.toggle('is-demo',demo);
@@ -1975,6 +1975,7 @@ function openMenu(){
    +rowHtml('compare','Compare notes before buying','Overlap between notes you type and the notes on your bottles')
    +rowHtml('share','Share shelf image','An editorial picture of the shelf, no app chrome')
    +rowHtml('backup','Backup and restore',PREFS.backupAt?'Kept on this device only. Last export '+fmtDate(PREFS.backupAt):'Kept on this device only. No backup exported yet')
+   +rowHtml('install','Install Arooma','Show Add to Home Screen instructions')
    +(demo?rowHtml('reset','Reset the demo','Restore the collectible cards and samples'):(MODE?rowHtml('demo','Explore the demo collection','Curated collectible cards and fictional samples, separate from yours'):''))
    +(samples?rowHtml('samples','Remove sample bottles','Sample bottles from an earlier version are on your shelves'):'')
    +(MODE==='own'&&N?rowHtml('clear','Clear my collection','Remove every bottle from this device','danger'):'')
@@ -1986,6 +1987,7 @@ function openMenu(){
     else if(a==='compare')openCompare();
     else if(a==='share'){closePanel();openSheet()}
     else if(a==='backup')openBackup();
+    else if(a==='install'){closePanel();lsSet('arooma-a2hs','0');maybeShowInstallHint()}
     else if(a==='demo')confirmLoadDemo();
     else if(a==='reset')confirmResetDemo();
     else if(a==='samples')confirmRemoveSamples();

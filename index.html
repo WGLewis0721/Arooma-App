@@ -987,10 +987,38 @@ function loadOwn(){return cleanState(readJSON(KEY_OWN))}
 function loadDemo(){return cleanState(readJSON(KEY_DEMO))||demoState()}
 var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null,remindAt:DATE_RE.test(p.remindAt)?p.remindAt:null}})();
 function savePrefs(){try{localStorage.setItem(KEY_PREFS,JSON.stringify(PREFS))}catch(e){}}
-/* migration from v1 and v2: one way, once, and the old key is never deleted */
+/* A parallel build (main at 648a506, live for a few minutes on 2026-10-29) wrote its own v3 into arooma.v1:
+   {v:3, active, own:{shelves,bottles,rots,meta}, demo:{...}}. Its impressions used words (close, short) and its photos a
+   cover crop. This maps that shape onto ours so nothing saved there is lost; photo positions reset to the defaults. */
+function fromParallel(c){
+  if(!c||typeof c!=='object'||!Array.isArray(c.bottles))return null;
+  var P={close:1,moderate:2,strong:3},L={short:1,medium:2,long:3};
+  var bottles=c.bottles.map(function(b){
+    if(!b||typeof b!=='object')return b;
+    var o={};for(var k in b)o[k]=b[k];
+    var imp={};if(b.imp&&typeof b.imp==='object')Object.keys(b.imp).forEach(function(d){var m=b.imp[d]||{};imp[d]={o:m.o||'',dv:[m.d,m.n].filter(Boolean).join('. '),p:P[m.p]||0,l:L[m.l]||0,at:d}});
+    o.imp=imp;o.img=b.photo&&typeof b.photo.src==='string'?{src:b.photo.src,x:0,y:0,s:1}:null;delete o.photo;
+    return o;
+  });
+  var r=Array.isArray(c.rots)&&c.rots[0]&&Array.isArray(c.rots[0].ids)?c.rots[0].ids.slice(0,3):[];
+  return cleanState({v:3,shelves:c.shelves,bottles:bottles,rot:r});
+}
+/* migration from v1 and v2 (and the parallel v3): one way, once, and the old key is never deleted */
 (function migrate(){
   if(readJSON(KEY_OWN))return;
-  var old=cleanState(readJSON(KEY_V1));if(!old)return;
+  var raw=readJSON(KEY_V1);
+  if(raw&&raw.v===3&&(raw.own||raw.demo)){
+    var o=fromParallel(raw.own),d=fromParallel(raw.demo);
+    try{
+      if(o)localStorage.setItem(KEY_OWN,JSON.stringify({v:SCHEMA,shelves:o.shelves,bottles:o.bottles,rot:o.rot}));
+      if(d&&!readJSON(KEY_DEMO))localStorage.setItem(KEY_DEMO,JSON.stringify({v:SCHEMA,shelves:d.shelves,bottles:d.bottles,rot:d.rot}));
+    }catch(e){return}
+    var bk=raw.own&&raw.own.meta&&DATE_RE.test(raw.own.meta.backupAt)?raw.own.meta.backupAt:null;
+    if(!PREFS.mode&&(raw.active==='own'||raw.active==='demo'))PREFS.mode=raw.active==='own'&&!o?null:raw.active;
+    if(bk&&!PREFS.backupAt)PREFS.backupAt=bk;
+    savePrefs();return;
+  }
+  var old=cleanState(raw);if(!old)return;
   try{localStorage.setItem(KEY_OWN,JSON.stringify({v:SCHEMA,shelves:old.shelves,bottles:old.bottles,rot:old.rot}))}catch(e){return}
   if(!PREFS.mode){PREFS.mode='own';savePrefs()}
 })();

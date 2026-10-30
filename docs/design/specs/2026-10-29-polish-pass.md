@@ -55,9 +55,9 @@ Search: a header button (rejected: a fourth header button truncates the title at
 - **First run:** doors open on a paper card, "Your cabinet is open", with Start my collection and Explore demo.
 - **Empty cabinet:** a card with Add a bottle, Restore a backup, Explore the demo instead. Layouts and Daily Pick wait.
 - **Header:** All shelves and search, Add, Cabinet menu. The eyebrow reads "Demo · 07 objects" in the demo.
-- **Cabinet menu:** (demo: Back to my collection), Find a bottle, Compare, Share, Backup and restore, Explore the demo or Reset the demo, Remove sample bottles (only if an old save mixed them in), Clear my collection, Replay the doors.
-- **Bottle menu:** Edit details, Wear history, Add to or Remove from rotation, Move, Authenticity notes, Delete.
-- **Info area:** reason, notes, Last worn and Estimated remaining, Wear today, Test, More; after a wear, "Add how it wore".
+- **Cabinet menu:** a plain storage line (saved on this device, nothing uploaded, last backup), (demo: Back to my collection), Find a bottle, Rotations, Compare, Share, Backup and restore, Explore the demo or Reset the demo, Remove sample bottles (only if an old save mixed them in), Clear my collection, Replay the doors.
+- **Bottle menu:** Edit details, Wear history, Rotations, Move, Authenticity notes, Delete. The selected card also carries a pencil (and the `e` key) for Edit.
+- **Info area:** reason, notes, Last worn and Estimated remaining, Wear today, Test, More; after a wear, "Add how it wore today" (or today's impression, to edit).
 - **Record (back):** five rows, Recent wears with up to three impressions, the owner's line, Edit details.
 - **Panels:** Add or edit (with the photo editor: preview, Size, Left and right, Up and down, drag), How it wore, Wear history (Add impression or Edit per wear), Backup and restore, Restore review (replace or add, then a second confirm to replace a non-empty collection).
 
@@ -82,15 +82,17 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 | --- | --- | --- |
 | Liquid on photo bottles | Shown through a level window, coloured from the photo, with the same motion | Owner |
 | Photo storage | Stay in `localStorage`: shrink to 480 px, request persistent storage, show usage, remind to back up. A real collection of 60 photos fits in about 3 to 5 MB, so the reminder matters. IndexedDB or files come with the native build, where the widget needs a shared store anyway | Claude, at the owner's direction |
-| Photo backgrounds | Keep the "cut-out sits best" hint. On-device background removal needs native Vision; do it in the native build | Claude |
-| Session check-ins at 20 minutes and 2 hours | Keep; they match how a skin test actually moves | Claude |
-| Rotation of three | Keep; it matches the Fan geometry and a weekly rotation | Claude |
+| Photo backgrounds | A photo with a background fills the picture (crop, zoom, position); a cut-out stands on the table. Both keep the level window. On-device background removal needs native Vision; do it in the native build | Claude |
+| Session check-ins | 15 minutes, 1 hour and 3 hours, as the parallel build had them: they follow the top, heart and base notes. A due check-in waits for the owner | Claude |
+| Rotations | Named sets of up to five bottles, up to twelve, as the parallel build had them. Stack became today's shortlist | Claude |
 | `arooma.v1` fallback | Keep for one release, then remove in its own spec | Owner to confirm |
 | Device risk | The level window position is a guess from the outline; the owner can slide it. Check on real photos of real bottles | Owed on a device |
 
 ## 9. Verification and acceptance report
 
-`npm test` runs 191 checks, all passing in headless Chromium (111 before this pass, all kept; four changed meaning by request: no forced samples, last bottle deletable, demo in its own key, the timer reads minutes). `npm run docs:check` passes. Nothing here was run on an iPhone.
+Before the port of the parallel build's features (see the end of this section), `npm test` ran 192 checks, all passing in headless Chromium. **The port was done without running or updating the smoke test, at the owner's direction, and was not run in a browser at all.** Several of those checks describe behavior the port changed (rotations as named sets, Stack as a shortlist, the 15 minute / 1 hour / 3 hour timer, the bottle menu's Rotations row, deleting the last bottle on a shelf), so `npm test` will fail until it is updated. `npm run docs:check` passes. Nothing here was run on an iPhone.
+
+Ported from the parallel build (`648a506`), untested: named rotations of up to five (up to twelve) and the rotation maker; Stack as today's shortlist; the selected bottle, layout and rotation remembered per collection; the pencil on the selected card and the `e` key; cards hidden once faded; a Demo tag on the plank and in the shared image; the storage line in the menu; the panel scroll fix; no haptic on a flip and one on a due check-in; due check-ins that wait and open the matching field; an impression note; the impression summary on the button; photos that fill the picture with crop, zoom and position; an empty shelf that stays in view; Delete in the edit form; `?clock=N`; and import of that build's backup files and saves.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
@@ -106,7 +108,7 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 | BK-4 | Done | Backup panel, empty card and menu row say the data lives in this browser on this device |
 | CM-1 | Done | Accent-free, case-free, all-words search in the overview; `/` opens it |
 | CM-2 | Done | Edit details is the first bottle-menu row and a link on the record |
-| CM-3 | Done | Existing layout tests plus Fan visiting state |
+| CM-3 | Done, port untested | Selection survives all three layouts; in Fan a bottle outside the rotation visits as a guest |
 | CM-4 | Done | Add and move go to the end of the shelf; delete selects the next on the same shelf; Undo restores the place |
 | CM-5 | Done in Chromium | Ellipsis, hidden empty notes, duplicate asked once, 60 bottles under 25 ms per step headless; device speed owed |
 | CM-6 | Done | One tap, toast with Undo, meta reads Worn today |
@@ -116,19 +118,19 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 | WL-4 | Done | "You haven't worn this in a while: 40 days. Last time you noted over 6 hours." |
 | WL-5 | Done | No feed or ranking; no request leaves the page in the test |
 | BP-1 | Done | Six photos stored; PNG or WebP kept for transparency, JPEG otherwise |
-| BP-2 | Done | `meet` everywhere; size and position by slider and drag, saved |
+| BP-2 | Done, fill mode untested | `meet` everywhere for cut-outs; fill mode crops without stretching (`slice`) with zoom and position sliders |
 | BP-3 | Done in Chromium | Generated clear, near-black, amber, opaque white with background, metal cap, irregular and wide images; screenshots 35 to 40 |
 | BP-4 | Done in Chromium | Same table, baseline, shadow, light and moving liquid for every photo; true scale is set by the owner, and a photo with a background still reads as a picture |
 | PL-1 | Partial | Long-name ellipsis, record timeline, empty state on the card recipe, install hint style bug fixed; no token or shadow values changed |
-| PL-2 | Done | Cover Flow browses, Stack shortlists, Fan shows only the saved rotation; share image in Fan is the rotation |
+| PL-2 | Done, port untested | Cover Flow browses the shelf, Stack is today's shortlist, Fan shows a named rotation; the share image in Fan is the rotation |
 | PL-3 | Done | One DOM kept; selection survives every layout and the visiting state |
 | PL-4 | Done | Every new drag has sliders or buttons; search, edit and impressions never need a gesture |
 | PL-5 | Done | Liquid engine unchanged; Reduce Motion tests pass |
 | WO-1 | Done | "Estimated remaining" everywhere; test scans all text |
 | WO-2 | Done | Compare says it compares notes you entered and cannot predict wear or liking |
 | WO-3 | Done | "Authenticity notes", "Your checks", "cannot verify" |
-| WO-4 | Done | 30 second default removed; check-ins at 0, 20 minutes, 2 hours; labelled an in-app timer |
-| TS-1 | Done | 187 checks |
+| WO-4 | Done, port untested | 30 second default removed; check-ins at 15 minutes, 1 hour, 3 hours; labelled an in-app timer |
+| TS-1 | Partial | 192 checks passed before the port; the smoke test was not updated for it, at the owner's direction |
 | TS-2 | Not done | No device available in this session |
 | TS-3 | Done | Checklist below, untested |
 
@@ -143,7 +145,11 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 - [ ] Reload and relaunch from the Home Screen: collection, mode and a running test session return.
 - [ ] Export to Files, Clear, Restore from Files: same collection. Note that Safari and the Home Screen app do not share it.
 - [ ] 60 bottles with 20 photos: Cover Flow, Stack and the overview stay smooth; storage warning appears if the quota is hit.
-- [ ] Haptics at settle, wear and completed action only.
+- [ ] Haptics at settle, wear and completed action only (none on a flip; one when a test check-in is due).
+- [ ] Rotations: make one of five, edit it, delete it with Undo; Fan with none opens the maker; Stack shows five plus the selected bottle.
+- [ ] Photos: a phone photo with a background in Fill mode (crop, zoom, level window on the glass), and a cut-out in Stand mode.
+- [ ] Close the app on a bottle in Fan and reopen it: the bottle, layout and rotation return.
+- [ ] Test with `?clock=60`: each check-in waits, Log impression opens the right field, saving moves on.
 
 ## 10. Rollout, rollback and release
 

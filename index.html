@@ -1030,7 +1030,23 @@ function profileOf(text){
 function coolFrom(v){return v[2]+v[3]+v[4]+v[5]>=1.6}
 function overlap(a,b){var mn=0,mx=0;for(var i=0;i<8;i++){mn+=Math.min(a[i],b[i]);mx+=Math.max(a[i],b[i])}return mx?mn/mx:0}
 
-/* sample collection: every house is a fictional placeholder */
+/* Archive Foil v3: previously commissioned fragrance concepts, in an opt-in demo only.
+   These lightweight editable illustrated editions use original Arooma vector art;
+   they do not claim rights to third-party manufacturer product photography. */
+var CARDS={
+ c0:{key:'dior',house:'Dior',name:'Sauvage Elixir',conc:'Elixir',shelf:'au',notes:'Grapefruit, cinnamon, nutmeg, cardamom, lavender, woods',vessel:'noir',ml:60,cool:true},
+ c1:{key:'hawas',house:'Rasasi',name:'Hawas For Him',conc:'Eau de Parfum',shelf:'su',notes:'Apple, bergamot, lemon, cinnamon, orange blossom, cardamom, plum',vessel:'clear',ml:100,cool:false},
+ c2:{key:'myslf',house:'Yves Saint Laurent',name:'MYSLF',conc:'Eau de Parfum',shelf:'sp',notes:'Bergamot, orange blossom, Indonesian patchouli, Ambrofix',vessel:'noir',ml:100,cool:false},
+ c3:{key:'prodigy',house:'MIND GAMES',name:'Prodigy',conc:'Extrait de Parfum',shelf:'au',notes:'Rose absolute, cardamom, bergamot, patchouli, latte, sandalwood',vessel:'white',ml:100,cool:true}
+};
+function curatedSeed(){
+ return Object.keys(CARDS).map(function(id){
+   var c=CARDS[id];return {id:id,shelf:c.shelf,house:c.house,name:c.name,conc:c.conc,ml:c.ml,left:.91,notes:c.notes,vessel:c.vessel,
+    acq:12,first:10,last:3,wears:3,cool:c.cool,note:'Collectible artwork demo. Independent and unaffiliated.'};
+ });
+}
+
+/* Legacy fictional demo bottles remain available beside the four curated cards. */
 var SEED=[
  {id:'s0',shelf:'su',house:'Maison Aubrac',name:'Linen Rain',conc:'Eau de Toilette',ml:100,left:.78,notes:'Wet stone, white tea, clean linen',vessel:'clear',acq:540,first:531,last:41,wears:19,cool:false,note:'A summer bottle. Still the cleanest thing on the shelf.'},
  {id:'s1',shelf:'au',house:'Atelier Nocte',name:'Ink No. 4',conc:'Eau de Parfum',ml:50,left:.55,notes:'Black tea, vetiver, iris root',vessel:'noir',acq:210,first:206,last:23,wears:27,cool:true,note:'Evening bottle. Two sprays is plenty.'},
@@ -1146,9 +1162,21 @@ function cleanState(s){
 }
 function readJSON(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null}catch(e){return null}}
 function emptyState(){return {shelves:seasons(),bottles:[],rots:[]}}
-function demoState(){return {shelves:seasons(),bottles:SEED.map(fromSeed),rots:DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}})}}
+function demoState(){return {shelves:seasons(),bottles:curatedSeed().concat(SEED).map(fromSeed),rots:[{id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']}].concat(DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}))}}
 function loadOwn(){return cleanState(readJSON(KEY_OWN))}
-function loadDemo(){return cleanState(readJSON(KEY_DEMO))||demoState()}
+function loadDemo(){
+  var saved=cleanState(readJSON(KEY_DEMO));
+  if(!saved)return demoState();
+  /* One-time demo-only upgrade; owner collections and their backups are never touched.
+     A demo user can still remove a card afterward without it reappearing on reload. */
+  if(!readJSON('arooma.v2.curatedInstalled')){
+    var existing={};saved.bottles.forEach(function(b){existing[b.id]=true});
+    curatedSeed().forEach(function(seed){if(!existing[seed.id])saved.bottles.push(clean(fromSeed(seed)))});
+    if(!saved.rots.some(function(r){return r.id==='rfoil'}))saved.rots.unshift({id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']});
+    try{localStorage.setItem('arooma.v2.curatedInstalled','true');localStorage.setItem(KEY_DEMO,JSON.stringify({v:SCHEMA,shelves:saved.shelves,bottles:saved.bottles.map(plain),rots:saved.rots}))}catch(e){}
+  }
+  return saved;
+}
 var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null,remindAt:DATE_RE.test(p.remindAt)?p.remindAt:null}})();
 function savePrefs(){try{localStorage.setItem(KEY_PREFS,JSON.stringify(PREFS))}catch(e){}}
 /* A parallel build (main at 648a506, live for a few minutes on 2026-10-29) wrote its own v3 into arooma.v1:
@@ -1243,7 +1271,7 @@ var LEAN=[-1.8,1.4,-.8,1.9,-1.4,.9,-1.1];
 /* ---------- state ---------- */
 var stage=$('#stage'), G={cw:216,ch:310};
 var U=MODE?(loadUI()[MODE]||{}):{};
-function startSel(u){u=u||{};var k=u.sel?idxOfId(u.sel):-1;if(k<0&&N)k=MODE==='demo'&&idxOfId('s2')>-1?idxOfId('s2'):idxOfId('s2')>-1&&BOTTLES[idxOfId('s2')].sample?idxOfId('s2'):0;return N?k:-1}
+function startSel(u){u=u||{};var k=u.sel?idxOfId(u.sel):-1;if(k<0&&N)k=MODE==='demo'&&idxOfId('c0')>-1?idxOfId('c0'):idxOfId('s2')>-1&&BOTTLES[idxOfId('s2')].sample?idxOfId('s2'):0;return N?k:-1}
 var sel=startSel(U);
 rotId=U.rot&&ROTS.some(function(r){return r.id===U.rot})?U.rot:(ROTS[0]?ROTS[0].id:null);
 var mode=(U.mode==='stack'||U.mode==='fan')?U.mode:'flow', pickIdx=null, pickPtr=-1, introDone=false;
@@ -1313,6 +1341,7 @@ function timelineHtml(b){
   return b.log.slice(0,3).map(function(d){var t=impText(b.imp[d]);return '<li><b>'+fmtShort(d)+'</b><span>'+(t?esc(t):'No impression noted')+'</span></li>'}).join('');
 }
 function fillRecord(el,b){
+  if(!$('.rec-dl',el))return; // Collectible backs show a fragrance map, not an ownership form.
   $('.rec-dl',el).innerHTML=recordRows(b).map(function(r){return '<dt>'+r[0]+'</dt><dd>'+esc(r[1])+'</dd>'}).join('');
   $('.rec-tl ul',el).innerHTML=timelineHtml(b);
   $('.rec-n',el).innerHTML='&ldquo;'+esc(b.note||'Added to the cabinet.')+'&rdquo;';
@@ -1321,6 +1350,17 @@ function buildSlot(b,i){
   var el=document.createElement('div');
   el.className='slot';el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
   el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':'')+(b.sample&&MODE==='own'?', sample bottle':''));
+  if(MODE==='demo'&&CARDS[b.id]){
+    var art=CARDS[b.id].key,root='assets/collectibles/cards/'+art;
+    el.classList.add('collectible');
+    el.innerHTML='<div class="card-inner">'
+      +'<div class="face front"><img class="collectible-img" src="'+root+'-front.svg" alt="'+esc(b.house+' '+b.name+' front')+'" decoding="async"><span class="num">N&deg; '+pad(i+1)+'</span><div class="shade"></div></div>'
+      +'<div class="face back"><img class="collectible-img" src="'+root+'-back.svg" alt="'+esc(b.name+' fragrance map')+'" decoding="async"><span class="rec-no"></span></div>'
+      +'</div><div class="tab">Today&rsquo;s pick</div>'
+      +'<span class="nm" style="position:absolute;left:-9999px">'+esc(b.name)+'</span>'
+      +'<button class="cpen" tabindex="-1" aria-label="Edit '+esc(b.name)+'"><i>'+PEN+'</i></button>';
+    LQ.regSlot(el);return el;
+  }
   var lowHtml=b.low?'<div class="low">Running low<i><b style="width:'+Math.round(b.left*100)+'%"></b></i></div>':'';
   el.innerHTML='<div class="card-inner">'
    +'<div class="face front"><div class="photo"><span class="num">N&deg; '+pad(i+1)+'</span>'+b.draw('c'+b.id,b.left)+'</div>'
@@ -1721,6 +1761,13 @@ $('#saveImg').addEventListener('click',function(){
 /* ---------- cabinet doors ---------- */
 var cab=$('#cabinet'), dim=$('#dim'), openT=null;
 function openCabinet(){
+  /* V2: the old physical-door scene is retired; the writing animation is the welcome. */
+  if(cab.classList.contains('gone'))return;
+  clearTimeout(openT);cab.classList.add('gone','open');dim.classList.add('off');
+  introDone=true;stage.classList.add('lit');render();
+  setTimeout(maybeShowInstallHint,3200);
+  setTimeout(maybeRemindBackup,3600);
+  return;
   if(cab.classList.contains('open'))return;
   clearTimeout(openT);
   cab.classList.add('open');dim.classList.add('off');
@@ -1738,12 +1785,9 @@ cab.addEventListener('click',openCabinet);
 function doReopen(){
   if(test)return toast('Finish the test first');
   closeSheet();cancelZ();setZ(0);
-  introDone=false;stage.classList.remove('lit');
-  slots.forEach(function(el){el.classList.remove('flipped')});
-  render();
-  cab.classList.remove('gone');void cab.offsetWidth;
-  cab.classList.remove('open');dim.classList.remove('off');
-  openT=setTimeout(openCabinet,RM?0:1500);
+  var intro=$('#introV2');intro.classList.remove('dismissed');
+  intro.querySelector('.inkscript').style.animation='none';void intro.offsetWidth;
+  intro.querySelector('.inkscript').style.animation='';
 }
 
 /* ---------- panels: cabinet menu, add, delete, wear history, authenticity, compare ---------- */
@@ -1785,8 +1829,9 @@ var NUMW=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight'];
 function footTxt(){var V=shareList().length;return shareRot()?NUMW[V]+(V===1?' bottle':' bottles')+' in rotation':V<=8?NUMW[V]+(V===1?' object':' objects')+', kept close':'Eight of '+V+' objects'}
 
 /* shelf bookkeeping after any add, delete, move or mode change */
-function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;$('.num',el).innerHTML='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
+function renumber(){var cnt={};BOTTLES.forEach(function(b,i){var el=slots[i],n=(cnt[b.shelf]=(cnt[b.shelf]||0)+1);el.dataset.i=i;var label='N&deg; '+pad(n)+(b.sample&&MODE==='own'?' &middot; <em>Sample</em>':'');if($('.num',el))$('.num',el).innerHTML=label;if($('.rec-no',el))$('.rec-no',el).innerHTML='N&deg; '+pad(n)})}
 function updateCounts(){
+  var quick=$('#demoQuick');if(quick)quick.textContent=MODE==='demo'?'My collection':'Demo';
   var demo=MODE==='demo',cnt=pad(N)+(N===1?' object':' objects');
   $('#eyebrow').innerHTML=!MODE?'Arooma &middot; personal cabinet':(demo?'Demo':'The cabinet')+' &middot; '+cnt;
   $('#device').classList.toggle('is-demo',demo);
@@ -1817,7 +1862,7 @@ function updateEmpty(){
   var shelfEmpty=!!MODE&&N>0&&sel<0,on=!N||!MODE||shelfEmpty,h;
   stage.classList.toggle('is-empty',on);emptyEl.classList.toggle('on',on);
   if(!on){emptyEl.innerHTML='';return}
-  if(!MODE)h='<div class="eb">Personal cabinet</div><h2>Your cabinet is open</h2><p>Start with an empty cabinet for your own bottles, or look around a demo of fictional houses first. Nothing leaves this device.</p>'
+  if(!MODE)h='<div class="eb">Personal archive</div><h2>Your collection awaits</h2><p>Start your own fragrance collection, or explore the curated collectible demo first. Nothing leaves this device.</p>'
     +'<div class="actions"><button class="btn primary" data-er="start">Start my collection</button><button class="btn" data-er="demo">Explore demo</button></div>';
   else if(shelfEmpty)h='<div class="eb">'+esc(shelfName(curShelf))+'</div><h2>Nothing on this shelf yet</h2><p>Add a bottle here, or move one from another shelf.</p>'
     +'<div class="actions"><button class="btn primary" data-er="addhere">Add a bottle</button><button class="btn" data-er="all">See all shelves</button></div>';
@@ -1849,15 +1894,15 @@ function mount(st){
 }
 function setPrefMode(m){MODE=m;PREFS.mode=m;savePrefs()}
 function startOwn(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();haptic('complete');toast(N?'Your collection.':'Your cabinet is ready. Add your first bottle.')}
-function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Demo collection. The houses are fictional.')}
+function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Explore the collectible archive. Your own collection stays separate.')}
 function leaveDemo(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();toast(N?'Back to your collection.':'Back to your collection. It is empty.')}
 function confirmLoadDemo(){
-  openPanel('<h2>Open the demo collection?</h2><p class="sub">Seven sample bottles from fictional houses. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
+  openPanel('<h2>Open the demo collection?</h2><p class="sub">A collectible fragrance gallery plus classic fictional samples. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Stay here</button><button class="btn primary" data-act="yes">Open the demo</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();enterDemo()}});
 }
 function confirmResetDemo(){
-  openPanel('<h2>Reset the demo?</h2><p class="sub">This brings back the seven sample bottles and clears what you changed in the demo. Your own collection is not touched.</p>'
+  openPanel('<h2>Reset the demo?</h2><p class="sub">This restores the curated collectible cards and the classic samples. Your own collection is untouched. Your own collection is not touched.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Reset</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();try{localStorage.removeItem(KEY_DEMO)}catch(_){}dropUI('demo');mount(demoState());toast('Demo reset.')}});
 }
@@ -1898,10 +1943,10 @@ function openMenu(){
    +rowHtml('compare','Compare notes before buying','Overlap between notes you type and the notes on your bottles')
    +rowHtml('share','Share shelf image','An editorial picture of the shelf, no app chrome')
    +rowHtml('backup','Backup and restore',PREFS.backupAt?'Kept on this device only. Last export '+fmtDate(PREFS.backupAt):'Kept on this device only. No backup exported yet')
-   +(demo?rowHtml('reset','Reset the demo','Bring back the seven sample bottles'):(MODE?rowHtml('demo','Explore the demo collection','Fictional sample bottles, kept apart from yours'):''))
+   +(demo?rowHtml('reset','Reset the demo','Restore the collectible cards and samples'):(MODE?rowHtml('demo','Explore the demo collection','Curated collectible cards and fictional samples, separate from yours'):''))
    +(samples?rowHtml('samples','Remove sample bottles','Sample bottles from an earlier version are on your shelves'):'')
    +(MODE==='own'&&N?rowHtml('clear','Clear my collection','Remove every bottle from this device','danger'):'')
-   +rowHtml('reopen','Replay the cabinet doors','Close the doors and open them again'),
+   +rowHtml('reopen','Show Arooma calligraphy','Replay the fountain-pen wordmark and entry choices'),
   function(e){var a=actOf(e);if(!a)return;
     if(a==='leave'){closePanel();leaveDemo()}
     else if(a==='find'){closePanel();openFind()}
@@ -2729,7 +2774,8 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
 }
 
 fit();geo();fitOver();setZ(0);updateCounts();setFanState();updateEmpty();markPick();render();updateInfo();updateTestBtn();setModeButtons();resumeTest();
-openT=setTimeout(openCabinet,RM?0:1700);
+openCabinet();
+if(PREFS.mode){$('#introV2').classList.add('dismissed')}
 })();
 </script>
 </body>

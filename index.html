@@ -1165,10 +1165,15 @@ function cleanState(s){
 }
 function readJSON(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null}catch(e){return null}}
 function emptyState(){return {shelves:seasons(),bottles:[],rots:[]}}
-function demoState(){return {shelves:seasons(),bottles:curatedSeed().concat(SEED).map(fromSeed),rots:[{id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']}].concat(DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}))}}
+/* Classic demo is kept for compatibility tests and existing sample-only workflows.
+   Normal entry stays on the eleven-card V2 demo. */
+var CLASSIC_DEMO=/(?:[?&])classicDemo=1(?:&|$)/.test(location.search);
+function demoState(){return {shelves:seasons(),bottles:(CLASSIC_DEMO?SEED:curatedSeed().concat(SEED)).map(fromSeed),
+  rots:(CLASSIC_DEMO?[]:[{id:'rfoil',name:'Collectible favorites',ids:['c0','c2','c3']}]).concat(DEMO_ROTS.map(function(r){return {id:r.id,name:r.name,ids:r.ids.slice()}}))}}
 function loadOwn(){return cleanState(readJSON(KEY_OWN))}
 function loadDemo(){
   var saved=cleanState(readJSON(KEY_DEMO));
+  if(CLASSIC_DEMO)return saved||demoState();
   if(!saved)return demoState();
   /* One-time demo-only upgrade; owner collections and their backups are never touched.
      A demo user can still remove a card afterward without it reappearing on reload. */

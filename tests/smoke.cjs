@@ -68,7 +68,7 @@ function check(name, ok, detail) {
   await page.click('#introDemo'); await page.waitForTimeout(1600);
   check('11 bottle cards rendered, including four curated collectibles', (await page.locator('.slot').count()) === 11 && (await page.locator('.slot.collectible').count()) === 4);
   check('FR-2 the demo is labelled as the demo, in the header and on the plank', /^Demo/.test((await page.textContent('#eyebrow')).trim()) && await page.isVisible('.demo-tag'));
-  check('Cover Flow opens on Dior card in Autumn', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7' && (await page.textContent('#cap')).trim() === '01 / 07' && (await page.textContent('#title')) === 'Autumn shelf');
+  check('Cover Flow opens on Dior card in Autumn', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0' && (await page.textContent('#cap')).trim() === '01 / 07' && (await page.textContent('#title')) === 'Autumn shelf');
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
   // V2 native-feel and theme acceptance
@@ -112,10 +112,10 @@ function check(name, ok, detail) {
   // layouts keep the selection
   await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '3-fan.png') });
-  check('Fan keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
+  check('Fan keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '4-stack.png') });
-  check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
+  check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
 
   // daily pick

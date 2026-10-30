@@ -1,4 +1,6 @@
-# Spec: Archive Foil fragrance collectible image standard
+# Spec: Archive Foil fragrance collectible image standard (historical v1)
+
+**SUPERSEDED VISUAL DIRECTION (2026-10-30):** The owner subsequently approved the dramatic Prodigy diptych and rejected a flat editorial card. Use [the v2 art-direction guide](../brand/COLLECTIBLE_CARD_ART_DIRECTION.md) and [production handbook](../brand/COLLECTIBLE_CARD_PRODUCTION.md) for all new work. This dated spec remains as history only.
 
 > Part of the Arooma design brain. Start at [../README.md](../README.md). Follow [../PLAN_SPEC_PROTOCOL.md](../PLAN_SPEC_PROTOCOL.md). This is a **docs/creative-spec task**, not an authorization to implement an in-app collectible feature.
 
@@ -9,7 +11,7 @@
 | Surface | Generated art assets; not regular cards, share image or app screens |
 | Size | L: multiple art surfaces and explicit visual-rule exceptions |
 | Author | ChatGPT, 2026-10-30 |
-| Status | **In review**, standards committed for feedback; owner approval to ship or integrate not assumed |
+| Status | **Superseded (visual direction)**; historical decisions retained; no app integration |
 | Governing docs read | [RULES_CARD.md](../RULES_CARD.md) Look/Boundaries/Verify; [README.md](../README.md) §§2-4,6; [packs/spec-writing.md](../packs/spec-writing.md); [packs/shelf-change.md](../packs/shelf-change.md); [brand/BRAND_BOARD.md](../brand/BRAND_BOARD.md) §§1-3,6; [PLAN_SPEC_PROTOCOL.md](../PLAN_SPEC_PROTOCOL.md) §§2-6; [specs/TEMPLATE.md](TEMPLATE.md) |
 
 ## 1. Problem

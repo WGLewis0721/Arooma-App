@@ -159,8 +159,8 @@ function navAction(type){
  if(type==='archive'){c.closeOverview();setTab('archive')}
  if(type==='discover'){c.search();setTab('discover')}
  if(type==='shelves'){c.overview();setTab('shelves')}
- if(type==='bottle'){openOwner();setTab('bottle')}
- if(type==='style'){c.theme();setTab('style')}
+ if(type==='bottle'){openOwner();setTab('archive')}
+ if(type==='style'){c.theme();setTab('archive')}
 }
 nav.addEventListener('click',function(e){
  var b=e.target.closest('[data-at-tab]');if(b)navAction(b.dataset.atTab);

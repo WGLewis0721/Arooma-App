@@ -418,13 +418,33 @@ function check(name, ok, detail) {
   for (let k = 0; k < 6; k++) { const v = await surf('.slot[tabindex="0"] .lq'); idle.push(Math.abs(v[0] - v[1])); await page.waitForTimeout(260); }
   const d1 = await page.getAttribute('.slot[tabindex="0"] .lq', 'd'); await page.waitForTimeout(350);
   check('a bottle at rest still ripples gently', d1 !== await page.getAttribute('.slot[tabindex="0"] .lq', 'd') && Math.max(...idle) < 4, 'idle tilt max ' + Math.max(...idle).toFixed(1));
+  // Follow the bottle being dragged, including motion before release. Selection changes
+  // on release, so sampling [tabindex="0"] afterward observes a different bottle.
+  // Sample in animation frames to avoid RPC timing skipping the opposite overshoot.
+  await page.evaluate(() => {
+    const card = document.querySelector('.slot[tabindex="0"]');
+    const liquid = card.querySelector('.lq');
+    const probe = window.__liquidProbe = { id: card.dataset.i, samples: [], connected: true, frame: 0 };
+    const sample = () => {
+      probe.connected = probe.connected && liquid.isConnected;
+      const m = liquid.getAttribute('d').match(/^M([\d.]+) ([\d.]+)L.*L([\d.]+) ([\d.]+)V/);
+      if (m) probe.samples.push(+m[2] - +m[4]);
+      probe.frame = requestAnimationFrame(sample);
+    };
+    probe.frame = requestAnimationFrame(sample);
+  });
   await page.mouse.move(300, 420); await page.mouse.down();
   for (let i = 1; i <= 8; i++) { await page.mouse.move(300 - i * 14, 420); await page.waitForTimeout(12); }
   await page.mouse.up();
-  const peak = [];
-  for (let k = 0; k < 14; k++) { await page.waitForTimeout(45); const v = await surf('.slot[tabindex="0"] .lq'); peak.push(v[0] - v[1]); }
-  check('a swipe sloshes the liquid, with momentum: it tilts one way then the other', Math.max(...peak) > 3 && Math.min(...peak) < -3, 'tilt range ' + Math.min(...peak).toFixed(1) + ' to ' + Math.max(...peak).toFixed(1));
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(1800);
+  const probe = await page.evaluate(() => {
+    const p = window.__liquidProbe; cancelAnimationFrame(p.frame); delete window.__liquidProbe;
+    return { id: p.id, samples: p.samples, connected: p.connected };
+  });
+  const peak = probe.samples;
+  check('a swipe sloshes the liquid, with momentum: it tilts one way then the other', probe.connected && peak.length > 10 && Math.max(...peak) > 3 && Math.min(...peak) < -3, 'bottle ' + probe.id + ', tilt range ' + Math.min(...peak).toFixed(1) + ' to ' + Math.max(...peak).toFixed(1) + ', ' + peak.length + ' frames');
+  // Retain the original approximately 3.6-second release-to-calm budget.
+  await page.waitForTimeout(1830);
   const calm = []; for (let k = 0; k < 5; k++) { const v = await surf('.slot[tabindex="0"] .lq'); calm.push(Math.abs(v[0] - v[1])); await page.waitForTimeout(200); }
   check('it settles back to a gentle ripple', Math.max(...calm) < 4, 'max ' + Math.max(...calm).toFixed(1));
   // Fan: cards lean, the liquid stays level with the room

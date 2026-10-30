@@ -1,0 +1,196 @@
+{
+  "pack_version": 1,
+  "generated_on": "2026-10-30",
+  "scope": "Exact previously generated imagery, NO redraw, NO synthetic upscaling",
+  "card_sources": [
+    {
+      "id": "dior-sauvage-elixir",
+      "status": "approved",
+      "source_filename": "a_high_end_cinematic_photorealistic_two_panel_pe.png",
+      "original_path": "approved/dior-sauvage-elixir-original-diptych.png",
+      "original_pixels": [
+        1470,
+        1070
+      ],
+      "original_sha256": "eb4fef3eaa37d8ffc270354d90a1e5614cb944b33b90521c2abb3cc19bfbeb7c",
+      "faces": {
+        "front": {
+          "path": "approved/dior-sauvage-elixir-front-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "3ae4578298b4e89052f08e0bb1a81b082c46b832e0180a23479226f129fda7a7",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ]
+        },
+        "back": {
+          "path": "approved/dior-sauvage-elixir-back-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "957e11bfc8c7a1038de2f5c93e22b7b9f91e6752b20b40d2e6aef0c8214c6108",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ]
+        }
+      },
+      "notes": "The two separate faces are direct pixel crops from the exact source diptych. Preserve originals as final authority; manually trim surrounding matte only after visual check. Do not use SVG approximations."
+    },
+    {
+      "id": "rasasi-hawas-for-him",
+      "status": "approved",
+      "source_filename": "a_high_end_perfume_card_graphic_layout_two_panel.png",
+      "original_path": "approved/rasasi-hawas-for-him-original-diptych.png",
+      "original_pixels": [
+        1470,
+        1070
+      ],
+      "original_sha256": "77073abcba76f1173efe62daa6259cd0e34db0374d5ec186f8e65094607c1bdd",
+      "faces": {
+        "front": {
+          "path": "approved/rasasi-hawas-for-him-front-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "e14ceaafc24370d66b315aca5c44326a18ff2e761840b8300c5777c11e7fbbb5",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ]
+        },
+        "back": {
+          "path": "approved/rasasi-hawas-for-him-back-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "18323a850d08df3327d56914799c884a46d97ec7243c3bf7e2b38f12308ff927",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ]
+        }
+      },
+      "notes": "The two separate faces are direct pixel crops from the exact source diptych. Preserve originals as final authority; manually trim surrounding matte only after visual check. Do not use SVG approximations."
+    },
+    {
+      "id": "ysl-myslf-edp",
+      "status": "approved",
+      "source_filename": "ysl_myslf_bergamot_fragrance_cards.png",
+      "original_path": "approved/ysl-myslf-edp-original-diptych.png",
+      "original_pixels": [
+        1536,
+        1024
+      ],
+      "original_sha256": "ebdc1a32ba4a667f2fbe306c6acbea4be694b346f56c99b20cd91c9a12fff7ec",
+      "faces": {
+        "front": {
+          "path": "approved/ysl-myslf-edp-front-fullhalf.png",
+          "pixels": [
+            768,
+            1024
+          ],
+          "sha256": "5b67dac88000a3465bc591df5a0ef35262de92f24b80cea1e29ed321ae699117",
+          "crop_px": [
+            0,
+            0,
+            768,
+            1024
+          ]
+        },
+        "back": {
+          "path": "approved/ysl-myslf-edp-back-fullhalf.png",
+          "pixels": [
+            768,
+            1024
+          ],
+          "sha256": "24b721e01dad80f4c8fbaf5f7344040964a520ef234df495c590c34ca1780ba1",
+          "crop_px": [
+            768,
+            0,
+            1536,
+            1024
+          ]
+        }
+      },
+      "notes": "The two separate faces are direct pixel crops from the exact source diptych. Preserve originals as final authority; manually trim surrounding matte only after visual check. Do not use SVG approximations."
+    },
+    {
+      "id": "mind-games-prodigy",
+      "status": "historical",
+      "source_filename": "a_detailed_high_end_cinematic_diptych_card_layou.png",
+      "original_path": "historical/mind-games-prodigy-original-diptych.png",
+      "original_pixels": [
+        1470,
+        1070
+      ],
+      "original_sha256": "f6187eb0778226b6c8ac55af1eec59d7b54f3944fadf0874ef5a79ec56465418",
+      "faces": {
+        "front": {
+          "path": "historical/mind-games-prodigy-front-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "dc6da89db887a99639db7769feeb0ca8e10e26da8d5c3331ce27a549372087b1",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ]
+        },
+        "back": {
+          "path": "historical/mind-games-prodigy-back-fullhalf.png",
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "9d5ad8b5cfe60fba3fb1fbb3bc560320d50a3e736614ae26454c3c1992b6cfe8",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ]
+        }
+      },
+      "notes": "The two separate faces are direct pixel crops from the exact source diptych. Preserve originals as final authority; manually trim surrounding matte only after visual check. Do not use SVG approximations."
+    }
+  ],
+  "caution": "Image quality and product data are separate: visual approval does not prove note/date accuracy. Public-repo distribution needs rights review.",
+  "historical_prada": [
+    {
+      "face": "front",
+      "path": "historical/prada-luna-rossa-ocean-front-original.png",
+      "sha256": "ca63cb7feac38abf6c2dadec02c39efa0004ff421882e4a70ca6e91170677c39",
+      "pixels": [
+        712,
+        1049
+      ]
+    },
+    {
+      "face": "back",
+      "path": "historical/prada-luna-rossa-ocean-back-original.png",
+      "sha256": "a2a2d16592d12f1dd8c6e7ba4d5f98764ffa8c6fdcc6e758252a83bcbb74ba24",
+      "pixels": [
+        726,
+        1049
+      ]
+    }
+  ]
+}

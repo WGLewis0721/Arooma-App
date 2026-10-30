@@ -1,6 +1,6 @@
 # Arooma
 
-A personal cabinet for your fragrance collection. A premium iOS app concept: not a storefront, not an inventory dashboard. Bottles are the richest thing on screen; everything around them is paper, light and restraint.
+Arooma V2 is a private collectible fragrance archive with a calligraphic welcome, four 60:30:10 luxury palettes in light/dark, magnetic Cover Flow, Stack and Fan, and a separately saved demo collection containing four illustrated real-fragrance concepts alongside the original seven fictional samples. Personal bottle data stays local and the native iOS features remain future work.
 
 This repo holds the **iOS web app demo** (an installable PWA) and the brand board.
 
@@ -18,9 +18,9 @@ Hold the phone upright; landscape shows a prompt to rotate.
 
 | Area | What to try |
 |---|---|
-| First open | Two cabinet doors swing open and the interior light comes up. The first time, the cabinet asks: **Start my collection** (truly empty) or **Explore demo**. Nothing is saved before that choice. Tap the doors to open sooner. Cabinet menu, then Replay the cabinet doors, plays it again. |
-| Shelves | The cabinet opens on the Autumn shelf. **Pinch in** (or tap the grid button in the header, or press `-`) to zoom out to every shelf: Spring, Summer, Autumn and Winter by default. Each has a **pencil** to rename it, and **Add a shelf** sits at the bottom. Pinch out over a shelf, tap it, or press Escape to go back in; the selected bottle stays selected. Move a bottle between shelves from the three dots under the card. |
-| Your collection and the demo | Your collection and the demo (seven bottles from fictional houses) are stored apart and never mix. The eyebrow says Demo while you are in it. Switch from the Cabinet menu; loading the demo and clearing your collection each ask first. An empty cabinet shows Add a bottle and Restore a backup. |
+| First open | Two cabinet doors swing open and the interior light comes up. The first time, a short Arooma calligraphy intro offers **Open my collection** or **Explore the demo cards**, a palette, and light/dark appearance; no door animation. Returning users enter directly. Cabinet menu replays the wordmark. |
+| Shelves | The default curated demo opens on Dior Sauvage Elixir in Autumn. **Pinch in** (or tap the grid button in the header, or press `-`) to zoom out to every shelf: Spring, Summer, Autumn and Winter by default. Each has a **pencil** to rename it, and **Add a shelf** sits at the bottom. Pinch out over a shelf, tap it, or press Escape to go back in; the selected bottle stays selected. Move a bottle between shelves from the three dots under the card. |
+| Your collection and the demo | Your collection and the demo (eleven demo bottles: seven fictional samples and four independent illustrated real-fragrance concepts) are stored apart and never mix. The eyebrow says Demo while you are in it. Switch from the Cabinet menu; loading the demo and clearing your collection each ask first. An empty cabinet shows Add a bottle and Restore a backup. |
 | Shelf | Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record, which shows the three latest wears and how they wore, and an Edit details link. |
 | Liquid | Every bottle shows its liquid and fill level, including the black, white ceramic and terracotta ones through a small level window. The surface sloshes with momentum when you swipe, ripples in the direction the card moves, stays level with the room when cards lean in Fan, and never goes dead still. With Reduce Motion it stays flat at the estimated level. A bottle shown with your own photo gets the same level window, holding liquid in the colour of the photo, moving like the rest. Photos either fill the picture (a photo with a background, with zoom and position) or stand on the table (a cut-out with a clear background). |
 | Layouts | Cover Flow browses the shelf. Stack chooses: today's shortlist, the five bottles most due to be worn, plus the selected one. Fan presents a saved rotation. The same bottle stays selected; in Fan a bottle outside the rotation visits in front, labelled. The layout, the selected bottle and the rotation are remembered for each collection. |
@@ -35,7 +35,7 @@ Hold the phone upright; landscape shows a prompt to rotate.
 | Testing session | "Test" starts an in-app timer in a chip shaped like the Island, with check-ins at 15 minutes (the opening), 1 hour (the heart) and 3 hours (the dry-down). A due check-in waits for you: Log impression opens the right field and saving moves on; tapping the open chip skips it. It survives a reload but only shows while Arooma is open. `?clock=60` runs it sixty times faster for trying it out. |
 | Shelf image | Cabinet menu, then Share shelf image, builds an editorial 1080 x 1350 image of up to eight bottles with no app chrome and opens the iOS share sheet (Save Image, Messages, AirDrop). |
 | Backup | Cabinet menu, Backup and restore. Your data lives only in this browser on this device (Safari and the Home Screen app keep separate copies). Export writes one JSON file; Restore shows what the file holds, then lets you replace or add, and never overwrites silently. |
-| Reset | In the demo, Cabinet menu, then Reset the demo, brings back the seven samples. It never touches your collection. |
+| Reset | In the demo, Cabinet menu, then Reset the demo restores all eleven samples. It never touches your collection. |
 
 ## Web demo versus the native app
 

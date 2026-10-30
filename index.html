@@ -395,7 +395,19 @@ h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}
 .back .rec-n{font-size:calc(var(--u)*12px)}
 .rec-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .back dl{margin-top:calc(var(--u)*9px)}
-.rec-edit{align-self:flex-end;height:calc(var(--u)*26px);margin:calc(var(--u)*4px) calc(var(--u)*-4px) calc(var(--u)*-6px) 0;padding:0 calc(var(--u)*4px);font-size:calc(var(--u)*10.5px);font-weight:600;color:var(--olive-deep)}
+/* The reverse-side Edit action lives OUTSIDE the rotated .card-inner.
+   The 3D transform creates its own hit-test plane in WebKit/Chromium and used to
+   intercept taps destined for the back-face button. Keep the text aligned with
+   the reverse card's bottom-right edge, but make the actual target a sibling. */
+.slot>.rec-edit{position:absolute;right:calc(var(--u)*12px);bottom:calc(var(--u)*10px);
+  z-index:16;min-width:88px;min-height:35px;padding:0 9px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;background:var(--paper);border:1px solid var(--hair);
+  color:var(--olive-deep);font-size:calc(var(--u)*10.5px);font-weight:600;
+  box-shadow:0 3px 9px rgba(0,0,0,.12);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,visibility .16s}
+.slot.flipped>.rec-edit{opacity:1;visibility:visible;pointer-events:auto}
+.slot>.rec-edit:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
 /* search, in the all-shelves view */
 .ov-find{position:relative;padding:0 12px 10px}
 .ov-find .in{padding-left:38px}
@@ -1382,8 +1394,9 @@ function buildSlot(b,i){
    +'<div class="capn"><div><div class="house">'+esc(b.house)+'</div><div class="nm">'+esc(b.name)+'</div><div class="spec">'+esc(b.conc)+' &middot; '+b.ml+' ml</div></div>'+lowHtml+'</div><div class="shade"></div></div>'
    +'<div class="face back"><div class="rec-h"><span>Ownership record</span><span class="rec-no">N&deg; '+pad(i+1)+'</span></div>'
    +'<div class="rec-t">'+esc(b.name)+'</div><div class="rec-s">'+esc(b.house)+'</div>'
-   +'<dl class="rec-dl"></dl><div class="rec-tl"><h4>Recent wears</h4><ul></ul></div><div class="rec-n"></div><button class="rec-edit" tabindex="-1">Edit details</button></div></div>'
+   +'<dl class="rec-dl"></dl><div class="rec-tl"><h4>Recent wears</h4><ul></ul></div><div class="rec-n"></div></div></div>'
    +'<div class="tab">Today&rsquo;s pick</div>'
+   +'<button type="button" class="rec-edit" tabindex="-1" aria-label="Edit details for '+esc(b.name)+'">Edit details</button>'
    +'<button class="cpen" tabindex="-1" aria-label="Edit '+esc(b.name)+'"><i>'+PEN+'</i></button>';
   fillRecord(el,b);LQ.regSlot(el);
   return el;

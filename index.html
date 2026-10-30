@@ -1110,7 +1110,7 @@ function clean(s){
   if(!s||typeof s!=='object')return null;
   var b={id:str(s.id,'',24).replace(/[^a-z0-9]/gi,''),shelf:str(s.shelf,'',16).replace(/[^a-z0-9]/gi,''),house:str(s.house,'',40).trim(),name:str(s.name,'',NAMEMAX).trim(),conc:str(s.conc,'Eau de Parfum',24),
     ml:Math.max(1,Math.min(1000,Math.round(+s.ml)||50)),left:num(s.left,0,1,0),notes:str(s.notes,'',120),vessel:vessel(s.vessel).k,
-    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',120),sample:!!s.sample,img:cleanImg(s.img)};
+    acq:DATE_RE.test(s.acq)?s.acq:todayStr(),log:[],imp:{},auth:null,cool:!!s.cool,note:str(s.note,'',120),sample:!!s.sample,img:cleanImg(s.img),artKey:/^(dior|hawas|myslf|prodigy)$/.test(s.artKey||'')?s.artKey:null};
   if(!b.id||!b.house||!b.name)return null;
   var seen={};(Array.isArray(s.log)?s.log:[]).forEach(function(d){if(typeof d==='string'&&DATE_RE.test(d)&&!seen[d]){seen[d]=1;b.log.push(d)}});
   b.log.sort().reverse();
@@ -1123,7 +1123,7 @@ function prep(b){
   b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
   return b;
 }
-function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?JSON.parse(JSON.stringify(b.img)):null}}
+function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?JSON.parse(JSON.stringify(b.img)):null,artKey:b.artKey||null}}
 var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
 var MAXSH=12;
 function seasons(){return DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}})}
@@ -1358,8 +1358,8 @@ function buildSlot(b,i){
   var el=document.createElement('div');
   el.className='slot';el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
   el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':'')+(b.sample&&MODE==='own'?', sample bottle':''));
-  if(MODE==='demo'&&CARDS[b.id]){
-    var art=CARDS[b.id].key,root='assets/collectibles/cards/'+art;
+  if((MODE==='demo'&&CARDS[b.id])||(b.artKey&&!b.img)){
+    var art=b.artKey||(CARDS[b.id]&&CARDS[b.id].key),root='assets/collectibles/cards/'+art;
     el.classList.add('collectible');
     el.innerHTML='<div class="card-inner">'
       +'<div class="face front"><img class="collectible-img" src="'+root+'-front.svg" alt="'+esc(b.house+' '+b.name+' front')+'" decoding="async"><span class="num">N&deg; '+pad(i+1)+'</span><div class="shade"></div></div>'
@@ -1524,7 +1524,7 @@ function updateInfo(){
     $('#meta').innerHTML=lastTxt+' &middot; '+left;
     w.classList.toggle('done',wornToday(b));
     if(wornToday(b)){w.disabled=true;w.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.5"/></svg>Worn today'}
-    else{w.disabled=false;w.textContent='Wear today'}
+    else{w.disabled=false;w.textContent=MODE==='demo'&&CARDS[b.id]?'Add to my collection':'Wear today'}
     var today=wornToday(b),x=today?b.imp[todayStr()]:null;
     ib.classList.toggle('on',today);
     ib.textContent=x?'Today: '+impText(x)+'. Edit ›':'Add how it wore today ›';
@@ -1537,7 +1537,28 @@ function updateTestBtn(){
   else{t.disabled=sel<0;t.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.5h6v8.5L7 12.5 4 10z"/></svg>Test'}
   t.setAttribute('aria-label',test?'Testing session running':'Start a testing session');
 }
-$('#wear').addEventListener('click',doWear);
+function addCuratedToMine(){
+  if(MODE!=='demo'||!BOTTLES[sel]||!CARDS[BOTTLES[sel].id])return;
+  var source=BOTTLES[sel],already=null,own=loadOwn()||emptyState();
+  already=own.bottles.find(function(b){return b.artKey===CARDS[source.id].key;});
+  if(!already){
+    if(own.bottles.length>=MAXN){toast('Your collection is full.');return}
+    var copy=plain(source);
+    copy.id=uid('u');copy.sample=false;copy.artKey=CARDS[source.id].key;
+    copy.log=[];copy.imp={};copy.auth=null;copy.img=null;
+    copy.note='';copy.left=1;copy.acq=todayStr();
+    if(!own.shelves.some(function(sh){return sh.id===copy.shelf}))copy.shelf=own.shelves[0].id;
+    own.bottles.push(copy);already=copy;
+  }
+  setPrefMode('own');dropUI('own');mount(own);
+  var i=idxOfId(already.id);if(i>=0&&i!==sel)select(i);
+  saveState();saveUI();haptic('complete');
+  toast(source.name+' is in your collection.'); 
+}
+$('#wear').addEventListener('click',function(){
+  if(MODE==='demo'&&BOTTLES[sel]&&CARDS[BOTTLES[sel].id])addCuratedToMine();
+  else doWear();
+});
 $('#impBtn').addEventListener('click',function(){var b=BOTTLES[sel];if(b)openImpression(b,todayStr())});
 
 /* ---------- daily pick ---------- */
@@ -1910,7 +1931,7 @@ function confirmLoadDemo(){
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();enterDemo()}});
 }
 function confirmResetDemo(){
-  openPanel('<h2>Reset the demo?</h2><p class="sub">This restores the curated collectible cards and the classic samples. Your own collection is untouched. Your own collection is not touched.</p>'
+  openPanel('<h2>Reset the demo?</h2><p class="sub">This restores the curated collectible cards and classic samples. Your own collection is untouched.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Keep it</button><button class="btn primary" data-act="yes">Reset</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='yes'){closePanel();try{localStorage.removeItem(KEY_DEMO)}catch(_){}dropUI('demo');mount(demoState());toast('Demo reset.')}});
 }

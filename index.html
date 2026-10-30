@@ -1569,7 +1569,7 @@ function settleFx(){
   settleTimer=setTimeout(function(){
     if(sel<0)return;
     haptic('settle');LQ.kick(slots[sel],{s:.08,A:.8,b:.4});
-  },390);
+  },sel>=0&&artKeyFor(BOTTLES[sel])?390:560);
 }
 function select(i){
   if(!N||i==null||i<0)return;

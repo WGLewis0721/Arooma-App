@@ -5,32 +5,33 @@
 This card is the single source for the always-loaded design rules. `npm run docs:sync` copies the block below into `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and `.github/copilot-instructions.md`, and the docs check fails if a copy is stale. Edit only here. Keep the block under 3,000 bytes.
 
 <!-- card:start -->
-**Start here:** `docs/design/README.md` (router). Plans and specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Tokens as data: `docs/design/tokens.json`. Visual authority: `docs/design/brand/BRAND_BOARD.md`. Read the task pack the router names, then only the section it points to.
+**Start here:** `docs/design/README.md` (router). Plans/specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Current visual authority: `docs/design/brand/BRAND_BOARD.md` and [V2 spec](docs/design/specs/2026-10-30-v2-collectible-gallery-implementation.md). Read the relevant pack and sections.
 
 **Look**
-- A personal cabinet of objects, not a storefront or an inventory dashboard. Bottles are the richest thing on screen.
-- No new colors, fonts or decorative styles. Use a token (`--oat`, `--paper`, `--ink`, `--soft`, `--hair`, `--olive`, `--olive-deep`, `--clay`, `--clay-deep`) or an existing pattern. Two faces only: `ui-serif` and SF Pro.
-- Cards are opaque Paper. No glass, blur or transparency on cards, bottles or sheets. Glass only on the layout switcher, toolbar and header buttons.
-- Bottle art stays neutral and true to each house: same studio light and table, no per-house color grade, liquid drawn at the estimated level. The owner's own photos sit on the same table. Every bottle shows its liquid, moving, photos included.
-- Olive and Clay are for graphics and large text; small text uses Olive Deep and Clay Deep. Status is never color alone.
-- Low stock is quiet: label, hairline gauge, liquid level. Never red, never a badge.
+- Arooma is a private premium fragrance archive. The object and collectible card are the hero; not a storefront or noisy game screen.
+- V2 themes follow 60:30:10: Obsidian Gold, Ivory Oud, Violet Ink and Emerald Resin. All have light and dark modes; dark is navy/blackened plum, not jet black, light is bone/cream/beige, not paper white.
+- Maintain one system utility font stack (SF Pro), curated editorial display serifs and a dedicated calligraphic wordmark **only** for the intro; avoid script in controls.
+- Collector artwork is an optional 59:86 opaque collectible face, separate from frosted navigational controls. Foil is subtle perimeter material, not rainbow noise.
+- The approved Dior Archive Foil v3: front must expose verified top notes; reverse uses horizontal TOP/HEART/BASE strips; concentration replaces invented rarity labels. Do not invent variants or notes.
+- Existing owner bottle photos, level windows and the local-first ownership record remain functional; do not overwrite them when changing card art.
 
 **Behavior**
-- The selected bottle persists across Cover Flow, Stack and Fan. Layouts rearrange the same objects.
-- Every drag has a tap and a keyboard path. Reduced motion means cross-fades only.
-- Haptics at three moments only: selection settle, wear confirmation, completed action.
-- The Island chip is an in-app timer for a testing session only. Widgets are today's pick plus one action, never a mini shelf.
-- Remaining volume is an estimate and says so. Never claim authenticity is verified or a scent match is certain.
+- Do not replay an obligatory intro for returning users. Cold welcome uses fountain-pen `Arooma` with a direct Demo / My Collection choice and theme switcher. No cabinet door animation.
+- Demo and owner's collection are **separate** local stores. A one-tap in-app switcher changes modes; never auto-import branded demo cards into the owner's collection.
+- Same selected item persists across Cover Flow, Stack and Fan; drag feels finger-led with velocity snap. Every drag has a tappable and keyboard alternative; reduced motion is respected.
+- Tap a focused curated card to flip to fragrance information. Ownership actions remain accessible through Details; Wear Today, Test, Search and Add must be first-level actions.
+- Haptics only for selection settle, wear confirmation and completed actions. Island is an in-app testing timer, not a permanent badge.
+- Estimates and note overlap never become promised accuracy claims.
 
 **Boundaries**
-- Sample houses and bottles are fictional. Never draw a real brand's bottle, logo or label. The demo is labelled and stored apart from the owner's collection.
-- No backend, account, analytics or network call without a spec.
-- `index.html` stays one self-contained file. Generated assets come from `tools/generate_assets.py`.
+- The original seven fictional demo bottles coexist with four documented **independent** illustrated real-fragrance collectible concepts. They do not imply endorsement by the named houses. Do not scrape or commit unlicensed manufacturer photography.
+- Content ownership, rights review and takedowns follow `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`. App Store approval is not proof of content rights.
+- No new backend, account, analytics, ads, or IAP without a dedicated implementation spec.
+- Preserve `index.html` as the self-contained web demo. One cannot claim this PWA is native SwiftUI; genuine native functionality requires separate work.
 - Never force-push `main`.
 
 **Verify**
-- Widths 375, 390, 430, the landscape prompt, reduced motion, no horizontal scroll.
-- `npm run docs:check` and `npm test` are necessary, not sufficient. Device checks are owed: Home Screen install, status bar, launch image, haptics, share sheet.
-
-**If a request seems to need something forbidden, list it as an exception for the owner to decide. Never design around a rule silently.**
+- 375/390/430 widths, landscape, reduced motion, no horizontal scroll, card image delivery, offline caching, intro theme choice and returning-user fast path.
+- `npm run docs:check`, `npm run test:docs` and `npm test` before merge. iPhone Safari, Home Screen install, touch physics and haptics need real-device validation.
+- Existing owner backups, photos, saved rotations, migration and Undo remain intact.
 <!-- card:end -->

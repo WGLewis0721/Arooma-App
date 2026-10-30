@@ -2,11 +2,11 @@
 
 The one place to start for how Arooma looks, feels or adapts to a device. This map tells you what to read for your task, and what not to.
 
-**Audience:** developers and GenAI agents. Do not look for design guidance anywhere else, and do not create design documents outside this folder.
+**Audience:** developers and coding agents. Keep design guidance here.
 
 **Product model:** a personal cabinet of fragrance objects. Shelf, then Bottle, then Ownership record. Today Arooma is an installable iOS web app demo in one HTML file. A native app is an open decision ([DECISIONS.md](DECISIONS.md)).
 
-**Origin:** the structure, protocol and checks are forked from the Spread design brain (`WGLewis0721/spread-app`, commit `4c23d25`). Spread's planner and landing rules were not carried over. Spread's iOS reference documents are kept verbatim in [../reference/spread/](../reference/spread/README.md).
+**Origin:** structure and checks came from Spread (`WGLewis0721/spread-app`, `4c23d25`); its iOS reference remains in [../reference/spread/](../reference/spread/README.md).
 
 ---
 
@@ -22,11 +22,11 @@ Stop at the first tier that answers your question.
 | 3 | The long documents, read **by section** using the pointers in the pack | n/a | Only when the pack says the detail matters |
 | Data | [tokens.json](tokens.json): every design token, generated from the `:root` block in `index.html` | 4 KB | Instead of reading CSS or prose for token values |
 
-Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log).
+Open decisions: [DECISIONS.md](DECISIONS.md).
 
 ---
 
-**Active commissioned visual-polish exception:** the owner requested the complete Sol Extra specification at repository root: [../../AROOMA_V2_FINAL_POLISH_SPEC.md](../../AROOMA_V2_FINAL_POLISH_SPEC.md), with [../../SOL_EXTRA_HANDOFF.md](../../SOL_EXTRA_HANDOFF.md). Read those two files first for the final V2 Polish task. Actual approved card masters are indexed in [../../assets/collectibles/masters/README.md](../../assets/collectibles/masters/README.md). This is not a new general place to create ad-hoc design documentation.
+**Current V2 polish:** read [root spec](../../AROOMA_V2_FINAL_POLISH_SPEC.md) and [handoff](../../SOL_EXTRA_HANDOFF.md) first. Approved source art is indexed in [masters](../../assets/collectibles/masters/README.md).
 
 ## 2. Task router
 
@@ -70,13 +70,13 @@ All paths are under `docs/design/`.
 | brand/ICON_HANDOFF.md | Icon files, generation and placement | Highest for icon files |
 | platforms/APPLE_DESIGN_PRINCIPLES.md | Native feel: materials, color, sheets | Advisory, below the brand board. Apple facts carried over from Spread, not re-read |
 
-**When documents disagree, higher wins and the lower one is fixed in the same change:** (1) what ships: the `:root` tokens and `BOTTLES` data in `index.html`, the running app; (2) the brand board; (3) `[Apple]` facts; (4) `[3P]` and `[Rec]` leads; (5) the Spread reference material and historical records.
+**Priority:** (1) running `index.html`; (2) brand board; (3) `[Apple]` facts; (4) `[3P]` and `[Rec]` leads; (5) Spread references and history. Fix lower-priority conflicts in the same change.
 
 ---
 
 ## 4. Where the design truth lives in code
 
-All current app behavior is in `index.html`. The Archive Foil collectible visual standard is **documentation only**, with no runtime integration.\n\nAll in `index.html`:
+All app behavior is in `index.html`. Original collectible faces load from `assets/collectibles/production/`, derived from checksum-locked masters. In `index.html`:
 - Tokens: the `:root` block at the top of the `<style>`. Read them as data in [tokens.json](tokens.json).
 - Bottle art: `bLinen`, `bInk`, `bFig`, `bMilk`, `bCedar`, `bSmoke`, `bEarth` (SVG, one per material family). Sample data: `BOTTLES`.
 - Layouts: `place` (Cover Flow and Stack) and `fanPlace` (Fan). One DOM, three arrangements.

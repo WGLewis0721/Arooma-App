@@ -50,13 +50,30 @@ def main() -> None:
             for row, (face, box) in enumerate(bounds.items()):
                 pixels = original.crop(box)
                 target = folder / f"{face}.webp"
-                pixels.save(target, format="WEBP", quality=95, method=6, exact=True)
+                temp = folder / f"{face}.webp.tmp"
+                pixels.save(temp, format="WEBP", quality=95, method=6, exact=True)
+                with Image.open(temp) as check:
+                    check.verify()
+                if temp.stat().st_size == 0:
+                    raise ValueError(f"Empty derivative: {temp}")
+                temp.replace(target)
                 faces[face] = {"path": str(target.relative_to(ROOT)), "crop_px": box, "pixels": pixels.size, "sha256": digest(target)}
                 thumb = ImageOps.contain(pixels.convert("RGB"), (400, 310), Image.Resampling.LANCZOS)
                 contact.paste(thumb, (column * 420 + (420 - thumb.width) // 2, row * 330 + (330 - thumb.height) // 2))
         manifest["cards"][key] = {"status": status, "source": str(source.relative_to(ROOT)), "source_sha256": actual, "faces": faces}
-    contact.save(OUTPUT / "contact-sheet.png", optimize=True)
-    (OUTPUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    for card in manifest["cards"].values():
+        for face in card["faces"].values():
+            path = ROOT / face["path"]
+            if not path.stat().st_size or digest(path) != face["sha256"]:
+                raise ValueError(f"Export changed during derivation: {path}")
+    contact_temp = OUTPUT / "contact-sheet.tmp.png"
+    contact.save(contact_temp, format="PNG", optimize=True)
+    with Image.open(contact_temp) as check:
+        check.verify()
+    contact_temp.replace(OUTPUT / "contact-sheet.png")
+    manifest_temp = OUTPUT / "manifest.tmp.json"
+    manifest_temp.write_text(json.dumps(manifest, indent=2) + "\n")
+    manifest_temp.replace(OUTPUT / "manifest.json")
 
 
 if __name__ == "__main__":

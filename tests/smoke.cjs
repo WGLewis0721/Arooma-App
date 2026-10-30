@@ -56,21 +56,34 @@ function check(name, ok, detail) {
   await page.goto(base);
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(outDir, '1-doors-closed.png') });
-  check('doors are closed on first paint', await page.evaluate(() => !document.getElementById('cabinet').classList.contains('open')));
+  check('V2 calligraphy intro visible at first paint', await page.isVisible('#introV2') && await page.isVisible('#introDemo') && await page.isVisible('.inkscript'));
 
   await page.waitForTimeout(4600);
   await page.screenshot({ path: path.join(outDir, '2-cover-flow.png') });
-  check('cabinet opened and cleared', await page.evaluate(() => document.getElementById('cabinet').classList.contains('gone')));
+  check('retired cabinet doors do not block V2', await page.evaluate(() => document.getElementById('cabinet').classList.contains('gone')));
   // FR-1: the first run offers a choice and puts no sample bottle on the shelf
-  check('FR-1 first run shows no bottles and offers Start my collection or Explore demo', (await page.locator('.slot').count()) === 0 && await page.isVisible('[data-er="start"]') && await page.isVisible('[data-er="demo"]'));
+  check('FR-1 first run shows no bottles and exposes Arooma direct-entry options', (await page.locator('.slot').count()) === 0 && await page.isVisible('#introOwn') && await page.isVisible('#introDemo'));
   check('FR-1 nothing is saved before the choice', await page.evaluate(() => ['arooma.cabinet', 'arooma.demo', 'arooma.prefs', 'arooma.v1'].every((k) => localStorage.getItem(k) === null)));
   await page.screenshot({ path: path.join(outDir, '2a-first-run.png') });
-  await page.click('[data-er="demo"]'); await page.waitForTimeout(1600);
-  check('7 bottle cards rendered', (await page.locator('.slot').count()) === 7);
+  await page.click('#introDemo'); await page.waitForTimeout(1600);
+  check('11 bottle cards rendered, including four curated collectibles', (await page.locator('.slot').count()) === 11 && (await page.locator('.slot.collectible').count()) === 4);
   check('FR-2 the demo is labelled as the demo, in the header and on the plank', /^Demo/.test((await page.textContent('#eyebrow')).trim()) && await page.isVisible('.demo-tag'));
-  check('Cover Flow opens on Fig Hour, 02 of 05 on the Autumn shelf', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2' && (await page.textContent('#cap')).trim() === '02 / 05' && (await page.textContent('#title')) === 'Autumn shelf');
+  check('Cover Flow opens on Dior card in Autumn', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7' && (await page.textContent('#cap')).trim() === '01 / 07' && (await page.textContent('#title')) === 'Autumn shelf');
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
+  // V2 native-feel and theme acceptance
+  check('four collectible art assets load without breaking the app', await page.evaluate(async () => {
+    const sources=[...document.querySelectorAll('.slot.collectible .collectible-img')].map(n=>n.getAttribute('src'));
+    const statuses=await Promise.all(sources.map(async url=>(await fetch(url)).ok));
+    return sources.length===8&&statuses.every(Boolean);
+  }));
+  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('#panel .themeSwatch[data-palette="violet"]');
+  await page.click('#panel [data-look="dark"]');
+  check('theme and appearance change without reloading or losing selection', await page.evaluate(() =>
+    document.querySelector('#device').dataset.theme==='violet'&&document.querySelector('#device').dataset.appearance==='dark'
+      && localStorage.getItem('arooma.v2.theme')==='violet'&&localStorage.getItem('arooma.v2.appearance')==='dark'));
+  await page.click('#panel [data-act="done"]');await page.waitForTimeout(300);
   // PWA wiring
   const manifest = await page.evaluate(async () => {
     const href = document.querySelector('link[rel="manifest"]').href;
@@ -99,10 +112,10 @@ function check(name, ok, detail) {
   // layouts keep the selection
   await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '3-fan.png') });
-  check('Fan keeps Fig Hour selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
+  check('Fan keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
   await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '4-stack.png') });
-  check('Stack keeps Fig Hour selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
+  check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
 
   // daily pick
@@ -234,7 +247,7 @@ function check(name, ok, detail) {
 
   // persistence across reloads
   await reopenFast(page);
-  check('shelf, wear and evidence survive a reload', (await page.locator('.slot').count()) === 8 && await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('arooma.demo')); return d.bottles.some((b) => b.auth && b.auth.v.every((x) => x === 1)) && d.bottles.some((b) => b.log.length > 0); }));
+  check('shelf, wear and evidence survive a reload', (await page.locator('.slot').count()) === 12 && await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('arooma.demo')); return d.bottles.some((b) => b.auth && b.auth.v.every((x) => x === 1)) && d.bottles.some((b) => b.log.length > 0); }));
 
   // delete with undo
   await page.focus('#stage'); for (let k = 0; k < 4; k++) await page.keyboard.press('ArrowRight');
@@ -244,7 +257,7 @@ function check(name, ok, detail) {
   check('delete asks first', /Delete Test Scent\?/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
   check('delete removes the bottle', (await page.locator('.slot').count()) === 7 && /07 objects/.test(await page.textContent('#eyebrow')));
-  check('delete is saved', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.length === 7));
+  check('delete is saved', await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo')).bottles.length === 11));
   await page.screenshot({ path: path.join(outDir, '17-deleted-undo.png') });
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
   check('Undo puts the bottle back where it was', (await page.locator('.slot').count()) === 8 && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '7');
@@ -254,7 +267,7 @@ function check(name, ok, detail) {
   // reset
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#reset'); await page.waitForTimeout(300);
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('reset restores the seven sample bottles', (await page.locator('.slot').count()) === 7 && (await stored()) === null);
+  check('reset restores all eleven demo bottles', (await page.locator('.slot').count()) === 11 && (await stored()) === null);
 
 
   // ================= shelves: overview, pinch, rename, add shelf, move a bottle =================
@@ -437,7 +450,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#demo'); await page.waitForTimeout(300);
   check('FR-5 Load demo asks first and promises my collection stays', /Open the demo collection/.test(await page.textContent('#panelBody')) && /stays saved/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(1200);
-  check('FR-5 the demo opens, labelled', (await page.locator('.slot').count()) === 7 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
+  check('FR-5 the demo opens, labelled', (await page.locator('.slot').count()) === 11 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
   await addB('Demo House', 'Demo Only', 'au');
   check('FR-2 a bottle added in the demo never reaches my collection', (await own()).bottles.map((b) => b.name).join() === 'Only One' && (await demoSaved()).bottles.some((b) => b.name === 'Demo Only'));
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#leave'); await page.waitForTimeout(1100);
@@ -445,7 +458,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#clear'); await page.waitForTimeout(300);
   check('FR-5 Clear my collection asks first and suggests a backup', /Clear your collection/.test(await page.textContent('#panelBody')) && /Export a backup first/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('FR-5 Clear empties only my collection; the demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 8);
+  check('FR-5 Clear empties only my collection; the demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 12);
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
   check('FR-5 Undo after Clear restores my collection', (await page.locator('.slot').count()) === 1 && (await own()).bottles.length === 1);
 

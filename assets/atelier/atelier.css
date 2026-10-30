@@ -658,3 +658,37 @@ body {
 @media(prefers-reduced-motion:reduce){
  .device .slot.collectible.is-sel::before {opacity:0!important}
 }
+
+
+/* Final gallery layering: Shelves/Search are real full-canvas destinations.
+   The legacy overview was painted underneath the sticky archive heading, so
+   the heading bled through the search field and shelf titles. */
+.device #over {
+  z-index:22;
+  top:0;
+  bottom:55px;
+  transform:none;
+  background:var(--at-ground)!important;
+  isolation:isolate;
+  box-shadow:none;
+}
+.device #over::before {position:relative;z-index:1}
+.device #ovBar {
+  z-index:23;
+  bottom:0;
+  min-height:54px;
+  border-top:1px solid var(--at-stroke);
+}
+.device:has(#over:not(.off)) .head {
+  visibility:hidden;
+  pointer-events:none;
+}
+.device:has(#over:not(.off)) #atIdentity,
+.device:has(#over:not(.off)) #info {visibility:hidden;pointer-events:none}
+.device .inspector.on {
+  opacity:1;
+  background-color:var(--at-ground);
+}
+/* Keep controls attached to their own destination, not a ghost header. */
+.device .inspector-top {top:max(28px,env(safe-area-inset-top,0px))}
+.device #inspectorTitle {font-size:19px}

@@ -601,7 +601,8 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
 }
 
 </style>
-<link rel="stylesheet" href="assets/atelier/atelier.css">
+<link rel="stylesheet" id="atelierStyle" href="assets/atelier/atelier.css">
+<script>if(new URLSearchParams(location.search).has("classicDemo"))document.getElementById("atelierStyle").disabled=true;</script>
 </head>
 <body>
 <div class="device" id="device">

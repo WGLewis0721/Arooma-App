@@ -14,7 +14,7 @@ fs.mkdirSync(outDir, { recursive: true });
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json',
-  '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css'
+  '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.css': 'text/css'
 };
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
@@ -56,7 +56,7 @@ function check(name, ok, detail) {
   await page.goto(base);
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(outDir, '1-doors-closed.png') });
-  check('V2 calligraphy intro visible at first paint', await page.isVisible('#introV2') && await page.isVisible('#introDemo') && await page.isVisible('.inkscript'));
+  check('V2 vector calligraphy intro visible at first paint', await page.isVisible('#introV2') && await page.isVisible('#introDemo') && await page.isVisible('.inkstroke'));
 
   await page.waitForTimeout(4600);
   await page.screenshot({ path: path.join(outDir, '2-cover-flow.png') });
@@ -72,11 +72,29 @@ function check(name, ok, detail) {
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
   // V2 native-feel and theme acceptance
-  check('four collectible art assets load without breaking the app', await page.evaluate(async () => {
+  check('eight original collectible faces decode at source resolution', await page.evaluate(async () => {
     const sources=[...document.querySelectorAll('.slot.collectible .collectible-img')].map(n=>n.getAttribute('src'));
-    const statuses=await Promise.all(sources.map(async url=>(await fetch(url)).ok));
+    const statuses=await Promise.all(sources.map(async url=>{
+      const img=new Image();img.src=url;
+      try{await img.decode();return /^assets\/collectibles\/production\/(dior|hawas|myslf|prodigy)\/(front|back)\.webp$/.test(url)&&img.naturalWidth>=735&&img.naturalHeight>=1024}
+      catch(_){return false}
+    }));
     return sources.length===8&&statuses.every(Boolean);
   }));
+  await page.click('.slot.collectible.is-sel');await page.waitForSelector('#inspector.on');
+  check('focused photographic card expands into inspector', await page.isVisible('.inspector-card .collectible-img'));
+  await page.screenshot({ path: path.join(outDir, 'v2-original-inspector-front-393x852.png') });
+  await page.click('#inspectorFlip');await page.waitForTimeout(580);
+  check('inspector turns to the original fragrance map', await page.locator('.inspector-card.flipped').count()===1);
+  await page.screenshot({ path: path.join(outDir, 'v2-original-inspector-back-393x852.png') });
+  await page.click('#inspectorClose');await page.waitForSelector('#inspector.on',{state:'hidden'});
+  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('#panel .themeSwatch[data-palette="obsidian"]');
+  await page.click('#panel [data-look="dark"]');await page.click('#panel [data-act="done"]');await page.waitForTimeout(400);
+  await page.screenshot({ path: path.join(outDir, 'v2-original-dark-393x852.png') });
+  await page.click('#themeToggle');await page.waitForSelector('#panel.on');
+  await page.click('#panel [data-look="light"]');await page.click('#panel [data-act="done"]');await page.waitForTimeout(400);
+  await page.screenshot({ path: path.join(outDir, 'v2-original-light-393x852.png') });
   await page.click('#themeToggle');await page.waitForSelector('#panel.on');
   await page.click('#panel .themeSwatch[data-palette="violet"]');
   await page.click('#panel [data-look="dark"]');
@@ -322,6 +340,9 @@ function check(name, ok, detail) {
   await pinch(await shelfY('au'), 80, 260);
   check('pinching out over a shelf opens it with the same bottle selected', (await zval()) < .02 && (await ttl()) === 'Autumn shelf' && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2');
   await page.click('#shelvesBtn'); await page.waitForTimeout(900);
+  // The taller editorial header leaves a scrollable overview; Spring is above the
+  // Autumn-centered opening position, so bring it under the gesture first.
+  await page.locator('.shelf[data-id="sp"]').scrollIntoViewIfNeeded();
   await pinch(await shelfY('sp'), 80, 260);
   check('pinching out over another shelf opens that shelf', (await ttl()) === 'Spring shelf' && (await page.textContent('#cap')).trim() === '01 / 01' && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '3');
   await page.keyboard.press('-'); await page.waitForTimeout(900);

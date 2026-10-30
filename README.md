@@ -1,20 +1,20 @@
 # Arooma
 
-Arooma V2 is a private collectible fragrance archive with a calligraphic welcome, four 60:30:10 luxury palettes in light/dark, magnetic Cover Flow, Stack and Fan, and a separately saved demo collection containing four illustrated real-fragrance concepts alongside the original seven fictional samples. Personal bottle data stays local and the native iOS features remain future work.
+Arooma V2 is a private collectible fragrance archive with a vector calligraphic welcome, four 60:30:10 palettes in light/dark, Cover Flow, Stack and Fan. The separately saved demo contains three approved original photographic card pairs, one explicitly archival card pair and seven fictional samples. Personal bottle data stays local; native iOS features remain future work.
 
 This repo holds the **iOS web app demo** (an installable PWA) and the brand board.
 
 **Live demo:** https://wglewis0721.github.io/Arooma-App/
 
-## Final-polish handoff (GPT-6 Sol · Extra High)
+## Original-art collectible edition
 
-The complete owner-approved production brief is at [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and its [agent execution checklist](SOL_EXTRA_HANDOFF.md). **Actual prior photographic collectible artwork is committed in [assets/collectibles/masters](assets/collectibles/masters/README.md)**; the SVG card sketches in the current demo are placeholders, not the approved final cards. This is a scoped handoff, not a claim that the final-polish implementation is already deployed.
+The existing interface now uses the approved Dior, Hawas and MYSLF originals, with Prodigy labeled as archival. Individual production faces appear in the gallery, full-card inspector, thumbnails and shared shelf images. [Protected masters](assets/collectibles/masters/README.md), [production provenance and hashes](assets/collectibles/production/README.md), the [owner brief](AROOMA_V2_FINAL_POLISH_SPEC.md) and [execution handoff](SOL_EXTRA_HANDOFF.md) remain committed. SVG sketches are fallback artwork only. GitHub Actions reports build and Pages deployment status; physical iPhone acceptance remains a separate check.
 
 ## Try it on iPhone
 
 1. Open the link above in **Safari** on your iPhone.
 2. Tap **Share**, then **Add to Home Screen**.
-3. Launch **Arooma** from the Home Screen. It opens full screen with its own icon and a closed-cabinet launch image, and keeps working offline after the first load.
+3. Launch **Arooma** from the Home Screen. It opens full screen with its own icon and keeps working offline after the first load.
 
 Hold the phone upright; landscape shows a prompt to rotate.
 
@@ -22,15 +22,15 @@ Hold the phone upright; landscape shows a prompt to rotate.
 
 | Area | What to try |
 |---|---|
-| First open | Two cabinet doors swing open and the interior light comes up. The first time, a short Arooma calligraphy intro offers **Open my collection** or **Explore the demo cards**, a palette, and light/dark appearance; no door animation. Returning users enter directly. Cabinet menu replays the wordmark. |
+| First open | A short vector-stroke Arooma welcome offers **Open my collection** or **Explore the demo cards**, a palette, and light/dark appearance. Entry is immediate; returning users enter directly. The Cabinet menu can replay the wordmark. |
 | Shelves | The default curated demo opens on Dior Sauvage Elixir in Autumn. **Pinch in** (or tap the grid button in the header, or press `-`) to zoom out to every shelf: Spring, Summer, Autumn and Winter by default. Each has a **pencil** to rename it, and **Add a shelf** sits at the bottom. Pinch out over a shelf, tap it, or press Escape to go back in; the selected bottle stays selected. Move a bottle between shelves from the three dots under the card. |
-| Your collection and the demo | Your collection and the demo (eleven demo bottles: seven fictional samples and four independent illustrated real-fragrance concepts) are stored apart and never mix. The eyebrow says Demo while you are in it. Switch from the Cabinet menu; loading the demo and clearing your collection each ask first. An empty cabinet shows Add a bottle and Restore a backup. |
-| Shelf | Swipe, tap a neighbor, or use arrow keys. Tap the centered card to flip it to its ownership record, which shows the three latest wears and how they wore, and an Edit details link. |
+| Your collection and the demo | Your collection and the eleven-card demo are stored apart. The eyebrow identifies the demo; the header switches between Demo and Mine in one tap. Add to Mine preserves the original artwork and opens an existing owned card instead of duplicating it. An empty cabinet offers Add a bottle and Restore a backup. |
+| Shelf | Swipe, tap a neighbor, or use arrow keys. Tap a photographic card to expand it into the inspector; Flip turns it to its fragrance map, while My Bottle opens personal ownership actions. Classic bottle cards keep their direct flip to the ownership record and Edit details link. |
 | Liquid | Every bottle shows its liquid and fill level, including the black, white ceramic and terracotta ones through a small level window. The surface sloshes with momentum when you swipe, ripples in the direction the card moves, stays level with the room when cards lean in Fan, and never goes dead still. With Reduce Motion it stays flat at the estimated level. A bottle shown with your own photo gets the same level window, holding liquid in the colour of the photo, moving like the rest. Photos either fill the picture (a photo with a background, with zoom and position) or stand on the table (a cut-out with a clear background). |
 | Layouts | Cover Flow browses the shelf. Stack chooses: today's shortlist, the five bottles most due to be worn, plus the selected one. Fan presents a saved rotation. The same bottle stays selected; in Fan a bottle outside the rotation visits in front, labelled. The layout, the selected bottle and the rotation are remembered for each collection. |
 | Rotations | A rotation is a named set of up to five bottles you wear together, such as Evenings or Travel; you can keep twelve. Make and edit them from Cabinet menu, Rotations, or tap the caption above the cards in Fan. Fan with no rotation opens the maker. |
 | Daily Pick | Brings the next candidate forward with an olive outline and a "Today's pick" tab, with one honest reason from your log and notes, for example "You haven't worn this in a while: 40 days." |
-| Search | The grid button (or `/`) opens All shelves with a search field. It matches fragrance names and houses, ignoring case and accents. Tap a result to open its shelf. |
+| Search | The grid button (or `/`) opens All shelves with search for names, houses, concentration and known alternate names, ignoring case and accents. Tap an owned result to focus it; in Mine, curated catalog results can be added directly. |
 | Low stock | Salt Cedar: the liquid level drops, and a quiet "Running low" label with a hairline gauge. Always labeled as an estimate. |
 | Add, edit and delete | The plus button adds a bottle: house, fragrance, size, estimated remaining, notes, acquired date, your own photo (optional) or one of seven neutral drawings. The pencil on the selected card (or the `e` key) edits it; Edit details is also the first row in the three dots under the card, and the edit form can delete the bottle. Added and moved bottles go to the end of their shelf. Any bottle can be deleted, including the last, with Undo. The cabinet holds up to 200. |
 | Wear and impressions | Wear today logs the date with Undo. Then, if you want, Add how it wore: opening, development, projection and longevity, all optional. Wear history lists every wear, adds a past date, adds or edits each wear's impression, removes one and shows the average gap. |

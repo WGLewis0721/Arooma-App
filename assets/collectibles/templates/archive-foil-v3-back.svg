@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="1180" height="1720" viewBox="0 0 1180 1720" role="img" aria-label="Arooma Archive Foil v3 back editable composition template">
+<title>Arooma Archive Foil v3 — back face production layout</title>
+<defs>
+ <linearGradient id="setBg" x1=".1" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#122436"/><stop offset=".37" stop-color="#253443"/><stop offset=".77" stop-color="#080f19"/><stop offset="1" stop-color="#09111d"/></linearGradient>
+ <linearGradient id="beam" x1=".8" y1=".02" x2=".17" y2="1"><stop offset="0" stop-color="#e4f3fc" stop-opacity=".52"/><stop offset=".45" stop-color="#c5dce8" stop-opacity=".13"/><stop offset="1" stop-color="#c5dce8" stop-opacity="0"/></linearGradient>
+ <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ec6e7"/><stop offset=".17" stop-color="#be93cf"/><stop offset=".30" stop-color="#e2a579"/><stop offset=".50" stop-color="#5ca0dc"/><stop offset=".72" stop-color="#8e80c4"/><stop offset=".87" stop-color="#d4a06e"/><stop offset="1" stop-color="#81c9df"/></linearGradient>
+ <linearGradient id="bottleGhost" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#e1e8ec" stop-opacity=".14"/><stop offset=".5" stop-color="#e8f1f7" stop-opacity=".28"/><stop offset="1" stop-color="#e1e8ec" stop-opacity=".14"/></linearGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="30"/></filter>
+ <clipPath id="trim"><rect x="15" y="15" width="1150" height="1690" rx="38"/></clipPath>
+</defs>
+<g id="BG_SET"><rect x="0" y="0" width="1180" height="1720" fill="#101318"/><rect x="15" y="15" width="1150" height="1690" rx="38" fill="url(#setBg)"/></g>
+<g id="INNER_FRAME"><rect x="46" y="46" width="1088" height="1628" rx="27" fill="none" stroke="#ddd1c3" stroke-width="2" opacity=".8"/><path d="M62 72L84 49 M1093 48l22 25 M62 1648l22 23 M1093 1672l22-24" fill="none" stroke="#b1a7a0" stroke-width="4" opacity=".85"/></g>
+<g id="FOIL_MASK"><rect x="23" y="23" width="1134" height="1674" rx="34" fill="none" stroke="url(#foil)" stroke-width="23" opacity=".72"/><rect x="45" y="45" width="1090" height="1630" rx="26" fill="none" stroke="#abb6c7" stroke-width="2.3"/><path d="M45 115h90 M1040 45v80 M45 1570v100 M1000 1675h130" fill="none" stroke="#e2b98a" stroke-width="4" opacity=".7"/></g>
+<g id="GUIDES_NONEXPORT" display="none"><rect x="59" y="59" width="1062" height="1602" fill="none" stroke="#f0d261" stroke-dasharray="10 10" stroke-width="3"/><path d="M0 395h1180 M0 560h1180 M0 1090h1180 M0 1250h1180 M0 1500h1180" stroke="#43d9ef" stroke-width="2" stroke-dasharray="8 10"/></g>
+<g id="DISPLAY_TYPE" fill="#e2e7ee">
+ <text x="89" y="174" font-family="Georgia,serif" font-size="77" letter-spacing="7">HOUSE NAME</text>
+ <text x="89" y="273" font-family="Arial,Helvetica,sans-serif" font-size="48" letter-spacing="12">FRAGRANCE</text>
+ <text x="91" y="327" font-family="Arial,Helvetica,sans-serif" font-size="24" letter-spacing="7">CONCENTRATION</text>
+</g>
+
+<g id="DESCRIPTION"><path d="M90 366h1000 M90 555h1000" stroke="#b8ab93" stroke-width="2"/>
+ <text x="89" y="427" font-size="32" font-family="Georgia,serif" fill="#e6e9eb">Write a short, accurate description.</text>
+ <text x="89" y="473" font-size="32" font-family="Georgia,serif" fill="#e6e9eb">Keep it under 32 words.</text>
+</g>
+<g id="NOTES" fill="#eee8e1">
+ <text x="90" y="612" font-family="Georgia,serif" font-size="32" letter-spacing="5" fill="#c7a27a">FRAGRANCE MAP</text>
+ <g id="NOTES_TOP">
+ <rect x="89" y="641" width="612" height="160" fill="#253644" fill-opacity=".42" stroke="#bd9871" stroke-width="2"/>
+ <text x="395" y="733" font-family="Arial,sans-serif" font-size="20" letter-spacing="4" text-anchor="middle">EDITORIAL IMAGE: TOP</text>
+ <text x="748" y="674" font-family="Georgia,serif" font-size="31" letter-spacing="3" fill="#c7a27a">TOP</text>
+ <text x="748" y="719" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 1</text>
+ <text x="748" y="752" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 2</text>
+ <text x="748" y="785" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 3</text>
+ <path d="M89 811h1000" stroke="#a98c6b" stroke-opacity=".68" stroke-width="2"/>
+ </g>
+<g id="NOTES_HEART">
+ <rect x="89" y="821" width="612" height="160" fill="#253644" fill-opacity=".42" stroke="#bd9871" stroke-width="2"/>
+ <text x="395" y="913" font-family="Arial,sans-serif" font-size="20" letter-spacing="4" text-anchor="middle">EDITORIAL IMAGE: HEART</text>
+ <text x="748" y="854" font-family="Georgia,serif" font-size="31" letter-spacing="3" fill="#c7a27a">HEART</text>
+ <text x="748" y="899" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 1</text>
+ <text x="748" y="932" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 2</text>
+ <text x="748" y="965" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 3</text>
+ <path d="M89 991h1000" stroke="#a98c6b" stroke-opacity=".68" stroke-width="2"/>
+ </g>
+<g id="NOTES_BASE">
+ <rect x="89" y="1001" width="612" height="160" fill="#253644" fill-opacity=".42" stroke="#bd9871" stroke-width="2"/>
+ <text x="395" y="1093" font-family="Arial,sans-serif" font-size="20" letter-spacing="4" text-anchor="middle">EDITORIAL IMAGE: BASE</text>
+ <text x="748" y="1034" font-family="Georgia,serif" font-size="31" letter-spacing="3" fill="#c7a27a">BASE</text>
+ <text x="748" y="1079" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 1</text>
+ <text x="748" y="1112" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 2</text>
+ <text x="748" y="1145" font-family="Georgia,serif" font-size="27" font-style="italic">Verified note 3</text>
+ <path d="M89 1171h1000" stroke="#a98c6b" stroke-opacity=".68" stroke-width="2"/>
+ </g>
+</g>
+<g id="METADATA">
+ <path d="M90 1208h1000 M90 1494h1000" stroke="#b8a989" stroke-width="2"/>
+ <g><text x="90" y="1320" font-family="Georgia,serif" font-size="34" fill="#eff3f5">YEAR</text><text x="90" y="1382" font-family="Arial,Helvetica,sans-serif" font-size="18" letter-spacing="4" fill="#cbd4dd">RELEASED</text></g>
+<g><text x="427" y="1320" font-family="Georgia,serif" font-size="34" fill="#eff3f5">POSITIONING</text><text x="427" y="1382" font-family="Arial,Helvetica,sans-serif" font-size="18" letter-spacing="4" fill="#cbd4dd">CLASSIFICATION</text></g>
+<g><text x="764" y="1320" font-family="Georgia,serif" font-size="34" fill="#eff3f5">OFFICIAL TYPE</text><text x="764" y="1382" font-family="Arial,Helvetica,sans-serif" font-size="18" letter-spacing="4" fill="#cbd4dd">CONCENTRATION</text></g>
+ <path d="M417 1240v202 M758 1240v202" stroke="#b8a989" stroke-width="2" opacity=".8"/>
+</g>
+<g id="FOOTER_ACCENT"><path d="M522 1585h136" stroke="#c2a17b" stroke-width="3"/></g>
+<g id="INFO_TYPE"><text x="590" y="1650" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="19" letter-spacing="7" fill="#e2e7ea">AROOMA • FRAGRANCE COLLECTION</text></g></svg>

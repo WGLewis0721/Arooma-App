@@ -1,8 +1,11 @@
-# Archive Foil v2 | Production handbook for designers + AI agents
+# Archive Foil v3 | Production handbook for designers + AI agents
 
-> Part of the Arooma design brain. Start at [../README.md](../README.md). Visual authority: [COLLECTIBLE_CARD_ART_DIRECTION.md](COLLECTIBLE_CARD_ART_DIRECTION.md). This handbook makes the owner's approved Prodigy diptych **repeatable**; it does not implement an in-app feature.
+> Part of the Arooma design brain. Start at [../README.md](../README.md). Visual authority: [COLLECTIBLE_CARD_ART_DIRECTION.md](COLLECTIBLE_CARD_ART_DIRECTION.md). This handbook makes the owner's approved Dior Sauvage Elixir diptych with top-note names on front and no rarity badges **repeatable**; it does not implement an in-app feature.
 
 > Summary: Treat AI as the art department for set generation, object cleanup, relighting and ingredient still lifes. Treat the designer as art director, retoucher, typographer, colorist and final print operator. Lock a product manifest, compose against fixed SVG artboards, isolate a controllable foil layer, retouch bottle markings and verify small-type, source and rights before export.
+
+
+**Locked 2026-10-30 v3 overrides:** do not put “ULTRA RARE” or an equivalent rarity badge on either face. The front must contain **a source-verified visual top-note ingredient and the 3-4 source-verified top-note names** under the title. Back note-map tiles are **horizontal photo strips with text immediately to their right**, not three columns. Preserve the approved back spacing, serif italics, copper labels, and 3-field metadata row. **Never source note lists or dates from a rendered AI image.**
 
 ## 1. Job ticket (complete before prompting)
 
@@ -15,7 +18,6 @@ fragrance: "EXACT FRAGRANCE"
 concentration: "EXACT EDT / EDP / Extrait etc."
 positioning: "Masc / Fem / Unisex, with source"
 released: "YYYY, with source"
-arooma_rarity: "ULTRA RARE" # Fictional Arooma tier
 bottle_reference: "owner photo file + view/crop + usage permission"
 brand_photo_reference: "official URL, visual reference only"
 verified_top: ["..."]
@@ -29,13 +31,13 @@ designer: "name"
 reviewer: "name"
 ```
 
-**Rules:** do not copy notes from the last generated card. Do not mix Eau de Toilette, Eau de Parfum, Le Parfum or Extrait versions. If a top/heart/base taxonomy is unavailable, describe the published note *set* and do not fabricate pyramid placement. The approved Prodigy image is **visual-only**: its sample note text is not a primary source.
+**Rules:** do not copy notes from the last generated card. Do not mix Eau de Toilette, Eau de Parfum, Le Parfum or Extrait versions. If a top/heart/base taxonomy is unavailable, describe the published note *set* and do not fabricate pyramid placement. The approved Dior layout reference is **visual-only**: its sample note text is not a primary source.
 
 ## 2. Working package and layer contract
 
 Use the editable templates:
-- [Front SVG](../../../assets/collectibles/templates/archive-foil-front.svg)
-- [Back SVG](../../../assets/collectibles/templates/archive-foil-back.svg)
+- [Front SVG](../../../assets/collectibles/templates/archive-foil-v3-front.svg)
+- [Back SVG](../../../assets/collectibles/templates/archive-foil-v3-back.svg)
 
 Files for every fragrance:
 ```text
@@ -98,21 +100,21 @@ Output photo plate suitable for a rectangular note tile.
 6. **Props:** one botanical/wood structure and at most one accent prop in front; integrate perspective and color temperature.
 7. **Inner frame and foil:** use selective etched vectors. The outer edge is sacrosanct; masked subject overlap can interrupt **only** the inner frame. Keep foil at border and micro-corners, not a lens flare across copy.
 8. **Typography:** set house/name/concentration/notes/metadata/footer in the editor from manifest. Use **actual text objects** and permitted fonts. Rebuild any words generated into the image; even a recognizable bottle label must be audited.
-9. **Back face:** same trim, photographic tonal range, type family, foil rhythm. Back is **not a bland spreadsheet**: three large editorial image tiles + concise facts + bottom atmospheric still life.
+9. **Back face:** same trim, photographic tonal range, type family, foil rhythm. Back is **not a bland spreadsheet**: three large **horizontal** editorial image strips + their adjacent stage notes + concise facts.
 10. **Physical finish:** minuscule print grain, edge-foil reflection, calibrated contrast. Add final grain to art, not to primary text. No global oversharpen or overglow.
 11. **Review:** overlay front/back in registration; flip horizontally for design balance review; verify both at natural size, 360px width, and 100% zoom.
 12. **Export and handoff:** pack source, manifest, sources/rights, generation metadata, PNGs, review proof and any print-specific files.
 
 ## 5. Front and back copy budget
 
-**Front:** Brand house, fragrance, concentration, one collectible tier + small Arooma maker line. Rare small emblem is permitted only when it belongs to the product's personality. Do **not** add date, note map, performance numbers, bottle sizes or fake stats to crowd the photo by default.
+**Front:** Brand house, fragrance, concentration at upper-right, **3-4 verified top-note names** in small uppercase under the name, a recognizable top-note ingredient scene, and the small Arooma maker line. Concentration is the only strength indicator. **Do not add ULTRA RARE, performance numbers, fake statistics or price.**
 
 **Back:**
-- Header title + concentration and `ULTRA RARE` near upper right.
+- Header title and **exact official concentration at upper right**, no extra rarity tiers.
 - Description: one short paragraph **18-32 words**, no subjective claims dressed as independent performance facts.
-- Note map: **three columns** (TOP, HEART, BASE); at most 2-3 names per column, one realistic photo tile per column. If source doesn't assign stages, use a non-pyramidal “KEY NOTES” label instead.
+- Note map: **three horizontal full-width rows** (TOP, HEART, BASE); each row shows a wide ingredient photo on the left and stage heading + a concise verified note list **on the right**. The front's note list must match the TOP row. If source doesn't assign stages, use a non-pyramidal “KEY NOTES” label instead.
 - Metadata: `RELEASED`, `POSITIONING`, `CONCENTRATION` in three equal columns. Use source-labeled marketing positioning. Avoid repeat information where space is needed.
-- Lower full-width atmospheric photograph: 19-25% of card height, an extension of front set.
+- Keep three generous note photographs and the bottom metadata; **no compulsory additional bottom photo strip**, which was removed in the approved Dior layout.
 - Arooma microlabel in lower safe area.
 - Community ratings only if separately commissioned with published source, retrieval date and units. They are not a default card element.
 
@@ -141,23 +143,23 @@ Output photo plate suitable for a rectangular note tile.
 **Visual scoring (1 to 5)**; require **≥4 in each** for a finished concept:
 1. **Fidelity:** exact bottle looks manufactured, not invented.
 2. **Art direction:** strongest detail around bottle, intentional diagonal light and grounded props.
-3. **Collectibility:** border/foil feels printed, frame overlaps controlled, scarcity conveyed without gold clutter.
+3. **Collectibility:** border/foil feels printed, frame overlaps controlled, concentration carries strength without any invented rarity tag.
 4. **Typography:** hierarchy is deliberate, text legible at phone width, no typographic errors.
 5. **Pairing:** back looks like same object, visually rich editorial imagery, not a different template.
 
-Use the owner's approved Prodigy diptych as the visual calibration image, not its note text. A human art director gives the final yes/no.
+Use the owner's approved Dior Sauvage Elixir diptych with top-note names on front and no rarity badges as the visual calibration image, not its note text. A human art director gives the final yes/no.
 
 ## 8. First-pass brief for another agent
 
 ```text
 Read docs/design/brand/COLLECTIBLE_CARD_ART_DIRECTION.md and
 docs/design/brand/COLLECTIBLE_CARD_PRODUCTION.md.
-The approved 2026-10-30 MIND GAMES PRODIGY diptych is the visual master.
+The approved 2026-10-30 DIOR SAUVAGE ELIXIR final diptych is the visual master.
 Work as an experienced luxury packaging/editorial designer using AI for
 photographic plates only. Do not ask image AI to typeset a complete card.
 Before producing pixels: verify the exact brand, concentration, bottle and
 official notes; output a copy manifest and 2-sentence art direction.
-Use the front/back SVG templates, preserve foil/text as editable layers,
+Use the front/back **v3** SVG templates, preserve foil/text as editable layers,
 compose a matching pair, then run the five scoring gates. Never reintroduce
 the rejected flat catalog look or maximal fantasy card.
 Deliver separate front/back 1180x1720 PNGs, a diptych proof, a layered source,

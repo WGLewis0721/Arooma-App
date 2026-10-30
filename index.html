@@ -1484,7 +1484,10 @@ renumber();refreshView();
 
 /* ---------- geometry ---------- */
 function geo(){
-  var sw=stage.clientWidth, shh=stage.clientHeight, plank=shh<300?38:46;
+  var sw=stage.clientWidth, shh=stage.clientHeight;
+  // The Atelier edition has no physical cabinet plank and gives its height to card art.
+  // The classic test fixture retains its historic vessel geometry.
+  var plank=new URLSearchParams(location.search).has('classicDemo')?(shh<300?38:46):0;
   var cw=sw*.68, ch=Math.min(shh-plank-22,cw*86/59,440);
   ch=Math.max(ch,190);
   if(cw>ch*59/86)cw=ch*59/86;

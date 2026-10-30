@@ -2,6 +2,8 @@
 
 > Part of the Arooma design brain. Start at [README.md](README.md) for the map and the router.
 
+> Summary: open decisions with where each is described, then the dated decision log, newest first.
+
 Resolve an open decision here and in its source document together, then move the row to the log. Not needed for ordinary tasks; read it when a task touches one of these topics or when you record a decision.
 
 ## Open decisions

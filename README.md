@@ -4,6 +4,12 @@ Arooma V2 is a private collectible fragrance archive with a calligraphic welcome
 
 This repo holds the **iOS web app demo** (an installable PWA) and the brand board.
 
+## Current production handoff (GPT-6 Sol at Extra)
+
+**[Read the root V2 final polish spec](AROOMA_V2_FINAL_POLISH_HANDOFF.md)** before touching the app. It defines the approved visual masters, core interaction constraints, motion/type direction, exact source-crop instructions, and a short meaningful acceptance gate.
+
+**[The exact photographic collectible masters are committed here](assets/collectibles/masters/README.md).** Dior Sauvage Elixir, Rasasi Hawas For Him, and YSL MYSLF EDP have owner-approved original front/back diptychs in `assets/collectibles/masters/approved/`. Historical Prodigy and Prada artwork is archived separately; do not represent those older designs as approved Archive Foil v3. **The live PWA still displays the lower-detail SVG placeholders until the next implementation pass extracts and wires up the original PNG faces.**
+
 **Live demo:** https://wglewis0721.github.io/Arooma-App/
 
 ## Try it on iPhone

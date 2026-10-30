@@ -26,6 +26,8 @@ Rarely needed: [DECISIONS.md](DECISIONS.md) (open decisions and the decision log
 
 ---
 
+**Active commissioned visual-polish exception:** the owner requested the complete Sol Extra specification at repository root: [../../AROOMA_V2_FINAL_POLISH_SPEC.md](../../AROOMA_V2_FINAL_POLISH_SPEC.md), with [../../SOL_EXTRA_HANDOFF.md](../../SOL_EXTRA_HANDOFF.md). Read those two files first for the final V2 Polish task. Actual approved card masters are indexed in [../../assets/collectibles/masters/README.md](../../assets/collectibles/masters/README.md). This is not a new general place to create ad-hoc design documentation.
+
 ## 2. Task router
 
 | If you are doing... | Read | Then, only if needed |

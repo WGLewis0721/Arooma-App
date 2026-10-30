@@ -2,7 +2,7 @@
    __BUILD__ is replaced with the commit SHA by the GitHub Actions workflow,
    so each deploy gets a fresh cache and old ones are removed. */
 const BUILD = '__BUILD__';
-const CACHE = 'arooma-' + BUILD;
+const CACHE = 'arooma-originals-v2-' + BUILD;
 const SHELL = [
   './',
   'index.html',
@@ -11,19 +11,23 @@ const SHELL = [
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
   'assets/icons/apple-touch-icon.png',
-  'assets/icons/favicon-32.png',
-  'assets/collectibles/cards/dior-front.svg',
-  'assets/collectibles/cards/dior-back.svg',
-  'assets/collectibles/cards/hawas-front.svg',
-  'assets/collectibles/cards/hawas-back.svg',
-  'assets/collectibles/cards/myslf-front.svg',
-  'assets/collectibles/cards/myslf-back.svg',
-  'assets/collectibles/cards/prodigy-front.svg',
-  'assets/collectibles/cards/prodigy-back.svg'
+  'assets/icons/favicon-32.png'
+];
+const ART = [
+  'assets/collectibles/production/dior/front.webp',
+  'assets/collectibles/production/dior/back.webp',
+  'assets/collectibles/production/hawas/front.webp',
+  'assets/collectibles/production/hawas/back.webp',
+  'assets/collectibles/production/myslf/front.webp',
+  'assets/collectibles/production/myslf/back.webp',
+  'assets/collectibles/production/prodigy/front.webp',
+  'assets/collectibles/production/prodigy/back.webp'
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE)
+    .then((c) => c.addAll(SHELL).then(() => Promise.allSettled(ART.map((path) => c.add(path)))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {

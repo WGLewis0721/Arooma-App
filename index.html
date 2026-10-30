@@ -493,14 +493,16 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
 .device .info{min-height:117px}
 .device .face{background:var(--v2-surface);border:1px solid color-mix(in srgb,var(--v2-accent) 38%,transparent)}
 .device .face::after{background:linear-gradient(115deg,rgba(255,255,255,.12),transparent 32%,rgba(0,0,0,.10))}
-.device .slot{transition:transform .57s cubic-bezier(.2,.9,.22,1),opacity .4s ease;transform-style:preserve-3d}
+.device .slot{transition:transform .38s cubic-bezier(.2,.78,.22,1),opacity .38s ease;transform-style:preserve-3d;will-change:auto}
 .device .slot.is-sel{filter:drop-shadow(0 10px 20px rgba(0,0,0,.23))}
-.device .slot .card-inner{transition:transform .59s cubic-bezier(.18,.78,.22,1)}
+.device .slot .card-inner{transition:transform .54s cubic-bezier(.18,.78,.22,1)}
 .device .slot.is-sel:active .card-inner{filter:brightness(1.075)}
 .device .slot.collectible .face{padding:0;overflow:hidden;background:#080b13;border:0;border-radius:11px}
 .device .slot.collectible .face::after{content:none}
-.device .slot.collectible .collectible-img{display:block;width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none}
+.device .slot.collectible .collectible-img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
 .device .slot.collectible .shade{background:#000}
+.device .slot.collectible.archival .tab{background:var(--v2-secondary)}
+.device .slot.collectible.archival::after{content:"Archival art";position:absolute;right:9px;bottom:9px;z-index:8;padding:5px 8px;border-radius:12px;background:rgba(13,16,24,.83);color:#f3ede6;font:600 10px var(--sans);letter-spacing:.05em;pointer-events:none}
 .device .slot.collectible .tab{z-index:10;top:5px;transform:translate(-50%,-50%);border-radius:10px}
 .device .slot.collectible .cpen{z-index:5}
 .device .slot.collectible .num,.device .slot.collectible .rec-no{display:none}
@@ -520,10 +522,11 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
   transition:opacity .42s ease,visibility .42s ease}
 .device .introV2.dismissed{opacity:0;visibility:hidden;pointer-events:none}
 .device .introMark{width:min(320px,100%);height:192px;overflow:visible;color:var(--v2-accent)}
-.device .inkscript{font-family:"Snell Roundhand","Bickham Script Pro","Apple Chancery",cursive;font-size:108px;font-style:italic;font-weight:400;fill:var(--v2-text);clip-path:inset(0 100% 0 0);animation:ink-reveal 1.45s cubic-bezier(.35,.05,.38,1) .1s both}
-.device .inkflourish{stroke:var(--v2-accent);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-dasharray:520;stroke-dashoffset:520;animation:ink-underline .9s ease 1.03s forwards}
-@keyframes ink-reveal{to{clip-path:inset(0 0 0 0)}}
-@keyframes ink-underline{to{stroke-dashoffset:0}}
+.device .inkstroke{fill:none;stroke:var(--v2-text);stroke-width:4.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100;stroke-dashoffset:100;animation:ink-write .62s cubic-bezier(.28,.05,.38,1) forwards}
+.device .inkstroke:nth-child(2){animation-delay:.24s}.device .inkstroke:nth-child(3){animation-delay:.44s}
+.device .inkstroke:nth-child(4){animation-delay:.65s}.device .inkstroke:nth-child(5){animation-delay:.86s}.device .inkstroke:nth-child(6){animation-delay:1.07s}
+.device .inkflourish{stroke:var(--v2-accent);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;animation:ink-write .45s ease 1.2s forwards}
+@keyframes ink-write{to{stroke-dashoffset:0}}
 .device .introLead{font-family:var(--v2-display);font-size:21px;line-height:1.3;text-align:center;max-width:320px}
 .device .introSub{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--v2-muted)}
 .device .v2ThemeGroup{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px}
@@ -541,9 +544,54 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
 .device #bMenu{font-size:12px;padding:0 12px;min-width:66px}
 .device .v2FooterActions{display:flex;justify-content:center;gap:6px}
 .device .empty p{color:var(--v2-muted)}
+/* The original card is a rigid photographic object. Controls live beyond its rim. */
+.device .slot.collectible .face{background:#090b12}
+.device .slot.collectible .collectible-img{background:#090b12}
+.device .slot.collectible.is-sel{filter:drop-shadow(0 14px 22px rgba(0,0,0,.3))}
+.device .stage{border:0;box-shadow:inset 0 15px 50px rgba(0,0,0,.13);margin:0 8px}
+.device .plank{height:24px;opacity:.55}
+.device .head{padding:5px 16px 12px;display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.device .head>div:first-child{min-width:0}
+.device .head .hbtns{justify-content:space-between;width:100%}
+.device .head h1{font-size:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.device .head .round,.device #demoQuick{min-width:44px;width:44px;height:44px}
+.device #demoQuick{width:60px;font-size:12px}
+.device #themeToggle{display:grid}
+.device .eyebrow{font-size:10px;letter-spacing:.13em}
+.device .info{padding:10px 20px 0;min-height:110px}
+.device .notes{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.device .actions{gap:8px;margin-top:10px}
+.device .btn{min-height:44px;height:auto;padding:0 16px}
+.device .toolbar{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+.device .seg button{font-size:12px}
+.device .slot:focus-visible .face{outline:2px solid var(--v2-accent);outline-offset:3px}
+.device .stage.dragging .slot.is-sel .card-inner{transform:translateY(-3px) scale(1.012)}
+.device .slot.is-sel:not(.flipped):active .card-inner{filter:none}
+.device .inspector{position:absolute;inset:0;z-index:55;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  background:radial-gradient(85% 60% at 50% 48%,var(--v2-secondary),var(--v2-major));color:var(--v2-text);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .32s ease,visibility .32s ease}
+.device .inspector.on{opacity:1;visibility:visible;pointer-events:auto}
+.device .inspector-top{position:absolute;top:max(60px,calc(env(safe-area-inset-top,0px) + 28px));left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;z-index:2}
+.device .inspector-top p{min-width:0;max-width:70%;font:500 16px var(--v2-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.device .inspector button{min-height:44px}
+.device .inspector-close{padding:0 16px;border-radius:23px}
+.device .inspector-card{position:absolute;left:50%;top:49%;bottom:auto;margin:0;width:min(352px,calc(100% - 32px));height:auto;aspect-ratio:59 / 86;
+  transform:translate(-50%,-50%);z-index:1;cursor:pointer;filter:drop-shadow(0 20px 30px rgba(0,0,0,.38));will-change:transform}
+.device .inspector-card .face{padding:0;border:0;border-radius:12px;overflow:hidden;background:#090b12}
+.device .inspector-card .face::after{content:none}
+.device .inspector-card .collectible-img{width:100%;height:100%;object-fit:contain;display:block;background:#090b12}
+.device .inspector-card .shade,.device .inspector-card .tab,.device .inspector-card .cpen,.device .inspector-card .rec-edit{display:none}
+.device .inspector-card.archival::after{content:"Archival art";position:absolute;right:10px;bottom:10px;z-index:4;padding:6px 10px;border-radius:14px;background:rgba(13,16,24,.86);color:#f3ede6;font:600 11px var(--sans)}
+.device .inspector-actions{position:absolute;bottom:max(34px,calc(env(safe-area-inset-bottom,0px) + 22px));left:16px;right:16px;display:flex;justify-content:center;gap:8px;z-index:2}
+.device .inspector-actions .btn{white-space:nowrap;justify-content:center;min-width:74px}
+.device .inspector-hint{position:absolute;bottom:max(86px,calc(env(safe-area-inset-bottom,0px) + 75px));font-size:11px;color:var(--v2-muted);letter-spacing:.03em}
+.device .mb .collectible-img,.device .hit .collectible-img{display:block;width:100%;height:100%;object-fit:contain;border-radius:3px;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+.device .ed-tier .collectible-img{display:block;width:auto;height:100%;max-width:75px;object-fit:contain;border-radius:3px}
+@media(max-height:740px){.device .inspector-card{width:min(292px,calc(100% - 64px));top:49%}.device .inspector-hint{display:none}}
+@media(max-width:380px){.device .head{padding-left:12px;padding-right:12px}.device .head .hbtns{gap:2px}.device .head h1{font-size:23px}.device .inspector-actions .btn{padding:0 12px;font-size:12px}}
 /* One light control system, not a second decorative card system */
 @media(prefers-reduced-motion:reduce){
- .device .inkscript{animation:none;clip-path:none}
+ .device .inkstroke{animation:none;stroke-dashoffset:0}
  .device .inkflourish{animation:none;stroke-dasharray:none;stroke-dashoffset:0}
  .device .slot{transition-duration:.01ms!important}
 }
@@ -644,8 +692,13 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
   <div class="introV2" id="introV2" role="dialog" aria-label="Welcome to Arooma">
   <div class="introSub">Your private fragrance archive</div>
   <svg class="introMark" viewBox="0 0 380 200" role="img" aria-label="Arooma calligraphy wordmark">
-    <text class="inkscript" x="190" y="127" text-anchor="middle">Arooma</text>
-    <path class="inkflourish" d="M82 142 Q165 166 257 138 T333 144 M92 149q-25 15-31-1"/>
+    <path class="inkstroke" pathLength="100" d="M25 126 C43 117 55 73 69 49 C82 25 99 34 88 60 C80 81 69 103 60 129 M55 93 C72 86 87 84 103 87 M92 53 C88 80 88 111 99 123 C107 132 114 119 119 109"/>
+    <path class="inkstroke" pathLength="100" d="M117 121 C126 104 128 90 125 100 C122 111 122 124 129 120 C136 105 140 96 150 99"/>
+    <path class="inkstroke" pathLength="100" d="M168 102 C163 94 154 96 150 105 C143 121 150 130 160 124 C172 117 174 100 165 97 C160 94 154 98 155 105"/>
+    <path class="inkstroke" pathLength="100" d="M207 102 C201 94 192 96 187 105 C181 121 187 129 198 124 C211 117 212 100 204 97 C198 94 192 98 193 105"/>
+    <path class="inkstroke" pathLength="100" d="M212 121 C220 104 223 93 221 107 C218 127 222 127 229 111 C238 91 248 94 246 110 C243 128 248 127 256 110 C267 89 278 97 274 112 C270 127 276 129 285 116"/>
+    <path class="inkstroke" pathLength="100" d="M320 101 C313 94 300 97 292 110 C283 126 292 133 304 121 C312 113 318 97 318 103 C315 118 315 129 324 124 C332 119 342 119 355 111"/>
+    <path class="inkflourish" pathLength="100" d="M69 145 C132 154 213 147 291 141 C319 139 341 139 359 145"/>
   </svg>
   <div class="introLead">Every fragrance, a story worth keeping.</div>
   <div class="introSub">Choose your finish</div>
@@ -663,6 +716,11 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
   <button class="v2Secondary" id="introOwn">Open my collection</button>
   <div class="v2legal">Independent fragrance companion. Brand names identify products; no affiliation or endorsement is implied.</div>
 </div>
+  <section class="inspector" id="inspector" role="dialog" aria-modal="true" aria-label="Card inspector" aria-hidden="true">
+    <div class="inspector-top"><p id="inspectorTitle"></p><button class="glass inspector-close" id="inspectorClose" aria-label="Close card inspector">Close</button></div>
+    <p class="inspector-hint">Tap the card to turn it over</p>
+    <div class="inspector-actions"><button class="btn" id="inspectorFlip">Flip card</button><button class="btn primary" id="inspectorPrimary"></button><button class="btn" id="inspectorDetails">My Bottle</button></div>
+  </section>
 <div class="scrim" id="scrim"></div>
   <div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Cabinet" tabindex="-1"><div class="grab"></div><div class="pbody" id="panelBody"></div></div>
   <div class="sheet" id="sheet" role="dialog" aria-label="Share your shelf">
@@ -1052,15 +1110,26 @@ function profileOf(text){
 function coolFrom(v){return v[2]+v[3]+v[4]+v[5]>=1.6}
 function overlap(a,b){var mn=0,mx=0;for(var i=0;i<8;i++){mn+=Math.min(a[i],b[i]);mx+=Math.max(a[i],b[i])}return mx?mn/mx:0}
 
-/* Archive Foil v3: previously commissioned fragrance concepts, in an opt-in demo only.
-   These lightweight editable illustrated editions use original Arooma vector art;
-   they do not claim rights to third-party manufacturer product photography. */
+/* Approved original photographic faces; Prodigy is retained as historical art. */
 var CARDS={
  c0:{key:'dior',house:'Dior',name:'Sauvage Elixir',conc:'Elixir',shelf:'au',notes:'Grapefruit, cinnamon, nutmeg, cardamom, lavender, woods',vessel:'noir',ml:60,cool:true},
  c1:{key:'hawas',house:'Rasasi',name:'Hawas For Him',conc:'Eau de Parfum',shelf:'su',notes:'Apple, bergamot, lemon, cinnamon, orange blossom, cardamom, plum',vessel:'clear',ml:100,cool:false},
  c2:{key:'myslf',house:'Yves Saint Laurent',name:'MYSLF',conc:'Eau de Parfum',shelf:'sp',notes:'Bergamot, orange blossom, Indonesian patchouli, Ambrofix',vessel:'noir',ml:100,cool:false},
  c3:{key:'prodigy',house:'MIND GAMES',name:'Prodigy',conc:'Extrait de Parfum',shelf:'au',notes:'Rose absolute, cardamom, bergamot, patchouli, latte, sandalwood',vessel:'white',ml:100,cool:true}
 };
+var CARD_ART={
+ dior:{base:'assets/collectibles/production/dior/',status:'approved'},
+ hawas:{base:'assets/collectibles/production/hawas/',status:'approved'},
+ myslf:{base:'assets/collectibles/production/myslf/',status:'approved'},
+ prodigy:{base:'assets/collectibles/production/prodigy/',status:'archival'}
+};
+function collectibleFace(key,side){return CARD_ART[key].base+side+'.webp'}
+function artKeyFor(b){return b.img?null:b.artKey&&CARD_ART[b.artKey]?b.artKey:MODE==='demo'&&CARDS[b.id]?CARDS[b.id].key:null}
+function collectibleImage(key,side,label,priority){
+ return '<img class="collectible-img" src="'+collectibleFace(key,side)+'" data-fallback="assets/collectibles/cards/'+key+'-'+side+'.svg" alt="'+esc(label)+'" decoding="async" loading="'+(priority?'eager':'lazy')+'">';
+}
+document.addEventListener('error',function(e){var img=e.target;if(img.tagName==='IMG'&&img.dataset.fallback){img.src=img.dataset.fallback;delete img.dataset.fallback}},true);
+function bottlePicture(b,id){var key=artKeyFor(b);return key?collectibleImage(key,'front',b.house+' '+b.name,true):b.draw(id,b.left)}
 function curatedSeed(){
  return Object.keys(CARDS).map(function(id){
    var c=CARDS[id];return {id:id,shelf:c.shelf,house:c.house,name:c.name,conc:c.conc,ml:c.ml,left:.91,notes:c.notes,vessel:c.vessel,
@@ -1377,12 +1446,13 @@ function buildSlot(b,i){
   var el=document.createElement('div');
   el.className='slot';el.dataset.i=i;el.setAttribute('role','button');el.tabIndex=-1;
   el.setAttribute('aria-label',b.house+', '+b.name+(b.low?', running low':'')+(b.sample&&MODE==='own'?', sample bottle':''));
-  if((MODE==='demo'&&CARDS[b.id])||(b.artKey&&!b.img)){
-    var art=b.artKey||(CARDS[b.id]&&CARDS[b.id].key),root='assets/collectibles/cards/'+art;
+  if(artKeyFor(b)){
+    var art=artKeyFor(b),near=Math.abs(i-sel)<=1;
     el.classList.add('collectible');
+    if(CARD_ART[art].status==='archival')el.classList.add('archival');
     el.innerHTML='<div class="card-inner">'
-      +'<div class="face front"><img class="collectible-img" src="'+root+'-front.svg" alt="'+esc(b.house+' '+b.name+' front')+'" decoding="async"><span class="num">N&deg; '+pad(i+1)+'</span><div class="shade"></div></div>'
-      +'<div class="face back"><img class="collectible-img" src="'+root+'-back.svg" alt="'+esc(b.name+' fragrance map')+'" decoding="async"><span class="rec-no"></span></div>'
+      +'<div class="face front">'+collectibleImage(art,'front',b.house+' '+b.name+' front',near)+'<span class="num">N&deg; '+pad(i+1)+'</span><div class="shade"></div></div>'
+      +'<div class="face back">'+collectibleImage(art,'back',b.name+' fragrance map',near)+'<span class="rec-no"></span></div>'
       +'</div><div class="tab">Today&rsquo;s pick</div>'
       +'<span class="nm" style="position:absolute;left:-9999px">'+esc(b.name)+'</span>'
       +'<button class="cpen" tabindex="-1" aria-label="Edit '+esc(b.name)+'"><i>'+PEN+'</i></button>';
@@ -1407,9 +1477,9 @@ renumber();refreshView();
 /* ---------- geometry ---------- */
 function geo(){
   var sw=stage.clientWidth, shh=stage.clientHeight, plank=shh<300?38:46;
-  var cw=sw*.62, ch=Math.min(shh-plank-26,cw/.60,410);
+  var cw=sw*.68, ch=Math.min(shh-plank-22,cw*86/59,440);
   ch=Math.max(ch,190);
-  if(cw>ch*.70)cw=ch*.70;
+  if(cw>ch*59/86)cw=ch*59/86;
   G.cw=Math.round(cw);G.ch=Math.round(ch);
   stage.style.setProperty('--cw',G.cw+'px');stage.style.setProperty('--ch',G.ch+'px');
   stage.style.setProperty('--u',(G.cw/216).toFixed(3));stage.style.setProperty('--plank',plank+'px');
@@ -1463,6 +1533,7 @@ function render(pos){
   var live=stage.classList.contains('dragging');
   slots.forEach(function(el,i){
     var o=(mode==='fan'&&introDone)?fanPlace(i):place(i,pos);
+    if(Math.abs(OPOS[i]-pos)<1.6&&OPOS[i]>=0)$$('.collectible-img',el).forEach(function(img){img.loading='eager'});
     el.style.transform='translate3d('+o.x.toFixed(1)+'px,'+o.y.toFixed(1)+'px,'+o.z.toFixed(1)+'px) rotateY('+o.ry.toFixed(1)+'deg) translateY('+o.p.toFixed(1)+'px) rotateZ('+o.rz.toFixed(2)+'deg) translateY('+(-o.p).toFixed(1)+'px) scale('+o.s.toFixed(3)+')';
     el.style.opacity=o.op;el.style.zIndex=o.zi;el.style.setProperty('--shade',o.shade);
     el.style.pointerEvents=o.op<.2?'none':'auto';
@@ -1494,9 +1565,7 @@ function settleFx(){
   settleTimer=setTimeout(function(){
     if(sel<0)return;
     haptic('settle');LQ.kick(slots[sel],{s:.08,A:.8,b:.4});
-    var el=slots[sel];if(!el||RM||el.classList.contains('flipped'))return;
-    var inner=el.firstChild;if(inner&&inner.animate){inner.animate([{transform:'translateY(0)'},{transform:'translateY(-3px)'},{transform:'translateY(0)'}],{duration:260,easing:'ease-out'})}
-  },560);
+  },390);
 }
 function select(i){
   if(!N||i==null||i<0)return;
@@ -1505,7 +1574,58 @@ function select(i){
   slots.forEach(function(el){el.classList.remove('flipped')});
   sel=i;syncShelf();render();updateInfo();settleFx();saveUI();
 }
-function flip(){if(sel<0)return;slots[sel].classList.toggle('flipped')} /* no haptic: a flip is not a moment worth a tick */
+var inspector=$('#inspector'),inspectCard=null,inspectSource=null,inspectClosing=false,inspectStartY=null,inspectSuppressClick=false;
+function inspectMotion(card,source,reverse,done){
+ if(RM||!card.animate||!source){done();return}
+ var a=source.getBoundingClientRect(),b=card.getBoundingClientRect(),d=$('#device').getBoundingClientRect(),scale=d.width/$('#device').offsetWidth||1;
+ var dx=((a.left+a.width/2)-(b.left+b.width/2))/scale,dy=((a.top+a.height/2)-(b.top+b.height/2))/scale;
+ var from='translate(calc(-50% + '+dx.toFixed(1)+'px),calc(-50% + '+dy.toFixed(1)+'px)) scale('+(a.width/b.width).toFixed(3)+','+(a.height/b.height).toFixed(3)+')';
+ var to='translate(-50%,-50%) scale(1)';
+ var anim=card.animate(reverse?[{transform:to},{transform:from}]:[{transform:from},{transform:to}],{duration:reverse?350:430,easing:'cubic-bezier(.22,1,.36,1)'});
+ anim.finished.then(done,done);
+}
+function inspectorButtons(){
+ var b=BOTTLES[sel];if(!b)return;
+ $('#inspectorFlip').textContent=inspectCard&&inspectCard.classList.contains('flipped')?'Show front':'Flip card';
+ var primary=$('#inspectorPrimary');primary.textContent=MODE==='demo'&&CARDS[b.id]?'Add to Mine':wornToday(b)?'Worn today':'Wear today';primary.disabled=MODE!=='demo'&&wornToday(b);
+ $('#inspectorDetails').textContent=MODE==='demo'?'Details':'My Bottle';
+}
+function openInspector(){
+ if(sel<0||inspectCard||inspectClosing)return;
+ if(!artKeyFor(BOTTLES[sel])){slots[sel].classList.toggle('flipped');return}
+ inspectSource=slots[sel];inspectCard=inspectSource.cloneNode(true);
+ inspectCard.classList.add('inspector-card');inspectCard.classList.remove('flipped');inspectCard.removeAttribute('data-i');inspectCard.tabIndex=0;
+ inspectCard.style.removeProperty('transform');inspectCard.style.removeProperty('opacity');inspectCard.style.removeProperty('visibility');
+ inspectCard.style.width=Math.max(180,Math.min(352,$('#device').clientWidth-32,($('#device').clientHeight-210)*59/86))+'px';
+ $$('.collectible-img',inspectCard).forEach(function(img){img.loading='eager'});
+ inspectCard.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flipInspector()}});
+ inspector.appendChild(inspectCard);
+ var b=BOTTLES[sel];$('#inspectorTitle').textContent=b.house+' · '+b.name;
+ inspectorButtons();inspector.classList.add('on');inspector.setAttribute('aria-hidden','false');
+ inspectMotion(inspectCard,inspectSource,false,function(){});
+ inspectSource.style.visibility='hidden';$('#screen').inert=true;$('#inspectorClose').focus({preventScroll:true});
+}
+function closeInspector(after){
+ if(!inspectCard||inspectClosing){if(after)after();return}
+ inspectClosing=true;var card=inspectCard,source=inspectSource;
+ function finish(){
+   if(source){source.style.visibility='';render()}
+   card.remove();inspectCard=null;inspectSource=null;inspectClosing=false;
+   inspector.classList.remove('on');inspector.setAttribute('aria-hidden','true');
+   $('#screen').inert=false;
+   if(after)after();else if(source)stage.focus({preventScroll:true});
+ }
+ inspectMotion(card,source,true,finish);
+}
+function flipInspector(){if(!inspectCard)return;inspectCard.classList.toggle('flipped');inspectorButtons()}
+function flip(){if(sel<0)return;if(inspectCard)flipInspector();else if(artKeyFor(BOTTLES[sel]))openInspector();else slots[sel].classList.toggle('flipped')}
+$('#inspectorClose').addEventListener('click',function(){closeInspector()});
+$('#inspectorFlip').addEventListener('click',flipInspector);
+$('#inspectorPrimary').addEventListener('click',function(){closeInspector(function(){if(MODE==='demo'&&CARDS[BOTTLES[sel].id])addCuratedToMine();else doWear()})});
+$('#inspectorDetails').addEventListener('click',function(){closeInspector(openBottleMenu)});
+inspector.addEventListener('pointerdown',function(e){inspectStartY=e.clientY;inspectSuppressClick=false});
+inspector.addEventListener('pointerup',function(e){if(inspectStartY!==null&&e.clientY-inspectStartY>75){inspectSuppressClick=true;closeInspector()}inspectStartY=null});
+inspector.addEventListener('click',function(e){if(!e.target.closest('.inspector-card'))return;if(inspectSuppressClick){inspectSuppressClick=false;return}flipInspector()});
 function stepFan(dir){var k=ORD.length;if(k<2)return;select(ORD[(OPOS[sel]+dir+k)%k])}
 function setModeButtons(){$$('#seg button').forEach(function(b,k){var on=b.dataset.mode===mode;b.setAttribute('aria-pressed',on);if(on)$('#seg').dataset.i=k})}
 function setMode(m){
@@ -1530,12 +1650,10 @@ function reasonText(b){
   return t+' '+b.fit;
 }
 function updateInfo(){
-  var info=$('#info'),tok=++infoTok;info.classList.add('swap');
-  setTimeout(function(){
-    if(tok!==infoTok)return;
+  var info=$('#info');
     var b=BOTTLES[sel],w=$('#wear'),ib=$('#impBtn');
     info.classList.toggle('is-empty',!b);
-    if(!b){$('#reason').textContent='';$('#notes').textContent='';$('#meta').textContent='';ib.classList.remove('on');info.classList.remove('swap');return}
+    if(!b){$('#reason').textContent='';$('#notes').textContent='';$('#meta').textContent='';ib.classList.remove('on');return}
     var guest=mode==='fan'&&activeRot()&&activeRot().ids.indexOf(b.id)<0;
     $('#reason').textContent=sel===pickIdx?'Today’s pick. '+reasonText(b):guest?'Not in this rotation. Rotations, in More, can add it.':'';
     var nt=$('#notes');nt.textContent=b.notes||'No notes yet';nt.classList.toggle('muted',!b.notes);
@@ -1548,8 +1666,6 @@ function updateInfo(){
     var today=wornToday(b),x=today?b.imp[todayStr()]:null;
     ib.classList.toggle('on',today);
     ib.textContent=x?'Today: '+impText(x)+'. Edit ›':'Add how it wore today ›';
-    info.classList.remove('swap');
-  },130);
 }
 function updateTestBtn(){
   var t=$('#test');
@@ -1557,23 +1673,29 @@ function updateTestBtn(){
   else{t.disabled=sel<0;t.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.5h6v8.5L7 12.5 4 10z"/></svg>Test'}
   t.setAttribute('aria-label',test?'Testing session running':'Start a testing session');
 }
-function addCuratedToMine(){
-  if(MODE!=='demo'||!BOTTLES[sel]||!CARDS[BOTTLES[sel].id])return;
-  var source=BOTTLES[sel],already=null,own=loadOwn()||emptyState();
-  already=own.bottles.find(function(b){return b.artKey===CARDS[source.id].key;});
+function saveCuratedToMine(key,source){
+  if(!CARD_ART[key])return;
+  var already=null,own=loadOwn()||emptyState();
+  already=own.bottles.find(function(b){return b.artKey===key;});
   if(!already){
     if(own.bottles.length>=MAXN){toast('Your collection is full.');return}
+    if(!source){var id=Object.keys(CARDS).find(function(k){return CARDS[k].key===key});source=clean(fromSeed(curatedSeed().find(function(b){return b.id===id})))}
     var copy=plain(source);
-    copy.id=uid('u');copy.sample=false;copy.artKey=CARDS[source.id].key;
+    copy.id=uid('u');copy.sample=false;copy.artKey=key;
     copy.log=[];copy.imp={};copy.auth=null;copy.img=null;
     copy.note='';copy.left=1;copy.acq=todayStr();
     if(!own.shelves.some(function(sh){return sh.id===copy.shelf}))copy.shelf=own.shelves[0].id;
     own.bottles.push(copy);already=copy;
   }
+  if(Z>.5){cancelZ();setZ(0)}
   setPrefMode('own');dropUI('own');mount(own);
   var i=idxOfId(already.id);if(i>=0&&i!==sel)select(i);
   saveState();saveUI();haptic('complete');
-  toast(source.name+' is in your collection.'); 
+  toast(already.name+' is in your collection.');
+}
+function addCuratedToMine(){
+  if(MODE!=='demo'||!BOTTLES[sel]||!CARDS[BOTTLES[sel].id])return;
+  saveCuratedToMine(CARDS[BOTTLES[sel].id].key,BOTTLES[sel]);
 }
 $('#wear').addEventListener('click',function(){
   if(MODE==='demo'&&BOTTLES[sel]&&CARDS[BOTTLES[sel].id])addCuratedToMine();
@@ -1610,7 +1732,7 @@ stage.addEventListener('pointermove',function(e){
   var dx=e.clientX-drag.x;
   if(!drag.moved&&Math.abs(dx)>7){drag.moved=true;stage.classList.add('dragging');try{stage.setPointerCapture(e.pointerId)}catch(_){}}
   if(!drag.moved)return;
-  var now=performance.now();drag.v=(e.clientX-drag.lastX)/Math.max(1,now-drag.lastT);drag.lastX=e.clientX;drag.lastT=now;
+  var now=performance.now(),instant=(e.clientX-drag.lastX)/Math.max(1,now-drag.lastT);drag.v=drag.v*.55+instant*.45;drag.lastX=e.clientX;drag.lastT=now;
   if(mode!=='fan'){
     var unit=mode==='stack'?G.cw*.85:G.cw*.55;
     drag.live=clamp(drag.start-dx/unit,0,ORD.length-1);render(drag.live);
@@ -1631,7 +1753,7 @@ function endDrag(e,cancel){
     var i=+d.slot.dataset.i;
     if(d.pen&&i===sel){openAdd(null,sel);return}
     if(d.edit&&i===sel&&d.slot.classList.contains('flipped')){openAdd(null,sel);return}
-    if(i===sel)flip();else select(i);
+    if(i===sel)openInspector();else select(i);
   }
 }
 stage.addEventListener('pointerup',function(e){endDrag(e,false)});
@@ -1641,7 +1763,7 @@ stage.addEventListener('keydown',function(e){
   var p=OPOS[sel];
   if(e.key==='ArrowRight'){e.preventDefault();mode==='fan'?stepFan(1):select(ORD[Math.min(ORD.length-1,p+1)])}
   else if(e.key==='ArrowLeft'){e.preventDefault();mode==='fan'?stepFan(-1):select(ORD[Math.max(0,p-1)])}
-  else if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}
+  else if(e.key==='Enter'||e.key===' '){e.preventDefault();openInspector()}
   else if(e.key==='e'||e.key==='E'){e.preventDefault();openAdd(null,sel)}
 });
 $$('#seg button').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
@@ -1717,7 +1839,7 @@ function buildEditorial(){
   if(edBuilt)return;edBuilt=true;
   var tiers=tiersOf();
   $('#ed').innerHTML='<div class="ed-top"><span>Arooma</span><span>'+(MODE==='demo'?'Demo collection':new Date().getFullYear())+'</span></div><h3 class="ed-title">'+esc(shareTitle())+'</h3>'
-   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+b.draw('e'+i,b.left)+'<figcaption>'+shareNum(i)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
+   +tiers.map(function(t){return '<div class="ed-tier">'+t.map(function(i){var b=BOTTLES[i];return '<figure>'+bottlePicture(b,'e'+i)+'<figcaption>'+shareNum(i)+'</figcaption></figure>'}).join('')+'</div>'}).join('')
    +'<div class="ed-foot"><span>'+footTxt()+'</span><span>N&deg; '+pad(shareList().length)+'</span></div>';
 }
 function fitEditorial(){
@@ -1737,6 +1859,10 @@ function svgImg(svg,w,h){return new Promise(function(res,rej){
   im.onload=function(){res(im)};im.onerror=function(){rej(new Error('svg'))};
   im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 })}
+function shelfArt(b,i){var key=artKeyFor(b);if(!key)return svgImg(b.draw('x'+i,b.left),150,330).then(function(img){return {img:img,card:false}});
+ return new Promise(function(res,rej){var img=new Image();img.onload=function(){res({img:img,card:true})};img.onerror=function(){rej(new Error('art'))};img.src=collectibleFace(key,'front')})
+  .catch(function(){return svgImg(b.draw('x'+i,b.left),150,330).then(function(img){return {img:img,card:false}})});
+}
 function spaced(ctx,t,x,y,sp,align){
   var ws=[],w=0,i;
   for(i=0;i<t.length;i++){var cw=ctx.measureText(t.charAt(i)).width;ws.push(cw);w+=cw+(i<t.length-1?sp:0)}
@@ -1750,7 +1876,7 @@ function renderShelfPNG(){
   var SANS='-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Helvetica,Arial,sans-serif';
   var SERIF='ui-serif,"New York","Iowan Old Style","Palatino Linotype",Georgia,serif';
   var tiers=tiersOf(),baseY=tiers.length===1?[980]:[790,1170],jobs=[];
-  tiers.forEach(function(t){t.forEach(function(i){jobs.push(svgImg(BOTTLES[i].draw('x'+i,BOTTLES[i].left),150,330))})});
+  tiers.forEach(function(t){t.forEach(function(i){jobs.push(shelfArt(BOTTLES[i],i))})});
   return Promise.all(jobs).then(function(imgs){
     var g=ctx.createLinearGradient(0,0,W,H*.35);
     g.addColorStop(0,'#FCF8F0');g.addColorStop(.55,'#F4EFE4');g.addColorStop(1,'#EDE7DA');
@@ -1770,7 +1896,9 @@ function renderShelfPNG(){
       ctx.fillStyle=sg;ctx.fillRect(88,y+2,W-176,14);
       t.forEach(function(i,k){
         var cx=88+(W-176)*(k+.5)/t.length;
-        ctx.drawImage(imgs[idx++],cx-75,y-330+10,150,330);
+        var art=imgs[idx++];
+        if(art.card){var ar=art.img.width/art.img.height,w=Math.min(150,300*ar),h=w/ar;ctx.drawImage(art.img,cx-w/2,y-h+10,w,h)}
+        else ctx.drawImage(art.img,cx-75,y-330+10,150,330);
         ctx.fillStyle='#6B6862';ctx.font='600 20px '+SANS;spaced(ctx,shareNum(i),cx,y+52,3,'center');
       });
     });
@@ -1835,8 +1963,8 @@ function doReopen(){
   if(test)return toast('Finish the test first');
   closeSheet();cancelZ();setZ(0);
   var intro=$('#introV2');intro.classList.remove('dismissed');
-  intro.querySelector('.inkscript').style.animation='none';void intro.offsetWidth;
-  intro.querySelector('.inkscript').style.animation='';
+  $$('.inkstroke,.inkflourish',intro).forEach(function(path){path.style.animation='none'});void intro.offsetWidth;
+  $$('.inkstroke,.inkflourish',intro).forEach(function(path){path.style.animation=''});
 }
 
 /* ---------- panels: cabinet menu, add, delete, wear history, authenticity, compare ---------- */
@@ -1861,7 +1989,7 @@ function closePanel(){
 }
 panelBody.addEventListener('click',function(e){if(panelClick)panelClick(e)});
 panelBody.addEventListener('input',function(e){if(panelInput)panelInput(e)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){var had=panel.classList.contains('on')||$('#sheet').classList.contains('on');closePanel();closeSheet();if(!had&&Z>.5)closeOver()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(inspectCard){e.preventDefault();closeInspector();return}var had=panel.classList.contains('on')||$('#sheet').classList.contains('on');closePanel();closeSheet();if(!had&&Z>.5)closeOver()}});
 /* keep the panel above the iOS keyboard */
 if(window.visualViewport){var vv=window.visualViewport;var kbFix=function(){panel.style.bottom=Math.max(0,window.innerHeight-vv.height-vv.offsetTop)+'px'};vv.addEventListener('resize',kbFix);vv.addEventListener('scroll',kbFix)}
 
@@ -2586,17 +2714,20 @@ function canZoom(){return introDone&&!panel.classList.contains('on')&&!$('#sheet
 
 /* the overview: every shelf as a row of miniature bottles. Bottles keep their true liquid level. */
 var PENCIL='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 3.8l3 3L7.4 15.6l-3.9.9.9-3.9z"/><path d="M11.6 5.4l3 3"/></svg>';
-/* search: every term must appear in the house or the name; accents and case are ignored */
+/* Search exact product and concentration; known alternate names stay distinct by variant. */
 var findIn=$('#findIn'),Q='';
 function norm(t){t=String(t);return (t.normalize?t.normalize('NFD').replace(/[\u0300-\u036f]/g,''):t).toLowerCase()}
 function terms(q){return norm(q).split(/\s+/).filter(Boolean)}
-function findHits(q){var ts=terms(q);if(!ts.length)return [];var out=[];BOTTLES.forEach(function(b,i){var h=norm(b.house+' '+b.name);if(ts.every(function(t){return h.indexOf(t)>-1}))out.push(i)});return out}
+function searchText(b){return norm(b.house+' '+b.name+' '+b.conc+' '+(b.artKey==='myslf'||b.id==='c2'?' YSL my self myself':'')+' '+(b.artKey==='dior'||b.id==='c0'?' sauvage elixir':''))}
+function findHits(q){var ts=terms(q);if(!ts.length)return [];var out=[];BOTTLES.forEach(function(b,i){var h=searchText(b);if(ts.every(function(t){return h.indexOf(t)>-1}))out.push(i)});return out}
+function catalogHits(q){if(MODE!=='own')return [];var ts=terms(q);if(!ts.length)return [];return Object.keys(CARDS).filter(function(id){var c=CARDS[id],b={id:id,house:c.house,name:c.name,conc:c.conc};return ts.every(function(t){return searchText(b).indexOf(t)>-1})&&!BOTTLES.some(function(x){return x.artKey===c.key})})}
 function hl(text,t){var k=t?norm(text).indexOf(t):-1;if(k<0||norm(text).length!==text.length)return esc(text);return esc(text.slice(0,k))+'<mark>'+esc(text.slice(k,k+t.length))+'</mark>'+esc(text.slice(k+t.length))}
 function renderHits(){
   ovBuilt=true;LQ.dropGroup('ov');
-  var hits=findHits(Q),t=terms(Q).sort(function(a,b){return b.length-a.length})[0]||'';
-  overScroll.innerHTML=hits.length?'<p class="sub" style="margin:0 2px 8px" role="status">'+hits.length+(hits.length===1?' bottle matches':' bottles match')+'</p>'+hits.slice(0,80).map(function(i){var b=BOTTLES[i];
-      return '<button class="hit" data-b="'+i+'"><span class="mb" aria-hidden="true">'+b.draw('f'+b.id,b.left)+'</span><span><b>'+hl(b.name,t)+'</b><small>'+hl(b.house,t)+' &middot; <i>'+esc(shelfName(b.shelf))+'</i>'+(b.low?' &middot; running low':'')+'</small></span></button>'}).join('')
+  var hits=findHits(Q),catalog=catalogHits(Q),t=terms(Q).sort(function(a,b){return b.length-a.length})[0]||'';
+  overScroll.innerHTML=hits.length||catalog.length?'<p class="sub" style="margin:0 2px 8px" role="status">'+(hits.length+catalog.length)+(hits.length+catalog.length===1?' result':' results')+'</p>'+hits.slice(0,80).map(function(i){var b=BOTTLES[i];
+      return '<button class="hit" data-b="'+i+'"><span class="mb" aria-hidden="true">'+bottlePicture(b,'f'+b.id)+'</span><span><b>'+hl(b.name,t)+'</b><small>'+hl(b.house,t)+' &middot; '+esc(b.conc)+' &middot; <i>'+esc(shelfName(b.shelf))+'</i>'+(b.low?' &middot; running low':'')+'</small></span></button>'}).join('')
+    +catalog.map(function(id){var c=CARDS[id];return '<button class="hit" data-catalog="'+c.key+'"><span class="mb" aria-hidden="true">'+collectibleImage(c.key,'front',c.house+' '+c.name,true)+'</span><span><b>'+hl(c.name,t)+'</b><small>'+hl(c.house,t)+' &middot; '+esc(c.conc)+' &middot; Add to Collection</small></span></button>'}).join('')
     :'<p class="nohit" role="status">Nothing on your shelves matches &ldquo;'+esc(Q.trim())+'&rdquo;.</p>';
   $$('.lq',overScroll).forEach(function(p){LQ.regStatic(p,'ov')});
 }
@@ -2604,7 +2735,7 @@ findIn.addEventListener('input',function(){Q=findIn.value;$('#findX').classList.
 $('#findX').addEventListener('click',function(){findIn.value='';Q='';$('#findX').classList.remove('on');buildOver();try{findIn.focus()}catch(_){}});
 findIn.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&findIn.value){e.preventDefault();e.stopPropagation();clearFind();buildOver();try{findIn.focus()}catch(_){}}
-  else if(e.key==='Enter'){var h=findHits(Q);if(h.length===1){e.preventDefault();clearFind();zoomToBottle(h[0])}else findIn.blur()}
+  else if(e.key==='Enter'){var h=findHits(Q),c=catalogHits(Q);if(h.length+c.length===1){e.preventDefault();clearFind();if(h.length)zoomToBottle(h[0]);else saveCuratedToMine(CARDS[c[0]].key)}else findIn.blur()}
 });
 function clearFind(){Q='';findIn.value='';$('#findX').classList.remove('on');if(document.activeElement===findIn)findIn.blur()}
 function openFind(){if(!introDone)return;openOver();setTimeout(function(){try{findIn.focus()}catch(_){}},RM?0:420)}
@@ -2623,7 +2754,7 @@ function buildOver(){
     else for(var k=0;k<idxs.length;k+=per){
       h+='<div class="tier">'+idxs.slice(k,k+per).map(function(i){
         var b=BOTTLES[i];
-        return '<button class="mb'+(i===sel?' is-sel':'')+'" data-b="'+i+'" aria-label="'+esc(b.house+', '+b.name)+(i===sel?', selected':'')+'">'+b.draw('o'+b.id,b.left)+'</button>';
+        return '<button class="mb'+(i===sel?' is-sel':'')+'" data-b="'+i+'" aria-label="'+esc(b.house+', '+b.name)+(i===sel?', selected':'')+'">'+bottlePicture(b,'o'+b.id)+'</button>';
       }).join('')+'</div><div class="pl"></div>';
     }
     h+='</section>';
@@ -2633,6 +2764,8 @@ function buildOver(){
 }
 overScroll.addEventListener('click',function(e){
   if(performance.now()<noClickUntil)return;
+  var card=e.target.closest?e.target.closest('[data-catalog]'):null;
+  if(card){saveCuratedToMine(card.getAttribute('data-catalog'));return}
   var t=e.target.closest?e.target.closest('button'):null;if(!t)return;
   if(t.getAttribute('data-b')!==null){if(t.classList.contains('hit'))clearFind();zoomToBottle(+t.getAttribute('data-b'))}
   else if(t.getAttribute('data-open'))zoomInto(t.getAttribute('data-open'));

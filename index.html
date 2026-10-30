@@ -690,16 +690,28 @@ function bEarth(p,f){var body='M30 226 Q30 236 40 236 H100 Q110 236 110 226 V160
 
 /* 7. the owner's own photo of their own bottle. It stands in the same frame as the drawings: same table, same contact
    shadow, same baseline (y 237), and the same soft key light from the left, laid over the photo's own shape. The image keeps
-   its aspect ratio ("meet", never stretched). x, y move it and s scales it about the base, so a tall bottle and a squat
-   one can be brought to one scale. The photo is the owner's record, so no liquid is drawn over it. */
-function photoArt(img){return function(p){
-  var t='translate('+n2(70+img.x)+' '+n2(237+img.y)+') scale('+img.s+') translate(-70 -237)';
+   its aspect ratio ("meet", never stretched). x, y move it and s scales it about the base.
+   Like the opaque drawn vessels it carries a level window, so every bottle shows its liquid and it moves like the rest.
+   The window is placed from the photo's real outline (its aspect ratio, stored at import), sits in the lower body where
+   the liquid is, slides left or right with img.w, and moves and scales with the photo. Its liquid takes the colour sampled
+   from the photo, so an amber bottle holds amber. */
+function hexRgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function mixHex(h,t,a){var c=hexRgb(h),o=hexRgb(t);return '#'+c.map(function(v,i){return ('0'+Math.round(v+(o[i]-v)*a).toString(16)).slice(-2)}).join('')}
+var LIQ_DEFAULT='#C99A4E',HEAD=.92; /* a full bottle keeps a little air at the top of the window, as the drawings do, so its surface can move */
+function photoWin(img){
+  var ar=img.ar||.5,cw,ch;if(ar>96/203){cw=96;ch=96/ar}else{ch=203;cw=203*ar}
+  var x0=22+(96-cw)/2,top=237-ch,w=Math.max(8,Math.min(14,cw*.12)),y1=237-Math.max(4,ch*.07),y0=Math.min(top+ch*.42,y1-16);
+  return {x:n2(x0+(cw-w)*(img.w==null?.78:img.w)),y0:n2(Math.max(36,y0)),y1:n2(y1),w:n2(w)};
+}
+function photoArt(img){return function(p,f){
+  var t='translate('+n2(70+img.x)+' '+n2(237+img.y)+') scale('+img.s+') translate(-70 -237)',W=photoWin(img),c=img.c||LIQ_DEFAULT;
   return wrap('<defs>'+sh(p+'s')+lg(p+'L',[[0,'#ffffff',.18],[.42,'#ffffff',0],[1,'#25231F',.08]])
    +'<image id="'+p+'i" href="'+img.src+'" x="22" y="34" width="96" height="203" preserveAspectRatio="xMidYMax meet"/>'
    +'<mask id="'+p+'m" maskUnits="userSpaceOnUse" x="0" y="0" width="140" height="260" style="mask-type:alpha"><use href="#'+p+'i" transform="'+t+'"/></mask></defs>'
    +ground(p+'s')
    +'<use class="ph" href="#'+p+'i" transform="'+t+'"/>'
-   +'<rect x="0" y="0" width="140" height="260" fill="url(#'+p+'L)" mask="url(#'+p+'m)"/>');
+   +'<rect x="0" y="0" width="140" height="260" fill="url(#'+p+'L)" mask="url(#'+p+'m)"/>'
+   +'<g class="phw" transform="'+t+'">'+sight(p,W.x,W.y0,W.y1,W.w,f*HEAD,{frame:'#7C7F81',glass:'#E2E1DA',liq:[[0,mixHex(c,'#ffffff',.22)],[.5,c],[1,mixHex(c,'#000000',.38)]],hl:'#fff'})+'</g>');
 }}
 
 /* ---------- liquid physics ---------- */
@@ -911,7 +923,8 @@ function str(v,d,max){return typeof v==='string'?v.slice(0,max):d}
 function num(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d}
 function cleanImg(o){
   if(!o||typeof o!=='object'||typeof o.src!=='string'||o.src.length>MAXIMG||!IMG_RE.test(o.src))return null;
-  return {src:o.src,x:Math.round(num(o.x,-40,40,0)*10)/10,y:Math.round(num(o.y,-60,40,0)*10)/10,s:Math.round(num(o.s,.5,2,1)*100)/100};
+  return {src:o.src,x:Math.round(num(o.x,-40,40,0)*10)/10,y:Math.round(num(o.y,-60,40,0)*10)/10,s:Math.round(num(o.s,.5,2,1)*100)/100,
+    ar:Math.round(num(o.ar,.1,10,.5)*1000)/1000,c:typeof o.c==='string'&&/^#[0-9a-f]{6}$/i.test(o.c)?o.c.toLowerCase():LIQ_DEFAULT.toLowerCase(),w:Math.round(num(o.w,.05,.95,.78)*100)/100};
 }
 function cleanImp(o,log){
   var out={};if(!o||typeof o!=='object')return out;
@@ -939,7 +952,7 @@ function prep(b){
   b.fit=b.cool?'Suits cooler air.':'A lighter choice for mild hours.';
   return b;
 }
-function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?{src:b.img.src,x:b.img.x,y:b.img.y,s:b.img.s}:null}}
+function plain(b){return {id:b.id,shelf:b.shelf,house:b.house,name:b.name,conc:b.conc,ml:b.ml,left:b.left,notes:b.notes,vessel:b.vessel,acq:b.acq,log:b.log.slice(),imp:JSON.parse(JSON.stringify(b.imp||{})),auth:b.auth,cool:b.cool,note:b.note,sample:b.sample,img:b.img?{src:b.img.src,x:b.img.x,y:b.img.y,s:b.img.s,ar:b.img.ar,c:b.img.c,w:b.img.w}:null}}
 var DEFAULT_SHELVES=[{id:'sp',name:'Spring shelf'},{id:'su',name:'Summer shelf'},{id:'au',name:'Autumn shelf'},{id:'wi',name:'Winter shelf'}];
 var MAXSH=12;
 function seasons(){return DEFAULT_SHELVES.map(function(h){return {id:h.id,name:h.name}})}
@@ -972,7 +985,7 @@ function emptyState(){return {shelves:seasons(),bottles:[],rot:[]}}
 function demoState(){return {shelves:seasons(),bottles:SEED.map(fromSeed),rot:DEMO_ROT.slice()}}
 function loadOwn(){return cleanState(readJSON(KEY_OWN))}
 function loadDemo(){return cleanState(readJSON(KEY_DEMO))||demoState()}
-var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null}})();
+var PREFS=(function(){var p=readJSON(KEY_PREFS)||{};return {mode:p.mode==='own'||p.mode==='demo'?p.mode:null,backupAt:DATE_RE.test(p.backupAt)?p.backupAt:null,remindAt:DATE_RE.test(p.remindAt)?p.remindAt:null}})();
 function savePrefs(){try{localStorage.setItem(KEY_PREFS,JSON.stringify(PREFS))}catch(e){}}
 /* migration from v1 and v2: one way, once, and the old key is never deleted */
 (function migrate(){
@@ -985,11 +998,13 @@ var MODE=PREFS.mode;
 var START=MODE==='demo'?loadDemo():MODE==='own'?(loadOwn()||emptyState()):emptyState();
 var SHELVES=START.shelves, BOTTLES=START.bottles.map(prep), ROT=START.rot;
 function stateNow(){return {v:SCHEMA,shelves:SHELVES.map(function(h){return {id:h.id,name:h.name}}),bottles:BOTTLES.map(plain),rot:ROT.slice()}}
-var saveWarned=false;
+var saveWarned=false,persistAsked=false;
+/* Ask once per session for persistent storage, so the browser is less likely to evict the collection. No prompt on iOS. */
+function askPersist(){if(persistAsked||MODE!=='own')return;persistAsked=true;try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){})}catch(e){}}
 /* Returns false when the browser refuses (usually storage is full, often from photos). Says so once, never silently. */
 function saveState(){
   if(!MODE)return true;
-  try{localStorage.setItem(MODE==='demo'?KEY_DEMO:KEY_OWN,JSON.stringify(stateNow()));saveWarned=false;return true}
+  try{localStorage.setItem(MODE==='demo'?KEY_DEMO:KEY_OWN,JSON.stringify(stateNow()));saveWarned=false;askPersist();return true}
   catch(e){if(!saveWarned){saveWarned=true;setTimeout(function(){toast('Could not save on this device. Storage may be full. Export a backup.')},0)}return false}
 }
 function shelfById(id){for(var i=0;i<SHELVES.length;i++)if(SHELVES[i].id===id)return SHELVES[i];return null}
@@ -1477,7 +1492,7 @@ function openCabinet(){
     render();
     setTimeout(function(){slots.forEach(function(el){el.style.transitionDelay=''})},1600);
     setTimeout(function(){haptic('settle')},1500);
-    setTimeout(maybeShowInstallHint,2800);if(N)setTimeout(maybeShowPinchHint,5200);
+    setTimeout(maybeShowInstallHint,2800);setTimeout(maybeRemindBackup,3400);if(N)setTimeout(maybeShowPinchHint,6800);
   },RM?0:650);
   setTimeout(function(){cab.classList.add('gone')},RM?50:2100);
 }
@@ -1682,10 +1697,11 @@ function formVessel(){var v=$('#fVessel .vopt[aria-pressed="true"]');return v?v.
 function formLeft(){var r=$('#fLeft');return r?(+r.value)/100:.8}
 function drawPreview(){var f=$('#phFrame');if(f)f.innerHTML=(fImg?photoArt(fImg):vessel(formVessel()).fn)('pv'+(++pvN),formLeft())}
 function photoCtlHtml(){
-  if(!fImg)return '<p class="sub" style="margin-top:0">Your own photo of your own bottle. A cut-out on a clear background sits best on the shelf. It is shrunk and kept on this device.</p><div class="ph-btns"><button type="button" class="btn" data-act="phpick">Choose a photo</button></div>';
+  if(!fImg)return '<p class="sub" style="margin-top:0">Your own photo of your own bottle. A cut-out on a clear background sits best on the shelf. A small level window shows its liquid; slide it onto the glass. Kept on this device.</p><div class="ph-btns"><button type="button" class="btn" data-act="phpick">Choose a photo</button></div>';
   return '<label class="fl" for="phS">Size</label><input class="range" id="phS" type="range" min="50" max="200" step="2" value="'+Math.round(fImg.s*100)+'">'
    +'<label class="fl" for="phX">Left and right</label><input class="range" id="phX" type="range" min="-40" max="40" step="1" value="'+Math.round(fImg.x)+'">'
    +'<label class="fl" for="phY">Up and down</label><input class="range" id="phY" type="range" min="-60" max="40" step="1" value="'+Math.round(fImg.y)+'">'
+   +'<label class="fl" for="phW">Level window</label><input class="range" id="phW" type="range" min="5" max="95" step="1" value="'+Math.round((fImg.w==null?.78:fImg.w)*100)+'" aria-label="Level window, left to right">'
    +'<div class="ph-btns"><button type="button" class="btn" data-act="phpick">Replace</button><button type="button" class="btn" data-act="phrm">Remove</button></div>';
 }
 function photoEdRefresh(){var c=$('#phCtl');if(c)c.innerHTML=photoCtlHtml();drawPreview()}
@@ -1693,7 +1709,7 @@ function openAdd(shelfId,editIdx){
   var edit=editIdx!=null&&BOTTLES[editIdx]?BOTTLES[editIdx]:null;
   if(!edit&&N>=MAXN){toast('The cabinet holds '+MAXN+' bottles.');return}
   if(!MODE)setPrefMode('own');
-  fImg=edit&&edit.img?{src:edit.img.src,x:edit.img.x,y:edit.img.y,s:edit.img.s}:null;fDup=false;
+  fImg=edit&&edit.img?{src:edit.img.src,x:edit.img.x,y:edit.img.y,s:edit.img.s,ar:edit.img.ar,c:edit.img.c,w:edit.img.w}:null;fDup=false;
   var pre=edit?edit.shelf:shelfById(shelfId)?shelfId:curShelf,vk=edit?edit.vessel:'clear',val=function(k,d){return edit?esc(edit[k]):(d||'')};
   var vopts=VESSELS.map(function(v,k){return '<button type="button" class="vopt" data-v="'+v.k+'" aria-pressed="'+(v.k===vk)+'" aria-label="'+v.label+'">'+v.fn('v'+k,.8)+'<span>'+v.label.split(',')[0]+'</span></button>'}).join('');
   var concs=['Eau de Parfum','Eau de Toilette','Eau de Cologne','Parfum','Extrait'];if(edit&&concs.indexOf(edit.conc)<0)concs.push(edit.conc);
@@ -1723,7 +1739,7 @@ function openAdd(shelfId,editIdx){
   function(e){
     var id=e.target.id;
     if(id==='fLeft'){$('#fLeftV').textContent=e.target.value+'%';drawPreview()}
-    else if(fImg&&(id==='phS'||id==='phX'||id==='phY')){fImg.s=+$('#phS').value/100;fImg.x=+$('#phX').value;fImg.y=+$('#phY').value;drawPreview()}
+    else if(fImg&&(id==='phS'||id==='phX'||id==='phY'||id==='phW')){fImg.s=+$('#phS').value/100;fImg.x=+$('#phX').value;fImg.y=+$('#phY').value;fImg.w=+$('#phW').value/100;drawPreview()}
     else if(id==='fHouse'||id==='fName')fDup=false;
   });
   photoEdRefresh();
@@ -1739,6 +1755,21 @@ panelBody.addEventListener('pointermove',function(e){
   var x=$('#phX'),y=$('#phY');if(x)x.value=fImg.x;if(y)y.value=fImg.y;drawPreview();
 });
 ['pointerup','pointercancel'].forEach(function(n){panelBody.addEventListener(n,function(){phDrag=null})});
+/* The liquid colour is the average of the opaque, coloured pixels in the lower middle of the bottle. Glass, labels and
+   very dark or pale bottles give no reliable colour, so those keep a neutral amber. */
+function liquidColor(im,w,h){
+  try{
+    var c=document.createElement('canvas'),S=48;c.width=S;c.height=S;var x=c.getContext('2d');x.drawImage(im,0,0,S,S);
+    var d=x.getImageData(0,0,S,S).data,r=0,g=0,b=0,n=0;
+    for(var yy=Math.round(S*.5);yy<Math.round(S*.92);yy++)for(var xx=Math.round(S*.28);xx<Math.round(S*.72);xx++){
+      var i=(yy*S+xx)*4;if(d[i+3]<200)continue;
+      var mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);if(mx<40||mn>235||mx-mn<28)continue;
+      r+=d[i];g+=d[i+1];b+=d[i+2];n++;
+    }
+    if(n<12)return LIQ_DEFAULT;
+    return '#'+[r,g,b].map(function(v){return ('0'+Math.round(v/n).toString(16)).slice(-2)}).join('');
+  }catch(e){return LIQ_DEFAULT}
+}
 /* the photo is decoded, oriented by the browser, shrunk and re-encoded here, so the stored copy is small. Transparency is kept. */
 function readPhoto(file){return new Promise(function(res,rej){
   if(file.type&&!/^image\//.test(file.type))return rej(new Error('type'));
@@ -1753,9 +1784,9 @@ function readPhoto(file){return new Promise(function(res,rej){
       if(!alpha)return c.toDataURL('image/jpeg',.84);
       var wp=c.toDataURL('image/webp',.86);return wp.indexOf('data:image/webp')===0?wp:c.toDataURL('image/png');
     }
-    var out=enc(560),m=560;while(out.length>MAXIMG*.6&&m>200){m-=120;out=enc(m)}
+    var out=enc(480),m=480;while(out.length>120000&&m>240){m-=80;out=enc(m)}
     if(out.length>MAXIMG||!IMG_RE.test(out))return rej(new Error('big'));
-    res({src:out,x:0,y:0,s:1});
+    res({src:out,x:0,y:0,s:1,ar:w/h,c:liquidColor(im,w,h),w:.78});
   };
   im.onerror=function(){URL.revokeObjectURL(url);rej(new Error('decode'))};
   im.src=url;
@@ -1774,7 +1805,7 @@ function saveForm(editIdx){
   if(dup&&!fDup){fDup=true;err.textContent='You already have '+name+' by '+house+'. Tap '+(edit?'Save changes':'Add to cabinet')+' again to keep both.';return}
   var acq=$('#fAcq').value;if(!DATE_RE.test(acq)||acq>todayStr())acq=todayStr();
   var notes=$('#fNotes').value.trim();
-  var f={shelf:$('#fShelf').value,house:house,name:name,conc:$('#fConc').value,ml:ml,left:formLeft(),notes:notes,vessel:formVessel(),acq:acq,cool:coolFrom(profileOf(notes).v),note:$('#fNote').value.trim(),img:fImg?{src:fImg.src,x:fImg.x,y:fImg.y,s:fImg.s}:null};
+  var f={shelf:$('#fShelf').value,house:house,name:name,conc:$('#fConc').value,ml:ml,left:formLeft(),notes:notes,vessel:formVessel(),acq:acq,cool:coolFrom(profileOf(notes).v),note:$('#fNote').value.trim(),img:fImg?{src:fImg.src,x:fImg.x,y:fImg.y,s:fImg.s,ar:fImg.ar,c:fImg.c,w:fImg.w}:null};
   closePanel();
   if(edit)updateBottle(editIdx,f);
   else{f.id='u'+Date.now().toString(36)+Math.floor(Math.random()*36).toString(36);f.log=[];f.imp={};f.auth=null;f.sample=false;addBottle(f)}
@@ -1852,12 +1883,21 @@ function exportBackup(){
 }
 function openBackup(){
   openPanel('<h2>Backup and restore</h2><p class="sub">Your collection lives only in this browser on this device. There is no account and no server, so clearing Safari&rsquo;s website data or removing the Home Screen app deletes it. Safari and the Home Screen app keep separate copies.</p>'
-   +'<p class="sub">Export a backup now and then and keep it in Files. '+(PREFS.backupAt?'Last export: '+fmtDate(PREFS.backupAt)+'.':'No backup exported yet.')+'</p>'
+   +'<p class="sub">Export a backup now and then and keep it in Files. '+(PREFS.backupAt?'Last export: '+fmtDate(PREFS.backupAt)+'.':'No backup exported yet.')+' Your collection uses about '+usageText()+' on this device.</p>'
    +(MODE==='demo'?'<p class="sub">You are in the demo. A backup always holds your own collection, never the demo.</p>':'')
    +rowHtml('export','Export a backup','One file with your shelves, bottles, notes, photos, wears and impressions')
    +rowHtml('import','Restore from a backup','Choose a file. You see what is in it, then choose to replace or add')
    +'<div class="pbtns"><button class="btn" data-act="cancel">Done</button></div>',
   function(e){var a=actOf(e);if(a==='cancel')closePanel();else if(a==='export')exportBackup();else if(a==='import')pickImport()});
+}
+function usageText(){var n=0;try{n=(localStorage.getItem(KEY_OWN)||'').length*2}catch(e){}return n<1e6?Math.max(1,Math.round(n/1024))+' KB':(n/1048576).toFixed(1)+' MB'}
+/* A quiet reminder, at most once a week, once the collection is worth losing: five bottles and no export in 30 days. */
+function maybeRemindBackup(){
+  if(MODE!=='own'||N<5)return;
+  var since=PREFS.backupAt?daysSince(PREFS.backupAt):999,asked=PREFS.remindAt?daysSince(PREFS.remindAt):999;
+  if(since<30||asked<7)return;
+  PREFS.remindAt=todayStr();savePrefs();
+  toast(PREFS.backupAt?'Last backup was '+since+' days ago.':'Your collection is only on this device.',{label:'Back up',fn:exportBackup});
 }
 function pickImport(){var f=$('#importFile');f.value='';f.click()}
 function parseBackup(text){

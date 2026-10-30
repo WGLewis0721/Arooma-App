@@ -544,18 +544,25 @@ function check(name, ok, detail) {
   check('BP-1 a cut-out keeps its transparency; a photo with a background is kept as JPEG', await (async () => { const p = await photos(), f = (n) => p.find((b) => b.name === 'Photo ' + n).img.src; return /^data:image\/(png|webp)/.test(f('clear')) && /^data:image\/jpeg/.test(f('white')) && p.every((b) => b.img.src.length < 600000); })());
   check('BP-2 photos are never stretched: every one keeps its aspect ratio', await page.evaluate(() => [...document.querySelectorAll('.slot image')].every((im) => im.getAttribute('preserveAspectRatio') === 'xMidYMax meet')));
   check('BP-4 every photo stands on the same table as the drawings: one baseline, one contact shadow, one light', await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => s.querySelector('use.ph')).every((s) => { const im = s.querySelector('image'); return +im.getAttribute('y') + +im.getAttribute('height') === 237 && s.querySelector('ellipse[cy="238"]') && s.querySelector('rect[mask]'); })));
+  check('BP-4 every photo bottle shows its liquid through a level window, like the opaque drawings', await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => s.querySelector('use.ph')).every((s) => s.querySelector('.phw .lq') && s.querySelector('.phw clipPath rect'))));
+  check('BP-4 the liquid takes its colour from the photo: the amber bottle holds amber', await page.evaluate(() => { const s = [...document.querySelectorAll('.slot')].find((x) => /Photo amber/.test(x.getAttribute('aria-label'))); const c = s.querySelector('.phw linearGradient stop:nth-child(2)').getAttribute('stop-color'); const n = parseInt(c.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return r > g && g > b && r - b > 80; }));
   await page.screenshot({ path: path.join(outDir, '35-photos-flow.png') });
   await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(1000);
   await page.screenshot({ path: path.join(outDir, '36-photos-stack.png') });
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
   // positioning: sliders (tap and keyboard path) and drag
   await page.click('#bMenu'); await page.waitForSelector('#panel.on'); await page.click('#edit'); await page.waitForTimeout(300);
-  await page.evaluate(() => { const set = (id, v) => { const r = document.getElementById(id); r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); }; set('phS', 140); set('phX', 10); });
+  await page.evaluate(() => { const set = (id, v) => { const r = document.getElementById(id); r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); }; set('phS', 140); set('phX', 10); set('phW', 30); set('fLeft', 40); });
   const fr = await page.locator('#phFrame').boundingBox();
   await page.mouse.move(fr.x + 60, fr.y + 80); await page.mouse.down(); await page.mouse.move(fr.x + 60, fr.y + 60, { steps: 4 }); await page.mouse.up();
   await page.screenshot({ path: path.join(outDir, '37-photo-editor.png') });
   await page.click('[data-act="save"]'); await page.waitForTimeout(1000);
-  check('BP-2 size and position are adjustable, by slider and by drag, and saved', await (async () => { const b = (await photos()).find((x) => x.name === 'Photo wide'); return b && b.img.s === 1.4 && b.img.x === 10 && b.img.y < -10; })());
+  check('BP-2 size and position are adjustable, by slider and by drag, and saved', await (async () => { const b = (await photos()).find((x) => x.name === 'Photo wide'); return b && b.img.s === 1.4 && b.img.x === 10 && b.img.y < -10 && b.img.w === .3; })());
+  check('BP-4 the photo bottle’s liquid sits at the estimated level, 40%', await page.evaluate(() => { const s = document.querySelector('.slot[tabindex="0"]'), r = s.querySelector('.phw clipPath rect'), y = +r.getAttribute('y'), h = +r.getAttribute('height'), lq = +s.querySelector('.phw .lq').getAttribute('data-y0'); return Math.abs(lq - (y + h - .4 * .92 * h)) < .05; }));
+  await page.waitForTimeout(1500);
+  const pd0 = await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'); await page.waitForTimeout(450);
+  check('BP-4 the photo bottle’s liquid moves like every other bottle', pd0 !== await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'));
+
   // three photo bottles become the rotation
   for (const n of ['Photo amber', 'Photo black', 'Photo irregular']) {
     await page.click('#shelvesBtn'); await page.waitForTimeout(800); await page.fill('#findIn', n); await page.waitForTimeout(200); await page.click('.hit'); await page.waitForTimeout(900);

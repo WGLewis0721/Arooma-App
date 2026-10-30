@@ -11,7 +11,7 @@ All design guidance lives in one place: **[docs/design/README.md](../docs/design
 - A personal cabinet of objects, not a storefront or an inventory dashboard. Bottles are the richest thing on screen.
 - No new colors, fonts or decorative styles. Use a token (`--oat`, `--paper`, `--ink`, `--soft`, `--hair`, `--olive`, `--olive-deep`, `--clay`, `--clay-deep`) or an existing pattern. Two faces only: `ui-serif` and SF Pro.
 - Cards are opaque Paper. No glass, blur or transparency on cards, bottles or sheets. Glass only on the layout switcher, toolbar and header buttons.
-- Bottle art stays neutral and true to each house: same studio light and table, no per-house color grade, liquid drawn at the estimated level. The owner's own photos sit on the same table.
+- Bottle art stays neutral and true to each house: same studio light and table, no per-house color grade, liquid drawn at the estimated level. The owner's own photos sit on the same table. Every bottle shows its liquid, moving, photos included.
 - Olive and Clay are for graphics and large text; small text uses Olive Deep and Clay Deep. Status is never color alone.
 - Low stock is quiet: label, hairline gauge, liquid level. Never red, never a badge.
 

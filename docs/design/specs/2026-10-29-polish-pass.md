@@ -34,7 +34,7 @@ The first time someone opens Arooma, seven fictional bottles are already on thei
 
 | Rule (document and section) | How this pass touches it |
 | --- | --- |
-| `RULES_CARD.md`, Look: liquid level | Owner photos draw no liquid, so the card does not show a drawn level for them. The meta line and record state the estimate in words. **Exception for the owner:** confirm this, or ask for a level window on photo cards (section 8) |
+| `RULES_CARD.md`, Look: liquid level | Owner photos carry a level window like the opaque drawings, liquid coloured from the photo and simulated. Owner decision, 2026-10-29: show the liquid and keep the motion |
 | `RULES_CARD.md`, Look: no new colors, fonts, decorative styles | None added. The empty state reuses the card recipe; search reuses inputs and paper rows |
 | `RULES_CARD.md`, Behavior: haptics at three moments | Kept to the three kinds. Completed action now also covers add, edit, impression saved, export and restore |
 | `RULES_CARD.md`, Behavior: Dynamic Island | Reworded to "Island chip, in-app timer". The visual stays as the brand board specifies |
@@ -72,25 +72,25 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 ## 7. Technical approach
 
 - **Storage:** `arooma.cabinet` `{v:3, shelves, bottles, rot}`; `arooma.demo` the same shape, written only once changed; `arooma.prefs` `{mode, backupAt}`; `arooma.test` the running session. `cleanState` accepts v1, v2 and v3 and is used for loading, migration and import alike. Migration copies `arooma.v1` into `arooma.cabinet` once and never deletes it.
-- **Photos:** `readPhoto` decodes, lets the browser apply orientation, shrinks to 560 px or less, keeps PNG or WebP when the image has transparency and JPEG otherwise, and refuses anything over 600,000 characters. `photoArt(img)` draws it with `preserveAspectRatio="xMidYMax meet"` on the shared table and light.
+- **Photos:** `readPhoto` decodes, lets the browser apply orientation, shrinks to 560 px or less, keeps PNG or WebP when the image has transparency and JPEG otherwise, and refuses anything over 600,000 characters. `photoArt(img)` draws it with `preserveAspectRatio="xMidYMax meet"` on the shared table and light, plus a level window from `photoWin(img)`: the stored aspect ratio gives the bottle's real outline in the frame, the window sits in its lower body at `img.w` across, and its liquid uses `img.c`, the average of the coloured, opaque pixels in the lower middle of the photo (neutral amber when the photo gives no reliable colour). A full bottle fills 92% of the window so the surface keeps room to move. Photos are stored at 480 px or less (about 30 to 120 KB). The first successful save asks `navigator.storage.persist()`. Backup shows the collection's size, and a reminder appears at most weekly once there are five bottles and no export in 30 days.
 - **Search:** `findHits` splits the query into words, removes accents and needs every word in the house or name.
 - **Do not touch:** tokens, the liquid engine, the layout transforms, the share canvas shape.
 
-## 8. Risks and open questions
+## 8. Risks and decisions
 
-| Item | Proposed default | Who decides |
+| Item | Decision | By |
 | --- | --- | --- |
-| Photo bottles show no drawn liquid, only the estimate in text | Keep; a level window drawn over someone's photo would look like a decal | Owner |
-| `localStorage` holds photos; about 5 MB per site in Safari | Shrink hard and warn on a failed save. Move photos to IndexedDB if owners hit the limit | Owner |
-| A photo with its background reads as a framed picture, not an object | Say "a cut-out sits best"; no automatic background removal | Owner |
-| Test session lengths (20 minutes, 2 hours) | Keep; make them adjustable only if testers ask | Owner |
-| Rotation size of three | Keep, matches the Fan geometry | Owner |
-| Remove sample bottles shows only for migrated saves | Keep | Owner |
-| `arooma.v1` stays forever after migration | Keep one release, then remove in a later spec | Owner |
+| Liquid on photo bottles | Shown through a level window, coloured from the photo, with the same motion | Owner |
+| Photo storage | Stay in `localStorage`: shrink to 480 px, request persistent storage, show usage, remind to back up. A real collection of 60 photos fits in about 3 to 5 MB, so the reminder matters. IndexedDB or files come with the native build, where the widget needs a shared store anyway | Claude, at the owner's direction |
+| Photo backgrounds | Keep the "cut-out sits best" hint. On-device background removal needs native Vision; do it in the native build | Claude |
+| Session check-ins at 20 minutes and 2 hours | Keep; they match how a skin test actually moves | Claude |
+| Rotation of three | Keep; it matches the Fan geometry and a weekly rotation | Claude |
+| `arooma.v1` fallback | Keep for one release, then remove in its own spec | Owner to confirm |
+| Device risk | The level window position is a guess from the outline; the owner can slide it. Check on real photos of real bottles | Owed on a device |
 
 ## 9. Verification and acceptance report
 
-`npm test` runs 187 checks, all passing in headless Chromium (111 before this pass, all kept; four changed meaning by request: no forced samples, last bottle deletable, demo in its own key, the timer reads minutes). `npm run docs:check` passes. Nothing here was run on an iPhone.
+`npm test` runs 191 checks, all passing in headless Chromium (111 before this pass, all kept; four changed meaning by request: no forced samples, last bottle deletable, demo in its own key, the timer reads minutes). `npm run docs:check` passes. Nothing here was run on an iPhone.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
@@ -118,7 +118,7 @@ Widths 375, 390, 393 and 430 tested in Chromium with a touch viewport; landscape
 | BP-1 | Done | Six photos stored; PNG or WebP kept for transparency, JPEG otherwise |
 | BP-2 | Done | `meet` everywhere; size and position by slider and drag, saved |
 | BP-3 | Done in Chromium | Generated clear, near-black, amber, opaque white with background, metal cap, irregular and wide images; screenshots 35 to 40 |
-| BP-4 | Partial | Same table, baseline, shadow and light by construction; true scale depends on how the owner sizes each photo, and a photo with a background still reads as a picture |
+| BP-4 | Done in Chromium | Same table, baseline, shadow, light and moving liquid for every photo; true scale is set by the owner, and a photo with a background still reads as a picture |
 | PL-1 | Partial | Long-name ellipsis, record timeline, empty state on the card recipe, install hint style bug fixed; no token or shadow values changed |
 | PL-2 | Done | Cover Flow browses, Stack shortlists, Fan shows only the saved rotation; share image in Fan is the rotation |
 | PL-3 | Done | One DOM kept; selection survives every layout and the visiting state |

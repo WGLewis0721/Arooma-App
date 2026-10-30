@@ -1,0 +1,145 @@
+{
+  "derivation": "Exact left/right half pixel crop; WebP quality 95, method 6. No resampling or artwork changes.",
+  "cards": {
+    "dior": {
+      "status": "approved",
+      "source": "assets/collectibles/masters/approved/dior-sauvage-elixir-original-diptych.png",
+      "source_sha256": "eb4fef3eaa37d8ffc270354d90a1e5614cb944b33b90521c2abb3cc19bfbeb7c",
+      "faces": {
+        "front": {
+          "path": "assets/collectibles/production/dior/front.webp",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "10fa104b7de1a675af12f476961aea728dc8765366fae834ed65281e9b6f124e"
+        },
+        "back": {
+          "path": "assets/collectibles/production/dior/back.webp",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "8e5d76e969f3618883c1a6c163657b77f4c8dc08f51efc99584654689841a3ca"
+        }
+      }
+    },
+    "hawas": {
+      "status": "approved",
+      "source": "assets/collectibles/masters/approved/rasasi-hawas-for-him-original-diptych.png",
+      "source_sha256": "77073abcba76f1173efe62daa6259cd0e34db0374d5ec186f8e65094607c1bdd",
+      "faces": {
+        "front": {
+          "path": "assets/collectibles/production/hawas/front.webp",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "c50594027a1022a1f0264544ef940ec37dfd7c97893a505327b28b0db19a145b"
+        },
+        "back": {
+          "path": "assets/collectibles/production/hawas/back.webp",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "4a9963e855ab31a08b6eb17f11146f0bf1616f53949ebb28b990691d4fad1902"
+        }
+      }
+    },
+    "myslf": {
+      "status": "approved",
+      "source": "assets/collectibles/masters/approved/ysl-myslf-edp-original-diptych.png",
+      "source_sha256": "ebdc1a32ba4a667f2fbe306c6acbea4be694b346f56c99b20cd91c9a12fff7ec",
+      "faces": {
+        "front": {
+          "path": "assets/collectibles/production/myslf/front.webp",
+          "crop_px": [
+            0,
+            0,
+            768,
+            1024
+          ],
+          "pixels": [
+            768,
+            1024
+          ],
+          "sha256": "ee257d543cd534de4504f4d6e6a6b35396e15408cdc568fa8d09001d46e6a5bf"
+        },
+        "back": {
+          "path": "assets/collectibles/production/myslf/back.webp",
+          "crop_px": [
+            768,
+            0,
+            1536,
+            1024
+          ],
+          "pixels": [
+            768,
+            1024
+          ],
+          "sha256": "3f30b77cf7c812955acf414e64d0b5336d0f79e455742d5d58366c43a3cb1ce0"
+        }
+      }
+    },
+    "prodigy": {
+      "status": "historical",
+      "source": "assets/collectibles/masters/historical/mind-games-prodigy-v2-original-diptych.png",
+      "source_sha256": "f6187eb0778226b6c8ac55af1eec59d7b54f3944fadf0874ef5a79ec56465418",
+      "faces": {
+        "front": {
+          "path": "assets/collectibles/production/prodigy/front.webp",
+          "crop_px": [
+            0,
+            0,
+            735,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "fdaa259f28ab2772691aed765143b5dff9b2e6ffa1f6794714507bbee375976e"
+        },
+        "back": {
+          "path": "assets/collectibles/production/prodigy/back.webp",
+          "crop_px": [
+            735,
+            0,
+            1470,
+            1070
+          ],
+          "pixels": [
+            735,
+            1070
+          ],
+          "sha256": "a73cb7b60a48ef723c7aafbb0f103bc7e96f8219475bd81236e59059dedd85d5"
+        }
+      }
+    }
+  }
+}

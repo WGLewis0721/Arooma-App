@@ -118,6 +118,26 @@ function check(name, ok, detail) {
   check('Stack keeps Dior selected', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
   await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
 
+  // V2: one-tap collectible import goes into my own collection, preserving art and not duplicating cards.
+  const cctx = await browser.newContext({ viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true });
+  const cpage = await cctx.newPage();
+  const cerrors = []; cpage.on('pageerror', (e) => cerrors.push(e.message));
+  await cpage.goto(base); await cpage.click('#introDemo'); await cpage.waitForTimeout(350);
+  await cpage.click('#wear'); await cpage.waitForTimeout(800);
+  check('V2 one-tap add copies Dior card to own collection with art', await cpage.evaluate(() => {
+    const own=JSON.parse(localStorage.getItem('arooma.cabinet')||'null');
+    return !!own&&own.bottles.length===1&&own.bottles[0].artKey==='dior'&&
+      document.querySelector('.slot.collectible')!==null&&
+      localStorage.getItem('arooma.prefs').includes('"mode":"own"');
+  }));
+  await cpage.click('#demoQuick'); await cpage.waitForTimeout(350);
+  await cpage.click('#wear'); await cpage.waitForTimeout(650);
+  check('V2 repeated add opens the existing card without duplication', await cpage.evaluate(() => {
+    const own=JSON.parse(localStorage.getItem('arooma.cabinet')||'null');
+    return own.bottles.length===1&&own.bottles[0].artKey==='dior';
+  })&&cerrors.length===0,cerrors.join(' | '));
+  await cctx.close();
+
   // Keep the established seven-bottle smoke fixture for complete V1 core-feature regression.
   // The default V2 experience above has already proved its eleven cards and four themes.
   await page.goto(base + '?classicDemo=1'); await page.waitForTimeout(800);
@@ -772,7 +792,7 @@ function check(name, ok, detail) {
   const dpage = await dctx.newPage();
   const derrors = [];
   dpage.on('pageerror', (e) => derrors.push(e.message));
-  await dpage.goto(base); await dpage.waitForTimeout(5200);
+  await dpage.goto(base + '?classicDemo=1'); await dpage.waitForTimeout(5200);
   await dpage.screenshot({ path: path.join(outDir, '9-desktop.png') });
   check('desktop shows the framed device', (await dpage.locator('.slot').count()) === 7 && derrors.length === 0, derrors.join(' | '));
 
@@ -783,7 +803,7 @@ function check(name, ok, detail) {
   const rpage = await rctx.newPage();
   const rerr = [];
   rpage.on('pageerror', (e) => rerr.push(e.message));
-  await rpage.goto(base); await rpage.waitForTimeout(300);
+  await rpage.goto(base + '?classicDemo=1'); await rpage.waitForTimeout(300);
   await rpage.evaluate(() => document.getElementById('cabinet').click()); await rpage.waitForTimeout(1200);
   const flat = () => rpage.evaluate(() => document.querySelector('.slot[tabindex="0"] .lq').getAttribute('d'));
   const f1 = await flat(); await rpage.waitForTimeout(700);
@@ -799,7 +819,7 @@ function check(name, ok, detail) {
   const spage = await sctx.newPage();
   const serr = [];
   spage.on('pageerror', (e) => serr.push(e.message));
-  await spage.goto(base); await spage.waitForTimeout(300);
+  await spage.goto(base + '?classicDemo=1'); await spage.waitForTimeout(300);
   await spage.evaluate(() => document.getElementById('cabinet').click()); await spage.waitForTimeout(2400);
   const noScroll = () => spage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1 && document.body.scrollWidth <= window.innerWidth + 1);
   check('375 wide: no horizontal scroll', await noScroll());

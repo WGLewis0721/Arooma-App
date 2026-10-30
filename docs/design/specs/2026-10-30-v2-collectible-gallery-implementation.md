@@ -43,7 +43,7 @@ Distribution is by visual area and emphasis: 60% dominant shell, 30% secondary s
 - The selected collectible displays the original Arooma v3 content hierarchy: product name, visual top-note props, top-note names, clear official concentration; reverse contains description and three horizontal TOP/HEART/BASE strips.
 - Image face and reverse are static **illustrated SVG interpretations** produced for this PWA from previously approved card concepts, **not the original ChatGPT full-resolution photorealistic PNG diptychs**. Swap them with cleared rasters at same filenames when provided/imported. No unlicensed manufacturer marketing photo was scraped or committed.
 - Original fictional seven-bottle demo remains, with four recognizable curated fragrances added: Dior Sauvage Elixir, Rasasi Hawas for Him, YSL MYSLF EDP, and Mind Games Prodigy. The official maker's concentration and listed note information are used; exact note stage order verified against published brand sources.
-- The collectible **flips to the scent map**, while the existing Details button opens the personal ownership menu (wear history, edit, rotate, move, authenticity observations and delete) in the same interaction framework. The owner record is never deleted.
+- The collectible **flips to the scent map**, and curated demo entries have a one-tap **Add to my collection** action that preserves their illustrated card art under an optional `artKey` in the existing schema v3; the existing Details button opens the personal ownership menu (wear history, edit, rotate, move, authenticity observations and delete) in the same interaction framework. The owner record is never deleted.
 
 ### Core functions, friction budget
 
@@ -51,7 +51,8 @@ Distribution is by visual area and emphasis: 60% dominant shell, 30% secondary s
 | --- | --- | --- |
 | Browse | Direct drag/keyboard or tap adjacent card | Existing finger-tracked Cover Flow |
 | Check notes | One focused-card tap | Same card flips to scent map |
-| Wear today | One tap | Existing Wear today CTA / Undo |
+| Add curated fragrance to my collection | One tap on a demo collectible | The primary action copies its fragrance facts and Arooma illustration to own storage, then switches to the owned card; duplicates are opened instead of added |
+| Wear today | One tap on any owned or classic bottle | Existing Wear today CTA / Undo |
 | Start scent test | One tap | Existing Test CTA and in-app check-ins |
 | Find a fragrance | One tap | All Shelves/Search button |
 | Add bottle | One tap | Header + opens existing add form |

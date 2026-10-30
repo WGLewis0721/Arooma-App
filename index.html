@@ -2773,6 +2773,46 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 }
 
+/* ---- V2: independent themes and immediate access to the two collections. ---- */
+var V2_THEME_KEY='arooma.v2.theme',V2_LOOK_KEY='arooma.v2.appearance';
+var V2_NAMES={obsidian:'Obsidian Gold',ivory:'Ivory Oud',violet:'Violet Ink',emerald:'Emerald Resin'};
+function v2Stored(k){try{return localStorage.getItem(k)}catch(e){return null}}
+var v2Theme=V2_NAMES[v2Stored(V2_THEME_KEY)]?v2Stored(V2_THEME_KEY):'obsidian';
+var v2Look=/^(light|dark)$/.test(v2Stored(V2_LOOK_KEY)||'')?v2Stored(V2_LOOK_KEY):(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+function v2Apply(){
+  var d=$('#device');d.setAttribute('data-theme',v2Theme);d.setAttribute('data-appearance',v2Look);
+  $('.themeSwatch').forEach(function(btn){btn.setAttribute('aria-pressed',btn.dataset.palette===v2Theme?'true':'false')});
+  $('[data-look]').forEach(function(btn){btn.setAttribute('aria-pressed',btn.dataset.look===v2Look?'true':'false')});
+  var title=$('#introThemeName');if(title)title.textContent=V2_NAMES[v2Theme];
+  var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',v2Look==='light'?'#F4EEE4':'#161B24');
+}
+function v2PickTheme(v){if(!V2_NAMES[v])return;v2Theme=v;lsSet(V2_THEME_KEY,v);v2Apply()}
+function v2PickLook(v){if(v!=='light'&&v!=='dark')return;v2Look=v;lsSet(V2_LOOK_KEY,v);v2Apply()}
+document.addEventListener('click',function(e){
+  var p=e.target.closest&&e.target.closest('.themeSwatch');
+  if(p){v2PickTheme(p.dataset.palette);return}
+  var l=e.target.closest&&e.target.closest('[data-look]');
+  if(l){v2PickLook(l.dataset.look);return}
+});
+function v2CloseIntro(){var el=$('#introV2');el.classList.add('dismissed');$('#stage').focus({preventScroll:true});}
+$('#introDemo').addEventListener('click',function(){if(MODE!=='demo')enterDemo();v2CloseIntro()});
+$('#introOwn').addEventListener('click',function(){if(MODE==='demo')leaveDemo();else if(MODE!=='own')startOwn();v2CloseIntro()});
+$('#demoQuick').addEventListener('click',function(){if(MODE==='demo')leaveDemo();else enterDemo()});
+$('#themeToggle').addEventListener('click',function(){
+  var opts=Object.keys(V2_NAMES).map(function(k){
+    var colors={obsidian:['#161b24','#312b33','#b88b47'],ivory:['#f3ebdd','#d8c4aa','#9f6a36'],violet:['#1b1a28','#5d5266','#c9b6d9'],emerald:['#18211f','#4b5a55','#d1b68b']}[k];
+    return '<button class="themeSwatch" data-palette="'+k+'" title="'+V2_NAMES[k]+'" aria-label="'+V2_NAMES[k]+'" style="--sw-major:'+colors[0]+';--sw-secondary:'+colors[1]+';--sw-accent:'+colors[2]+'"></button>';
+  }).join('');
+  openPanel('<h2>Appearance</h2><p class="sub">Four editorial finishes, one consistent card system. Your selection stays on this device.</p>'
+    +'<div class="v2ThemeGroup" data-theme-controls="true">'+opts+'</div>'
+    +'<p class="sub" id="v2CurrentTheme">'+V2_NAMES[v2Theme]+'</p>'
+    +'<div class="v2Appearance" data-appearance-controls="true"><button data-look="light">Light</button><button data-look="dark">Dark</button></div>'
+    +'<div class="pbtns"><button class="btn primary" data-act="done">Done</button></div>',
+    function(e){if(actOf(e)==='done')closePanel();var t=$('#v2CurrentTheme');if(t)t.textContent=V2_NAMES[v2Theme]});
+  v2Apply();
+});
+v2Apply();
+
 fit();geo();fitOver();setZ(0);updateCounts();setFanState();updateEmpty();markPick();render();updateInfo();updateTestBtn();setModeButtons();resumeTest();
 openCabinet();
 if(PREFS.mode){$('#introV2').classList.add('dismissed')}

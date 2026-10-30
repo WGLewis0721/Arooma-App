@@ -102,6 +102,17 @@ function check(name, ok, detail) {
     document.querySelector('#device').dataset.theme==='violet'&&document.querySelector('#device').dataset.appearance==='dark'
       && localStorage.getItem('arooma.v2.theme')==='violet'&&localStorage.getItem('arooma.v2.appearance')==='dark'));
   await page.click('#panel [data-act="done"]');await page.waitForTimeout(300);
+  // Atelier V3: one concise, real UI interaction pass (not just static screenshots).
+  check('Atelier has five accessible core-navigation destinations', (await page.locator('.at-nav [data-at-tab]').count())===5);
+  await page.click('[data-at-tab="shelves"]'); await page.waitForTimeout(650);
+  check('card-first shelves show photographic collection tiles', (await page.locator('.at-shelf-tile').count())>=4);
+  await page.click('[data-at-tab="discover"]');await page.fill('#findIn','dior');await page.waitForTimeout(250);
+  check('search finds a bottle by house in one action',await page.locator('#overScroll .hit[data-b="0"]').count()===1);
+  await page.click('[data-at-tab="archive"]');await page.waitForTimeout(650);
+  await page.click('[data-at-tab="bottle"]');await page.waitForSelector('#panel.on');
+  check('ownership view has direct wear, history, edit and backup',await page.locator('.at-owner-record [data-at-owner]').count()>=6);
+  await page.click('#scrim',{position:{x:18,y:18}});await page.waitForTimeout(240);
+
   // PWA wiring
   const manifest = await page.evaluate(async () => {
     const href = document.querySelector('link[rel="manifest"]').href;

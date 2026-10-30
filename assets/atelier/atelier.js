@@ -173,6 +173,34 @@ document.addEventListener('keydown',function(e){
 function mark(){
  sync();
 }
+
+// A restrained foil rim that reacts to the actual pointer. No ambient loop,
+// no device-orientation permission, no wash over the printed photography.
+var stage=$('#stage'),foilCard=null,foilFrame=0;
+function foilOff(){
+ if(foilFrame)cancelAnimationFrame(foilFrame);
+ foilFrame=0;
+ if(foilCard){foilCard.style.setProperty('--at-foil-opacity','0');foilCard=null}
+}
+stage.addEventListener('pointermove',function(e){
+ if(e.pointerType==='mouse'&&!e.buttons)return;
+ var card=$('.slot.collectible.is-sel',stage);
+ if(!card||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+ if(foilFrame)cancelAnimationFrame(foilFrame);
+ foilFrame=requestAnimationFrame(function(){
+  var r=card.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  if(foilCard&&foilCard!==card)foilCard.style.setProperty('--at-foil-opacity','0');
+  foilCard=card;
+  var pct=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+  card.style.setProperty('--at-foil-angle',(65+pct*95).toFixed(1)+'deg');
+  card.style.setProperty('--at-foil-opacity','0.72');
+ });
+},{passive:true});
+['pointerup','pointercancel','pointerleave'].forEach(function(type){
+ stage.addEventListener(type,foilOff,{passive:true});
+});
+
 window.AroomaAtelier={
  renderShelves:renderShelves,
  renderHits:renderHits,

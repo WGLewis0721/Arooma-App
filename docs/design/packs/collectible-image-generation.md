@@ -1,30 +1,41 @@
-# Pack: generating collectible fragrance card images
+# Pack: producing Archive Foil collectible cards
 
-> Part of the Arooma design brain. Start at [../README.md](../README.md). This pack is for **opt-in Archive Foil art assets only**, not ordinary cabinet cards. Governing details: [../brand/COLLECTIBLE_CARD_ART_DIRECTION.md](../brand/COLLECTIBLE_CARD_ART_DIRECTION.md).
+> Part of the Arooma design brain. Start at [../README.md](../README.md). **Only for standalone collectible art**; normal shelf/card work uses [shelf-change.md](shelf-change.md) and [../brand/BRAND_BOARD.md](../brand/BRAND_BOARD.md).
 
-**Use when:** a user requests holographic collectible images, front/back card compositions, or consistent GenAI fragrance-card art. For actual app screen/card work, use [shelf-change.md](shelf-change.md) and [../brand/BRAND_BOARD.md](../brand/BRAND_BOARD.md) instead. The normal Warm Archive rules still apply to the app.
+**Visual master:** the owner's explicitly approved 2026-10-30 **MIND GAMES PRODIGY front/back diptych**. The earlier quiet Prada card and flat-photo/card experiments are **not** the target. The master image is a *visual reference, not a source for correct Prodigy notes*. Read the brief and work with the reference artwork attached.
 
-## Quick brief
-- **Reference order:** exact photographed bottle > same-concentration brand product page > owner-approved quiet card > modern overframe composition principles. Never use EDT or Le Parfum notes/photos to fill gaps on EDP.
-- **Hierarchy:** product hero > fragrance name > concentration and tiny fictional Arooma tier > notes on back. One bottle, one atmospheric movement, 20-30% negative space.
-- **Medium:** 59:86 portrait, flat, visible corners, 2-3% charcoal gutter, printed navy cardstock with thin silver/cool holographic perimeter, limited specular glints. Product is photorealistic; border never competes.
-- **Type:** two faces max, strong editorial title, readable metadata. Tiny wording must be validated or rendered as deterministic text overlay.
-- **Do not:** make a two-up collage when separate images are requested, create imaginary cap, paint uniform rainbow, add ornamental gold, fantasy landscapes, game elements or unsourced statistics.
-- **Brand and ownership:** the user-approved real-brand exception applies only to concept collectible art. Do not put real-brand material into the public fictional demo or claim brand affiliation/rarity endorsement.
+## One-minute job brief
 
-## Exact sections to read
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#1. Source of truth and precedence` for references, original product fidelity, source mix-ups.
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#2. Visual system` for color, lighting, card material and typography.
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#3. Fixed canvas and composition` for precise front/back layout.
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#4. Repeatable generation workflow` for preflight, prompt scaffold, negative prompts.
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#5. Release checklist and rejection thresholds` for the pass/fail gate.
-- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#6. Boundaries and next decisions` before adding anything to the app.
+- **Art direction:** luxury product photography + deliberate trading-card depth. Authentic bottle centered in a grounded still life, strong diagonal studio light, controlled botanical/wood/glass props. Finish with deeply etched, localized cyan/violet/copper foil edges and print grain. Rich but not gaudy; collector's object, not catalog.
+- **Front:** oversized accurate bottle with photographed props, house/fragrance/concentration above, `ULTRA RARE` near lower edge, Arooma footer.
+- **Back:** house/name/concentration and rarity, concise editorial paragraph, **three** photographic note tiles TOP/HEART/BASE only if officially documented, three factual metadata fields, a full-width cinematic image strip at bottom.
+- **Card:** two standalone 59:86 assets; 1180x1720px master each. Optional diptych preview is not a substitute for separate faces.
+- **Editability:** AI can generate retouched bottle and scene plates, not finalized typography, holographic edge, or verified factual copy. Composite in layers with text and foil in vectors.
+- **Product proof:** exact concentration and maker sources; classify year/marketing positioning with citations; do not propagate words from a previous GenAI image.
 
-## Agent checklist
-- [ ] State exact brand + version (EDT, EDP, Le Parfum are not equivalent).
-- [ ] Lock product photo details, concentration-specific official note pyramid and marketing positioning.
-- [ ] Keep the front bottle large and the back informational, matched in border and typography.
-- [ ] Check copy for spelling, invented statistics and invented dimensions.
-- [ ] Show one finished 59:86 image per requested side, not app chrome.
-- [ ] Run every checkbox in section 5 and reject decorative creep.
-- [ ] If proposing integration with the cabinet, open a separate spec; no changes to `index.html` under this asset task.
+## Read these exact sections
+
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#1. North star and rejection boundary`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#2. Master reference: observed composition`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#3. Measured artboard system`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#4. Image-making and art direction`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#5. Print finish and type system`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#6. Product data, accuracy and ownership`
+- `brand/COLLECTIBLE_CARD_ART_DIRECTION.md#7. Production, export and QA`
+- `brand/COLLECTIBLE_CARD_PRODUCTION.md#1. Job ticket (complete before prompting)`
+- `brand/COLLECTIBLE_CARD_PRODUCTION.md#3. Image-generation tasks by component`
+- `brand/COLLECTIBLE_CARD_PRODUCTION.md#4. Human compositing sequence`
+- `brand/COLLECTIBLE_CARD_PRODUCTION.md#7. Creative and technical rejection gates`
+
+## Handoff checklist
+
+- [ ] Approved visual reference and authentic bottle image are attached to the job.
+- [ ] Copy manifest is filled from maker's exact edition and reviewed.
+- [ ] Set, bottle, props, shadows, foil and text are **separately editable**.
+- [ ] Hero product remains accurate and visibly dominant; props are supporting, physically grounded.
+- [ ] Diagonal light, etched frame, foil restraint and image-heavy reverse match the approved master.
+- [ ] Three note tiles, compact metadata and bottom photo strip form one readable back.
+- [ ] Label/font/brand spelling is checked manually at 360px width and at full size.
+- [ ] Both faces are separate 1180x1720 PNGs, with original layered source, rights log, and optional diptych proof.
+- [ ] Five scores (fidelity, art direction, collectibility, typography, pairing) are each at least 4/5 after **human** review.
+- [ ] No change to `index.html`, demo brand restrictions, or normal Warm Archive card system without a new spec.

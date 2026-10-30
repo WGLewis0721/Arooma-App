@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="1180" height="1720" viewBox="0 0 1180 1720" role="img" aria-label="Arooma Archive Foil v2 front editable composition template">
+<title>Arooma Archive Foil v2 — front face production layout</title>
+<defs>
+ <linearGradient id="setBg" x1=".1" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#122436"/><stop offset=".37" stop-color="#253443"/><stop offset=".77" stop-color="#080f19"/><stop offset="1" stop-color="#09111d"/></linearGradient>
+ <linearGradient id="beam" x1=".8" y1=".02" x2=".17" y2="1"><stop offset="0" stop-color="#e4f3fc" stop-opacity=".52"/><stop offset=".45" stop-color="#c5dce8" stop-opacity=".13"/><stop offset="1" stop-color="#c5dce8" stop-opacity="0"/></linearGradient>
+ <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ec6e7"/><stop offset=".17" stop-color="#be93cf"/><stop offset=".30" stop-color="#e2a579"/><stop offset=".50" stop-color="#5ca0dc"/><stop offset=".72" stop-color="#8e80c4"/><stop offset=".87" stop-color="#d4a06e"/><stop offset="1" stop-color="#81c9df"/></linearGradient>
+ <linearGradient id="bottleGhost" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#e1e8ec" stop-opacity=".14"/><stop offset=".5" stop-color="#e8f1f7" stop-opacity=".28"/><stop offset="1" stop-color="#e1e8ec" stop-opacity=".14"/></linearGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="30"/></filter>
+ <clipPath id="trim"><rect x="15" y="15" width="1150" height="1690" rx="38"/></clipPath>
+</defs>
+<g id="BG_SET"><rect x="0" y="0" width="1180" height="1720" fill="#101318"/><rect x="15" y="15" width="1150" height="1690" rx="38" fill="url(#setBg)"/></g>
+<g id="INNER_FRAME"><rect x="46" y="46" width="1088" height="1628" rx="27" fill="none" stroke="#ddd1c3" stroke-width="2" opacity=".8"/><path d="M62 72L84 49 M1093 48l22 25 M62 1648l22 23 M1093 1672l22-24" fill="none" stroke="#b1a7a0" stroke-width="4" opacity=".85"/></g>
+<g id="FOIL_MASK"><rect x="23" y="23" width="1134" height="1674" rx="34" fill="none" stroke="url(#foil)" stroke-width="23" opacity=".72"/><rect x="45" y="45" width="1090" height="1630" rx="26" fill="none" stroke="#abb6c7" stroke-width="2.3"/><path d="M45 115h90 M1040 45v80 M45 1570v100 M1000 1675h130" fill="none" stroke="#e2b98a" stroke-width="4" opacity=".7"/></g>
+<g id="GUIDES_NONEXPORT" display="none"><rect x="59" y="59" width="1062" height="1602" fill="none" stroke="#f0d261" stroke-dasharray="10 10" stroke-width="3"/><path d="M0 395h1180 M0 560h1180 M0 1090h1180 M0 1250h1180 M0 1500h1180" stroke="#43d9ef" stroke-width="2" stroke-dasharray="8 10"/></g>
+<g id="SET_PROPS_BACK" clip-path="url(#trim)">
+ <path d="M775 260 L1110 280 L490 1510 L340 1500Z" fill="url(#beam)"/>
+ <ellipse cx="930" cy="1290" rx="450" ry="170" fill="#94b0c4" opacity=".12" filter="url(#soft)"/>
+ <path d="M128 620 Q170 485 280 445 Q245 780 150 1090 M130 850L265 715" stroke="#849e80" stroke-width="7" opacity=".34" fill="none"/>
+ <rect x="795" y="920" width="160" height="320" rx="9" fill="#dbeaf5" opacity=".06" stroke="#aab9c5" stroke-width="3"/>
+</g>
+<g id="BOTTLE_MASTER" opacity=".72">
+ <rect x="387" y="684" width="408" height="672" rx="47" fill="url(#bottleGhost)" stroke="#c3d6e6" stroke-dasharray="15 13" stroke-width="5"/>
+ <rect x="457" y="521" width="269" height="176" rx="20" fill="url(#bottleGhost)" stroke="#d6e1ec" stroke-dasharray="14 11" stroke-width="5"/>
+ <circle cx="590" cy="506" r="31" fill="#c8dbe7" opacity=".32" stroke="#e4e7ee" stroke-width="5"/>
+ <text x="590" y="995" font-family="system-ui,sans-serif" font-size="28" text-anchor="middle" letter-spacing="3" fill="#eaf2f5">REPLACE WITH</text>
+ <text x="590" y="1039" font-family="system-ui,sans-serif" font-size="28" text-anchor="middle" letter-spacing="3" fill="#eaf2f5">AUTHENTIC BOTTLE PHOTO</text>
+</g>
+<g id="CONTACT_SHADOWS"><ellipse cx="595" cy="1383" rx="337" ry="47" fill="#000" opacity=".5" filter="url(#soft)"/><path d="M75 1408h1030" stroke="#b0c3ce" stroke-opacity=".36" stroke-width="3"/></g>
+<g id="FOREGROUND_PROPS"><path d="M105 1332q140-70 245-32 M831 1329q140-50 222 0" stroke="#4d6f64" stroke-width="9" stroke-opacity=".45" fill="none"/></g>
+<g id="DISPLAY_TYPE" font-family="Georgia,'Times New Roman',serif" fill="#e0e5e8">
+ <text x="92" y="173" font-size="91" letter-spacing="7">HOUSE NAME</text>
+ <text x="95" y="274" font-size="57" letter-spacing="12">FRAGRANCE</text>
+</g>
+<g id="INFO_TYPE" font-family="Arial,Helvetica,sans-serif" letter-spacing="7" fill="#c9d2dc">
+ <text x="96" y="338" font-size="28">CONCENTRATION</text>
+ <path d="M95 367h151" stroke="#b4c9db" stroke-width="4"/>
+</g>
+<g id="BOTTOM_BAND"><rect x="48" y="1475" width="1084" height="194" fill="#08101a" opacity=".94"/><path d="M60 1476h1062 M60 1655h1062" stroke="#c6a679" stroke-width="2"/></g>
+<g id="RARITY_AND_FOOTER" text-anchor="middle">
+ <text x="590" y="1569" font-family="Georgia,serif" font-size="44" letter-spacing="15" fill="#e2c79f">ULTRA RARE</text>
+ <text x="590" y="1631" font-family="Arial,Helvetica,sans-serif" font-size="19" letter-spacing="7" fill="#dce2e6">AROOMA • FRAGRANCE COLLECTION</text>
+</g></svg>

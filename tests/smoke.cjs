@@ -157,7 +157,11 @@ function check(name, ok, detail) {
   check('Island returns to idle', (await page.getAttribute('#island', 'data-s')) === 'idle');
 
   // install hint (iOS user agent, not standalone)
-  check('Add to Home Screen hint shown on iOS Safari', await page.evaluate(() => document.getElementById('a2hs').classList.contains('show')));
+  check('V2 does not obstruct cards with unsolicited install instructions', await page.evaluate(() => !document.getElementById('a2hs').classList.contains('show')));
+  await page.click('#menu'); await page.waitForSelector('#panel.on');
+  await page.click('#install'); await page.waitForTimeout(450);
+  check('Install Arooma is available on demand', await page.evaluate(() => document.getElementById('a2hs').classList.contains('show')));
+  await page.click('#a2hsx'); await page.waitForTimeout(650);
 
   // share export (reached from the cabinet menu)
   await page.click('#menu'); await page.waitForSelector('#panel.on');

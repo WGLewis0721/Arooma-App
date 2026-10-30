@@ -48,7 +48,7 @@ function assert(cond,msg){if(!cond)throw new Error('Atelier QA failure: '+msg);c
   assert(photo,'selected artwork is approved photographic Dior production asset');
   await page.screenshot({path:path.join(shots,'atelier-02-cover-flow-dark.png')});
   await page.click('.slot.collectible.is-sel');
-  await page.waitForSelector('#inspector.on');
+  await page.waitForSelector('#inspector.on');await page.waitForTimeout(460);
   assert(await page.isVisible('.inspector-card .collectible-img'),'focused card expands to Inspector');
   await page.screenshot({path:path.join(shots,'atelier-03-inspector.png')});
   await page.click('#inspectorFlip');await page.waitForTimeout(560);

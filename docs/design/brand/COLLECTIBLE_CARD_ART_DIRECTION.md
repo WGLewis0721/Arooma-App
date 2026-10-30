@@ -1,105 +1,87 @@
-# Arooma Archive Foil v2 | Master art-direction specification
+# Arooma Archive Foil v3 | Locked collectible card art direction
 
-> Part of the Arooma design brain. Start at [../README.md](../README.md). This governs optional, standalone collectible **artwork**, not the existing Warm Archive cabinet UI. Production methods are in [COLLECTIBLE_CARD_PRODUCTION.md](COLLECTIBLE_CARD_PRODUCTION.md).
+> Part of the [Arooma design brain](../README.md). This governs **optional standalone collectible card images** only, not the ordinary Warm Archive UI. Use the companion [production handbook](COLLECTIBLE_CARD_PRODUCTION.md) and [image-generation task pack](../packs/collectible-image-generation.md).
 
-> Summary: **Approved visual master (2026-10-30): the two-sided MIND GAMES PRODIGY dark photographic diptych with etched iridescent border, white sculptural hero bottle, diagonal studio light, layered glass/plant props, precise silver typography and a three-column note map above a wide photographic footer.** Supersedes the earlier Prada-minimal reference and both the busy fantasy and plain catalog explorations. This is an art-directed collectible, not a generic prompt style.
+> Summary: **OWNER-LOCKED DESIGN, 2026-10-30.** The specifically approved **Dior Sauvage Elixir front/back diptych**, modified to show grapefruit and the top-note names on the front, remove “ULTRA RARE,” and retain the exact reverse note-strip typography/layout, is the visual baseline for all future cards. The image immediately preceding the owner's “I like it. lock it in.” is the accepted reference. The earlier Prodigy diptych informed v2 but is now superseded as the main reference. Use the accepted artwork supplied in the conversation as an optical master; this document captures the reproducible rules.
 
-**Version:** 2.0 | **Status:** owner-approved *visual direction*; actual product copy and image rights separately checked. **Reference:** the owner's explicitly approved final Prodigy front/back image in the 2026-10-30 ChatGPT conversation. A low-resolution schematic is available in [../../assets/collectibles/templates/](../../../assets/collectibles/templates/). The approved raster itself is not embedded in this public repository; keep that reference attached to every image-production task.
+**Version:** 3.0 | **Approval:** visual layout approved, not factual approval of every AI-generated label | **Scope:** concept artwork only | **Rights:** do not commit user images or unlicensed maker advertising to a public repository.
 
-## 1. North star and rejection boundary
+## 1. Locked visual decisions (do not reinterpret)
 
-**Make a fragrance feel like a physical collector's edition:** premium perfume campaign photography framed as a rare foil trading card. The viewer sees, in order: authentic bottle, fragrance identity, carefully staged atmosphere, collectible finish. The reverse rewards inspection with three verified note groupings, brief editorial writing, metadata and a continuation photograph.
+1. **Front communicates the fragrance before the flip.** Show the exact house/fragrance/concentration, one recognizable bottle, one or more visual representations of the verified top notes (e.g. a cut grapefruit), and a **short, readable list of 3-4 verified top notes** near the upper-left, beneath the fragrance name. Do not hide all note information on the back.
+2. **No separate rarity text, icons or invented rarity class.** Remove the old `ULTRA RARE` line on **both** faces and from prompts/templates. The maker's stated **concentration** is the displayed strength/rarity cue; do not claim concentration is an official rarity ranking or fabricate an “Extrait” designation.
+3. **Keep the title and concentration stack.** Luxury serif house/name, smaller accent-colored subname, concentration in short uppercase lines in the **upper-right**, a small hairline beneath, and quiet readable note labels.
+4. **Keep this back composition exactly:** same masthead at top; short italicized editorial description; `FRAGRANCE MAP` heading; **three full-width horizontal photographic note strips** (TOP / HEART / BASE), each image on the left and stage label plus note names on the right; slim horizontal rules; bottom facts in three columns (release year / masculine-feminine-unisex marketing position / concentration); Arooma footer.
+5. **Keep the back's type proportions, color and spacing.** Near-black textured ink, cream serif body, warm copper/bronze headings, very narrow thin rules, optical baselines and generous side padding. No re-styling into infographic cards, three vertical note columns or random templates.
+6. **Keep the image treatment:** recognizable authentic bottle with realistic glass and cap, small grounded botanical/citrus/material props, dark atmospheric set with high-end directional light, sharply resolved tactile reflections, and a narrow etched iridescent border. Small violet/cyan/copper foil highlights are allowed along the border, not across the entire scene.
+7. **Maintain separate faces** on 59:86 portrait artboards; the two-up diptych is only a preview. All four corners must remain visible and no artwork may cross the outer border.
 
-**Keep:** grounded still-life set, strong chiaroscuro/diagonal key light, 1-3 tactile glass/botanical props, shallow depth, clean recognizable bottle anatomy, confident typesetting, rich dark shadows, broken-line etched border with localized cyan/purple/rose-gold diffraction, physical print surface.
+## 2. Composition construction (1180 × 1720 pixel artboard per face)
 
-**Reject both ends:** (A) a plain photo in a rectangle with routine retail UI; (B) ornamental fantasy poster, gold filigree, magical particles, over-rendered CGI bottle, flowers erupting from the nozzle, impossible liquids, glitter everywhere, neon glows, illegible microtype. The owner's latest approved **Prodigy diptych**, not any preceding concept, is the aesthetic reference.
+All bounds are **design guides**, not forensic pixel measurements. Positioning may shift optically for bottle proportions and brand length, but not the hierarchy.
 
-Modern Yu-Gi-Oh cards are cited only for *visual grammar*: a hero with forward depth, an inner frame visually interrupted by art, a compact text zone, foil-as-material, and card-like handling. Do not copy franchise logos, rules, attributes, level stars, ATK/DEF, layout pixels, character art or typefaces.
-
-## 2. Master reference: observed composition
-
-Measurements below are design targets inferred from the **approved 1470×1070 diptych** (each displayed card approximately 700×1010), normalized into independent portrait artboards. They are **not** a production mechanical drawing or evidence of exact physical foil thickness.
-
-| Feature | FRONT | BACK |
+| Front normalized Y | Object | Locked treatment |
 | --- | --- | --- |
-| Master proportion | 59:86 | 59:86 |
-| Main title stack | Upper 5-23%; large house, name, concentration in three rows | Upper 5-19%; house, name, concentration with rarity at upper right |
-| Main subject/content | From ~23 to 88% height: still life fills edge-to-edge **inside border** | Description ~20-33%; note map ~34-63%; metadata ~64-74%; continuous photographic bottom band ~75-96% |
-| Product scale | Bottle ~42-58% card width, ~53-65% height; photographic environment fills the rest | No second hero bottle; 3 equal representative image tiles with note text |
-| Footer | Last ~12%: dark opaque rarity band + Arooma microlabel | Rarity can sit top right; bottom photograph and a contained footer |
-| Direction | Diagonal upper-right-to-lower-left soft shaft of light; counterweight botanical/glass objects | Structured editorial grid; thumbnail still lifes + wide atmospheric image |
-| Surface | Printed dark midnight charcoal; textured cool foil edge with warm metallic pin highlights | Identical trim, grain, ink and optical corner details |
+| 4-22% | House, large fragrance name, concentration in upper-right, secondary title | Serif masthead, cream white. Concentration is the only strength tier |
+| 20-35% | 3-4 top-note names, immediately below title | Upper-left small uppercase sans, tracking, subtle bronze rule; ensure no overlap with bottle |
+| 25-89% | Product hero and photographed ingredient scene | Bottle approximately 42-57% card width; top-note fruit botanical prominently recognizable; restrained grounded wet surfaces |
+| 90-97% | Maker footer | **AROOMA • FRAGRANCE COLLECTION** centered, one thin warm line; no rarity row |
 
-**Approved signature gestures:** a recognizable white bottle in an asymmetric laboratory still life; tube/botanical glass on the left, reagent/flower element on the right, wet reflective table; sharply controlled highlights and subdued backgrounds. Border corners show tiny etched geometric detail, not baroque scrolls. On the reverse, an **ultra-rare header tag**, three horizontally arranged ingredient images, two to three description lines, a row of three facts, and a full-width secondary art strip. The images are part of the composition, not nine miniature ingredient tiles.
-
-**Important:** The generated Prodigy reference is **visual evidence only**. Some of its note labels are not source-verified. Never carry its fragrance notes or concentration into another fragrance record without checking the exact maker's product page.
-
-## 3. Measured artboard system
-
-- **Each face:** 1180 × 1720 px working artboard, portrait 59:86, with artwork and trim fully contained. A pair means **two separate files**; diptych is an optional review image.
-- **Review gutter:** 2-3% outside card only in review previews, never inside print art.
-- **Rounded corner:** visually equivalent to 2.5-3.5% of card width. No corner cuts through a logo or text.
-- **Decorative foil perimeter:** optical width ~2-3% of card width, with a 1-2 px (at 1180px canvas) calm interior rule. Iridescence lives principally along perimeter and selected intersections, never across the entire photograph.
-- **Safe zones:** text ≥5% card width from outer trim, key product detail ≥4% from frame; 2 mm added print bleed beyond trim only in a separate commercial-print derivative.
-- **Grids:** 12-column underlying guide; 5% left/right margins; 2% minimum gutters. Front is visually **asymmetric** despite centered bottle. Back body spans ~90% width. Three note columns equal, with 2% gaps.
-- **Negative space:** at least 15-25% of imagery should carry low detail so titles and bottle silhouette stay legible; no empty-but-sterile catalog appearance.
-- **Overframe:** hero bottle/props may conceal a *segment of the inner etched line* but not the outer trim, footers or text; avoid fake huge 3D protrusions.
-
-## 4. Image-making and art direction
-
-**Photographic character**: premium studio set build. One large soft key from upper side, a smaller colder/hotter kicker tuned to the product, contact shadows, believable specular physics, real material grain. Keep bottle labels sharp, especially embossed crests, cap seams, tassels or red plaques. Supporting notes act as material **props** and suggest the smell rather than literal illustrated explosions.
-
-**Depth layers** (distinct Photoshop/Figma/other editor layers):
-1. `SET_BG`: atmospheric set and light/shadow (not UI gradient).
-2. `SET_PROPS_BACK`: plant, flower, glass or mineral forms behind the product.
-3. `BOTTLE_MASTER`: real photographed or accurately composited product, clean edges, exact geometry, original label and cap.
-4. `SET_PROPS_FORE`: at most 1-2 grounded accents, with occlusion and cast shadow.
-5. `INNER_FRAME`: thin etched line under/behind selective subject overlap.
-6. `FOIL_MASK`: isolated textured border and microglints.
-7. `TYPE_LOCKED`: **deterministically typeset**, separate from AI raster.
-8. `PRINT_GRAIN`: subtle paper/coating texture on top, away from small letters.
-
-**Do not use AI to invent an entire finished card** as the only production source. Generate/retouch photographic assets, then compose with a repeatable grid, non-generative typography and a controlled foil mask. Every deliverable has a clean, editable layered source and export.
-
-### House-specific art direction without style drift
-
-| House/fragrance | Stage and palette | Product-specific invariants |
+| Back normalized Y | Object | Locked treatment |
 | --- | --- | --- |
-| MIND GAMES Prodigy | Black/steel-blue experimental atelier, cool hard glass, one disciplined diagonal shaft, soft white and muted rose/green botanical cues | White chess-piece/crown-like cap, correct stepped white vessel, center label, clear lower portion; **do not** turn cap into a generic cylinder |
-| Parfums de Marly Delina | Dusty blush, antique silver, rose/lychee, romantic but shadowed stone studio; charcoal ink and restrained rose/pearl foil | Pale sculpted bottle, spherical silver crested cap, distinct knotted pink tassel; keep full silhouette readable |
-| Parfums de Marly Althaïr | Tobacco/cognac/vanilla-brown, warm directional amber key, black vanilla pods and mineral texture; quiet copper foil | Cognac matte bottle with correct raised horses/crest, tapered polished silver cap; no fabricated label or spray top |
-| Prada Luna Rossa Ocean EDP | Deep navy marine set, cold cyan water reflections, a **single** coherent splash, precise crimson only at bottle plaque | Navy/black bottle, vertical red PRADA plaque, exposed black spray assembly and red detail; do not swap Le Parfum gradient |
+| 4-22% | House/name/subtitle and concentration tag | Mirror front branding; warm bronze accent and thin divider |
+| 23-38% | Description | One short editorial italic paragraph, ~18-34 words, maximum four lines at phone legibility |
+| 39-78% | **Three stacked photographic strips** | Image width about 56-62% of usable content area, notes to right, bronze stage label above white serif 2-4 note names, even row rhythm |
+| 79-91% | Metadata | Three equal fields separated by thin vertical rules: released year, marketing positioning, concentration |
+| 92-97% | Arooma footer | Same maker label and rule as front |
 
-**Brand adaptation is mandatory:** palette, backdrop and props may change, but typographic hierarchy, 59:86 trim, border construction, note-map logic and finish remain Arooma-consistent. Arooma is a curator, not a replacement brand.
+**Spacing:** 4-5% left/right title safety, minimum 1.5% gaps within back strips, aligned strip edges and baseline. Back descriptions, headings and metadata must remain readable when card is displayed at ~360 px width. Preserve both card faces at 59:86, slight rounded corners, narrow charcoal outside gutter for previews only.
 
-## 5. Print finish and type system
+**Border and material:** approx 2% visible narrow holographic textured outer foil edge with intermittent blue-violet/bronze diffraction, inner warm metal hairline, selective corner cut details. No giant metal panels, stacked frames, uniform rainbow gradient, glowing particles or fake glossy UI. Keep notes/typography untouched by holographic glare.
 
-**Foil:** use a continuous narrow border foundation with small **intermittent cyan, violet, pale gold and copper holographic interference**; one or two localized edge glints. Crisp inset metallic rule and fine hand-tooled corner angles. Holography must look like reflective material under one light source, not a rainbow gradient or neon outline. Don't make 100% of edge the same luminous saturation.
+## 3. Photographic art direction and identity
 
-**Type:** use a *licensed* luxury display serif for house/name (e.g. a legal high-contrast serif with small caps), and a neutral UI sans for secondary labels (e.g. permitted SF/system equivalent or licensed grotesk). Maximum two families, three weights, no novelty script. Preserve intentional accents (e.g. ALTHAÏR) and exact brand spelling. House/name can be spread letterspaced in uppercase, but no hand-invented house logo.
+- Real photographic set with coherent key light, wet rock or botanical subject only as supported by the actual fragrance story; true contact shadows and reflection; one primary motion/splash gesture maximum.
+- Each fragrance has its own honest palette (e.g. navy/amber for Dior Sauvage Elixir, violet/silver/green apple for Rasasi Hawas). Never default every scent to generic blue rocks and lavender.
+- Bottle silhouette, cap, embossed emblems, labels, fluid color and nozzle shape must match the owner's photo. Brand marks must be correctly spelled and not “approximately” generated.
+- A fruit/flower prop should visually reveal the top note at a glance without obscuring the hero. The corresponding **typed** top-note list is still required.
+- Overframe means selected bottle/prop/atmosphere can overlap a delicate **inner** frame line. Do not crop outside the outer card edge.
+- Original user/brand product photography informs identity; compositing and art direction must be original, not a reprint of a stock listing in a holographic border.
+- The front's ingredient props must be top-note-relevant; other supporting props are possible but should not mislead about pyramid assignment.
 
-**Type targets at 1180px export:** house approximately 62-98px (adapt to name length), fragrance line 44-72px, concentration 19-31px, paragraph 27-33px, note labels 21-25px, metadata values 30-37px, footers 17-20px. These are **optical starting points**, not a license to shrink beyond legibility. Test at 360px card width and shorten text instead of compressing.
+## 4. Typography and copy architecture
 
-**Panel rules:** physical ink/opaque dark band, hairlines and modest metallic numerals; no floating glass panels. Front and back share the same baseline for trim, masthead style, footer tracking, corner ornament and foil frequency.
+Use two licensed type families maximum: a high-contrast luxury editorial serif for branding, notes/description/metadata; a restrained grotesk/sans for concentration, upper-left front top-note labels and the Arooma footer. A little italic serif on the back description and note lists is a signature of the approved card.
 
-**Arooma copy:** `ULTRA RARE` is an **invented Arooma collectible tier**. It is not a fragrance industry's award and never appears as a maker-certified claim. `AROOMA • FRAGRANCE COLLECTION` is the constant maker mark. Gender/style labels are marketing positioning, not a rule for who can wear a scent.
+**Color roles:** off-white for primary copy, pale warm copper for `ELIXIR` or brand-specific accent, bronze/copper for `FRAGRANCE MAP` and TOP/HEART/BASE stage labels, subdued white for note text and footer. Do not change this to neon or dense gold block labels.
 
-## 6. Product data, accuracy and ownership
+**Hard text rules:**
+- **Only exact verified product concentration** (e.g. Rasasi Hawas for Him: Eau de Parfum, not Extrait). Concentration communicates the class.
+- The front top-note list and back TOP stage must match; no “new” notes appear on one side only.
+- Release year, positioning, full pyramid and any house wording must be checked against official product sources. Do not treat an AI-generated approved *visual* as a source for facts.
+- Format back notes from the maker's exact TOP/HEART/BASE stages. If maker doesn't offer pyramid stages, use `KEY NOTES` without inventing stages.
+- No `ULTRA RARE`, ATK/DEF, stars, made-up statistics, price tags, serials or fictional performance claims.
 
-Lock a **copy manifest** for every fragrance *before* image generation: exact house, name, concentration, year, marketing positioning, verified top/heart/base groupings, short description, source URLs/as-of dates, bottle reference and author. Absence of trustworthy data means omit; never fill from an AI guess, another concentration, or a previous generated card. Any numeric longevity/sillage must have independent source + timestamp and should normally stay off this tier.
+## 5. Technical production method and acceptance
 
-For **real brands**, original user photos are preferred for private concept work. Third-party campaign stills are useful references, not cleared reusable source assets. Do not commit unlicensed photography, logos or user/private photos into this public repo. Copyright/trademark usage and distribution rights need review before shipping brand likenesses. Do not put real brands into the existing fictional-bottle demo without a separately approved implementation spec.
+**AI generates components, not an uneditable finished source**: retouch an accurately photographed bottle; produce original atmospheric/ingredient photo plates; layer them with grounded shadows. Assemble the final SVG/PSD/AI/Figma composition with editable typesetting, a separate foil mask and a named metadata manifest. The [production handbook](COLLECTIBLE_CARD_PRODUCTION.md) defines the handoff.
 
-## 7. Production, export and QA
+**Quality-control gates:**
+- [ ] Current owner-approved Dior card visual is used as layout/typography calibration, not generic Prodigy or older Prada style.
+- [ ] Front shows **3-4 verified top note names** plus recognizable top-note photograph.
+- [ ] No rarity badge or “ULTRA RARE” on either face.
+- [ ] Concentration appears accurately in upper-right on both faces.
+- [ ] Back is three **horizontal photo strips + adjacent note columns**, not three vertical cards.
+- [ ] Exactly one dominant accurate product bottle; no recreated/incorrect cap, labeling, or brand marks.
+- [ ] Copy verified against product concentration and official data, including release year and position; unknowns omitted.
+- [ ] Original scene, cohesive realistic lighting and restrained foiling; no stock-image-copy composition.
+- [ ] Name, description, notes, metadata and maker footer legible at 360px card display.
+- [ ] Both edges/corners match and all essential imagery/text are inside trim.
+- [ ] All layers (bottle, props, foil, typography) editable for human corrections.
+- [ ] Rights/provenance cleared before any public distribution; this documentation alone is not permission to publish house imagery.
 
-**Production workflow and gates:** [COLLECTIBLE_CARD_PRODUCTION.md](COLLECTIBLE_CARD_PRODUCTION.md) (source manifest, AI-only components, retouching, human layout, export profiles, prompts and fail conditions). Editable, branded-free skeletons: [front](../../../assets/collectibles/templates/archive-foil-front.svg) and [back](../../../assets/collectibles/templates/archive-foil-back.svg).
+**Rejection examples:** first Dior generation copied a stock photo; later drafts used glowing overdecorated rock/citrus collages and invented note facts; those are not the master. The **approved final Dior art with front grapefruit + top-note list, no rarity, and the precise back layout** is the locked reference.
 
-**Automatic reject:** (1) wrong bottle geometry or brand inscription; (2) wrong concentration or unverified notes; (3) imaginary perfume branding; (4) foil/reflections appear generated across entire image; (5) legibility fails at 360 px; (6) front/back optical mismatch; (7) border crops or text goes outside safety; (8) copied anime/card logos or game statistics; (9) project exported only as flat AI image with uneditable text; (10) claim of brand endorsement.
+## 6. Implementation boundary
 
-**Creative signoff:** the owner-approved Prodigy reference is the target. A production designer signs off individually on bottle fidelity, scene plausibility, balanced lighting, typography, foil separation, factual copy, copyright provenance and thumbnail test. No automatic acceptance based solely on a positive AI critique.
-
-## 8. Scope boundary
-
-This is **standalone collectible concept art**. The regular Arooma Warm Archive shelf, card UI, share image, tokens, demo bottles and local-first behavior remain governed by [BRAND_BOARD.md](BRAND_BOARD.md) and [../RULES_CARD.md](../RULES_CARD.md). Only an explicit new feature request may embed cards in the application. No code, app tokens, shipping flow or public brand assets change under this document.
-
-**Version note:** v1 (earlier minimalist Prada-only direction) is superseded by the owner's explicitly accepted Prodigy diptych; preserve older history in [../specs/2026-10-30-collectible-card-art-direction.md](../specs/2026-10-30-collectible-card-art-direction.md).
+This standard applies to standalone optional collectible art, not the normal Arooma Warm Archive cabinet card UI or the fictional no-brand demo. Future feature integration needs separate product specification and rights review. Historical evolution: [v1 dated concept](../specs/2026-10-30-collectible-card-art-direction.md) and v2 Prodigy prototype are earlier stages, not competing authorities.

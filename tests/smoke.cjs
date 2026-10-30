@@ -67,7 +67,7 @@ function check(name, ok, detail) {
   await page.screenshot({ path: path.join(outDir, '2a-first-run.png') });
   await page.click('[data-er="demo"]'); await page.waitForTimeout(1600);
   check('7 bottle cards rendered', (await page.locator('.slot').count()) === 7);
-  check('FR-2 the demo is labelled as the demo', /^Demo/.test((await page.textContent('#eyebrow')).trim()));
+  check('FR-2 the demo is labelled as the demo, in the header and on the plank', /^Demo/.test((await page.textContent('#eyebrow')).trim()) && await page.isVisible('.demo-tag'));
   check('Cover Flow opens on Fig Hour, 02 of 05 on the Autumn shelf', (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '2' && (await page.textContent('#cap')).trim() === '02 / 05' && (await page.textContent('#title')) === 'Autumn shelf');
   check('low-stock card present', (await page.locator('.low').count()) === 1);
 
@@ -401,7 +401,7 @@ function check(name, ok, detail) {
   await page.keyboard.press('Escape'); await page.waitForTimeout(800);
   // a save written by the parallel v3 build (main at 648a506) carries over: collection, demo, impressions, rotation, mode
   await fresh({ 'arooma.v1': JSON.stringify({ v: 3, active: 'own', own: { shelves: [{ id: 'au', name: 'Autumn shelf' }], bottles: [{ id: 'p1', shelf: 'au', house: 'Par House', name: 'Par One', log: ['2026-10-20'], imp: { '2026-10-20': { o: 'Bright', d: 'Soft', p: 'strong', l: 'long', n: 'Lovely' } } }, { id: 'p2', shelf: 'au', house: 'Par House', name: 'Par Two' }], rots: [{ id: 'r1', name: 'Week', ids: ['p2', 'p1'] }], meta: { backupAt: '2026-10-21', changes: 3 } }, demo: { shelves: [], bottles: [{ id: 's9', shelf: 'au', house: 'Demo', name: 'Kept Demo', sample: true }], rots: [] } }) });
-  check('FR-6 a save from the parallel v3 build carries over with its impressions, rotation and demo', (await page.locator('.slot').count()) === 2 && await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('arooma.cabinet')), d = JSON.parse(localStorage.getItem('arooma.demo')), m = c.bottles[0].imp['2026-10-20']; return m.p === 3 && m.l === 3 && m.dv === 'Soft. Lovely' && c.rot.join() === 'p2,p1' && d.bottles[0].name === 'Kept Demo' && JSON.parse(localStorage.getItem('arooma.prefs')).backupAt === '2026-10-21' && JSON.parse(localStorage.getItem('arooma.v1')).own; }));
+  check('FR-6 a save from the parallel v3 build carries over with its impressions, rotation and demo', (await page.locator('.slot').count()) === 2 && await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('arooma.cabinet')), d = JSON.parse(localStorage.getItem('arooma.demo')), m = c.bottles[0].imp['2026-10-20']; return m.p === 3 && m.l === 3 && m.dv === 'Soft' && m.n === 'Lovely' && c.rots[0].ids.join() === 'p2,p1' && d.bottles[0].name === 'Kept Demo' && JSON.parse(localStorage.getItem('arooma.prefs')).backupAt === '2026-10-21' && JSON.parse(localStorage.getItem('arooma.v1')).own; }));
   // sample bottles that an older version mixed into a real collection are labelled, and can be removed
   await fresh({ 'arooma.v1': JSON.stringify({ v: 2, shelves: [{ id: 'au', name: 'Autumn shelf' }], bottles: [{ id: 's2', shelf: 'au', house: 'Hollis & Reed', name: 'Fig Hour', sample: true }, { id: 'u1', shelf: 'au', house: 'Mine', name: 'Mine One' }, { id: 'u2', shelf: 'au', house: 'Mine', name: 'Mine Two' }] }) });
   check('FR-2 a sample bottle carried over from an old save is labelled Sample', await page.evaluate(() => { const n = (id) => document.querySelector('.slot[data-i="' + id + '"] .num').textContent; return /Sample/.test(n(0)) && !/Sample/.test(n(1)); }));
@@ -427,9 +427,9 @@ function check(name, ok, detail) {
   await page.click('[data-er="add"]'); await page.waitForSelector('#panel.on');
   await page.fill('#fHouse', 'Solo House'); await page.fill('#fName', 'Only One'); await page.click('[data-act="save"]'); await page.waitForTimeout(1300);
   check('FR-1 the first bottle goes into my collection and the demo stays untouched', (await page.locator('.slot').count()) === 1 && (await own()).bottles.length === 1 && (await demoSaved()) === null);
-  await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(900);
-  check('PL-2 Fan works with one bottle and says it is not in the rotation', /not in your rotation/.test(await page.textContent('#cap')) && (await page.getAttribute('.slot[tabindex="0"]', 'data-i')) === '0');
-  await page.click('#seg button[data-mode="flow"]'); await page.waitForTimeout(900);
+  await page.click('#seg button[data-mode="fan"]'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(500);
+  check('PL-2 Fan with no rotation opens the rotation maker instead of an empty fan', /Make one first/.test(await page.textContent('#panelBody')) && (await page.getAttribute('#seg button[data-mode="flow"]', 'aria-pressed')) === 'true');
+  await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(800);
   await page.click('#bMenu'); await page.waitForSelector('#panel.on'); await page.click('#del'); await page.waitForTimeout(300); await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
   check('FR-3 the last bottle can be deleted, and the empty cabinet returns', (await page.locator('.slot').count()) === 0 && await page.isVisible('[data-er="add"]') && (await own()).bottles.length === 0 && errors.length === 0, errors.join(' | '));
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
@@ -461,7 +461,7 @@ function check(name, ok, detail) {
   check('CM-5 a duplicate is flagged once, then both are kept', /already have/.test(dupMsg) && (await page.textContent('#cap')).trim() === '03 / 03', dupMsg);
   await addB('A House With A Considerably Long Name Indeed', 'An Extremely Long Fragrance Name For Testing Overflow', 'au');
   check('CM-5 a long name is shortened on the card, whole in its label, and nothing overflows', await page.evaluate(() => { const el = document.querySelector('.slot[tabindex="0"]'), nm = el.querySelector('.nm'); return nm.scrollWidth > nm.clientWidth && getComputedStyle(nm).textOverflow === 'ellipsis' && /Name For Testing/.test(el.getAttribute('aria-label')) && document.documentElement.scrollWidth <= window.innerWidth + 1; }));
-  check('CM-5 a bottle with no notes renders without a notes line', (await page.textContent('#notes')).trim() === '');
+  check('CM-5 a bottle with no notes says so, quietly', (await page.textContent('#notes')).trim() === 'No notes yet' && await page.evaluate(() => document.getElementById('notes').classList.contains('muted')));
   await page.screenshot({ path: path.join(outDir, '31-long-name.png') });
   await page.click('#bMenu'); await page.waitForSelector('#panel.on');
   check('CM-2 Edit details is the first row of the bottle menu', await page.evaluate(() => document.querySelector('#panelBody .prow').id === 'edit'));
@@ -543,9 +543,9 @@ function check(name, ok, detail) {
   const kinds = ['clear', 'black', 'amber', 'white', 'irregular', 'wide'];
   for (const k of kinds) await addB('Photo House', 'Photo ' + k, 'wi', '', { name: k + (k === 'white' ? '.jpg' : '.png'), mimeType: k === 'white' ? 'image/jpeg' : 'image/png', buffer: Buffer.from(art[k], 'base64') });
   const photos = async () => (await own()).bottles.filter((b) => b.img);
-  check('BP-1 six bottles carry their owner’s photo, stored on the device', (await photos()).length === 6 && (await ttl()) === 'Winter shelf' && (await page.locator('.slot use.ph').count()) >= 6);
+  check('BP-1 six bottles carry their owner’s photo, stored on the device', (await photos()).length === 6 && (await ttl()) === 'Winter shelf' && (await page.locator('.slot image').count()) >= 6);
   check('BP-1 a cut-out keeps its transparency; a photo with a background is kept as JPEG', await (async () => { const p = await photos(), f = (n) => p.find((b) => b.name === 'Photo ' + n).img.src; return /^data:image\/(png|webp)/.test(f('clear')) && /^data:image\/jpeg/.test(f('white')) && p.every((b) => b.img.src.length < 600000); })());
-  check('BP-2 photos are never stretched: every one keeps its aspect ratio', await page.evaluate(() => [...document.querySelectorAll('.slot image')].every((im) => im.getAttribute('preserveAspectRatio') === 'xMidYMax meet')));
+  check('BP-2 photos are never stretched: every one keeps its aspect ratio', await page.evaluate(() => [...document.querySelectorAll('.slot image')].every((im) => ['xMidYMax meet', 'xMidYMid slice'].includes(im.getAttribute('preserveAspectRatio')))));
   check('BP-4 every photo stands on the same table as the drawings: one baseline, one contact shadow, one light', await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => s.querySelector('use.ph')).every((s) => { const im = s.querySelector('image'); return +im.getAttribute('y') + +im.getAttribute('height') === 237 && s.querySelector('ellipse[cy="238"]') && s.querySelector('rect[mask]'); })));
   check('BP-4 every photo bottle shows its liquid through a level window, like the opaque drawings', await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => s.querySelector('use.ph')).every((s) => s.querySelector('.phw .lq') && s.querySelector('.phw clipPath rect'))));
   check('BP-4 the liquid takes its colour from the photo: the amber bottle holds amber', await page.evaluate(() => { const s = [...document.querySelectorAll('.slot')].find((x) => /Photo amber/.test(x.getAttribute('aria-label'))); const c = s.querySelector('.phw linearGradient stop:nth-child(2)').getAttribute('stop-color'); const n = parseInt(c.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return r > g && g > b && r - b > 80; }));
@@ -566,16 +566,18 @@ function check(name, ok, detail) {
   const pd0 = await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'); await page.waitForTimeout(450);
   check('BP-4 the photo bottle’s liquid moves like every other bottle', pd0 !== await page.getAttribute('.slot[tabindex="0"] .phw .lq', 'd'));
 
-  // three photo bottles become the rotation
-  for (const n of ['Photo amber', 'Photo black', 'Photo irregular']) {
-    await page.click('#shelvesBtn'); await page.waitForTimeout(800); await page.fill('#findIn', n); await page.waitForTimeout(200); await page.click('.hit'); await page.waitForTimeout(900);
-    await page.click('#bMenu'); await page.waitForSelector('#panel.on'); await page.click('#rot'); await page.waitForTimeout(500);
-  }
+  // three photo bottles become a named rotation
+  await page.click('#shelvesBtn'); await page.waitForTimeout(800); await page.fill('#findIn', 'Photo amber'); await page.waitForTimeout(200); await page.click('.hit'); await page.waitForTimeout(900);
+  await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#rots'); await page.waitForTimeout(300);
+  await page.click('#panel [data-act="newrot"]'); await page.waitForTimeout(300);
+  await page.fill('#rName', 'Evenings');
+  for (const n of ['Photo black', 'Photo irregular']) await page.click('.prow.chk:has-text("' + n + '")');
+  await page.click('#panel [data-act="saveR"]'); await page.waitForTimeout(1500);
   await page.click('#seg button[data-mode="fan"]'); await page.waitForTimeout(1200);
-  check('PL-2 Fan presents only the saved rotation, not everything', /Your rotation · 3 bottles/.test(await page.textContent('#cap')) && await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => +s.style.opacity > .5).length === 3));
+  check('PL-2 Fan presents only the saved rotation, not everything', /Evenings · 01 of 03/.test(await page.textContent('#cap')) && await page.evaluate(() => [...document.querySelectorAll('.slot')].filter((s) => +s.style.opacity > .5).length === 3));
   await page.screenshot({ path: path.join(outDir, '38-photos-fan.png') });
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#share'); await page.waitForTimeout(1500);
-  check('the share image in Fan is the rotation, one row of three', /Current rotation/.test(await page.textContent('#ed')) && (await page.locator('#ed figure').count()) === 3);
+  check('the share image in Fan is the rotation, one row of three', /Evenings/.test(await page.textContent('#ed')) && (await page.locator('#ed figure').count()) === 3);
   await page.screenshot({ path: path.join(outDir, '39-share-rotation.png') });
   await page.evaluate(() => { window.__shared = null; }); await page.click('#saveImg'); await page.waitForTimeout(1800);
   check('the rotation image with photos exports as a PNG', await page.evaluate(() => !!window.__shared && window.__shared.type === 'image/png' && window.__shared.size > 20000));
@@ -598,7 +600,7 @@ function check(name, ok, detail) {
   await page.evaluate(() => { window.__sharedText = null; }); await page.click('#export'); await page.waitForTimeout(800);
   const exported = await page.evaluate(() => window.__sharedText);
   const ex = JSON.parse(exported || '{}');
-  check('BK-1 the export holds shelves, bottles, notes, photos, wears and impressions', ex.app === 'arooma' && ex.v === 3 && ex.shelves.length === bkBefore.shelves.length && ex.bottles.length === bkBefore.bottles.length && ex.bottles.some((b) => b.img) && ex.bottles.some((b) => Object.keys(b.imp).length) && ex.bottles.some((b) => b.log.length > 1) && ex.bottles.some((b) => b.notes) && ex.rot.length === 3, (exported || '').length + ' bytes');
+  check('BK-1 the export holds shelves, bottles, notes, photos, wears and impressions', ex.app === 'arooma' && ex.v === 3 && ex.shelves.length === bkBefore.shelves.length && ex.bottles.length === bkBefore.bottles.length && ex.bottles.some((b) => b.img) && ex.bottles.some((b) => Object.keys(b.imp).length) && ex.bottles.some((b) => b.log.length > 1) && ex.bottles.some((b) => b.notes) && ex.rots.length === 1 && ex.rots[0].ids.length === 3, (exported || '').length + ' bytes');
   await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(700);
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#clear'); await page.waitForTimeout(300); await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
   check('BK-3 the collection is cleared before the restore', (await own()).bottles.length === 0);
@@ -620,22 +622,27 @@ function check(name, ok, detail) {
   await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(800);
   check('BK-2 Keep mine changes nothing: never a silent overwrite', (await own()).bottles.length === bkBefore.bottles.length);
 
-  // ================= WO-4: the testing session is an in-app aid, minutes and hours apart =================
+  // ================= WO-4: the testing session is an in-app aid with check-ins that wait for the owner =================
   await page.click('#test'); await page.waitForTimeout(500);
-  check('WO-4 a test counts down to the heart check-in in minutes, not a 30 second default', /^(19|20):\d\d$/.test((await page.textContent('.i-time')).trim()), await page.textContent('.i-time'));
+  check('WO-4 a test counts down to the 15 minute check-in, not a 30 second default', /^(14|15):\d\d$/.test((await page.textContent('.i-time')).trim()), await page.textContent('.i-time'));
   await reopenFast(page);
   check('WO-4 the session survives a reload', (await page.getAttribute('#island', 'data-s')) === 'compact');
-  await page.evaluate(() => { const r = Date.now.bind(Date); window.__off = 0; Date.now = () => r() + window.__off; window.__off = 21 * 60 * 1000; }); await page.waitForTimeout(700);
-  check('WO-4 twenty minutes in, it moves to the heart check-in and says it is an in-app timer', /Heart/.test(await page.textContent('#iPhase')) && /In-app timer/.test(await page.textContent('.i-note')));
+  await page.evaluate(() => { const r = Date.now.bind(Date); window.__off = 0; Date.now = () => r() + window.__off; window.__off = 16 * 60 * 1000; }); await page.waitForTimeout(700);
+  check('WO-4 at 15 minutes the opening check-in is due and waits for the owner', (await page.getAttribute('#island', 'data-s')) === 'done' && /15 min · Opening/.test(await page.textContent('#iPhase')) && await page.isVisible('#iLog') && /In-app timer/.test(await page.textContent('.i-note')));
   await page.screenshot({ path: path.join(outDir, '42-test-heart.png') });
-  await page.evaluate(() => { window.__off = 121 * 60 * 1000; }); await page.waitForTimeout(700);
-  check('WO-4 after two hours the session completes', (await page.getAttribute('#island', 'data-s')) === 'done' && /Test complete/.test(await page.textContent('#iPhase')));
-  await page.click('#iLog'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(250);
-  check('WO-4 Log impression opens a real impression for today', /How it wore/.test(await page.textContent('#panelBody h2')));
-  await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(700);
-  await page.click('#iEnd'); await page.waitForTimeout(600);
+  await page.click('#iLog'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  check('WO-4 Log impression opens an impression for today, on the opening field', /How it wore/.test(await page.textContent('#panelBody h2')) && await page.evaluate(() => document.activeElement && document.activeElement.id === 'iO'));
+  await page.fill('#iO', 'Bright and sharp'); await page.click('#panel [data-act="save"]'); await page.waitForTimeout(700);
+  check('WO-4 saving moves on to the 1 hour check-in', (await page.getAttribute('#island', 'data-s')) === 'compact' && /1 h · Heart/.test(await page.textContent('#iPhase')));
+  await page.evaluate(() => { window.__off = 61 * 60 * 1000; }); await page.waitForTimeout(700);
+  check('WO-4 the 1 hour check-in is due', (await page.getAttribute('#island', 'data-s')) === 'done' && /1 h · Heart/.test(await page.textContent('#iPhase')));
+  await page.click('#island'); await page.waitForTimeout(700);
+  check('WO-4 tapping the open chip skips to the 3 hour check-in', (await page.getAttribute('#island', 'data-s')) === 'compact' && /3 h · Dry-down/.test(await page.textContent('#iPhase')));
+  await page.evaluate(() => { window.__off = 181 * 60 * 1000; }); await page.waitForTimeout(700);
+  await page.click('#iLog'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  await page.click('.seg3[data-k="l"] button[data-val="2"]'); await page.click('#panel [data-act="save"]'); await page.waitForTimeout(700);
   await page.evaluate(() => { window.__off = 0; });
-  check('WO-4 the session ends cleanly', (await page.getAttribute('#island', 'data-s')) === 'idle' && (await page.evaluate(() => localStorage.getItem('arooma.test'))) === null);
+  check('WO-4 the last check-in ends the session cleanly and the impressions are saved', (await page.getAttribute('#island', 'data-s')) === 'idle' && (await page.evaluate(() => localStorage.getItem('arooma.test'))) === null && await page.evaluate(() => JSON.parse(localStorage.getItem('arooma.cabinet')).bottles.some((b) => Object.values(b.imp).some((m) => m.o === 'Bright and sharp' && m.l === 2))));
 
   // ================= WO-1 to WO-3: wording on every surface =================
   const allText = () => page.evaluate(() => { const c = document.body.cloneNode(true); c.querySelectorAll('script').forEach((s) => s.remove()); return c.textContent; });
@@ -644,6 +651,79 @@ function check(name, ok, detail) {
   check('WO-3 the bottle menu calls it authenticity notes that cannot verify', /Authenticity notes/.test(await page.textContent('#panelBody')) && /cannot verify/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act]', { position: { x: 1, y: 1 } }).catch(() => {}); await closePanel();
   check('WO-1 remaining volume is always called an estimate', /Estimated remaining|\(estimate\)/.test(await page.textContent('#meta')) && /Estimated remaining/.test(await page.textContent('.slot[tabindex="0"] .rec-dl')));
+
+  // ================= ported from the parallel build: shortlist, rotations, remembered view, pencil, empty shelf, fill photos, their files =================
+  const flowBtn = '#seg button[data-mode="flow"]';
+  const own2 = () => page.evaluate(() => JSON.parse(localStorage.getItem('arooma.cabinet')));
+  await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(1000);
+  check('PL-2 Stack is today’s shortlist: five bottles at most, plus the selected one', /^Shortlist for today · \d\d of 0[1-6]$/.test((await page.textContent('#cap')).trim()), await page.textContent('#cap'));
+  await page.click(flowBtn); await page.waitForTimeout(900);
+
+  await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#rots'); await page.waitForTimeout(300);
+  check('Rotations lists the saved one by name', /Evenings/.test(await page.textContent('#panelBody')));
+  await page.click('#panel [data-act="newrot"]'); await page.waitForTimeout(300);
+  await page.fill('#rName', 'Too many');
+  const chk = page.locator('#rList .prow.chk'), chkN = await chk.count();
+  for (let k = 0; k < chkN; k++) { if ((await chk.nth(k).getAttribute('aria-pressed')) === 'false') await chk.nth(k).click(); if (await page.textContent('#rErr')) break; }
+  check('a rotation holds up to five bottles', /up to five/.test(await page.textContent('#rErr')) && /5 of 5/.test(await page.textContent('#rCount')));
+  await page.click('#panel [data-act="saveR"]'); await page.waitForTimeout(1500);
+  check('saving a rotation shows it in Fan, named', (await page.getAttribute('#seg button[data-mode="fan"]', 'aria-pressed')) === 'true' && /^Too many · /.test((await page.textContent('#cap')).trim()), await page.textContent('#cap'));
+  await page.screenshot({ path: path.join(outDir, '44-rotation-of-five.png') });
+  await page.click('#cap'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  check('the Fan caption opens the list of rotations', /Rotations/.test(await page.textContent('#panelBody h2')) && /Too many/.test(await page.textContent('#panelBody')) && /Evenings/.test(await page.textContent('#panelBody')));
+  await page.click('.rrow:has-text("Too many") [data-redit]'); await page.waitForTimeout(300);
+  await page.click('#delR'); await page.waitForTimeout(900);
+  check('a rotation can be deleted, and Fan falls back to another', !/Too many/.test(await page.textContent('#cap')) && (await own2()).rots.length === 1);
+  await page.click('.toast.on .tact'); await page.waitForTimeout(700);
+  check('Undo brings the rotation back', (await own2()).rots.length === 2);
+  await page.click(flowBtn); await page.waitForTimeout(900);
+
+  await page.click('#seg button[data-mode="stack"]'); await page.waitForTimeout(900);
+  const selName = await page.textContent('.slot[tabindex="0"] .nm');
+  await reopenFast(page);
+  check('the selected bottle and the layout are remembered across a reload', (await page.getAttribute('#seg button[data-mode="stack"]', 'aria-pressed')) === 'true' && (await page.textContent('.slot[tabindex="0"] .nm')) === selName, selName);
+  await page.click(flowBtn); await page.waitForTimeout(900);
+
+  check('the selected card carries a pencil', await page.evaluate(() => getComputedStyle(document.querySelector('.slot[tabindex="0"] .cpen')).opacity === '1'));
+  await page.click('.slot[tabindex="0"] .cpen'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  check('the pencil opens the edit form, which can delete the bottle', /^Edit /.test(await page.textContent('#panelBody h2')) && await page.isVisible('#fdel'));
+  await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(800);
+  await page.focus('#stage'); await page.keyboard.press('e'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  check('the e key edits too', /^Edit /.test(await page.textContent('#panelBody h2')));
+  await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(800);
+
+  await page.click('#menu'); await page.waitForSelector('#panel.on');
+  check('the Cabinet menu says where the data lives', /Saved on this device, in this browser only\. Nothing is uploaded/.test(await page.textContent('#storeNote')));
+  await closePanel();
+
+  // an empty shelf stays in view
+  await page.click('#shelvesBtn'); await page.waitForTimeout(900);
+  await page.click('#addShelf'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  await page.fill('#nsName', 'Lone'); await page.click('[data-act="save"]'); await page.waitForTimeout(900);
+  await page.click('.shelf:last-child .sh-add'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  await page.fill('#fHouse', 'Lone House'); await page.fill('#fName', 'Lone Bottle'); await page.click('[data-act="save"]'); await page.waitForTimeout(1200);
+  await page.click('#openShelf'); await page.waitForTimeout(900);
+  await page.click('#bMenu'); await page.waitForSelector('#panel.on'); await page.click('#del'); await page.waitForTimeout(300); await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(1000);
+  check('deleting a shelf’s last bottle leaves you on that shelf, with a way to add one', (await ttl()) === 'Lone' && /Nothing on this shelf yet/.test(await page.textContent('#empty')) && await page.isVisible('[data-er="addhere"]') && await page.isHidden('#wear') && errors.length === 0, errors.join(' | '));
+  await page.screenshot({ path: path.join(outDir, '45-empty-shelf.png') });
+  await page.click('.toast.on .tact'); await page.waitForTimeout(900);
+  check('Undo brings the bottle back onto that shelf', (await ttl()) === 'Lone' && (await page.textContent('.slot[tabindex="0"] .nm')) === 'Lone Bottle');
+
+  // photos: a photo with a background fills the picture, a cut-out stands on the table; both keep the level window
+  check('a photo with a background fills the picture and keeps its level window; a cut-out stands on the table', await (async () => { const b = (await own2()).bottles, w = b.find((x) => x.name === 'Photo white'), c = b.find((x) => x.name === 'Photo clear'); return !!w && !!c && w.img.m === 'fill' && c.img.m === 'fit'; })() && await page.evaluate(() => { const s = [...document.querySelectorAll('.slot')].find((x) => /Photo white/.test(x.getAttribute('aria-label'))); return !!s.querySelector('svg[viewBox="0 0 100 120"] image[preserveAspectRatio="xMidYMid slice"]') && !!s.querySelector('.lq'); }));
+  await page.click('#shelvesBtn'); await page.waitForTimeout(800); await page.fill('#findIn', 'Photo clear'); await page.waitForTimeout(200); await page.click('.hit'); await page.waitForTimeout(900);
+  await page.click('.slot[tabindex="0"] .cpen'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  await page.click('#phMode button[data-m="fill"]'); await page.waitForTimeout(200);
+  await page.evaluate(() => { const set = (id, v) => { const r = document.getElementById(id); r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); }; set('phZ', 2); set('phWY', 90); });
+  await page.screenshot({ path: path.join(outDir, '46-photo-fill-editor.png') });
+  await page.click('[data-act="save"]'); await page.waitForTimeout(1000);
+  check('a photo can be switched to fill the picture, with zoom and level window saved', await (async () => { const b = (await own2()).bottles.find((x) => x.name === 'Photo clear'); return b.img.m === 'fill' && b.img.pz === 2 && b.img.wy === .9; })());
+
+  // a backup file and a save written by the parallel build import correctly
+  const theirs = JSON.stringify({ app: 'Arooma', kind: 'backup', schema: 3, exportedAt: '2026-10-29T00:00:00Z', collection: { shelves: [{ id: 'au', name: 'Autumn shelf' }], bottles: [{ id: 'th1', shelf: 'au', house: 'Their House', name: 'Their One', log: ['2026-10-20'], imp: { '2026-10-20': { o: 'Bright', d: 'Soft', p: 'strong', l: 'long', n: 'Nice' } }, photo: null }], rots: [{ id: 'rth', name: 'Theirs', ids: ['th1'] }] } });
+  await page.setInputFiles('#importFile', { name: 'theirs.json', mimeType: 'application/json', buffer: Buffer.from(theirs) }); await page.waitForSelector('#panel.on'); await page.waitForTimeout(300);
+  await page.click('#merge'); await page.waitForTimeout(1300);
+  check('BK-2 a backup written by the parallel build imports, with its impression and rotation', await (async () => { const c = await own2(), b = c.bottles.find((x) => x.name === 'Their One'); return !!b && b.imp['2026-10-20'].p === 3 && b.imp['2026-10-20'].l === 3 && b.imp['2026-10-20'].dv === 'Soft' && b.imp['2026-10-20'].n === 'Nice' && c.rots.some((r) => r.name === 'Theirs'); })());
 
   // ================= CM-5: a 60-bottle cabinet =================
   await page.evaluate(() => {

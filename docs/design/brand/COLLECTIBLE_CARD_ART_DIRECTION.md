@@ -22,8 +22,8 @@
 **Evidence from four owner-shared Prada.com screenshots, 2026-10-30** (images supplied in chat, not redistributed in this public repo):
 - **EDP hero:** dark navy cylindrical sprayer and broad rectangular body, continuous vertical red PRADA plaque, clean cyan-to-midnight blue background, crisp water sheets behind/around the bottle, simple left-aligned white sans heading. No fantasy particles or ornamental gold.
 - **Le Parfum hero:** similar bottle family but ruby-to-navy gradient body and red-tinted highlights. This is a *different concentration*. Ocean behind is defocused, splashes stay near the base.
-- **EDP ingredient photograph:** tactile weathered wood, red filaments, real citrus wedge, wet inky fluid; a few vivid natural objects anchored in shadow, asymmetrical crop.
-- **Other ingredient photograph:** pink grapefruit flesh, dark vanilla pods, pale orchid, textured translucent resin, suspended water; near-macro product still life. The following page text concerns EDT, so do not treat this image as proof of EDP note taxonomy.
+- **Wood-and-citrus ingredient photograph (variant not proven by crop):** tactile weathered wood, red filaments, real citrus wedge, wet inky fluid; a few vivid natural objects anchored in shadow, asymmetrical crop. Do not treat a visual association as official EDP note evidence.
+- **Grapefruit-and-vanilla ingredient photograph (variant not proven by crop):** pink grapefruit flesh, dark vanilla pods, pale orchid, textured translucent resin, suspended water; near-macro product still life. The visible text immediately below the image concerns EDT, so do not infer note taxonomy from its page adjacency.
 - **Common Prada grammar:** large areas of darkness, one sharply lit subject, editorial cropping, selective water sheen, realistic material response, disciplined negative space; no sparkle confetti, starbursts, nebulae, castles, mountains or magic lightning.
 
 ## 2. Visual system

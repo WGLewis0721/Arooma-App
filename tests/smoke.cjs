@@ -510,6 +510,15 @@ function check(name, ok, detail) {
   await page.fill('#fName', 'Shorter Name'); await page.click('[data-act="save"]'); await page.waitForTimeout(1000);
   check('CM-2 an edit shows on the card and is saved', (await page.textContent('.slot[tabindex="0"] .nm')) === 'Shorter Name' && (await own()).bottles.some((b) => b.name === 'Shorter Name') && (await page.textContent('#cap')).trim() === '04 / 04');
   await page.click('.slot[tabindex="0"]'); await page.waitForTimeout(1100);
+  check('flipped record Edit details is a visible top-layer hit target', await page.evaluate(() => {
+    const slot=document.querySelector('.slot[tabindex="0"]');
+    const b=slot&&slot.querySelector(':scope > .rec-edit');
+    if(!slot||!slot.classList.contains('flipped')||!b)return false;
+    const r=b.getBoundingClientRect();
+    const target=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+    return r.width>=44&&r.height>=35&&getComputedStyle(b).pointerEvents==='auto' &&
+      !!target&&(target===b||b.contains(target));
+  }));
   await page.click('.slot[tabindex="0"] .rec-edit'); await page.waitForSelector('#panel.on'); await page.waitForTimeout(200);
   check('CM-2 the ownership record has its own Edit details link', /Edit Shorter Name/.test(await page.textContent('#panelBody h2')));
   await page.click('#panel [data-act="cancel"]'); await page.waitForTimeout(800);

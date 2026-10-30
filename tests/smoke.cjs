@@ -151,7 +151,7 @@ function check(name, ok, detail) {
   // ================= cabinet features: wear, authenticity, compare, add, delete, persistence =================
   const reopenFast = async (p) => {
     await p.reload(); await p.waitForTimeout(300);
-    await p.evaluate(() => document.getElementById('cabinet').click()); await p.waitForTimeout(2300);
+    await p.evaluate(() => { document.getElementById('cabinet').click(); document.getElementById('introV2').classList.add('dismissed'); }); await p.waitForTimeout(2300);
   };
   const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('arooma.demo') || 'null'));
   const panelOn = () => page.evaluate(() => document.getElementById('panel').classList.contains('on'));
@@ -454,7 +454,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#demo'); await page.waitForTimeout(300);
   check('FR-5 Load demo asks first and promises my collection stays', /Open the demo collection/.test(await page.textContent('#panelBody')) && /stays saved/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(1200);
-  check('FR-5 the demo opens, labelled', (await page.locator('.slot').count()) === 11 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
+  check('FR-5 the classic demo opens, labelled', (await page.locator('.slot').count()) === 7 && /^Demo/.test((await page.textContent('#eyebrow')).trim()));
   await addB('Demo House', 'Demo Only', 'au');
   check('FR-2 a bottle added in the demo never reaches my collection', (await own()).bottles.map((b) => b.name).join() === 'Only One' && (await demoSaved()).bottles.some((b) => b.name === 'Demo Only'));
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#leave'); await page.waitForTimeout(1100);
@@ -462,7 +462,7 @@ function check(name, ok, detail) {
   await page.click('#menu'); await page.waitForSelector('#panel.on'); await page.click('#clear'); await page.waitForTimeout(300);
   check('FR-5 Clear my collection asks first and suggests a backup', /Clear your collection/.test(await page.textContent('#panelBody')) && /Export a backup first/.test(await page.textContent('#panelBody')));
   await page.click('#panel [data-act="yes"]'); await page.waitForTimeout(900);
-  check('FR-5 Clear empties only my collection; the demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 12);
+  check('FR-5 Clear empties only my collection; the classic demo keeps its changes', (await page.locator('.slot').count()) === 0 && (await own()).bottles.length === 0 && (await demoSaved()).bottles.length === 8);
   await page.click('.toast.on .tact'); await page.waitForTimeout(900);
   check('FR-5 Undo after Clear restores my collection', (await page.locator('.slot').count()) === 1 && (await own()).bottles.length === 1);
 

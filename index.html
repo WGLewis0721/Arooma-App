@@ -601,6 +601,7 @@ textarea.in{height:auto;min-height:64px;padding:10px 14px;resize:vertical;line-h
 }
 
 </style>
+<link rel="stylesheet" href="assets/atelier/atelier.css">
 </head>
 <body>
 <div class="device" id="device">
@@ -953,7 +954,9 @@ function photoArt(img){if(img.m==='fill')return fillArt(img);return function(p,f
    - a slow ambient ripple keeps every visible bottle gently alive, so the level can always be read.
    A full bottle hardly moves and a low one pools, because headroom and depth limit the tilt. */
 var LQ=(function(){
-  var ON=!RM,recs=[],raf=0,last=0,fn=0,shelfOn=true,ovOn=false;
+  /* Owner-directed V3 suspension: liquid surfaces keep their static recorded levels,
+     but no simulation frames, waves or ambient animation run. Preserve the code for rollback. */
+  var ON=false,recs=[],raf=0,last=0,fn=0,shelfOn=true,ovOn=false;
   var KA=5e-5,KV=2.4e-4,W1=2*Math.PI*1.65,Z1=.15,WB=2*Math.PI*2.3,ZB=.22;
   function bez(x1,y1,x2,y2){
     function B(a,b,t){var u=1-t;return 3*a*u*u*t+3*b*u*t*t+t*t*t}
@@ -1549,6 +1552,7 @@ function render(pos){
   });
   stage.classList.toggle('fan',mode==='fan');
   capUpdate();
+  if(window.AroomaAtelier&&window.AroomaAtelier.sync)window.AroomaAtelier.sync();
 }
 function capUpdate(){
   var c=$('#cap'),t='';
@@ -2727,6 +2731,9 @@ function findHits(q){var ts=terms(q);if(!ts.length)return [];var out=[];BOTTLES.
 function catalogHits(q){if(MODE!=='own')return [];var ts=terms(q);if(!ts.length)return [];return Object.keys(CARDS).filter(function(id){var c=CARDS[id],b={id:id,house:c.house,name:c.name,conc:c.conc};return ts.every(function(t){return searchText(b).indexOf(t)>-1})&&!BOTTLES.some(function(x){return x.artKey===c.key})})}
 function hl(text,t){var k=t?norm(text).indexOf(t):-1;if(k<0||norm(text).length!==text.length)return esc(text);return esc(text.slice(0,k))+'<mark>'+esc(text.slice(k,k+t.length))+'</mark>'+esc(text.slice(k+t.length))}
 function renderHits(){
+  if(window.AroomaAtelier&&window.AroomaAtelier.renderHits){
+    ovBuilt=true;window.AroomaAtelier.renderHits();return;
+  }
   ovBuilt=true;LQ.dropGroup('ov');
   var hits=findHits(Q),catalog=catalogHits(Q),t=terms(Q).sort(function(a,b){return b.length-a.length})[0]||'';
   overScroll.innerHTML=hits.length||catalog.length?'<p class="sub" style="margin:0 2px 8px" role="status">'+(hits.length+catalog.length)+(hits.length+catalog.length===1?' result':' results')+'</p>'+hits.slice(0,80).map(function(i){var b=BOTTLES[i];
@@ -2744,6 +2751,12 @@ findIn.addEventListener('keydown',function(e){
 function clearFind(){Q='';findIn.value='';$('#findX').classList.remove('on');if(document.activeElement===findIn)findIn.blur()}
 function openFind(){if(!introDone)return;openOver();setTimeout(function(){try{findIn.focus()}catch(_){}},RM?0:420)}
 function buildOver(){
+  if(window.AroomaAtelier){
+    ovBuilt=true;
+    if(Q.trim())window.AroomaAtelier.renderHits();
+    else window.AroomaAtelier.renderShelves();
+    return;
+  }
   if(Q.trim()){renderHits();return}
   ovBuilt=true;LQ.dropGroup('ov');
   var per=Math.max(4,Math.floor(((overScroll.clientWidth||366)-56+6)/46)),h='';
@@ -3001,10 +3014,49 @@ $('#themeToggle').addEventListener('click',function(){
 });
 v2Apply();
 
+/* Production bridge: give the Atelier presentation access to existing state and
+   actions without duplicating or migrating owner data. The old data engine owns truth. */
+window.AroomaCore={
+ selected:function(){return sel>=0?BOTTLES[sel]:null},
+ selectedIndex:function(){return sel},
+ bottles:function(){return BOTTLES},
+ shelves:function(){return SHELVES},
+ shelfId:function(){return curShelf},
+ shelfName:shelfName,
+ storeMode:function(){return MODE},
+ isOverview:function(){return Z>.5},
+ query:function(){return Q},
+ curated:function(){return Object.keys(CARDS).map(function(id){
+   var d=CARDS[id];return {key:d.key,house:d.house,name:d.name,conc:d.conc,notes:d.notes};
+ })},
+ artKey:artKeyFor,
+ artUrl:collectibleFace,
+ picture:bottlePicture,
+ esc:esc,
+ lastWorn:function(b){var d=lastDays(b);return d===null?'—':agoText(d)},
+ wornToday:wornToday,
+ overview:openOver,
+ closeOverview:function(){if(Z>.05)closeOver()},
+ search:openFind,
+ add:function(){openAdd()},
+ openPanel:openPanel,
+ closePanel:closePanel,
+ theme:function(){$('#themeToggle').click()},
+ history:openHistory,
+ edit:function(){openAdd(null,sel)},
+ move:openMove,
+ auth:openAuth,
+ backup:openBackup,
+ remove:function(){confirmDelete(sel)},
+ wear:doWear,
+ addCurated:addCuratedToMine
+};
+
 fit();geo();fitOver();setZ(0);updateCounts();setFanState();updateEmpty();markPick();render();updateInfo();updateTestBtn();setModeButtons();resumeTest();
 openCabinet();
 if(PREFS.mode){$('#introV2').classList.add('dismissed')}
 })();
 </script>
+<script src="assets/atelier/atelier.js"></script>
 </body>
 </html>

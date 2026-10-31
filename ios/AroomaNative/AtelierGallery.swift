@@ -130,10 +130,11 @@ struct AtelierGallery: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            VStack(alignment: .leading, spacing: -4) {
-                Text("Arooma")
-                    .font(.custom("Snell Roundhand", size: 32))
-                    .foregroundStyle(accent)
+            VStack(alignment: .leading, spacing: 0) {
+                AroomaSignatureMark(ink: accent)
+                    .frame(height: 30)
+                    .accessibilityElement()
+                    .accessibilityLabel("Arooma")
                     .accessibilityAddTraits(.isHeader)
                 Menu {
                     Button("My collection", systemImage: "square.stack") { archive.enter(.mine) }

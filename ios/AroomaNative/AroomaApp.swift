@@ -1,8 +1,14 @@
 import SwiftUI
+import AVFoundation
 
 @main
 struct AroomaNativeApp: App {
     @StateObject private var archive = CollectionStore()
+
+    init() {
+        // The intro clips are silent; never interrupt the owner's own audio.
+        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+    }
 
     var body: some Scene {
         WindowGroup {

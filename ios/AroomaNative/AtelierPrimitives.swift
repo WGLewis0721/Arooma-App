@@ -290,9 +290,8 @@ struct PersonalReverse: View {
                     .strokeBorder(Color(hex: 0xD8B877).opacity(0.5), lineWidth: max(0.6, w * 0.004))
                     .padding(w * 0.055)
                 VStack(spacing: w * 0.04) {
-                    Text("Arooma")
-                        .font(.custom("Snell Roundhand", size: w * 0.16))
-                        .foregroundStyle(Color(hex: 0xD8B877))
+                    AroomaSignatureMark(ink: Color(hex: 0xD8B877))
+                        .frame(width: w * 0.6)
                     Text((fragrance?.name ?? "").uppercased())
                         .font(.system(size: max(6, w * 0.035), weight: .semibold))
                         .tracking(w * 0.008)

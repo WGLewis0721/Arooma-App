@@ -16,36 +16,11 @@ struct WelcomeScreen: View {
                         .font(.system(size: 9, weight: .semibold))
                         .tracking(1.3)
                         .foregroundStyle(.secondary)
-                    ZStack(alignment: .leading) {
-                        Text("Arooma")
-                            .font(.custom("Snell Roundhand", size: min(84, geometry.size.width * 0.19)))
-                            .italic()
-                            .foregroundStyle(archive.theme.palette.accent)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                            .mask(alignment: .leading) {
-                                GeometryReader { rect in
-                                    Rectangle().frame(width: rect.size.width * ink)
-                                }
-                            }
-                        if reduceMotion {
-                            Text("Arooma")
-                                .font(.custom("Snell Roundhand", size: min(84, geometry.size.width * 0.19)))
-                                .italic()
-                                .foregroundStyle(archive.theme.palette.accent)
-                        }
-                    }
-                    .frame(height: 116)
-                    Path { path in
-                        path.move(to: CGPoint(x: 26, y: 10))
-                        path.addCurve(to: CGPoint(x: 260, y: 8),
-                                      control1: CGPoint(x: 105, y: 34), control2: CGPoint(x: 200, y: -3))
-                    }
-                    .trim(from: 0, to: ink)
-                    .stroke(archive.theme.palette.accent.opacity(0.75),
-                            style: StrokeStyle(lineWidth: 1.1, lineCap: .round))
-                    .frame(width: 290, height: 32)
-                    .accessibilityHidden(true)
+                    // Legacy screen (not routed). Uses the master signature asset, never a font.
+                    AroomaSignatureMark(ink: archive.theme.palette.accent)
+                        .frame(height: 116)
+                        .accessibilityElement()
+                        .accessibilityLabel("Arooma")
                 }
                 Spacer(minLength: 48)
                 VStack(spacing: 24) {

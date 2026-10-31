@@ -251,7 +251,7 @@ struct AtelierGallery: View {
             lift: lift,
             shade: pose.shade,
             foil: abs(d) < 1.15 ? .live : .sheen,
-            foilStrength: max(0, 1 - abs(d) * 1.05),
+            foilStrength: max(0, 1 - abs(d) * 1.8), // shader off beyond ~half a slot
             lean: nearness * nearness
         )
         .frame(width: w, height: w * 86.0 / 59.0)

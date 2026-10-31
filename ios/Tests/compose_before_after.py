@@ -20,7 +20,7 @@ for a in sorted(after.glob("after-*.png")):
     sheet = Image.new("RGB", (w * 2 + 60, h + 110), (18, 18, 22))
     sheet.paste(bi.resize((w, h)), (20, 90)); sheet.paste(ai, (w + 40, 90))
     d = ImageDraw.Draw(sheet)
-    d.text((20, 24), "BEFORE (main)" if b.exists() else "BEFORE: screen did not exist", fill=(200, 200, 200), font=font)
+    d.text((20, 24), "BEFORE (main)" if b.exists() else "BEFORE: not captured (no launch hook on main)", fill=(200, 200, 200), font=font)
     d.text((w + 40, 24), "AFTER (this branch)", fill=(230, 200, 140), font=font)
     target = out / f"compare-{key}"
     sheet.save(target); sheets.append(target)

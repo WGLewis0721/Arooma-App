@@ -3,6 +3,7 @@ import StoreKit
 import PhotosUI
 import UIKit
 import CryptoKit
+import UniformTypeIdentifiers
 
 // MARK: - Commercial catalog and StoreKit products
 // Product identifiers must be created in App Store Connect with exactly these values.

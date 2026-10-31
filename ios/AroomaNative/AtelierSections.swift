@@ -750,6 +750,7 @@ struct AtelierWearLog: View {
     @State private var selected: [UUID] = []
     @State private var impression = ""
     @State private var showAll = false
+    @Binding var startingBottleID: UUID?
     let add: () -> Void
     let focus: (DisplayCard) -> Void
 
@@ -765,8 +766,8 @@ struct AtelierWearLog: View {
             VStack(alignment: .leading, spacing: 19) {
                 VStack(alignment: .leading, spacing: 7) {
                     AtelierEyebrow(text: "Your daily ritual", accent: archive.theme.palette.accent)
-                    AtelierDisplay(title: "What are you wearing?", size: 34)
-                    Text("Log a fragrance by itself or layer several together.")
+                    AtelierDisplay(title: "What did you wear?", size: 34)
+                    Text("Tap one or more bottles. Log them together as one wear.")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 if archive.mode == .demo {
@@ -887,6 +888,16 @@ struct AtelierWearLog: View {
             .padding(.horizontal, 22).padding(.top, 15).padding(.bottom, 32)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .onAppear { includeStartingBottle() }
+        .onChange(of: startingBottleID) { _, _ in includeStartingBottle() }
+    }
+
+    private func includeStartingBottle() {
+        guard let id = startingBottleID else { return }
+        if archive.bottles.contains(where: { $0.id == id }) && !selected.contains(id) {
+            selected.append(id)
+        }
+        startingBottleID = nil
     }
 
     private func sessionRow(_ session: WearSession) -> some View {

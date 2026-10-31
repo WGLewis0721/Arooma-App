@@ -71,7 +71,7 @@ struct WelcomeScreen: View {
                                         ], startPoint: .topLeading, endPoint: .bottomTrailing))
                                         .frame(width: 43, height: 43)
                                         .overlay {
-                                            Circle().strokeBorder(archive.theme == theme ? .primary : .clear, lineWidth: 2)
+                                            Circle().strokeBorder(archive.theme == theme ? Color.primary : Color.clear, lineWidth: 2)
                                                 .padding(-5)
                                         }
                                         .frame(minWidth: 52, minHeight: 52)

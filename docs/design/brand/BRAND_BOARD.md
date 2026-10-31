@@ -6,6 +6,10 @@
 
 **Idea (V2):** a private luxury fragrance archive where the selected collectible card is the hero. Not a storefront and not a noisy card game. The old light-paper cabinet survives as the **owner's data and legacy vessel-art system**, but its front-end appearance and door launch are superseded by V2.
 
+## 2026-10-31 owner-approved original calligraphic signature (supersedes generic font entry)
+
+The brand entry wordmark is now a fixed, original **Arooma** handwritten signature, not runtime text in Snell Roundhand or Apple Chancery. Its SVG, transparent PNG, and both Higgsfield-generated light/dark pen-writing videos are in [the canonical asset handoff](../../../assets/brand/AROOMA_SIGNATURE.md). Always integrate those exact assets and preserve their letterforms; do not substitute a font or redraw the intro. Static image fallback is required for Reduce Motion and failed video playback.
+
 ## V2 implemented appearance and interaction override (2026-10-30)
 
 Implementation and acceptance: [V2 spec](../specs/2026-10-30-v2-collectible-gallery-implementation.md). This **overrides the V1 color, no-real-house-demo, card material, serif restriction and door-animation paragraphs below**, while preserving data model, physics, movements, layout semantics and local backup requirements.

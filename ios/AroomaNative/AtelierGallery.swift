@@ -167,8 +167,11 @@ struct AtelierGallery: View {
                         guard abs(predicted) > max(38, cardWidth * 0.17) else { return }
                         // Velocity carries across more than one card when the flick is decisive.
                         let steps = max(1, min(3, Int((abs(predicted) / (cardWidth * 0.7)).rounded())))
-                        withAnimation(reduceMotion ? nil : .spring(response: 0.51, dampingFraction: 0.86)) {
-                            archive.move(predicted < 0 ? steps : -steps)
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.51, dampingFraction: 0.86),
+                                      completionCriteria: .logicallyComplete) {
+                            archive.move(predicted < 0 ? steps : -steps, haptic: false)
+                        } completion: {
+                            HapticEngine.shared.play(.selection)
                         }
                     }
             )
@@ -233,8 +236,11 @@ struct AtelierGallery: View {
             .onTapGesture {
                 if distance == 0 { inspect(card) }
                 else {
-                    withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.84)) {
-                        archive.choose(card)
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.84),
+                                  completionCriteria: .logicallyComplete) {
+                        archive.choose(card, haptic: false)
+                    } completion: {
+                        HapticEngine.shared.play(.selection)
                     }
                 }
             }

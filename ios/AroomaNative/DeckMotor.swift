@@ -68,12 +68,17 @@ final class DeckMotor {
     private(set) var deck = DeckModel(count: 0)
     private(set) var press = SpringAxis(value: 0, parameters: .press)
     private(set) var morph = SpringAxis(value: 1, parameters: .morph)
-    private(set) var layoutFrom: DeckLayoutKind = .coverFlow
+    /// What the cards are morphing FROM: a layout, or the exact blend that was on screen when a
+    /// new layout was chosen mid-morph (so a second switch never snaps).
+    private(set) var source: MorphSource = .layout(.coverFlow)
     private(set) var layoutTo: DeckLayoutKind = .coverFlow
     /// Sign of the most recent travel, used to choose the direction label text slides.
     private(set) var travelDirection: Double = 1
 
     @ObservationIgnored var onSettle: ((Int, Bool, Double) -> Void)?
+    /// Called the moment a release or glide commits to a card, so the selection is saved before
+    /// the spring finishes (quitting mid-settle never loses it).
+    @ObservationIgnored var onCommit: ((Int) -> Void)?
     @ObservationIgnored var reduceMotion = false
     @ObservationIgnored private let driver = FrameDriver(label: "deck")
     @ObservationIgnored private var lastReleaseSpeed = 0.0
@@ -85,9 +90,10 @@ final class DeckMotor {
 
     func pose(distance: Double, index: Int, cardWidth: Double) -> CardPose {
         let target = DeckLayoutEngine.pose(distance: distance, index: index, layout: layoutTo, cardWidth: cardWidth)
-        guard morph.value < 1 || layoutFrom != layoutTo else { return target }
-        let source = DeckLayoutEngine.pose(distance: distance, index: index, layout: layoutFrom, cardWidth: cardWidth)
-        return CardPose.blend(source, target, morph.value)
+        if case .layout(let kind) = source, kind == layoutTo { return target }
+        guard morph.value < 1 else { return target }
+        let from = source.pose(distance: distance, index: index, cardWidth: cardWidth)
+        return CardPose.blend(from, target, morph.value)
     }
 
     func stride(cardWidth: Double) -> Double {
@@ -100,20 +106,24 @@ final class DeckMotor {
         if deck.count != count || (!deck.isInteracting && !deck.isAnimating && deck.settledIndex != index) {
             deck.updateCount(count, focusing: index)
         }
-        if layoutTo != layout && morph.isResting { layoutFrom = layout; layoutTo = layout }
+        if layoutTo != layout && morph.isResting { source = .layout(layout); layoutTo = layout }
     }
 
     func morph(to layout: DeckLayoutKind) {
         guard layout != layoutTo else { return }
         if reduceMotion {
-            layoutFrom = layout; layoutTo = layout
+            source = .layout(layout); layoutTo = layout
             morph = SpringAxis(value: 1, parameters: .morph)
             return
         }
-        // Start the new morph from the currently displayed blend so a second switch mid-morph
-        // does not snap: freeze the visible pose as the new "from" by keeping the old pair when
-        // the previous morph is less than half done.
-        if morph.value < 0.5 { layoutTo = layout } else { layoutFrom = layoutTo; layoutTo = layout; morph.value = 0 }
+        // The new morph starts from exactly what is on screen now.
+        if morph.isResting {
+            source = .layout(layoutTo)
+        } else {
+            source = MorphSource.blend(source, layoutTo, morph.value).collapsed()
+        }
+        layoutTo = layout
+        morph.value = 0
         morph.target = 1
         morph.velocity = 0
         run()
@@ -142,7 +152,8 @@ final class DeckMotor {
             place(target, notify: true)
             return
         }
-        deck.release(velocity: velocity)
+        let target = deck.release(velocity: velocity)
+        onCommit?(target)
         run()
     }
 
@@ -160,6 +171,7 @@ final class DeckMotor {
         lastReleaseSpeed = 0
         if reduceMotion { place(index, notify: true); return }
         deck.glide(to: index)
+        onCommit?(deck.targetIndex)
         run()
     }
 
@@ -188,9 +200,39 @@ final class DeckMotor {
         }
         if !morph.isResting {
             morph.step(dt)
-            if morph.snapIfResting() { layoutFrom = layoutTo }
+            if morph.snapIfResting() { source = .layout(layoutTo) }
         }
         return deck.isInteracting || deck.isAnimating || !press.isResting || !morph.isResting
+    }
+}
+
+/// The pose a card is morphing from: a plain layout, or a blend frozen mid-morph.
+indirect enum MorphSource {
+    case layout(DeckLayoutKind)
+    case blend(MorphSource, DeckLayoutKind, Double)
+
+    func pose(distance: Double, index: Int, cardWidth: Double) -> CardPose {
+        switch self {
+        case .layout(let kind):
+            return DeckLayoutEngine.pose(distance: distance, index: index, layout: kind, cardWidth: cardWidth)
+        case .blend(let from, let to, let t):
+            let a = from.pose(distance: distance, index: index, cardWidth: cardWidth)
+            let b = DeckLayoutEngine.pose(distance: distance, index: index, layout: to, cardWidth: cardWidth)
+            return CardPose.blend(a, b, t)
+        }
+    }
+
+    private var depth: Int {
+        if case .blend(let from, _, _) = self { return from.depth + 1 }
+        return 0
+    }
+
+    /// Bounds the nesting for someone tapping layouts very fast. Only the oldest, almost
+    /// finished blend is resolved, so the visible pose barely moves.
+    func collapsed() -> MorphSource {
+        guard depth > 3, case .blend(let from, let to, let t) = self else { return self }
+        if case .blend(_, let inner, _) = from, t > 0 { return .blend(.layout(inner), to, t) }
+        return self
     }
 }
 

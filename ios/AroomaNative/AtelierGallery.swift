@@ -102,7 +102,7 @@ struct AtelierGallery: View {
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
         .onAppear {
             motor.reduceMotion = reduceMotion
-            motor.onSettle = { index, changed, speed in settled(index, changed: changed, speed: speed) }
+            bindMotor()
             configure()
             if UserDefaults.standard.bool(forKey: "AroomaAutoplay") {
                 Task { await autoplay() }
@@ -449,10 +449,21 @@ struct AtelierGallery: View {
         motor.configure(count: cards.count, index: storedIndex, layout: archive.layout.kind)
     }
 
-    private func settled(_ index: Int, changed: Bool, speed: Double) {
-        guard cards.indices.contains(index) else { return }
-        archive.choose(cards[index], haptic: false)
-        if changed { HapticEngine.shared.play(.settle(speed: speed)) }
+    /// The motor's callbacks read the store directly (never a captured copy of this view), so
+    /// a commit or settle always resolves against the live card list.
+    private func bindMotor() {
+        let store = archive
+        motor.onCommit = { index in
+            let list = store.displayedCards
+            guard list.indices.contains(index) else { return }
+            store.choose(list[index], haptic: false)
+        }
+        motor.onSettle = { index, changed, speed in
+            let list = store.displayedCards
+            guard list.indices.contains(index) else { return }
+            store.choose(list[index], haptic: false)
+            if changed { HapticEngine.shared.play(.settle(speed: speed)) }
+        }
     }
 
     // MARK: QA autoplay (launch argument -AroomaAutoplay YES)

@@ -37,8 +37,8 @@ struct AtelierRoot: View {
                     Tab("Search", systemImage: "magnifyingglass", value: AtelierTab.discover) {
                         AtelierSearch(focus: focus)
                     }
-                    Tab("My Bottle", systemImage: "drop", value: AtelierTab.journal) {
-                        AtelierOwnership(add: { adding = true }, focus: focus)
+                    Tab("Today", systemImage: "square.and.pencil", value: AtelierTab.journal) {
+                        AtelierWearLog(add: { adding = true }, focus: focus)
                     }
                     Tab("Style", systemImage: "paintpalette", value: AtelierTab.atmosphere) {
                         AtelierStyle()
@@ -57,11 +57,10 @@ struct AtelierRoot: View {
                 .environmentObject(archive)
         }
         .sheet(isPresented: $adding) {
-            AtelierSearch(focus: { card in
-                archive.add(card.fragrance)
+            QuickAddSheet(onAdded: {
                 adding = false
                 tab = .gallery
-            }, adding: true)
+            })
             .environmentObject(archive)
         }
     }

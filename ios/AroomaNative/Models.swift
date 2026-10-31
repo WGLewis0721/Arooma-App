@@ -48,7 +48,7 @@ enum FragranceShelf: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-struct Fragrance: Identifiable, Hashable {
+struct Fragrance: Identifiable, Hashable, Codable {
     let id: String
     let house: String
     let name: String
@@ -59,6 +59,8 @@ struct Fragrance: Identifiable, Hashable {
     let base: [String]
     let shelf: FragranceShelf
     let archival: Bool
+    // Quick captures can have an original owner's bottle photo, not a generated card.
+    var photoFileName: String? = nil
     var notes: [String] { top + heart + base }
     var description: String { [house, name, concentration].joined(separator: " · ") }
 
@@ -136,4 +138,5 @@ struct SavedArchive: Codable {
     // Optional fields keep already-installed native JSON decodable without a reset.
     var shelfNames: [String: String]? = nil
     var wearSessions: [WearSession]? = nil
+    var customFragrances: [Fragrance]? = nil
 }

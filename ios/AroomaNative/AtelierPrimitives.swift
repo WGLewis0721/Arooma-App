@@ -97,29 +97,125 @@ extension View {
 // One shared sensor feed, only while the interactive gallery is visible.
 @MainActor final class FoilMotion: ObservableObject {
     static let shared = FoilMotion()
-    @Published var x: CGFloat = 0
-    @Published var y: CGFloat = 0
+    // One published value per sensor sample; a light low-pass keeps the foil
+    // from jittering during an otherwise steady hold.
+    @Published private(set) var light = CGSize.zero
     private let sensor = CMMotionManager()
     private init() {}
+
     func start() {
         guard sensor.isDeviceMotionAvailable, !sensor.isDeviceMotionActive,
               !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
-        sensor.deviceMotionUpdateInterval = 1.0 / 24.0
+        sensor.deviceMotionUpdateInterval = 1.0 / 30.0
         sensor.startDeviceMotionUpdates(to: .main) { [weak self] sample, _ in
-            guard let sample else { return }
+            guard let self, let sample else { return }
             Task { @MainActor in
-                self?.x = CGFloat(max(-1, min(1, sample.attitude.roll / 0.75)))
-                self?.y = CGFloat(max(-1, min(1, sample.attitude.pitch / 0.75)))
+                let x = CGFloat(max(-1, min(1, sample.attitude.roll / 0.75)))
+                let y = CGFloat(max(-1, min(1, sample.attitude.pitch / 0.75)))
+                let next = CGSize(width: self.light.width * 0.82 + x * 0.18,
+                                  height: self.light.height * 0.82 + y * 0.18)
+                if abs(next.width - self.light.width) > 0.004 ||
+                   abs(next.height - self.light.height) > 0.004 {
+                    self.light = next
+                }
             }
         }
     }
-    func stop() { if sensor.isDeviceMotionActive { sensor.stopDeviceMotionUpdates() } }
+    func stop() {
+        if sensor.isDeviceMotionActive { sensor.stopDeviceMotionUpdates() }
+    }
+}
+
+// A responsive, non-destructive interference layer. Tilt controls the spectral
+// highlight; a much slower idle pulse remains when the handset is stationary.
+// The approved card photography and lettering never change.
+struct AtelierFoilMaterial: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @ObservedObject private var tilt = FoilMotion.shared
+    var radius: CGFloat
+
+    var body: some View {
+        GeometryReader { geo in
+            TimelineView(.animation(
+                minimumInterval: 1.0 / 20.0,
+                paused: reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled
+            )) { clock in
+                let tick = clock.date.timeIntervalSinceReferenceDate
+                let breath = reduceMotion ? 0 : sin(tick * 0.50)
+                let travel = CGFloat(breath) * geo.size.width * 0.13 +
+                             tilt.light.width * geo.size.width * 0.39
+                let angle = Angle.degrees(Double(tilt.light.width * 64) + breath * 13)
+                ZStack {
+                    if !reduceTransparency {
+                        RoundedRectangle(cornerRadius: radius, style: .continuous)
+                            .fill(LinearGradient(
+                                colors: [
+                                    .clear,
+                                    Color.cyan.opacity(0.16),
+                                    Color.purple.opacity(0.14),
+                                    Color.yellow.opacity(0.13),
+                                    .clear
+                                ],
+                                startPoint: .topLeading, endPoint: .bottomTrailing
+                            ))
+                            .opacity(0.45 + abs(tilt.light.width) * 0.35)
+
+                        Rectangle()
+                            .fill(LinearGradient(
+                                stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .white.opacity(0.04), location: 0.19),
+                                    .init(color: Color.cyan.opacity(0.15), location: 0.35),
+                                    .init(color: Color.purple.opacity(0.19), location: 0.51),
+                                    .init(color: .white.opacity(0.27), location: 0.57),
+                                    .init(color: Color.yellow.opacity(0.11), location: 0.68),
+                                    .init(color: .clear, location: 1)
+                                ],
+                                startPoint: .leading, endPoint: .trailing
+                            ))
+                            .frame(width: geo.size.width * 0.64,
+                                   height: geo.size.height * 1.9)
+                            .rotationEffect(.degrees(19))
+                            .offset(x: travel - geo.size.width * 0.34,
+                                    y: tilt.light.height * 15)
+                            .blendMode(.screen)
+                    }
+
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(
+                            AngularGradient(
+                                colors: [
+                                    .white.opacity(0.34),
+                                    Color.cyan.opacity(0.74),
+                                    Color.purple.opacity(0.58),
+                                    Color.yellow.opacity(0.72),
+                                    .white.opacity(0.70),
+                                    Color.blue.opacity(0.49),
+                                    .white.opacity(0.31)
+                                ],
+                                center: .center,
+                                angle: angle
+                            ),
+                            lineWidth: 3.1
+                        )
+                    RoundedRectangle(cornerRadius: radius - 2, style: .continuous)
+                        .strokeBorder(.white.opacity(0.10 + abs(tilt.light.height) * 0.18),
+                                      lineWidth: 0.9)
+                        .padding(4)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .compositingGroup()
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
 }
 
 struct AtelierCardSurface: View {
     @EnvironmentObject private var archive: CollectionStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @ObservedObject private var foil = FoilMotion.shared
     let fragranceID: String
     var side: CardSide = .front
     var radius: CGFloat = 14
@@ -180,36 +276,12 @@ struct AtelierCardSurface: View {
         }
         .overlay {
             if selected {
-                TimelineView(.animation(minimumInterval: 1.0 / 12.0, paused: reduceMotion)) { clock in
-                    let phase = reduceMotion ? 0 : sin(clock.date.timeIntervalSinceReferenceDate * 0.67)
-                    let angle = Double(foil.x * 72) + phase * 8
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .strokeBorder(AngularGradient(
-                            colors: [
-                                .white.opacity(0.22),
-                                Color.cyan.opacity(0.35),
-                                Color.purple.opacity(0.48),
-                                Color.yellow.opacity(0.56),
-                                .white.opacity(0.55),
-                                Color.blue.opacity(0.37),
-                                .white.opacity(0.14)
-                            ],
-                            center: .center,
-                            angle: .degrees(angle)),
-                            lineWidth: 2.6)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: radius - 2, style: .continuous)
-                                .strokeBorder(.white.opacity(0.055 + abs(foil.y) * 0.14 + abs(phase) * 0.015),
-                                              lineWidth: 0.8)
-                                .padding(3)
-                        }
-                }
-                .allowsHitTesting(false)
+                AtelierFoilMaterial(radius: radius)
             }
         }
-        .shadow(color: .black.opacity(selected ? 0.32 : 0.17),
-                radius: selected ? 27 : 14, x: selected ? foil.x * 7 : 0,
-                y: selected ? 20 + foil.y * 4 : 10)
+        .shadow(color: .black.opacity(selected ? 0.33 : 0.15),
+                radius: selected ? 28 : 13,
+                x: 0, y: selected ? 19 : 10)
         .accessibilityLabel("Collectible \(fragranceID)")
     }
 }

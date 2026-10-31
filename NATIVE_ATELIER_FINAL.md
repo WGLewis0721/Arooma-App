@@ -81,6 +81,34 @@ These are **approved design requirements for the next native motion/polish pass*
 - **Compatibility:** legacy standalone wear records remain available and are not falsely grouped. The new optional saved fields preserve older archives. Custom shelf labels do not rewrite the stable shelf IDs.
 - **Physical device QA still required:** confirm camera permission and both success/cancel paths, 10–15 second captured-photo save, custom photo persistence after termination, low-motion/low-power foil fallback, stable pinch-to-shelf navigation, layered wear save/undo/repeat, and that all four original photographic card masters remain unchanged.
 
+## Premium deck / information architecture correction (2026-10-31)
+
+**Owner's physical iPhone findings:** The previous native build still slid, the collection's cards sometimes sat off-center, swipes skipped items and the navigation gave little guidance. These are correctness and product experience defects, not requests to add surface effects.
+
+### Gesture / centering contract
+- All three presentation modes use one common, measurable deck center and one continuous fractional `deckPosition`. Do not calculate card offsets from both drag distance and an abruptly changed selected index.
+- Drag follows the finger without an implicit spring fighting the gesture. A completed drag/flick settles at most **one adjacent collectible per gesture**. A swipe returning below threshold springs back without changing selected identity. The first and last card resist overscroll.
+- Canceling an animation, changing layout, opening inspection, switching Demo/Mine, and pinching into the shelf overview cannot cause re-indexing skips or off-center resting positions.
+- Tilt-responsive foil must visibly alter color/shine across the card surface and edges, with subdued idle spectral light. Use limited CPU/sensor work and respect Reduce Motion / Reduce Transparency / Low Power Mode.
+- Teach swipe and inspect once in a restrained, non-blocking hint; after initial interaction the card remains the visual hero.
+
+### Primary navigation contract
+- **Collection:** card-first gallery, quick add and access to Search and View & Style. The card's main action takes you to Today with that bottle already selected.
+- **Shelves:** browse and rename; pinching outward from the gallery also enters shelf overview, with a visible All shelves path as an alternative.
+- **Today:** pick one or more fragrances, record a grouped wear, review session history and repeat. Named two-or-more-bottle combinations are reusable and persistent.
+- Search and View & Style are contextual sheets rather than permanent bottom tabs. Cover Flow / Stack / Fan belong together in View & Style above the theme choices.
+- User data remains private and compatible with existing native JSON. New saved layer records are optional when decoding historical archives.
+
+### Physical iPhone acceptance before a paid-quality release
+1. Swipe slowly, flick rapidly, flick repeatedly, cancel mid-gesture and reverse direction in all three modes. Every selected card settles dead-center; one completed flick never skips two or three cards.
+2. Rotate/tilt a real iPhone: the selected card's interference/reflection changes perceptibly; when idle the light is subdued, not dead or distracting.
+3. Pinch outward and back. A two-finger gesture does not accidentally swipe a card or change selected identity.
+4. Quick Add a photo-only bottle and a name-only bottle; confirm return from camera, no account required, photo survives relaunch, and unfinished name can be edited later.
+5. From a selected bottle, reach Today, add second and third scents, record, undo, save a named combination, and recall it after terminating/relaunching.
+6. Verify themes, native color appearance, the approved original front/back artworks, accessibility, and previous saved collection records; profile animation hitches and device energy.
+
+**Commercial quality note:** these interaction and journal refinements improve retention but do not themselves establish a $25/year subscription product. An expanded trusted fragrance catalog, backup/sync choices, robust export and device testing remain separate product decisions. Do not claim them as present.
+
 ## Data and releases
 Retain `CollectionStore` model and existing `arooma-native-v1.json` encoding without migrations, deletions, or resetting onboarding. Keep the bundle ID `com.graymatter.arooma` so TestFlight updates install over the existing app. Use the existing `codemagic.yaml` workflow and App Store distribution profile; do not regenerate signing files.
 

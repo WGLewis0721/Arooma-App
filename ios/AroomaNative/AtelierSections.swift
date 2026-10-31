@@ -355,13 +355,33 @@ struct AtelierSearch: View {
                     VStack(alignment: .leading, spacing: 5) {
                         AtelierEyebrow(text: "The fragrance index", accent: archive.theme.palette.accent)
                         AtelierDisplay(title: adding ? "Add a fragrance" : "Discover", size: 38)
-                        Text("Find a house, an accord or a familiar name.")
+                        Text("Search by name or note. If it’s missing, save the name instantly.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.bottom, 12)
                     if results.isEmpty {
                         ContentUnavailableView.search(text: query)
+                        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Button {
+                                if let fragrance = archive.quickAdd(name: query) {
+                                    let bottle = archive.bottles.first(where: {
+                                        $0.fragranceID == fragrance.id
+                                    })
+                                    focus(DisplayCard(id: bottle?.id.uuidString ?? fragrance.id,
+                                                      fragrance: fragrance, bottleID: bottle?.id))
+                                    dismiss()
+                                }
+                            } label: {
+                                Label("Save this fragrance name now", systemImage: "plus")
+                                    .frame(maxWidth: .infinity, minHeight: 51)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(archive.theme.palette.accent)
+                            Text("No catalog match required. You can add the house or a photo later.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
                         ForEach(results) { fragrance in
                             Button { select(fragrance) } label: {
@@ -667,11 +687,18 @@ struct AtelierStyle: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                AtelierEyebrow(text: "Four signature finishes", accent: archive.theme.palette.accent)
-                AtelierDisplay(title: "The atmosphere", size: 37)
-                Text("Your cards never change. The environment around them does.")
+                AtelierEyebrow(text: "The way it feels", accent: archive.theme.palette.accent)
+                AtelierDisplay(title: "Your gallery", size: 35)
+                Text("One collection. Three ways to experience it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 10) {
+                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
+                    Text("Cover Flow for depth, Stack for focus, Fan for a spread.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                AtelierEyebrow(text: "Color & atmosphere", accent: archive.theme.palette.accent)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 13), GridItem(.flexible(), spacing: 13)], spacing: 16) {
                     ForEach(FragranceTheme.allCases) { theme in
                         Button {
@@ -684,7 +711,7 @@ struct AtelierStyle: View {
                                     .fill(LinearGradient(
                                         colors: [theme.palette.field, theme.palette.secondary, theme.palette.accent.opacity(0.64)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(height: 120)
+                                    .frame(height: 88)
                                     .overlay {
                                         RoundedRectangle(cornerRadius: 8)
                                             .strokeBorder(theme.palette.accent.opacity(0.6), lineWidth: 0.8)
@@ -710,30 +737,19 @@ struct AtelierStyle: View {
                         .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
                     }
                 }
-                VStack(alignment: .leading, spacing: 9) {
-                    AtelierEyebrow(text: "Gallery view", accent: archive.theme.palette.accent)
-                    Text("Choose how your collectible cards are arranged.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
-                }
                 AtelierEyebrow(text: "Appearance", accent: archive.theme.palette.accent)
                 Picker("Appearance", selection: $archive.appearance) {
                     ForEach(Appearance.allCases) { a in Text(a.rawValue).tag(a) }
                 }
                 .pickerStyle(.segmented)
                 .frame(minHeight: 48)
-                VStack(alignment: .leading, spacing: 12) {
-                    AtelierDisplay(title: "An independent archive", size: 24)
-                    Text("Arooma is a private fragrance companion, not endorsed by the featured houses. The collectible compositions remain the original approved artwork.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    Text("Local-first · iOS 26 · No account required")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                DisclosureGroup("About this archive") {
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
-                .padding(18)
-                .atelierPlate(19)
+                .font(.footnote)
+                .padding(15)
+                .atelierPlate(16)
             }
             .padding(.horizontal, 22)
             .padding(.top, 17)
@@ -750,6 +766,9 @@ struct AtelierWearLog: View {
     @State private var selected: [UUID] = []
     @State private var impression = ""
     @State private var showAll = false
+    @State private var namingLayer = false
+    @State private var newLayerName = ""
+    @Binding var startingBottleID: UUID?
     let add: () -> Void
     let focus: (DisplayCard) -> Void
 
@@ -765,8 +784,8 @@ struct AtelierWearLog: View {
             VStack(alignment: .leading, spacing: 19) {
                 VStack(alignment: .leading, spacing: 7) {
                     AtelierEyebrow(text: "Your daily ritual", accent: archive.theme.palette.accent)
-                    AtelierDisplay(title: "What are you wearing?", size: 34)
-                    Text("Log a fragrance by itself or layer several together.")
+                    AtelierDisplay(title: "What did you wear?", size: 34)
+                    Text("Tap one or more bottles. Log them together as one wear.")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 if archive.mode == .demo {
@@ -779,6 +798,40 @@ struct AtelierWearLog: View {
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
                         action: "Add a bottle", callback: add, accent: archive.theme.palette.accent)
                 } else {
+                    if !archive.savedLayers.isEmpty {
+                        VStack(alignment: .leading, spacing: 9) {
+                            AtelierEyebrow(text: "Your saved combinations", accent: archive.theme.palette.accent)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 9) {
+                                    ForEach(archive.savedLayers) { layer in
+                                        Button {
+                                            selected = layer.bottleIDs.filter { id in
+                                                archive.bottles.contains(where: { $0.id == id })
+                                            }
+                                        } label: {
+                                            VStack(alignment: .leading, spacing: 5) {
+                                                Text(layer.name)
+                                                    .font(.system(.subheadline, design: .serif))
+                                                    .lineLimit(1)
+                                                Text("\(layer.bottleIDs.count) scents · tap to wear")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                            .frame(width: 146, alignment: .leading)
+                                            .padding(13)
+                                            .atelierPlate(13)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .contextMenu {
+                                            Button("Delete saved combination", role: .destructive) {
+                                                archive.deleteLayer(layer.id)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     HStack {
                         AtelierEyebrow(text: "Choose your bottles", accent: archive.theme.palette.accent)
                         Spacer()
@@ -791,6 +844,7 @@ struct AtelierWearLog: View {
                                 Button {
                                     if selected.contains(bottle.id) { selected.removeAll { $0 == bottle.id } }
                                     else { selected.append(bottle.id) }
+                                    HapticEngine.shared.play(.selection)
                                 } label: {
                                     VStack(spacing: 7) {
                                         AtelierCardSurface(fragranceID: scent.id, selected: selected.contains(bottle.id))
@@ -847,6 +901,18 @@ struct AtelierWearLog: View {
                                     .frame(maxWidth: .infinity, minHeight: 51)
                             }
                             .buttonStyle(.borderedProminent).tint(archive.theme.palette.accent)
+                            if selected.count > 1 {
+                                Button {
+                                    newLayerName = ""
+                                    namingLayer = true
+                                } label: {
+                                    Label("Save combination for later", systemImage: "bookmark")
+                                        .font(.subheadline.weight(.medium))
+                                        .frame(maxWidth: .infinity, minHeight: 45)
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(archive.theme.palette.accent)
+                            }
                         }
                         .padding(15).atelierPlate(20)
                     }
@@ -887,6 +953,25 @@ struct AtelierWearLog: View {
             .padding(.horizontal, 22).padding(.top, 15).padding(.bottom, 32)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .alert("Save this combination", isPresented: $namingLayer) {
+            TextField("e.g. Workday layer", text: $newLayerName)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                archive.saveLayer(name: newLayerName, bottleIDs: selectedIDs)
+            }
+        } message: {
+            Text("Give these fragrances a name so you can wear them together again.")
+        }
+        .onAppear { includeStartingBottle() }
+        .onChange(of: startingBottleID) { _, _ in includeStartingBottle() }
+    }
+
+    private func includeStartingBottle() {
+        guard let id = startingBottleID else { return }
+        if archive.bottles.contains(where: { $0.id == id }) && !selected.contains(id) {
+            selected.append(id)
+        }
+        startingBottleID = nil
     }
 
     private func sessionRow(_ session: WearSession) -> some View {

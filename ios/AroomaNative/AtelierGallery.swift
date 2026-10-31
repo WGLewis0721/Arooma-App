@@ -99,7 +99,6 @@ struct AtelierGallery: View {
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))
-        .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
         .onAppear {
             motor.reduceMotion = reduceMotion
             bindMotor()
@@ -595,6 +594,7 @@ struct AtelierInspector: View {
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
         .sheet(item: $editing) { record in
             NavigationStack { BottleEditor(bottle: record) }
                 .environmentObject(archive)

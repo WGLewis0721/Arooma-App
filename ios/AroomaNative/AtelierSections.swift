@@ -826,6 +826,7 @@ struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var replayingIntro = false
+    @State private var probe = FramePacingProbe.shared
 
     var body: some View {
         ScrollView {
@@ -904,6 +905,18 @@ struct AtelierStyle: View {
                 .font(.footnote)
                 .padding(15)
                 .atelierPlate(16)
+                // Hidden owner tool: long-press to show or hide the frame-time readout.
+                Text(probe.enabled ? "Arooma · frame-time readout on" : "Arooma · private and on-device")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                    .contentShape(Rectangle())
+                    .onLongPressGesture(minimumDuration: 1.2) {
+                        probe.enabled.toggle()
+                        HapticEngine.shared.play(.completed)
+                    }
+                    .accessibilityHidden(true)
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
@@ -1024,6 +1037,7 @@ struct AtelierWearLog: View {
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
                         action: "Add a bottle", callback: add, accent: accent)
                 } else {
+                    if selectedIDs.isEmpty, let last = lastRitual { repeatLast(last) }
                     if !archive.savedLayers.isEmpty { savedLayers }
                     picker
                     history
@@ -1064,6 +1078,45 @@ struct AtelierWearLog: View {
     private func toggle(_ id: UUID) {
         if selected.contains(id) { selected.removeAll { $0 == id } }
         else { selected.append(id) }
+    }
+
+    // MARK: Repeat the last ritual
+
+    /// The most recent wear from an earlier day whose bottles are all still owned.
+    private var lastRitual: WearSession? {
+        archive.wearSessions.first { session in
+            !Calendar.current.isDateInToday(session.date) &&
+            session.bottleIDs.allSatisfy { id in archive.bottles.contains(where: { $0.id == id }) }
+        }
+    }
+
+    /// One tap re-selects yesterday's solo wear or layer; one more logs it.
+    private func repeatLast(_ session: WearSession) -> some View {
+        Button { selected = session.bottleIDs } label: {
+            HStack(spacing: 14) {
+                ComposedSet(bottleIDs: session.bottleIDs, cardWidth: 34, spread: 7)
+                    .frame(width: 70, height: 58)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Wear it again")
+                        .font(.system(.subheadline, design: .serif))
+                        .foregroundStyle(.primary)
+                    Text(session.bottleIDs.compactMap { id in archive.bottles.first(where: { $0.id == id })
+                        .flatMap { archive.fragrance(id: $0.fragranceID)?.name } }.joined(separator: " + "))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(session.date, format: .relative(presentation: .named))
+                        .font(.caption2).foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "arrow.clockwise.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(accent)
+            }
+            .padding(12)
+            .atelierPlate(18)
+        }
+        .buttonStyle(PressableCardStyle())
+        .accessibilityHint("Selects the same bottles so you can log them again")
     }
 
     // MARK: Saved layers

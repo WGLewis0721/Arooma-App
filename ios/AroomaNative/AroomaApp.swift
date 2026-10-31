@@ -48,6 +48,7 @@ struct AtelierRoot: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.96)))
             }
         }
+        .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
         .onAppear(perform: applyQALaunchArguments)
         .fullScreenCover(item: $inspection) { card in
             AtelierInspector(card: card, close: { inspection = nil })

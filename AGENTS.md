@@ -1,16 +1,12 @@
 # Arooma: instructions for coding agents
 
-**ACTIVE OWNER V3 ATELIER OVERRIDE:** Follow [AROOMA_ATELIER_V3_OWNER_OVERRIDE.md](AROOMA_ATELIER_V3_OWNER_OVERRIDE.md) for the current substantial card-first redesign. This owner decision supersedes older aesthetic/one-file/liquid-animation requirements where they conflict. Preserve existing storage/backups and third-party image rights. The approved source art and root Sol Extra handoff remain the asset authority.
+**ACTIVE OWNER OVERRIDE (2026-10-30):** The PWA is retired. Build a native SwiftUI iOS 26+ app. Do not port `index.html`, CSS, or the GitHub Pages demo. The goal is a polished app that can be demoed immediately in the iOS Simulator (clone + open Xcode project + run). No TestFlight required for the demo path.
 
-**CURRENT OWNER ASSIGNMENT FOR GPT-6 SOL (EXTRA HIGH):** Read [SOL_EXTRA_HANDOFF.md](SOL_EXTRA_HANDOFF.md) and [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) **before touching app UI or card assets**. The original photographic card PNG masters are already committed under `assets/collectibles/masters/`; do not regenerate or substitute them. This single owner-commissioned root spec supersedes older demo-art instructions for the final polish pass. Keep local owner records safe and use the compact QA gate in the root spec.
+Read [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and [docs/design/brand/BRAND_BOARD.md](docs/design/brand/BRAND_BOARD.md) first. Preserve all design objectives, photographic art masters, interaction rules, local-first data model, and content-vs-control layering. Liquid Glass only on functional layer; never on cards.
 
 For Codex, Cursor, Grok Build and any other tool that reads `AGENTS.md`.
 
-Arooma is a personal cabinet for a fragrance collection, shipped as an installable iOS web app. The whole app is `index.html` (one self-contained file), tested and deployed to GitHub Pages by `.github/workflows/pages.yml`.
-
-All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**. The block below is generated from `docs/design/RULES_CARD.md` (`npm run docs:sync`); do not edit it here. Plans and specs follow [docs/design/PLAN_SPEC_PROTOCOL.md](docs/design/PLAN_SPEC_PROTOCOL.md). Setup for each AI tool: [docs/design/AI_TOOL_SETUP.md](docs/design/AI_TOOL_SETUP.md).
-
-Commands: `npm start`, `npm run docs:check`, `npm test`, `npm run assets`.
+All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**.
 
 <!-- design-rules-card:start -->
 **Start here:** `docs/design/README.md` (router). Plans/specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Visual authority: `docs/design/brand/BRAND_BOARD.md`; V2 spec in `docs/design/specs/`.
@@ -35,11 +31,11 @@ Commands: `npm start`, `npm run docs:check`, `npm test`, `npm run assets`.
 - Seven fictional demo bottles and four independent branded illustrations; no endorsement or scraped images.
 - Rights follow `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`.
 - No new backend, account, analytics, ads, or IAP without a dedicated implementation spec.
-- Preserve self-contained PWA; never claim it is SwiftUI.
+- Native SwiftUI only. Do not preserve or extend the retired PWA.
 - Never force-push `main`.
 
 **Verify**
-- 375/390/430 px, landscape, reduced motion, no overflow, offline cards, fast entry.
-- `npm run docs:check`, `npm run test:docs` and `npm test` before merge. iPhone Safari, Home Screen install, touch physics and haptics need real-device validation.
+- Simulator on iPhone sizes, reduced motion, safe areas, Dynamic Type.
+- Design docs check. Real device optional for final polish.
 - Existing owner backups, photos, saved rotations, migration and Undo remain intact.
 <!-- design-rules-card:end -->

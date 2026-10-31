@@ -1,5 +1,8 @@
 # Claude Opus 5.5 implementation: Arooma gesture-first discovery, Wishlist and card intelligence
 
+> Part of the [Arooma design brain](../README.md); implement the native iOS product specification linked below.
+> Summary: Build a gesture-first Wishlist/scan/share/insight/search experience with native SwiftUI APIs; preserve data, document catalog/media licensing gaps and deliver a tested PR.
+
 ## Objective and workflow
 
 You are the principal SwiftUI iOS interaction engineer and product architect for the native Arooma fragrance companion. Implement a **substantive, production-minded native interaction update**, not a website prototype, mockup, or planning-only exercise. Make existing cards more powerful without surrounding them with more buttons: focus on a coherent gesture grammar, a first-class **Wishlist**, shareable collectible card images, on-demand explainable insight, local camera capture/scan, reliable destination gestures, and rich search/filtering.

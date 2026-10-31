@@ -183,7 +183,7 @@ struct AtelierShelves: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 30) {
                 VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: archive.mode == .mine ? "Your collection" : "The sample archive",
+                    AtelierEyebrow(text: archive.mode == .mine ? "Your collection" : (archive.mode == .wishlist ? "Your Wishlist" : "The sample archive"),
                                    accent: archive.theme.palette.accent)
                     HStack(alignment: .firstTextBaseline) {
                         AtelierDisplay(title: "The shelves", size: 37)

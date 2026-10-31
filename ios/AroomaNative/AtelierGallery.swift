@@ -35,6 +35,11 @@ struct AtelierGallery: View {
     @State private var pinching = false
     /// 0 = deck, 1 = spatial shelf overview. Driven continuously by pinch.
     @State private var overview: CGFloat = 0
+    /// Insight detent: 0 closed, 1 peek, 2 expanded. Continuous while the finger drags.
+    @State private var insight: CGFloat = 0
+    @State private var insightStart: CGFloat = 0
+    @State private var verticalDrag = false
+    @State private var comparing: DisplayCard?
     @AppStorage("arooma.deckTipV3") private var understoodDeck = false
 
     let transitionNamespace: Namespace.ID
@@ -61,15 +66,21 @@ struct AtelierGallery: View {
                 if cards.isEmpty {
                     Spacer()
                     AtelierEmptyState(
-                        title: "A collection starts with one bottle.",
-                        detail: "Capture a name or a photo in seconds. Make it yours later.",
-                        action: "Add a fragrance", callback: add, accent: accent
+                        title: archive.mode == .wishlist ? "Nothing on your Wishlist yet." : "A collection starts with one bottle.",
+                        detail: archive.mode == .wishlist
+                            ? "Heard about a fragrance? Capture its name or a photo, then swipe left to save it here."
+                            : "Capture a name or a photo in seconds. Make it yours later.",
+                        action: archive.mode == .wishlist ? "Capture a fragrance" : "Add a fragrance",
+                        callback: add, accent: accent
                     )
                     Spacer()
                 } else {
                     stage
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .scaleEffect(1 - 0.12 * min(insight, 1) - 0.3 * max(0, insight - 1), anchor: .top)
+                        .offset(y: -18 * min(insight, 1))
                         .layoutPriority(1)
+                    insightGrabber
                     DeckScrubber(count: cards.count, position: motor.position, accent: accent) { index in
                         understoodDeck = true
                         motor.glide(to: index)
@@ -88,6 +99,7 @@ struct AtelierGallery: View {
             .scaleEffect(1 - 0.1 * overview)
             .opacity(1 - Double(overview) * 0.92)
             .allowsHitTesting(overview < 0.5)
+            .overlay(alignment: .bottom) { insightOverlay }
 
             if overview > 0.001 {
                 ShelfOverview(progress: $overview, focus: { card in
@@ -119,12 +131,19 @@ struct AtelierGallery: View {
             }
         }
         .onChange(of: archive.layout) { _, layout in motor.morph(to: layout.kind) }
+        .sheet(item: $comparing) { card in
+            CompareSheet(primary: card).environmentObject(archive)
+        }
         .onChange(of: reduceMotion) { _, value in motor.reduceMotion = value }
         .onChange(of: fingerDown) { _, down in
             // The system can cancel a touch (Control Centre, a context menu) without onEnded.
             if !down && touching {
                 touching = false
                 dragging = false
+                if verticalDrag {
+                    verticalDrag = false
+                    setInsight(insight.rounded())
+                }
                 motor.liftWithoutDrag()
             }
         }
@@ -141,11 +160,12 @@ struct AtelierGallery: View {
                     .accessibilityLabel("Arooma")
                     .accessibilityAddTraits(.isHeader)
                 Menu {
-                    Button("My collection", systemImage: "square.stack") { archive.enter(.mine) }
-                    Button("Explore sample cards", systemImage: "sparkles") { archive.enter(.demo) }
+                    Button("My collection", systemImage: "square.stack") { closeInsight(); archive.enter(.mine) }
+                    Button("Wishlist", systemImage: "heart.text.square") { closeInsight(); archive.enter(.wishlist) }
+                    Button("Explore sample cards", systemImage: "sparkles") { closeInsight(); archive.enter(.demo) }
                 } label: {
                     HStack(spacing: 5) {
-                        Text(archive.mode == .mine ? "MY COLLECTION" : "SAMPLE ARCHIVE")
+                        Text(modeTitle)
                         Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
                     }
                     .font(.system(size: 10, weight: .semibold))
@@ -154,7 +174,7 @@ struct AtelierGallery: View {
                     .frame(minHeight: 30)
                     .contentShape(Rectangle())
                 }
-                .accessibilityLabel("Collection: \(archive.mode == .mine ? "mine" : "sample archive")")
+                .accessibilityLabel("Showing \(modeTitle.lowercased())")
             }
             Spacer(minLength: 4)
             GlassEffectContainer(spacing: 10) {
@@ -164,6 +184,14 @@ struct AtelierGallery: View {
                     glassButton("slider.horizontal.3", label: "View and style", action: openStyle)
                 }
             }
+        }
+    }
+
+    private var modeTitle: String {
+        switch archive.mode {
+        case .mine: "MY COLLECTION"
+        case .wishlist: "WISHLIST"
+        case .demo: "SAMPLE ARCHIVE"
         }
     }
 
@@ -233,6 +261,7 @@ struct AtelierGallery: View {
             }
             .accessibilityAction { if let focusedCard { inspect(focusedCard) } }
             .accessibilityAction(named: "Show every shelf") { openOverview() }
+            .accessibilityAction(named: "Show insights") { setInsight(insight >= 1 ? 2 : 1) }
         }
     }
 
@@ -276,11 +305,24 @@ struct AtelierGallery: View {
 
     @ViewBuilder private func cardMenu(_ card: DisplayCard) -> some View {
         Button("Inspect", systemImage: "arrow.up.left.and.arrow.down.right") { inspect(card) }
+        Button("Insights", systemImage: "text.magnifyingglass") { setInsight(1) }
+        ShareLink(item: CardShareImage(fragrance: card.fragrance, photoURL: archive.photoURL(for: card.fragrance)),
+                  preview: SharePreview(card.fragrance.name, image: Image(systemName: "rectangle.portrait"))) {
+            Label(archive.photoURL(for: card.fragrance) == nil ? "Share card image" : "Share card image (includes your photo)",
+                  systemImage: "square.and.arrow.up")
+        }
+        Button("Compare", systemImage: "square.split.2x1") { comparing = card }
         if let id = card.bottleID {
             Button("Wear today", systemImage: "drop") { archive.recordWear(bottleIDs: [id]) }
             Button("Layer with others", systemImage: "square.stack.3d.up") { showToday(id) }
+        } else if let wishID = card.wishID {
+            Button("Move to my collection", systemImage: "checkmark.circle") { archive.moveToCollection(wishID: wishID) }
+            Button("Remove from Wishlist", systemImage: "heart.slash", role: .destructive) { archive.removeFromWishlist(wishID) }
         } else {
             Button("Add to my collection", systemImage: "plus") { archive.add(card.fragrance) }
+            if !archive.isWishlisted(card.fragrance.id) {
+                Button("Add to Wishlist", systemImage: "heart") { archive.addToWishlist(card.fragrance) }
+            }
         }
     }
 
@@ -300,18 +342,40 @@ struct AtelierGallery: View {
                 guard !pinching else { return }
                 let dx = value.translation.width
                 let dy = value.translation.height
+                if verticalDrag {
+                    // One gesture, one owner: once vertical, the deck never moves in this drag.
+                    let raw = insightStart - dy / Self.insightDetentDistance
+                    insight = raw > 2 ? 2 + (raw - 2) * 0.2 : max(0, raw)
+                    return
+                }
                 if !dragging {
-                    // Horizontal intent only; a vertical wander stays a tap/press.
-                    guard abs(dx) > 7, abs(dx) > abs(dy) * 0.9 else { return }
-                    dragging = true
-                    slop = dx > 0 ? 7 : -7
-                    if !understoodDeck { withAnimation(.easeOut(duration: 0.3)) { understoodDeck = true } }
+                    if abs(dx) > 7, abs(dx) > abs(dy) * 0.9 {
+                        dragging = true
+                        slop = dx > 0 ? 7 : -7
+                        if !understoodDeck { withAnimation(.easeOut(duration: 0.3)) { understoodDeck = true } }
+                    } else if abs(dy) > 10, abs(dy) > abs(dx) * 1.2,
+                              insight > 0.05 || onHeroCard(value.startLocation, stage: stage, card: card) {
+                        // Vertical on the focused card: insights. Upward opens, downward closes.
+                        verticalDrag = true
+                        insightStart = insight
+                        motor.liftWithoutDrag()
+                        return
+                    } else {
+                        return
+                    }
                 }
                 motor.drag(translation: -Double(dx - slop) / unit)
             }
             .onEnded { value in
                 guard touching else { return }
                 touching = false
+                if verticalDrag {
+                    verticalDrag = false
+                    let projected = insightStart - value.predictedEndTranslation.height / Self.insightDetentDistance
+                    setInsight(projected < 0.45 ? 0 : (projected < 1.5 ? 1 : 2))
+                    dragging = false
+                    return
+                }
                 if dragging && !pinching {
                     motor.release(velocity: -Double(value.velocity.width) / unit)
                 } else {
@@ -346,6 +410,73 @@ struct AtelierGallery: View {
             inspect(card)
         } else {
             motor.glide(to: index)
+        }
+    }
+
+    // MARK: Insights
+
+    static let insightDetentDistance: CGFloat = 150
+
+    private func onHeroCard(_ point: CGPoint, stage: CGSize, card: CGSize) -> Bool {
+        abs(point.x - stage.width / 2) < card.width / 2 && abs(point.y - stage.height / 2) < card.height / 2
+    }
+
+    private func setInsight(_ value: CGFloat) {
+        withAnimation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(response: 0.42, dampingFraction: 0.86)) {
+            insight = max(0, min(2, value))
+        }
+    }
+
+    private func closeInsight() { if insight > 0 { setInsight(0) } }
+
+    /// A small labelled grabber under the card: visible signifier and tap alternative.
+    @ViewBuilder private var insightGrabber: some View {
+        if insight < 0.05, focusedCard != nil {
+            Button { setInsight(1) } label: {
+                VStack(spacing: 3) {
+                    Capsule().fill(.secondary.opacity(0.45)).frame(width: 30, height: 4)
+                    Text("Insights").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+                }
+                .frame(width: 88, height: 30)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Show insights")
+            .accessibilityHint("Or swipe up on the card")
+            .transition(.opacity)
+        }
+    }
+
+    @ViewBuilder private var insightOverlay: some View {
+        if insight > 0.01, let card = focusedCard {
+            GeometryReader { geo in
+                let peek: CGFloat = min(270, geo.size.height * 0.42)
+                let full = geo.size.height * 0.74
+                let height = insight <= 1 ? peek : peek + (full - peek) * min(1, insight - 1)
+                InsightPanel(card: card, expanded: insight > 1.3,
+                             compare: { comparing = card },
+                             close: { setInsight(0) })
+                    .frame(height: height)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .offset(y: (1 - min(1, insight)) * (peek + 30))
+                    .padding(.horizontal, 8)
+                    .gesture(
+                        DragGesture(minimumDistance: 6)
+                            .onChanged { value in
+                                if !verticalDrag { verticalDrag = true; insightStart = insight }
+                                let raw = insightStart - value.translation.height / Self.insightDetentDistance
+                                insight = raw > 2 ? 2 + (raw - 2) * 0.2 : max(0, raw)
+                            }
+                            .onEnded { value in
+                                verticalDrag = false
+                                let projected = insightStart - value.predictedEndTranslation.height / Self.insightDetentDistance
+                                setInsight(projected < 0.45 ? 0 : (projected < 1.5 ? 1 : 2))
+                            }
+                    )
+                    .environmentObject(archive)
+            }
+            .padding(.bottom, 4)
+            .transition(.opacity)
         }
     }
 
@@ -423,6 +554,14 @@ struct AtelierGallery: View {
                     }
                     .buttonStyle(.glass)
                     .accessibilityHint("Combine with other bottles in Today")
+                } else if let wishID = card.wishID {
+                    Button { archive.moveToCollection(wishID: wishID) } label: {
+                        Label("Move to my collection", systemImage: "checkmark.circle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 34)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(accent)
                 } else {
                     Button { archive.add(card.fragrance) } label: {
                         Label("Add to my collection", systemImage: "plus")
@@ -645,6 +784,7 @@ struct AtelierInspector: View {
             .buttonBorderShape(.circle)
             .accessibilityLabel("Close")
             Spacer()
+            CardShareButton(card: card)
             if let bottle {
                 Button {
                     var updated = bottle
@@ -850,14 +990,16 @@ struct AtelierInspector: View {
                 .buttonStyle(.glass)
             } else {
                 Button {
-                    archive.add(card.fragrance)
+                    if let wishID = card.wishID { archive.moveToCollection(wishID: wishID) }
+                    else { archive.add(card.fragrance) }
                     stamp += 1
                     Task { @MainActor in
                         try? await Task.sleep(for: .milliseconds(420))
                         close()
                     }
                 } label: {
-                    Label("Add to my collection", systemImage: "plus")
+                    Label(card.wishID == nil ? "Add to my collection" : "Move to my collection",
+                          systemImage: card.wishID == nil ? "plus" : "checkmark.circle")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: 36)
                 }

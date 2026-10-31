@@ -28,6 +28,8 @@ struct AtelierGallery: View {
     @State private var touching = false
     @State private var dragging = false
     @State private var slop: CGFloat = 0
+    /// Where the finger is on the hero card (unit coordinates), for the foil's press response.
+    @State private var touchUV = CGPoint(x: 0.5, y: 0.5)
     @GestureState private var fingerDown = false
     @State private var pinching = false
     /// 0 = deck, 1 = spatial shelf overview. Driven continuously by pinch.
@@ -212,7 +214,7 @@ struct AtelierGallery: View {
                 }
             }
             .contentShape(Rectangle())
-            .simultaneousGesture(deckDrag(unit: unit))
+            .simultaneousGesture(deckDrag(unit: unit, stage: geo.size, card: CGSize(width: w, height: h)))
             .simultaneousGesture(pinchToOverview)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(focusedCard.map { "\($0.fragrance.house), \($0.fragrance.name)" } ?? "Collection")
@@ -253,7 +255,9 @@ struct AtelierGallery: View {
             shade: pose.shade,
             foil: abs(d) < 1.15 ? .live : .sheen,
             foilStrength: max(0, 1 - abs(d) * 1.8), // shader off beyond ~half a slot
-            lean: nearness * nearness
+            lean: nearness * nearness,
+            touch: touchUV,
+            pressure: abs(d) < 0.5 ? lift : 0
         )
         .frame(width: w, height: w * 86.0 / 59.0)
         .matchedTransitionSource(id: card.id, in: transitionNamespace)
@@ -279,10 +283,12 @@ struct AtelierGallery: View {
 
     // MARK: Gestures
 
-    private func deckDrag(unit: Double) -> some Gesture {
+    private func deckDrag(unit: Double, stage: CGSize, card: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .updating($fingerDown) { _, state, _ in state = true }
             .onChanged { value in
+                touchUV = CGPoint(x: (value.location.x - stage.width / 2) / card.width + 0.5,
+                                  y: (value.location.y - stage.height / 2) / card.height + 0.5)
                 if !touching {
                     touching = true
                     dragging = false
@@ -537,6 +543,8 @@ struct AtelierInspector: View {
     @State private var flip = FlipMotor()
     @State private var axisLock: Axis?
     @State private var pull: CGSize = .zero
+    @State private var pressUV = CGPoint(x: 0.5, y: 0.5)
+    @State private var pressing: Double = 0
     @State private var editing: BottleRecord?
     @State private var appeared = false
     @State private var stamp = 0
@@ -650,10 +658,12 @@ struct AtelierInspector: View {
         let facing = abs(cos(angle * .pi / 180))
         return ZStack {
             AtelierCardSurface(fragranceID: card.fragrance.id, side: .front, radius: 16,
-                               yaw: frontYaw, lift: 0.6, foil: .live, lean: 0.7, shadowed: false)
+                               yaw: frontYaw, lift: 0.6, foil: .live, lean: 0.7,
+                               touch: pressUV, pressure: pressing, shadowed: false)
                 .opacity(back ? 0 : 1)
             AtelierCardSurface(fragranceID: card.fragrance.id, side: .back, radius: 16,
-                               yaw: backYaw, lift: 0.6, foil: .live, foilStrength: 0.6, lean: 0.7, shadowed: false)
+                               yaw: backYaw, lift: 0.6, foil: .live, foilStrength: 0.6, lean: 0.7,
+                               touch: CGPoint(x: 1 - pressUV.x, y: pressUV.y), pressure: pressing, shadowed: false)
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 .opacity(back ? 1 : 0)
         }
@@ -686,6 +696,17 @@ struct AtelierInspector: View {
         .contentShape(Rectangle())
         .onTapGesture { flip.flip() }
         .gesture(cardDrag(width: w))
+        .simultaneousGesture(
+            // The finger bends the foil: a glint follows it while pressed.
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    pressUV = CGPoint(x: value.location.x / w, y: value.location.y / (w * 86.0 / 59.0))
+                    if pressing == 0 { withAnimation(.spring(response: 0.22, dampingFraction: 0.7)) { pressing = 1 } }
+                }
+                .onEnded { _ in
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { pressing = 0 }
+                }
+        )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(card.fragrance.name), \(back ? "reverse with fragrance map" : "front")")
         .accessibilityHint("Double tap to flip")

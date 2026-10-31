@@ -3,27 +3,33 @@ import CoreMotion
 import UIKit
 import ImageIO
 import Observation
+import simd
 
 // MARK: - Motion field
 //
-// One shared Core Motion feed, reference-counted by the views that render live foil. The gravity
-// vector is compared against a slowly drifting baseline, so whatever angle the phone is held at
-// becomes "neutral" after a few seconds and only deliberate tilting moves the light.
-// Off when nothing visible needs it, when the app is backgrounded, or in Low Power Mode.
+// One shared Core Motion feed, reference-counted by the views that render live foil.
+// It tracks the iPhone's full attitude (not just gravity, so turning an upright phone left/right
+// counts) relative to a reference orientation that drifts slowly toward the current one: the way
+// the owner is holding the phone becomes "neutral" after ~15 s, and every deliberate tilt moves
+// the light. The light and the viewer are treated as fixed in the room; the card turns under
+// them. Off when nothing visible needs it, in the background, in Low Power Mode, or when hot.
 
 @MainActor
 @Observable
 final class MotionField {
     static let shared = MotionField()
 
-    /// -1...1. x: tilt right is positive. y: top edge tilted away from the viewer is positive.
+    /// Rotation taking room-fixed directions (as seen at the reference pose) into the device's
+    /// current frame. Identity when still at the reference, or when no sensor is running.
+    private(set) var relative = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
+    /// -1...1 summary of the same rotation, for the hero card's small physical lean.
     private(set) var tilt = CGPoint.zero
     private(set) var isLive = false
 
     @ObservationIgnored private let manager = CMMotionManager()
     @ObservationIgnored private var users = 0
-    @ObservationIgnored private var baseline: (x: Double, y: Double)?
-    @ObservationIgnored private var smooth = (x: 0.0, y: 0.0)
+    @ObservationIgnored private var reference: simd_quatd?
+    @ObservationIgnored private var smoothed = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var foreground = true
 
@@ -41,46 +47,68 @@ final class MotionField {
                                             object: nil, queue: .main) { _ in
             MainActor.assumeIsolated { MotionField.shared.reconcile() }
         })
+        observers.append(center.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification,
+                                            object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { MotionField.shared.reconcile() }
+        })
     }
 
     func acquire() { users += 1; reconcile() }
     func release() { users = max(0, users - 1); reconcile() }
 
     private var shouldRun: Bool {
-        users > 0 && foreground && manager.isDeviceMotionAvailable &&
-        !ProcessInfo.processInfo.isLowPowerModeEnabled
+        users > 0 && foreground && manager.isDeviceMotionAvailable && RenderQuality.allowsLiveMaterial
     }
 
     private func reconcile() {
         if shouldRun && !manager.isDeviceMotionActive {
-            baseline = nil
+            reference = nil
             manager.deviceMotionUpdateInterval = 1.0 / 60.0
-            manager.startDeviceMotionUpdates(to: .main) { motion, _ in
+            manager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: .main) { motion, _ in
                 guard let motion else { return }
-                MainActor.assumeIsolated { MotionField.shared.ingest(motion.gravity) }
+                MainActor.assumeIsolated { MotionField.shared.ingest(motion.attitude.quaternion) }
             }
             isLive = true
         } else if !shouldRun && manager.isDeviceMotionActive {
             manager.stopDeviceMotionUpdates()
             isLive = false
+            relative = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
+            smoothed = relative
             tilt = .zero
         }
     }
 
-    private func ingest(_ g: CMAcceleration) {
-        if baseline == nil { baseline = (g.x, g.y) }
-        guard var b = baseline else { return }
-        // ~4 s time constant at 60 Hz: posture changes are absorbed, gestures are not.
-        b.x += (g.x - b.x) * 0.004
-        b.y += (g.y - b.y) * 0.004
-        baseline = b
-        let tx = max(-1, min(1, (g.x - b.x) / 0.32))
-        let ty = max(-1, min(1, (g.y - b.y) / 0.32))
-        smooth.x += (tx - smooth.x) * 0.22
-        smooth.y += (ty - smooth.y) * 0.22
-        if abs(smooth.x - tilt.x) > 0.0015 || abs(smooth.y - tilt.y) > 0.0015 {
-            tilt = CGPoint(x: smooth.x, y: smooth.y)
-        }
+    private func ingest(_ q: CMQuaternion) {
+        let current = simd_quatd(ix: q.x, iy: q.y, iz: q.z, r: q.w)
+        if reference == nil { reference = current }
+        guard var ref = reference else { return }
+        // Re-centre very slowly (~15 s at 60 Hz) so posture is absorbed but tilts are not.
+        ref = simd_slerp(ref, current, 0.0011)
+        reference = ref
+        let rel = simd_normalize(simd_mul(simd_inverse(current), ref))
+        // Light low-pass removes hand tremor without adding perceptible lag.
+        smoothed = simd_normalize(simd_slerp(smoothed, rel, 0.4))
+        let change = simd_mul(simd_inverse(relative), smoothed).angle
+        guard change > 0.0012 else { return }
+        relative = smoothed
+        let eye = smoothed.act(simd_double3(0, 0, 1))
+        tilt = CGPoint(x: max(-1, min(1, eye.x / 0.3)), y: max(-1, min(1, eye.y / 0.3)))
+    }
+}
+
+/// Card-frame light and eye directions for the foil shader.
+enum MaterialOptics {
+    /// Room light above and slightly in front of the viewer, as seen at the reference pose.
+    static let light0 = simd_normalize(simd_double3(-0.08, 0.3, 1))
+    static let eye0 = simd_double3(0, 0, 1)
+
+    /// `yaw` is the card's own rotation about its vertical axis in degrees (deck pose, flip).
+    static func vectors(relative: simd_quatd, yaw: Double) -> (light: simd_float3, eye: simd_float3) {
+        let theta = -yaw * .pi / 180
+        let turn = simd_quatd(angle: theta, axis: simd_double3(0, 1, 0))
+        let q = simd_mul(turn, relative)
+        let l = q.act(light0), e = q.act(eye0)
+        return (simd_float3(Float(l.x), Float(l.y), Float(l.z)), simd_float3(Float(e.x), Float(e.y), Float(e.z)))
     }
 }
 
@@ -147,48 +175,46 @@ extension FragranceTheme {
 
 // MARK: - Live holographic foil
 
-/// GPU foil on the card that is in front. Light = device tilt + the card's own pose (yaw /
-/// flip angle) + a barely perceptible idle drift, so neighbouring cards, the hero and its
-/// shadow all agree on where the light is.
+/// GPU foil on the card that is in front. There is no clock: the shader re-renders only when the
+/// phone's attitude, the card's pose or a finger press changes, so a still card on a still phone
+/// is static, and tilting only the phone visibly moves the highlight, colour and glitter.
 struct LiveFoil: ViewModifier {
     var strength: Double
     var yaw: Double
     var radius: CGFloat
     var tint: Color
+    /// Finger position on the card (0...1) and press amount (0...1).
+    var touch: CGPoint = .zero
+    var pressure: Double = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.scenePhase) private var scenePhase
     @State private var motion = MotionField.shared
 
     func body(content: Content) -> some View {
         let live = strength > 0.01 && !reduceTransparency && !RenderQuality.foilDisabledForQA
-        let level = strength
+        let level = Float(strength)
         let tintColor = tint
-        // Only the hero's clock runs; neighbours keep a still (but tilt-responsive) light.
-        let animate = live && strength > 0.5 && !reduceMotion && scenePhase == .active && RenderQuality.allowsLiveMaterial
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: !animate)) { clock in
-            let t = clock.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600)
-            let drift = animate ? CGPoint(x: sin(t * 0.37) * 0.10, y: cos(t * 0.29) * 0.07) : .zero
-            let tilt = reduceMotion ? .zero : motion.tilt
-            let light = CGPoint(x: tilt.x * 0.95 + drift.x - yaw / 70,
-                                y: -tilt.y * 0.8 + drift.y - 0.25)
-            content
-                .visualEffect { view, proxy in
-                    view.colorEffect(
-                        ShaderLibrary.aroomaFoil(
-                            .float2(proxy.size),
-                            .float2(light),
-                            .float(animate ? t : 0),
-                            .float(live ? level : 0),
-                            .float(max(6, proxy.size.width * 0.045)),
-                            .color(tintColor)
-                        ),
-                        isEnabled: live
-                    )
-                }
-        }
-        .onAppear { motion.acquire() }
-        .onDisappear { motion.release() }
+        // Reduce Motion: the light holds still (no tilt-driven change), touch still answers.
+        let attitude = reduceMotion ? simd_quatd(ix: 0, iy: 0, iz: 0, r: 1) : motion.relative
+        let v = MaterialOptics.vectors(relative: attitude, yaw: yaw)
+        let press = SIMD3<Float>(Float(touch.x), Float(touch.y), Float(max(0, min(1, pressure))))
+        content
+            .visualEffect { view, proxy in
+                view.colorEffect(
+                    ShaderLibrary.aroomaFoil(
+                        .float2(proxy.size),
+                        .float3(v.light.x, v.light.y, v.light.z),
+                        .float3(v.eye.x, v.eye.y, v.eye.z),
+                        .float3(press.x, press.y, press.z),
+                        .float(live ? level : 0),
+                        .float(max(6, proxy.size.width * 0.045)),
+                        .color(tintColor)
+                    ),
+                    isEnabled: live
+                )
+            }
+            .onAppear { motion.acquire() }
+            .onDisappear { motion.release() }
     }
 }
 

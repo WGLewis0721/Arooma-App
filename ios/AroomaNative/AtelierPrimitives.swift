@@ -119,6 +119,9 @@ struct AtelierCardSurface: View {
     var foilStrength: Double = 1
     /// How much the card leans toward device tilt (0 = none, 1 = hero).
     var lean: Double = 0
+    /// Finger on the card (unit coordinates) and how hard it is pressed, for the live foil.
+    var touch: CGPoint = .zero
+    var pressure: Double = 0
     var shadowed = true
 
     var body: some View {
@@ -130,7 +133,8 @@ struct AtelierCardSurface: View {
         let lambert = min(0.62, shade + (1 - max(0, facing)) * 0.5)
         CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo, side: side, radius: radius)
             .equatable()
-            .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw, radius: radius, tint: theme.keyLight))
+            .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw, radius: radius, tint: theme.keyLight,
+                                touch: touch, pressure: pressure))
             .overlay {
                 if lambert > 0.004 {
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
@@ -316,10 +320,13 @@ private struct FoilLayer: ViewModifier {
     let yaw: Double
     let radius: CGFloat
     let tint: Color
+    var touch: CGPoint = .zero
+    var pressure: Double = 0
     func body(content: Content) -> some View {
         switch mode {
         case .live:
-            content.modifier(LiveFoil(strength: strength, yaw: yaw, radius: radius, tint: tint))
+            content.modifier(LiveFoil(strength: strength, yaw: yaw, radius: radius, tint: tint,
+                                      touch: touch, pressure: pressure))
         case .sheen:
             content.overlay {
                 RoundedRectangle(cornerRadius: radius, style: .continuous)

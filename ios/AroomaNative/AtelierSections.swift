@@ -27,6 +27,7 @@ struct AtelierWelcome: View {
     @State private var settled = false
     @State private var dealt = false
     @State private var handle: CGSize = .zero
+    @State private var handleUV = CGPoint(x: 0.5, y: 0.5)
     @Namespace private var swatchRing
     @Namespace private var signatureSpace
     let openDemo: () -> Void
@@ -127,7 +128,7 @@ struct AtelierWelcome: View {
                 .offset(x: dealt ? w * 0.42 : 0, y: dealt ? 16 : 440)
                 .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.78).delay(0.08), value: dealt)
             AtelierCardSurface(fragranceID: "dior", yaw: yaw, lift: handle == .zero ? 0.2 : 0.8,
-                               foil: .live, lean: 1)
+                               foil: .live, lean: 1, touch: handleUV, pressure: handle == .zero ? 0 : 1)
                 .frame(width: w, height: w * 86 / 59)
                 .rotation3DEffect(.degrees(yaw), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
                 .rotation3DEffect(.degrees(pitch), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
@@ -135,7 +136,10 @@ struct AtelierWelcome: View {
                 .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.16), value: dealt)
                 .gesture(
                     DragGesture(minimumDistance: 0)
-                        .onChanged { value in handle = value.translation }
+                        .onChanged { value in
+                            handle = value.translation
+                            handleUV = CGPoint(x: value.location.x / w, y: value.location.y / (w * 86 / 59))
+                        }
                         .onEnded { _ in
                             withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) { handle = .zero }
                         }

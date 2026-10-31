@@ -2083,8 +2083,8 @@ function mount(st){
 }
 function setPrefMode(m){MODE=m;PREFS.mode=m;savePrefs()}
 function startOwn(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();haptic('complete');toast(N?'Your collection.':'Your cabinet is ready. Add your first bottle.')}
-function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());toast('Explore the collectible archive. Your own collection stays separate.')}
-function leaveDemo(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();toast(N?'Back to your collection.':'Back to your collection. It is empty.')}
+function enterDemo(){if(MODE==='own')saveState();setPrefMode('demo');mount(loadDemo());/* Mode is already labelled in header; avoid covering the collectible with a toast. */}
+function leaveDemo(){setPrefMode('own');mount(loadOwn()||emptyState());saveState();/* Selection and Mine label confirm the switch without blocking the card. */}
 function confirmLoadDemo(){
   openPanel('<h2>Open the demo collection?</h2><p class="sub">A collectible fragrance gallery plus classic fictional samples. Your own collection stays saved on this device, untouched, and comes back when you leave the demo.</p>'
    +'<div class="pbtns"><button class="btn" data-act="cancel">Stay here</button><button class="btn primary" data-act="yes">Open the demo</button></div>',

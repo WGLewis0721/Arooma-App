@@ -9,7 +9,7 @@
 | Surface | Native iPhone: gallery, card overlap, inspector, shelves, onboarding, Quick Add, Today/Wear Log, View & Style |
 | Size | L, system-level redesign and implementation |
 | Author | OpenAI implementation handoff, 2026-10-31 |
-| Status | Implementation brief, not a claim of completed work |
+| Status | Implemented on branch feat/native-physical-deck-motion (section 12); real-device validation pending |
 | Governing context | Root [NATIVE_ATELIER_FINAL.md](../../../NATIVE_ATELIER_FINAL.md), [Apple-native pack](../packs/apple-native-feel.md), [design rules](../RULES_CARD.md), [Apple design principles](../platforms/APPLE_DESIGN_PRINCIPLES.md) |
 
 ## 1. Problem
@@ -167,3 +167,60 @@ Create a dedicated feature branch, implement in substantial integrated changes, 
 | Date | Decision | By | Documents updated |
 | --- | --- | --- | --- |
 | 2026-10-31 | Prioritize physical, interruption-safe native card behavior and coherent cross-screen motion over decorative polish; allow meaningful redesign, preserve user data and collectible identities | Owner feedback translated into implementation brief | This spec; existing source remains unchanged |
+| 2026-10-31 | Implement option B: display-link deck engine, GPU foil, zoom transitions and connected screens; device validation still pending | Implementation (Claude Code) | This spec section 12; ios/AroomaNative; ios/Tests |
+
+## 12. Implementation record (2026-10-31, branch feat/native-physical-deck-motion)
+
+Status: implemented in the native target; simulator-built and simulator-captured by CI. **Not yet validated on a physical iPhone** (no device was available to the implementer). Acceptance criteria 4 (holography on hardware), 8 (device frame pacing) and the haptic feel remain owner/device checks.
+
+### Reference apps studied for polish level
+
+| App | What Arooma borrows |
+| --- | --- |
+| Apple Wallet | A card is picked up, lifts with a deeper shadow and drops back into the stack; tilt shine on the hero card |
+| Photos / Apple Music (iOS 18+) | Zoom navigation transition from the exact thumbnail, pull-down dismissal, artwork-derived ambient backdrop |
+| Apple Invites | Full-bleed card as the hero of the screen, glass controls floating over it |
+| Pokémon TCG Pocket | The benchmark for tilt-reactive foil and a scrubbable two-sided card inspection |
+| (Not Boring) Weather / Habits | Physical, sparing haptics that confirm an outcome instead of decorating every touch |
+| Halide | Tactile controls that respond under the finger before the action completes |
+| Things 3 | Quick entry that saves first and lets details come later (Quick Add) |
+| Mela (ADA 2025 Interaction finalist) | Calm content-first navigation; the object, not the chrome |
+
+### What was built and why
+
+- **One deck engine** (`DeckPhysics.swift`, pure Swift): continuous position, velocity and phase; fixed-step springs (identical at 60/120 Hz); one-card-snap release (only the two cards straddling the centre line are candidates, so a release can never skip a card); iOS rubber band; exact rest snap (centred to the bit). Card poses for all three layouts are pure functions of distance, so the morph between layouts blends poses rather than rebuilding views.
+- **Display-link motor** (`DeckMotor.swift`): replaces `withAnimation` for the deck. SwiftUI animations jump state to the target immediately, so a new touch used to start from a pose that was not on screen. Now touch-down freezes the deck where it is drawn and release hands the measured finger velocity to the spring. Selection is written to disk once, on settle.
+- **GPU foil** (`HoloFoil.metal` + `LiveFoil`): sheen, glint, diffraction and rim sparkle as additive light on the unaltered master. Diffraction is masked by the rim and by the bright, low-saturation regions of each card's own art, so cards differ. Light = Core Motion tilt (gravity against a drifting baseline, so any holding posture is neutral) + card yaw + a barely moving idle drift. Off for cards further than one slot from centre; static sheen elsewhere.
+- **Physical card**: Lambert shading from yaw, visible edge thickness, catch-light, lift-aware contact shadow, small tilt lean on the hero.
+- **Spatial transitions**: inspector uses the system zoom navigation transition from the gallery card; horizontal drag scrubs the flip (faces swap at exactly edge-on), vertical pull dismisses; pinch on the deck continuously drives the shelf overview and pinch-out returns.
+- **Screens**: Shelves with scroll-transition depth and move-to-shelf; Today with a composition tray of fanned cards and a stamp on logging; Quick Add with a live card preview and catalog suggestions; dealt, touchable welcome hand; Style sheet at half height so layout and theme changes visibly morph the live gallery; Search as an iOS 26 search tab; a tab bar accessory for today's wear.
+
+### Deviations from earlier guidance
+
+- Haptics add a flip edge tick (allowed by this spec section 6); settle intensity scales with release speed. Still no per-frame or decorative haptics.
+- The Collection header wordmark uses the calligraphic face (wordmark-only use, per the rules card).
+
+### Gesture ownership
+
+| Surface | Gesture | Owner |
+| --- | --- | --- |
+| Deck | One-finger drag (horizontal intent past 7 pt) | Deck engine; vertical wander stays a press |
+| Deck | Tap | Focused card opens Inspect; neighbour glides to centre |
+| Deck | Two-finger pinch | Shelf overview progress; cancels any deck drag in progress |
+| Deck | Long press | Context menu (Inspect, Wear, Layer, Add) |
+| Inspector card | Horizontal drag / tap | Flip scrub / half turn |
+| Inspector card | Vertical drag | Pull to dismiss |
+
+### How to verify on device
+
+1. Xcode → AroomaNative scheme → Run on an iPhone. Add launch argument `-AroomaFramePacing YES` to show the frame-pacing HUD and console lines (`AroomaFramePacing frames=… fps=… hitch=…ms/s`).
+2. Drag slowly, reverse mid-drag, flick, and touch the deck while it is still settling: the card must be caught where it is drawn.
+3. Tilt the phone slowly with the hero card visible; compare a gold-lettered card with a darker one.
+4. Tap the hero, scrub the flip back and forth across edge-on, pull down to dismiss.
+5. `-AroomaAutoplay YES` replays the scripted engine choreography used in the CI recording (synthetic finger, real physics).
+
+### Tests
+
+- `ios/Tests/DeckPhysics/main.swift`: centring for all layouts and widths, pose continuity, exact rest snap, one-card snap under violent flicks, 5,000 random release-policy cases, 200 interrupted alternating swipes on a 24-card deck with no visible jump, end stops, bounded overshoot, empty/single decks, count changes, glide interruption, flip face visibility and flip landing, 60/120 Hz agreement.
+- `ios/Tests/ArchiveCompat/main.swift`: existing archive JSON (minimal and a full owner archive with sessions, layers, renamed shelves, personal capture) decodes and round-trips.
+- CI (`native-ios.yml`) builds this branch and the baseline, photographs the same seeded states in both, records the autoplay, and composes before/after sheets (artifact `Arooma-Before-After`).

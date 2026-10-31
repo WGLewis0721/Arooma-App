@@ -6,6 +6,7 @@ struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var revealed = false
+    @State private var ink: CGFloat = 0
     let openDemo: () -> Void
     let openMine: () -> Void
 
@@ -24,12 +25,28 @@ struct AtelierWelcome: View {
                 Spacer(minLength: 12)
                 VStack(spacing: 13) {
                     Text("Arooma")
-                        .font(.custom("Snell Roundhand", size: min(82, geo.size.width * 0.22)))
+                        .font(.custom("Snell Roundhand", size: min(88, geo.size.width * 0.235)))
+                        .italic()
                         .foregroundStyle(archive.theme.palette.accent)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .opacity(revealed ? 1 : 0.01)
-                        .offset(x: revealed ? 0 : -16)
+                        .minimumScaleFactor(0.72)
+                        .mask(alignment: .leading) {
+                            GeometryReader { letters in
+                                Rectangle().frame(width: letters.size.width * ink)
+                            }
+                        }
+                        .accessibilityLabel("Arooma")
+                    Path { path in
+                        path.move(to: CGPoint(x: 22, y: 15))
+                        path.addCurve(to: CGPoint(x: 278, y: 13),
+                                      control1: CGPoint(x: 98, y: 34),
+                                      control2: CGPoint(x: 195, y: -6))
+                    }
+                    .trim(from: 0, to: ink)
+                    .stroke(archive.theme.palette.accent.opacity(0.65),
+                            style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+                    .frame(width: min(290, geo.size.width * 0.76), height: 30)
+                    .accessibilityHidden(true)
                     AtelierDisplay(title: "A collection worth keeping.", size: 30)
                         .multilineTextAlignment(.center)
                 }
@@ -96,8 +113,11 @@ struct AtelierWelcome: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onAppear {
-                if reduceMotion { revealed = true }
-                else { withAnimation(.easeOut(duration: 0.8)) { revealed = true } }
+                if reduceMotion { revealed = true; ink = 1 }
+                else {
+                    withAnimation(.easeOut(duration: 0.35)) { revealed = true }
+                    withAnimation(.easeInOut(duration: 1.55)) { ink = 1 }
+                }
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))

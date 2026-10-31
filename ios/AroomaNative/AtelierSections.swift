@@ -106,6 +106,8 @@ struct AtelierWelcome: View {
 
 struct AtelierShelves: View {
     @EnvironmentObject private var archive: CollectionStore
+    @State private var renaming: FragranceShelf?
+    @State private var newName = ""
     let focus: (DisplayCard) -> Void
     let add: () -> Void
 
@@ -121,7 +123,7 @@ struct AtelierShelves: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 27) {
                 VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: "Organized by season", accent: archive.theme.palette.accent)
+                    AtelierEyebrow(text: "Your personalized collection", accent: archive.theme.palette.accent)
                     HStack(alignment: .firstTextBaseline) {
                         AtelierDisplay(title: "The shelves", size: 37)
                         Spacer()
@@ -143,8 +145,15 @@ struct AtelierShelves: View {
                             Image(systemName: shelf.icon)
                                 .font(.system(.subheadline, weight: .light))
                                 .foregroundStyle(archive.theme.palette.accent)
-                            AtelierDisplay(title: shelf.rawValue, size: 28)
+                            AtelierDisplay(title: archive.shelfName(shelf), size: 28)
                             Spacer()
+                            Button {
+                                newName = archive.shelfName(shelf)
+                                renaming = shelf
+                            } label: {
+                                Image(systemName: "pencil").frame(width: 44, height: 44)
+                            }
+                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
                             Text("\(cards.count, format: .number.precision(.integerLength(2)))")
                                 .font(.caption.monospacedDigit())
                                 .foregroundStyle(.secondary)
@@ -200,6 +209,19 @@ struct AtelierShelves: View {
             .padding(.bottom, 36)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .alert("Rename shelf", isPresented: Binding(
+            get: { renaming != nil },
+            set: { if !$0 { renaming = nil } }
+        )) {
+            TextField("Shelf name", text: $newName)
+            Button("Cancel", role: .cancel) { renaming = nil }
+            Button("Save") {
+                if let shelf = renaming { archive.renameShelf(shelf, to: newName) }
+                renaming = nil
+            }
+        } message: {
+            Text("Choose a name for this shelf. Your bottles stay where they are.")
+        }
     }
 }
 

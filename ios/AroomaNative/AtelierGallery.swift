@@ -437,16 +437,36 @@ struct AtelierGallery: View {
     }
 }
 
+// Back-face visibility is animatable and follows the actual rotation frame by frame.
+private struct CardFaceVisibility: AnimatableModifier {
+    var angle: Double
+    var showingBack: Bool
+    var animatableData: Double {
+        get { angle }
+        set { angle = newValue }
+    }
+    func body(content: Content) -> some View {
+        let normalized = ((angle.truncatingRemainder(dividingBy: 360)) + 360)
+            .truncatingRemainder(dividingBy: 360)
+        let backVisible = normalized > 90 && normalized < 270
+        return content.opacity(backVisible == showingBack ? 1 : 0)
+    }
+}
+
 struct AtelierInspector: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var flipped = false
+    @GestureState private var flipDragX: CGFloat = 0
     @State private var editing: BottleRecord?
     let card: DisplayCard
     let transitionNamespace: Namespace.ID
     let close: () -> Void
 
     private var palette: ArchivePalette { archive.theme.palette }
+    private var flipDegrees: Double {
+        (flipped ? 180 : 0) + Double(flipDragX) * 0.65
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -472,18 +492,27 @@ struct AtelierInspector: View {
                 Spacer(minLength: 5)
                 ZStack {
                     AtelierCardSurface(fragranceID: card.fragrance.id, side: .front, selected: true)
-                        .opacity(flipped ? 0 : 1)
+                        .modifier(CardFaceVisibility(angle: flipDegrees, showingBack: false))
                     AtelierCardSurface(fragranceID: card.fragrance.id, side: .back, selected: true)
                         .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                        .opacity(flipped ? 1 : 0)
+                        .modifier(CardFaceVisibility(angle: flipDegrees, showingBack: true))
                 }
                 .frame(width: max(155, cardWidth), height: max(155, cardWidth) * 86.0 / 59.0)
                 .matchedGeometryEffect(id: "collectible-\(card.id)", in: transitionNamespace, isSource: false)
-                .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.69)
+                .rotation3DEffect(.degrees(flipDegrees), axis: (x: 0, y: 1, z: 0), perspective: 0.69)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: flip)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 13)
+                        .updating($flipDragX) { value, state, _ in
+                            state = value.translation.width
+                        }
+                        .onEnded { value in
+                            if abs(value.predictedEndTranslation.width) > 54 { flip() }
+                        }
+                )
                 .accessibilityLabel("\(card.fragrance.name), \(flipped ? "back with fragrance map" : "front")")
-                .accessibilityHint("Double tap to flip")
+                .accessibilityHint("Swipe or double tap to flip")
                 Spacer(minLength: 5)
 
                 Text(flipped ? "FRAGRANCE MAP  ·  REVERSE" : "ARCHIVE FOIL  ·  FRONT")

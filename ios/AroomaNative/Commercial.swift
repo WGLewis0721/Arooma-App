@@ -256,7 +256,7 @@ struct CommercialArchive: Codable {
         var written: [URL] = []
         do {
             for card in backup.cards where !created.contains(where: { $0.id == card.id }) {
-                let filename = "studio-\(UUID().uuidString).\(cutout ? "png" : "jpg")"
+                let filename = "studio-\(UUID().uuidString).\(card.photoName.hasSuffix(".png") ? "png" : "jpg")"
                 let destination = Self.documentDirectory.appendingPathComponent(filename)
                 try backup.photos[card.photoName]!.write(to: destination, options: .atomic)
                 written.append(destination)
@@ -286,7 +286,7 @@ struct CommercialArchive: Codable {
             status = "Choose a readable bottle photo and enter a card name."
             return false
         }
-        let filename = "studio-\(UUID().uuidString).jpg"
+        let filename = "studio-\(UUID().uuidString).\(cutout ? "png" : "jpg")"
         do {
             try imageBytes.write(to: Self.documentDirectory.appendingPathComponent(filename), options: .atomic)
             created.insert(.init(fragranceID: fragranceID, title: String(title.prefix(80)),

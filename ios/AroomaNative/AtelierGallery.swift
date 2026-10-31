@@ -7,6 +7,8 @@ struct AtelierGallery: View {
     @GestureState private var dragX: CGFloat = 0
     @State private var pinchScale: CGFloat = 1
     @State private var shelfOverview = false
+    let transitionNamespace: Namespace.ID
+    let inspectedID: String?
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
 
@@ -220,6 +222,8 @@ struct AtelierGallery: View {
         }
         return AtelierCardSurface(fragranceID: card.fragrance.id, selected: distance == 0)
             .frame(width: width, height: width * 86.0 / 59.0)
+            .matchedGeometryEffect(id: "collectible-\(card.id)", in: transitionNamespace, isSource: true)
+            .opacity(inspectedID == card.id ? 0 : 1)
             .scaleEffect(scale)
             .rotation3DEffect(.degrees(Double(turn)), axis: (x: 0, y: 1, z: 0), perspective: 0.67)
             .rotationEffect(.degrees(Double(roll)))
@@ -315,6 +319,7 @@ struct AtelierInspector: View {
     @State private var flipped = false
     @State private var editing: BottleRecord?
     let card: DisplayCard
+    let transitionNamespace: Namespace.ID
     let close: () -> Void
 
     private var palette: ArchivePalette { archive.theme.palette }
@@ -349,6 +354,7 @@ struct AtelierInspector: View {
                         .opacity(flipped ? 1 : 0)
                 }
                 .frame(width: max(155, cardWidth), height: max(155, cardWidth) * 86.0 / 59.0)
+                .matchedGeometryEffect(id: "collectible-\(card.id)", in: transitionNamespace, isSource: false)
                 .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.69)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: flip)

@@ -8,7 +8,7 @@
 
 ## 2026-10-31 owner-approved original calligraphic signature (supersedes generic font entry)
 
-The brand entry wordmark is now a fixed, original **Arooma** handwritten signature, not runtime text in Snell Roundhand or Apple Chancery. Its SVG, transparent PNG, and both Higgsfield-generated light/dark pen-writing videos are in [the canonical asset handoff](../../../assets/brand/AROOMA_SIGNATURE.md). Always integrate those exact assets and preserve their letterforms; do not substitute a font or redraw the intro. Static image fallback is required for Reduce Motion and failed video playback.
+The brand entry wordmark is now a fixed, original **Arooma** handwritten signature, not runtime text in Snell Roundhand or Apple Chancery. Its SVG, transparent PNG, and both Higgsfield-generated light/dark pen-writing videos are in [the canonical asset handoff](../../../assets/brand/AROOMA_SIGNATURE.md). Always integrate those exact assets and preserve their letterforms; do not substitute a font or redraw the logo. The native intro no longer writes the name: the full master signature is legible from the first frame with a restrained, seamless metallic highlight (static with Reduce Motion), and navigation never waits for it.
 
 ## V2 implemented appearance and interaction override (2026-10-30)
 

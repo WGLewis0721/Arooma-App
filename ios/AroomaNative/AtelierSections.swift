@@ -20,37 +20,15 @@ struct PressableCardStyle: ButtonStyle {
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage(SignatureIntroPolicy.seenKey) private var introSeen = false
-    /// First launch only: the pen-writing intro, ending on the exact master signature.
-    @State private var showingIntro = !UserDefaults.standard.bool(forKey: SignatureIntroPolicy.seenKey)
-    @State private var cameFromIntro = false
     @State private var settled = false
     @State private var dealt = false
     @State private var handle: CGSize = .zero
     @State private var handleUV = CGPoint(x: 0.5, y: 0.5)
     @Namespace private var swatchRing
-    @Namespace private var signatureSpace
     let openDemo: () -> Void
     let openMine: () -> Void
 
-    var body: some View {
-        ZStack {
-            if showingIntro {
-                SignatureIntro(namespace: signatureSpace) {
-                    introSeen = true
-                    cameFromIntro = true
-                    withAnimation(reduceMotion ? .easeInOut(duration: 0.3) : .spring(response: 0.8, dampingFraction: 0.9)) {
-                        showingIntro = false
-                    }
-                }
-                .transition(.opacity)
-                .zIndex(2)
-            } else {
-                welcome
-                    .transition(.opacity)
-            }
-        }
-    }
+    var body: some View { welcome }
 
     private var welcome: some View {
         GeometryReader { geo in
@@ -61,15 +39,15 @@ struct AtelierWelcome: View {
                     .opacity(settled ? 1 : 0)
                 Spacer(minLength: 8)
                 VStack(spacing: 10) {
-                    // The exact master signature (assets/brand), inked in the theme's metal.
-                    AroomaSignatureMark(ink: accent)
+                    // The exact master signature (assets/brand), fully legible from the first frame,
+                    // with a slow metallic highlight. Buttons below act immediately; nothing waits
+                    // for the loop.
+                    AroomaSignatureShimmer(ink: accent, highlight: archive.theme.keyLight)
                         .frame(width: min(geo.size.width * 0.8, 330),
                                height: min(geo.size.width * 0.8, 330) / SignatureGeometry.logoAspect)
-                        .matchedGeometryEffect(id: "arooma-signature", in: signatureSpace)
                         .accessibilityElement()
                         .accessibilityLabel("Arooma")
                         .accessibilityAddTraits(.isHeader)
-                        .accessibilityHidden(cameFromIntro) // already announced by the intro
                     AtelierDisplay(title: "A collection worth keeping.", size: 27)
                         .multilineTextAlignment(.center)
                         .opacity(settled ? 1 : 0)
@@ -107,8 +85,8 @@ struct AtelierWelcome: View {
         .background(AtelierAtmosphere(theme: archive.theme))
         .onAppear {
             if reduceMotion { settled = true; dealt = true; return }
-            withAnimation(.easeOut(duration: 0.55).delay(cameFromIntro ? 0.35 : 0.1)) { settled = true }
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(cameFromIntro ? 0.45 : 0.25)) { dealt = true }
+            withAnimation(.easeOut(duration: 0.55).delay(0.1)) { settled = true }
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(0.25)) { dealt = true }
         }
     }
 
@@ -205,7 +183,7 @@ struct AtelierShelves: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 30) {
                 VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: archive.mode == .mine ? "Your collection" : "The sample archive",
+                    AtelierEyebrow(text: archive.mode == .mine ? "Your collection" : (archive.mode == .wishlist ? "Your Wishlist" : "The sample archive"),
                                    accent: archive.theme.palette.accent)
                     HStack(alignment: .firstTextBaseline) {
                         AtelierDisplay(title: "The shelves", size: 37)
@@ -471,124 +449,6 @@ struct ShelfOverview: View {
     }
 }
 
-struct AtelierSearch: View {
-    @EnvironmentObject private var archive: CollectionStore
-    @Environment(\.dismiss) private var dismiss
-    @State private var query = ""
-    let focus: (DisplayCard) -> Void
-    var adding = false
-
-    private var results: [Fragrance] {
-        let tokens = query.split(whereSeparator: \.isWhitespace).map(String.init)
-        return archive.catalog.filter { fragrance in
-            guard !tokens.isEmpty else { return true }
-            let all = ([fragrance.name, fragrance.house, fragrance.concentration, fragrance.year] +
-                       fragrance.notes).joined(separator: " ")
-            return tokens.allSatisfy { all.localizedStandardContains($0) }
-        }
-    }
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        AtelierEyebrow(text: "The fragrance index", accent: archive.theme.palette.accent)
-                        AtelierDisplay(title: adding ? "Add a fragrance" : "Discover", size: 38)
-                        Text("Search by name or note. If it’s missing, save the name instantly.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.bottom, 12)
-                    if results.isEmpty {
-                        ContentUnavailableView.search(text: query)
-                        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Button {
-                                if let fragrance = archive.quickAdd(name: query) {
-                                    let bottle = archive.bottles.first(where: {
-                                        $0.fragranceID == fragrance.id
-                                    })
-                                    focus(DisplayCard(id: bottle?.id.uuidString ?? fragrance.id,
-                                                      fragrance: fragrance, bottleID: bottle?.id))
-                                    dismiss()
-                                }
-                            } label: {
-                                Label("Save this fragrance name now", systemImage: "plus")
-                                    .frame(maxWidth: .infinity, minHeight: 51)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(archive.theme.palette.accent)
-                            Text("No catalog match required. You can add the house or a photo later.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    } else {
-                        ForEach(results) { fragrance in
-                            Button { select(fragrance) } label: {
-                                HStack(spacing: 16) {
-                                    AtelierCardSurface(fragranceID: fragrance.id, radius: 9)
-                                        .frame(width: 79, height: 115)
-                                    VStack(alignment: .leading, spacing: 7) {
-                                        AtelierEyebrow(text: fragrance.house, accent: archive.theme.palette.accent)
-                                        Text(fragrance.name)
-                                            .font(.system(.title3, design: .serif))
-                                            .foregroundStyle(.primary)
-                                        Text(fragrance.concentration)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                        if fragrance.archival {
-                                            Text("HISTORICAL ARTWORK")
-                                                .font(.caption2.weight(.semibold))
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    Spacer(minLength: 2)
-                                    Image(systemName: adding ? "plus.circle" : "chevron.right")
-                                        .font(.system(size: 17, weight: .light))
-                                        .foregroundStyle(archive.theme.palette.accent)
-                                        .frame(width: 44, height: 44)
-                                }
-                                .padding(10)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .atelierPlate(18)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("\(adding ? "Add" : "Open") \(fragrance.house) \(fragrance.name)")
-                        }
-                    }
-                    Text("Independent fragrance archive. The original photographs and collectible compositions are not brand endorsements.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 10)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .padding(.bottom, 35)
-            }
-            .background(AtelierAtmosphere(theme: archive.theme))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if adding {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") { dismiss() }
-                    }
-                }
-            }
-            .searchable(text: $query, prompt: "House, notes, concentration")
-        }
-    }
-
-    private func select(_ fragrance: Fragrance) {
-        if adding {
-            archive.add(fragrance)
-            dismiss()
-            return
-        }
-        let record = archive.bottles.first(where: { $0.fragranceID == fragrance.id })
-        focus(DisplayCard(id: record?.id.uuidString ?? fragrance.id,
-                          fragrance: fragrance, bottleID: record?.id))
-    }
-}
-
 struct AtelierOwnership: View {
     @EnvironmentObject private var archive: CollectionStore
     @State private var editing: BottleRecord?
@@ -826,7 +686,12 @@ struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var replayingIntro = false
-    @State private var probe = FramePacingProbe.shared
+    @State private var tuning = false
+    private static var versionString: String {
+        let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+        return "\(v) (\(b))"
+    }
 
     var body: some View {
         ScrollView {
@@ -890,13 +755,13 @@ struct AtelierStyle: View {
                         AroomaSignatureMark(ink: archive.theme.palette.accent)
                             .frame(height: 30)
                         Spacer(minLength: 8)
-                        Label("Replay intro", systemImage: "play.circle")
+                        Label("Show signature", systemImage: "sparkles")
                             .font(.subheadline.weight(.medium))
                     }
                     .frame(maxWidth: .infinity, minHeight: 40)
                 }
                 .buttonStyle(.glass)
-                .accessibilityLabel("Replay the Arooma signature intro")
+                .accessibilityLabel("Show the Arooma signature")
                 DisclosureGroup("About this archive") {
                     Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it switches off in Low Power Mode and with Reduce Motion.")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -905,25 +770,101 @@ struct AtelierStyle: View {
                 .font(.footnote)
                 .padding(15)
                 .atelierPlate(16)
-                // Hidden owner tool: long-press to show or hide the frame-time readout.
-                Text(probe.enabled ? "Arooma · frame-time readout on" : "Arooma · private and on-device")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 4)
-                    .contentShape(Rectangle())
-                    .onLongPressGesture(minimumDuration: 1.2) {
-                        probe.enabled.toggle()
-                        HapticEngine.shared.play(.completed)
-                    }
-                    .accessibilityHidden(true)
+                AtelierEyebrow(text: "Card lighting", accent: archive.theme.palette.accent)
+                Button {
+                    MotionField.shared.recenter()
+                    HapticEngine.shared.play(.completed)
+                } label: {
+                    Label("Recenter to how you're holding the phone", systemImage: "scope")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                }
+                .buttonStyle(.glass)
+                StylizedCardSettings()
+                DisclosureGroup("About this archive") {
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it holds still with Reduce Motion and switches off in Low Power Mode.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                        .padding(.top, 6)
+                }
+                .font(.footnote)
+                .padding(15)
+                .atelierPlate(16)
+                // Version row. Long-press opens the hidden owner tuning panel.
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text(Self.versionString).monospacedDigit()
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 15)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+                .onLongPressGesture(minimumDuration: 0.9) {
+                    HapticEngine.shared.play(.completed)
+                    tuning = true
+                }
+                .accessibilityElement(children: .combine)
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
             .padding(.bottom, 30)
         }
         .scrollContentBackground(.hidden)
-        .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay() }
+        .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay().environmentObject(archive) }
+        .sheet(isPresented: $tuning) { TuningPanel() }
+    }
+}
+
+/// Stylized card downloads. The preference is real and stored, but downloading stays
+/// unavailable until an approved, licensed card source exists: no remote catalog is invented
+/// and no manufacturer imagery is fetched.
+struct StylizedCardSettings: View {
+    @AppStorage("arooma.cards.downloadWhenOnline") private var downloadWhenOnline = false
+    @AppStorage("arooma.cards.wifiOnly") private var wifiOnly = true
+    @State private var cacheBytes: Int64 = 0
+    private static let licensedSourceAvailable = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle("Download stylized cards when online", isOn: $downloadWhenOnline)
+                .disabled(!Self.licensedSourceAvailable)
+            Toggle("Wi-Fi only", isOn: $wifiOnly)
+                .disabled(!Self.licensedSourceAvailable || !downloadWhenOnline)
+            HStack {
+                Text("Downloaded cards: \(ByteCountFormatter.string(fromByteCount: cacheBytes, countStyle: .file))")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Clear cache") { clearCache() }
+                    .disabled(cacheBytes == 0)
+            }
+            Text("Unavailable for now: Arooma has no licensed source for stylized card artwork yet. Your bundled cards and photos are unaffected, and nothing is downloaded.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .font(.subheadline)
+        .padding(15)
+        .atelierPlate(16)
+        .onAppear { cacheBytes = Self.cacheSize() }
+    }
+
+    static var cacheDirectory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("StylizedCards", isDirectory: true)
+    }
+
+    static func cacheSize() -> Int64 {
+        guard let files = FileManager.default.enumerator(at: cacheDirectory, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }
+        var total: Int64 = 0
+        for case let url as URL in files {
+            total += Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+        return total
+    }
+
+    private func clearCache() {
+        try? FileManager.default.removeItem(at: Self.cacheDirectory)
+        cacheBytes = Self.cacheSize()
     }
 }
 
@@ -1423,210 +1364,6 @@ struct ComposedSet: View {
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.78), value: ids)
         .accessibilityHidden(true)
-    }
-}
-
-// MARK: - Quick Add: capture now, details later
-
-struct QuickAddSheet: View {
-    @EnvironmentObject private var archive: CollectionStore
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var name = ""
-    @State private var photoData: Data?
-    @State private var libraryItem: PhotosPickerItem?
-    @State private var cameraOpen = false
-    @State private var saving = false
-    @State private var photoFailed = false
-    @FocusState private var typing: Bool
-    let onAdded: () -> Void
-
-    private var trimmed: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var suggestions: [Fragrance] {
-        guard trimmed.count >= 2 else { return [] }
-        return Array(archive.matches(trimmed, scope: .demo).prefix(3))
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    preview
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 4)
-                    TextField("Fragrance name", text: $name)
-                        .font(.title3)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.done)
-                        .focused($typing)
-                        .onSubmit(save)
-                        .padding(14)
-                        .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    if !suggestions.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            AtelierEyebrow(text: "In the archive", accent: archive.theme.palette.accent)
-                            ForEach(suggestions) { fragrance in
-                                Button { addKnown(fragrance) } label: {
-                                    HStack(spacing: 12) {
-                                        AtelierCardSurface(fragranceID: fragrance.id, radius: 4, shadowed: false)
-                                            .frame(width: 30, height: 44)
-                                        VStack(alignment: .leading, spacing: 1) {
-                                            Text(fragrance.name).font(.subheadline.weight(.medium))
-                                            Text(fragrance.house).font(.caption).foregroundStyle(.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "plus.circle.fill")
-                                            .foregroundStyle(archive.theme.palette.accent)
-                                    }
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(PressableCardStyle())
-                                .accessibilityLabel("Add \(fragrance.house) \(fragrance.name)")
-                            }
-                        }
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                    HStack(spacing: 10) {
-                        Button {
-                            typing = false
-                            cameraOpen = true
-                        } label: {
-                            Label("Take Photo", systemImage: "camera")
-                                .frame(maxWidth: .infinity, minHeight: 36)
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
-
-                        PhotosPicker(selection: $libraryItem, matching: .images) {
-                            Label(photoData == nil ? "Choose Photo" : "Change Photo", systemImage: "photo")
-                                .frame(maxWidth: .infinity, minHeight: 36)
-                        }
-                        .buttonStyle(.glass)
-                    }
-                    if photoFailed {
-                        Label("That photo could not be read. Try another, or save with the name only.",
-                              systemImage: "exclamationmark.triangle")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                    Text("Only a name or a photo is needed. Everything stays private on this iPhone.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                .padding(20)
-                .animation(reduceMotion ? nil : .snappy, value: suggestions.map(\.id))
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .safeAreaInset(edge: .bottom) {
-                Button(action: save) {
-                    Label("Save to My Collection", systemImage: "checkmark")
-                        .font(.headline).frame(maxWidth: .infinity, minHeight: 40)
-                }
-                .buttonStyle(.glassProminent)
-                .tint(archive.theme.palette.accent)
-                .disabled((trimmed.isEmpty && photoData == nil) || saving)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
-            }
-            .navigationTitle("Quick Add")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel", systemImage: "xmark") { dismiss() }
-                }
-            }
-            .onAppear { typing = true }
-            .onChange(of: libraryItem) { _, item in
-                Task {
-                    if let bytes = try? await item?.loadTransferable(type: Data.self),
-                       let image = UIImage(data: bytes) {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                            photoData = image.jpegData(compressionQuality: 0.84)
-                        }
-                        photoFailed = false
-                    } else if item != nil {
-                        photoFailed = true
-                    }
-                }
-            }
-            .fullScreenCover(isPresented: $cameraOpen) {
-                CameraCapture { image in
-                    photoData = image.jpegData(compressionQuality: 0.84)
-                    cameraOpen = false
-                } onCancel: {
-                    cameraOpen = false
-                }
-                .ignoresSafeArea()
-            }
-        }
-    }
-
-    /// A live collectible preview: the card you are making, updating as you type or add a photo.
-    private var preview: some View {
-        let draft = Fragrance(id: "personal-preview", house: "My Collection",
-                              name: trimmed.isEmpty ? "Your discovery" : trimmed,
-                              concentration: "", year: "", top: [], heart: [], base: [],
-                              shelf: .autumn, archival: false)
-        return ZStack {
-            if let photoData, let photo = UIImage(data: photoData) {
-                Image(uiImage: photo)
-                    .resizable().scaledToFill()
-                    .frame(width: 150, height: 150 * 86 / 59)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay(alignment: .bottomLeading) {
-                        Text(draft.name)
-                            .font(.system(size: 15, design: .serif))
-                            .foregroundStyle(.white)
-                            .lineLimit(2)
-                            .padding(10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .top, endPoint: .bottom))
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .transition(.scale(scale: 0.9).combined(with: .opacity))
-                    .accessibilityLabel("Captured bottle photograph")
-            } else {
-                PersonalCardArt(fragrance: draft)
-                    .frame(width: 150, height: 150 * 86 / 59)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .accessibilityHidden(true)
-            }
-        }
-        .shadow(color: archive.theme.shadowTint.opacity(0.4), radius: 18, y: 12)
-        .rotation3DEffect(.degrees(saving ? 0 : -6), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
-        .scaleEffect(saving ? 0.6 : 1)
-        .offset(y: saving ? 260 : 0)
-        .opacity(saving ? 0 : 1)
-        .animation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.8), value: saving)
-        .animation(reduceMotion ? nil : .snappy, value: trimmed)
-    }
-
-    private func addKnown(_ fragrance: Fragrance) {
-        guard !saving else { return }
-        saving = true
-        archive.add(fragrance)
-        finish()
-    }
-
-    private func save() {
-        guard !saving, !trimmed.isEmpty || photoData != nil else { return }
-        saving = true
-        if photoData == nil,
-           let known = archive.catalog.first(where: {
-               $0.name.localizedCaseInsensitiveCompare(trimmed) == .orderedSame
-           }) {
-            archive.add(known)
-        } else {
-            archive.quickAdd(name: trimmed, imageData: photoData)
-        }
-        finish()
-    }
-
-    private func finish() {
-        typing = false
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 0 : 340))
-            onAdded()
-            dismiss()
-        }
     }
 }
 

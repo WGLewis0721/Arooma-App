@@ -19,15 +19,15 @@ struct SpringParameters: Equatable {
     var friction: Double { 4 * Double.pi * damping / response }
 
     /// Card settling into the center slot after release: weighted, one soft overshoot at most.
-    static let deckSettle = SpringParameters(response: 0.46, damping: 0.84)
+    static var deckSettle = SpringParameters(response: 0.46, damping: 0.84)
     /// Programmatic moves (tap a neighbour, VoiceOver, search focus): a little calmer.
-    static let deckGlide = SpringParameters(response: 0.52, damping: 0.9)
+    static var deckGlide = SpringParameters(response: 0.52, damping: 0.9)
     /// Finger-down lift and release of the pressed card.
-    static let press = SpringParameters(response: 0.24, damping: 0.68)
+    static var press = SpringParameters(response: 0.24, damping: 0.68)
     /// Inspector flip after the finger lets go.
-    static let flip = SpringParameters(response: 0.52, damping: 0.8)
+    static var flip = SpringParameters(response: 0.52, damping: 0.8)
     /// Cover Flow, Stack and Fan morphing into one another.
-    static let morph = SpringParameters(response: 0.62, damping: 0.86)
+    static var morph = SpringParameters(response: 0.62, damping: 0.86)
 }
 
 /// One damped harmonic oscillator, integrated with semi-implicit Euler at a fixed small sub-step.
@@ -81,8 +81,14 @@ struct SpringAxis: Equatable {
 enum DeckMath {
     /// iOS-style rubber band: the further past the edge, the stronger the resistance.
     /// `limit` is the maximum distance (deck units) the content can ever travel past the edge.
-    static func rubberBand(_ overshoot: Double, limit: Double = 0.42, coefficient: Double = 0.55) -> Double {
+    /// Owner-tunable (hidden tuning panel); defaults are the shipped values.
+    static var rubberLimit = 0.42
+    static var rubberCoefficient = 0.55
+
+    static func rubberBand(_ overshoot: Double, limit: Double? = nil, coefficient: Double? = nil) -> Double {
         guard overshoot != 0 else { return 0 }
+        let limit = max(0.05, limit ?? rubberLimit)
+        let coefficient = max(0.05, coefficient ?? rubberCoefficient)
         let sign: Double = overshoot < 0 ? -1 : 1
         let x = abs(overshoot)
         return sign * (1 - 1 / (x * coefficient / limit + 1)) * limit
@@ -121,10 +127,10 @@ struct DeckModel: Equatable {
 
     /// Above this release speed (cards per second) a release commits to the next card in the
     /// direction of travel. Below it, the card nearest the centre wins.
-    static let flickThreshold = 0.75
+    static var flickThreshold = 0.75
     /// Release velocity handed to the spring is bounded so a violent flick cannot overshoot
     /// far enough to visually present a card that will not be selected.
-    static let maxReleaseVelocity = 7.0
+    static var maxReleaseVelocity = 7.0
 
     init(count: Int, index: Int = 0) {
         self.count = max(0, count)
@@ -295,6 +301,16 @@ struct CardPose: Equatable {
     }
 }
 
+/// Layout shape parameters, tunable live from the hidden tuning panel. Defaults are shipped values.
+enum LayoutTuning {
+    static var coverFlowYaw = 54.0          // degrees a neighbour hinges away
+    static var coverFlowScaleFalloff = 0.15 // scale lost by the first neighbour
+    static var stackDealRoll = 9.0          // degrees the dealt card turns in-plane
+    static var stackDealYaw = 12.0          // degrees the dealt card turns toward the viewer
+    static var fanSpread = 11.5             // degrees between fanned cards
+    static var fanPivot = 2.35              // pivot below the card, in card heights from the top
+}
+
 enum DeckLayoutEngine {
     /// How far apart neighbouring cards sit, in points, for a given card width. Used to convert
     /// finger travel into deck units so the card under the finger tracks it one-to-one.
@@ -304,7 +320,9 @@ enum DeckLayoutEngine {
         case .stack: return w * 1.04
         // Arc length per card at the card centre: pivot 1.85 card heights below, 11.5° apart.
         // Matching it keeps the fanned card exactly under the finger.
-        case .fan: return w * 0.54
+        case .fan:
+            let pivot = max(0.6, LayoutTuning.fanPivot)
+            return w * (pivot - 0.5) * (86.0 / 59.0) * max(1, LayoutTuning.fanSpread) * .pi / 180
         }
     }
 
@@ -323,8 +341,8 @@ enum DeckLayoutEngine {
             let s = DeckMath.clamp(d, -1, 1)
             let rest = d - s
             p.x = w * (0.60 * s + 0.24 * rest)
-            p.yaw = -s * 54
-            p.scale = max(0.66, 1 - 0.15 * abs(s) - 0.045 * abs(rest))
+            p.yaw = -s * LayoutTuning.coverFlowYaw
+            p.scale = max(0.5, 1 - LayoutTuning.coverFlowScaleFalloff * abs(s) - 0.045 * abs(rest))
             p.y = 0
             p.depth = -m
             p.shade = 0.10 * abs(s) + 0.07 * abs(rest)
@@ -343,8 +361,8 @@ enum DeckLayoutEngine {
                 // The top card is dealt off to the left, lifting toward the viewer and turning.
                 p.x = d * w * 1.06
                 p.y = m * w * 0.05
-                p.roll = d * 9
-                p.yaw = m * 12
+                p.roll = d * LayoutTuning.stackDealRoll
+                p.yaw = m * LayoutTuning.stackDealYaw
                 p.scale = 1 + 0.025 * min(1, m)
                 p.depth = 1 + m
                 p.shade = 0
@@ -352,10 +370,10 @@ enum DeckLayoutEngine {
             }
         case .fan:
             // A held hand of cards: rotation about a pivot far below, focused card raised.
-            let spread = 11.5
+            let spread = LayoutTuning.fanSpread
             let clamped = DeckMath.clamp(d, -3.6, 3.6)
             p.roll = clamped * spread
-            p.pivotY = 2.35
+            p.pivotY = LayoutTuning.fanPivot
             p.y = -w * 0.07 * max(0, 1 - m)
             p.scale = max(0.82, 1 - 0.045 * min(m, 3))
             p.depth = -m
@@ -378,7 +396,7 @@ struct FlipModel: Equatable {
     private var origin: Double = 0
     private(set) var dragging = false
 
-    static let flickThreshold = 240.0 // degrees per second
+    static var flickThreshold = 240.0 // degrees per second
 
     var angle: Double { axis.value }
     var isAnimating: Bool { !dragging && !axis.isResting }
@@ -409,6 +427,7 @@ struct FlipModel: Equatable {
     @discardableResult
     mutating func release(velocity: Double) -> Double {
         dragging = false
+        axis.parameters = .flip
         let v = velocity.isFinite ? velocity : 0
         let base = (axis.value / 180).rounded(.down) * 180
         let target: Double
@@ -422,6 +441,7 @@ struct FlipModel: Equatable {
     /// Tap / button flip: half a turn from wherever the card currently is.
     mutating func flip(direction: Double = 1) {
         dragging = false
+        axis.parameters = .flip
         let resting = (axis.target / 180).rounded() * 180
         axis.target = resting + (direction >= 0 ? 180 : -180)
     }

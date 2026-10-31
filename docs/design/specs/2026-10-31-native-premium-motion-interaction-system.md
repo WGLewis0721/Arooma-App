@@ -223,6 +223,10 @@ Status: implemented in the native target; simulator-built and simulator-captured
 
 Before/after captures, engine-playback recordings and the simulator frame-pacing A/B are in [docs/evidence/2026-10-31-native-motion](../../evidence/2026-10-31-native-motion/README.md). Simulator figures only rank relative cost (the foil shader was the largest); device pacing is still unmeasured.
 
+### Live tuning (added later on 2026-10-31)
+
+Long-press **Version** in View & Style to open the hidden tuning panel: springs, flick/release/rubber-band, layout shapes, tilt (range, sensitivity, smoothing, baseline drift with Off as default, sensor rate, lean) and foil (light travel, viewer distance, sheen, glint, diffraction, glitter, idle drift). Values persist and can be copied as text; copied values become the next code defaults.
+
 ### Tests
 
 - `ios/Tests/DeckPhysics/main.swift`: centring for all layouts and widths, pose continuity, exact rest snap, one-card snap under violent flicks, 5,000 random release-policy cases, 200 interrupted alternating swipes on a 24-card deck with no visible jump, end stops, bounded overshoot, empty/single decks, count changes, glide interruption, flip face visibility and flip landing, 60/120 Hz agreement.

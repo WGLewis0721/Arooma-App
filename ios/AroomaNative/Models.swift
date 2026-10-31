@@ -1,7 +1,12 @@
 import SwiftUI
 import Foundation
 
-enum CollectionMode: String, Codable, CaseIterable { case demo = "Demo", mine = "Mine" }
+enum CollectionMode: String, Codable, CaseIterable {
+    case demo = "Demo", mine = "Mine"
+    /// Fragrances the owner wants, not owns. Persisted as `wishlistMode` (not as this raw value)
+    /// so an older build reading the archive still sees a valid mode.
+    case wishlist = "Wishlist"
+}
 enum CardLayout: String, Codable, CaseIterable, Identifiable {
     case coverFlow = "Cover Flow", stack = "Stack", fan = "Fan"
     var id: Self { self }
@@ -102,6 +107,9 @@ struct BottleRecord: Codable, Identifiable, Hashable {
     var authenticityNotes = ""
     var favorite = false
     var wears: [WearEvent] = []
+    // Optional, additive: carried over when a Wishlist entry becomes an owned bottle.
+    var capturePhotoFileName: String? = nil
+    var source: String? = nil
     var lastWorn: Date? { wears.max(by: { $0.date < $1.date })?.date }
     var lowStock: Bool { remaining <= 0.2 }
     var wornToday: Bool { wears.contains { Calendar.current.isDateInToday($0.date) } }
@@ -128,6 +136,20 @@ struct DisplayCard: Identifiable, Hashable {
     var id: String // Stable across all layouts; owner copies have their own identity.
     var fragrance: Fragrance
     var bottleID: UUID?
+    var wishID: UUID? = nil
+}
+
+/// A fragrance the owner wants. Shares the stable fragrance identity (catalog or personal
+/// capture) with owned bottles; it is a relationship, not a second fragrance record.
+struct WishlistEntry: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var fragranceID: String
+    var added = Date()
+    /// Who or where recommended it (free text, stays on device).
+    var source = ""
+    var notes = ""
+    var photoFileName: String? = nil
+    var tested: Bool? = nil
 }
 struct SavedArchive: Codable {
     var mode: CollectionMode = .demo
@@ -146,4 +168,7 @@ struct SavedArchive: Codable {
     var wearSessions: [WearSession]? = nil
     var customFragrances: [Fragrance]? = nil
     var savedLayers: [LayerPreset]? = nil
+    var wishlist: [WishlistEntry]? = nil
+    var selectedWishID: UUID? = nil
+    var wishlistMode: Bool? = nil
 }

@@ -19,6 +19,8 @@ import SwiftUI
     @Published var customFragrances: [Fragrance] = [] { didSet { persist() } }
     @Published var savedLayers: [LayerPreset] = [] { didSet { persist() } }
     @Published var onboarded = false { didSet { persist() } }
+    @Published var wishlist: [WishlistEntry] = [] { didSet { persist() } }
+    @Published var selectedWishID: UUID? { didSet { persist() } }
 
     private var hydrating = true
     private static var location: URL {
@@ -36,16 +38,21 @@ import SwiftUI
             shelfNames = saved.shelfNames ?? [:]; wearSessions = saved.wearSessions ?? []
             customFragrances = saved.customFragrances ?? []
             savedLayers = saved.savedLayers ?? []
+            wishlist = saved.wishlist ?? []
+            selectedWishID = saved.selectedWishID
+            if saved.wishlistMode == true { mode = .wishlist }
         }
         hydrating = false
     }
     private func persist() {
         guard !hydrating else { return }
-        let snapshot = SavedArchive(mode: mode, theme: theme, appearance: appearance,
+        // `.wishlist` is stored as Mine + wishlistMode so older builds still decode the archive.
+        let snapshot = SavedArchive(mode: mode == .wishlist ? .mine : mode, theme: theme, appearance: appearance,
             layout: layout, selectedDemoID: selectedDemoID, selectedMineID: selectedMineID,
             selectedShelf: selectedShelf, rotationID: rotationID, bottles: bottles,
             rotations: rotations, onboarded: onboarded,
-            shelfNames: shelfNames, wearSessions: wearSessions, customFragrances: customFragrances, savedLayers: savedLayers)
+            shelfNames: shelfNames, wearSessions: wearSessions, customFragrances: customFragrances, savedLayers: savedLayers,
+            wishlist: wishlist, selectedWishID: selectedWishID, wishlistMode: mode == .wishlist ? true : nil)
         do {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: Self.location, options: .atomic)
@@ -98,6 +105,11 @@ import SwiftUI
                 guard let f = fragrance(id: b.fragranceID) else { return nil }
                 return DisplayCard(id: b.id.uuidString, fragrance: f, bottleID: b.id)
             }
+        case .wishlist:
+            return wishlist.compactMap { w in
+                guard let f = fragrance(id: w.fragranceID) else { return nil }
+                return DisplayCard(id: "wish-\(w.id.uuidString)", fragrance: f, bottleID: nil, wishID: w.id)
+            }
         }
     }
     var displayedCards: [DisplayCard] {
@@ -108,8 +120,11 @@ import SwiftUI
         return subset.isEmpty ? cards : subset
     }
     var selectedID: String? {
-        if mode == .demo { return selectedDemoID }
-        return selectedMineID?.uuidString
+        switch mode {
+        case .demo: return selectedDemoID
+        case .mine: return selectedMineID?.uuidString
+        case .wishlist: return selectedWishID.map { "wish-\($0.uuidString)" }
+        }
     }
     var selected: DisplayCard? {
         let current = displayedCards
@@ -121,8 +136,11 @@ import SwiftUI
     }
     func choose(_ card: DisplayCard, haptic: Bool = true) {
         guard selectedID != card.id else { return }
-        if mode == .demo { selectedDemoID = card.id }
-        else { selectedMineID = card.bottleID }
+        switch mode {
+        case .demo: selectedDemoID = card.id
+        case .mine: selectedMineID = card.bottleID
+        case .wishlist: selectedWishID = card.wishID
+        }
         if haptic {
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 240_000_000)
@@ -302,10 +320,117 @@ import SwiftUI
         }
     }
     var lowStock: [BottleRecord] { bottles.filter(\.lowStock) }
+    // MARK: Capture and Wishlist
+
+    /// Saves a captured photo (JPEG) under Documents and returns its file name.
+    func storeCapturePhoto(_ data: Data) -> String? {
+        let filename = "capture-\(UUID().uuidString).jpg"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(filename)
+        return (try? data.write(to: url, options: .atomic)) != nil ? filename : nil
+    }
+
+    /// Creates a personal fragrance identity from a capture (name and/or photo file) without
+    /// choosing a destination. Returns nil when there is nothing to save.
+    func makePersonalFragrance(name: String, house: String = "", photoFileName: String?) -> Fragrance? {
+        let clean = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(90))
+        guard !clean.isEmpty || photoFileName != nil else { return nil }
+        let houseClean = house.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fragrance = Fragrance(id: "personal-\(UUID().uuidString)",
+                                  house: houseClean.isEmpty ? "My Collection" : String(houseClean.prefix(80)),
+                                  name: clean.isEmpty ? "New fragrance" : clean,
+                                  concentration: "Personal discovery", year: "",
+                                  top: [], heart: [], base: [], shelf: .autumn, archival: false,
+                                  photoFileName: photoFileName)
+        customFragrances.append(fragrance)
+        return fragrance
+    }
+
+    /// Adds to the Wishlist (no duplicate for the same fragrance identity). Returns the entry.
+    @discardableResult
+    func addToWishlist(_ fragrance: Fragrance, source: String = "", notes: String = "",
+                       photoFileName: String? = nil) -> WishlistEntry {
+        if let index = wishlist.firstIndex(where: { $0.fragranceID == fragrance.id }) {
+            if !source.isEmpty && wishlist[index].source.isEmpty { wishlist[index].source = source }
+            if !notes.isEmpty && wishlist[index].notes.isEmpty { wishlist[index].notes = notes }
+            if wishlist[index].photoFileName == nil { wishlist[index].photoFileName = photoFileName }
+            selectedWishID = wishlist[index].id
+            HapticEngine.shared.play(.completed)
+            return wishlist[index]
+        }
+        let entry = WishlistEntry(fragranceID: fragrance.id, source: source, notes: notes, photoFileName: photoFileName)
+        wishlist.insert(entry, at: 0)
+        selectedWishID = entry.id
+        HapticEngine.shared.play(.completed)
+        return entry
+    }
+
+    func isWishlisted(_ fragranceID: String) -> Bool { wishlist.contains { $0.fragranceID == fragranceID } }
+    func isOwned(_ fragranceID: String) -> Bool { bottles.contains { $0.fragranceID == fragranceID } }
+
+    /// Moves a Wishlist fragrance into the Collection, keeping notes, source and photo. If the
+    /// fragrance is already owned, nothing is duplicated: the entry is simply resolved.
+    @discardableResult
+    func moveToCollection(wishID: UUID) -> UUID? {
+        guard let index = wishlist.firstIndex(where: { $0.id == wishID }) else { return nil }
+        let entry = wishlist[index]
+        let bottleID: UUID
+        if let existing = bottles.first(where: { $0.fragranceID == entry.fragranceID }) {
+            bottleID = existing.id
+        } else {
+            var record = BottleRecord(fragranceID: entry.fragranceID,
+                                      shelf: fragrance(id: entry.fragranceID)?.shelf ?? .autumn)
+            record.personalNotes = entry.notes
+            record.capturePhotoFileName = entry.photoFileName
+            record.source = entry.source.isEmpty ? nil : entry.source
+            bottles.append(record)
+            bottleID = record.id
+        }
+        wishlist.remove(at: index)
+        if selectedWishID == wishID { selectedWishID = wishlist.first?.id }
+        selectedMineID = bottleID
+        HapticEngine.shared.play(.completed)
+        return bottleID
+    }
+
+    func removeFromWishlist(_ wishID: UUID) {
+        wishlist.removeAll { $0.id == wishID }
+        if selectedWishID == wishID { selectedWishID = wishlist.first?.id }
+    }
+
+    /// Undo support for capture commits: removes a just-created bottle (no wears yet) and, if it
+    /// was a personal capture nobody else references, its fragrance identity too.
+    func undoCapture(bottleID: UUID?, wishID: UUID?, createdFragranceID: String?) {
+        if let bottleID, let b = bottles.first(where: { $0.id == bottleID }), b.wears.isEmpty {
+            bottles.removeAll { $0.id == bottleID }
+            if selectedMineID == bottleID { selectedMineID = bottles.last?.id }
+        }
+        if let wishID { removeFromWishlist(wishID) }
+        if let createdFragranceID, !isOwned(createdFragranceID), !isWishlisted(createdFragranceID) {
+            customFragrances.removeAll { $0.id == createdFragranceID }
+        }
+    }
+
+    /// Adds an owned bottle and returns its id (no mode switch side effects beyond `add`).
+    @discardableResult
+    func addOwned(_ fragrance: Fragrance, notes: String = "", source: String = "", photoFileName: String? = nil) -> UUID? {
+        let existed = bottles.first(where: { $0.fragranceID == fragrance.id })?.id
+        add(fragrance)
+        guard existed == nil, let index = bottles.firstIndex(where: { $0.fragranceID == fragrance.id }) else { return existed }
+        if !notes.isEmpty { bottles[index].personalNotes = notes }
+        if !source.isEmpty { bottles[index].source = source }
+        if photoFileName != nil && fragrance.photoFileName == nil { bottles[index].capturePhotoFileName = photoFileName }
+        return bottles[index].id
+    }
+
     func matches(_ query: String, scope: CollectionMode? = nil) -> [Fragrance] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let pool: [Fragrance] = (scope ?? mode) == .demo ? catalog :
-            bottles.compactMap { fragrance(id: $0.fragranceID) }
+        let pool: [Fragrance]
+        switch scope ?? mode {
+        case .demo: pool = catalog
+        case .mine: pool = bottles.compactMap { fragrance(id: $0.fragranceID) }
+        case .wishlist: pool = wishlist.compactMap { fragrance(id: $0.fragranceID) }
+        }
         guard !q.isEmpty else { return pool }
         let tokens = q.split(whereSeparator: \.isWhitespace).map(String.init)
         return pool.filter { f in

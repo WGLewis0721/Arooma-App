@@ -1,6 +1,6 @@
 # Arooma — canonical signature and Higgsfield pen-writing intro
 
-**Status:** Brand asset master delivered 2026-10-31. Native SwiftUI integration and real-device QA are the next work item.
+**Status:** Brand asset master delivered 2026-10-31. **Owner decision 2026-10-31 (later):** the app no longer plays the pen-writing clips. The intro shows the full static master immediately with a looping metallic highlight masked to the letterforms (static with Reduce Motion); see `ios/AroomaNative/Signature.swift`. The MP4s stay in the repository as brand assets but are not bundled.
 
 ## Identity lock
 

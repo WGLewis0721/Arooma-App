@@ -9,7 +9,7 @@
 | Surface | Native Collection/Deck, Card Inspector, Scan/Quick Add, Wishlist, Search, Insight sheet, Settings, Share Sheet |
 | Size | L, cross-app data and interaction work |
 | Author | ChatGPT for Arooma, 2026-10-31 |
-| Status | **Implementation specification; not built by this document** |
+| Status | Local-first slice implemented on branch feat/gesture-wishlist-tuning (Wishlist, focused-card insight gestures, capture/scan review, share PNG, compare, faceted search, download setting default off). Catalog network lookup and licensed card downloads remain blocked on a source and rights. Not verified on a device. |
 | Governing docs read | docs/design/RULES_CARD.md; docs/design/brand/BRAND_BOARD.md; docs/design/PLAN_SPEC_PROTOCOL.md; docs/design/packs/spec-writing.md; docs/design/specs/2026-10-30-unofficial-companion-strategy.md; docs/design/specs/2026-10-31-native-premium-motion-interaction-system.md |
 
 ## 1. Problem
@@ -211,3 +211,4 @@
 | Date | Decision | By | Documents updated |
 | --- | --- | --- | --- |
 | 2026-10-31 | Prefer gesture-consolidated native product interaction, rename To Try to Wishlist, add image sharing/insight/search/scan destination flow; require real catalog/rights verification for enrichment and downloads | Owner direction, detailed as implementation proposal | This spec, spec index, design decision log |
+| 2026-10-31 | Implemented the local-first slice with no network, no new tests (owner testing policy) and all physics/tilt/foil constants live-tunable on device | Implementation (Claude Code) | This spec status; native source |

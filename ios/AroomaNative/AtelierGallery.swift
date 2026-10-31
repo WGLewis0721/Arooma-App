@@ -4,6 +4,7 @@ struct AtelierGallery: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
     @GestureState private var dragX: CGFloat = 0
     @State private var pinchScale: CGFloat = 1
     @State private var shelfOverview = false
@@ -60,7 +61,7 @@ struct AtelierGallery: View {
                         .accessibilityLabel("Return to cards")
                     }
                     .padding(.horizontal, 23).padding(.top, 10)
-                    AtelierShelves(focus: { card in
+                    AtelierCompactShelves(focus: { card in
                         archive.choose(card, haptic: false)
                         withAnimation(.spring(response: 0.47, dampingFraction: 0.88)) { shelfOverview = false }
                     }, add: add)
@@ -77,6 +78,10 @@ struct AtelierGallery: View {
         }
         .onAppear { FoilMotion.shared.start() }
         .onDisappear { FoilMotion.shared.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active && !shelfOverview { FoilMotion.shared.start() }
+            else { FoilMotion.shared.stop() }
+        }
         .onChange(of: shelfOverview) { _, showing in
             if showing { FoilMotion.shared.stop() }
             else { FoilMotion.shared.start() }

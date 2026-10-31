@@ -746,6 +746,8 @@ struct AtelierWearLog: View {
     @State private var selected: [UUID] = []
     @State private var impression = ""
     @State private var showAll = false
+    @State private var namingLayer = false
+    @State private var newLayerName = ""
     @Binding var startingBottleID: UUID?
     let add: () -> Void
     let focus: (DisplayCard) -> Void
@@ -776,6 +778,40 @@ struct AtelierWearLog: View {
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
                         action: "Add a bottle", callback: add, accent: archive.theme.palette.accent)
                 } else {
+                    if !archive.savedLayers.isEmpty {
+                        VStack(alignment: .leading, spacing: 9) {
+                            AtelierEyebrow(text: "Your saved combinations", accent: archive.theme.palette.accent)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 9) {
+                                    ForEach(archive.savedLayers) { layer in
+                                        Button {
+                                            selected = layer.bottleIDs.filter { id in
+                                                archive.bottles.contains(where: { $0.id == id })
+                                            }
+                                        } label: {
+                                            VStack(alignment: .leading, spacing: 5) {
+                                                Text(layer.name)
+                                                    .font(.system(.subheadline, design: .serif))
+                                                    .lineLimit(1)
+                                                Text("\(layer.bottleIDs.count) scents · tap to wear")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                            .frame(width: 146, alignment: .leading)
+                                            .padding(13)
+                                            .atelierPlate(13)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .contextMenu {
+                                            Button("Delete saved combination", role: .destructive) {
+                                                archive.deleteLayer(layer.id)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     HStack {
                         AtelierEyebrow(text: "Choose your bottles", accent: archive.theme.palette.accent)
                         Spacer()
@@ -788,6 +824,7 @@ struct AtelierWearLog: View {
                                 Button {
                                     if selected.contains(bottle.id) { selected.removeAll { $0 == bottle.id } }
                                     else { selected.append(bottle.id) }
+                                    HapticEngine.shared.play(.selection)
                                 } label: {
                                     VStack(spacing: 7) {
                                         AtelierCardSurface(fragranceID: scent.id, selected: selected.contains(bottle.id))
@@ -844,6 +881,18 @@ struct AtelierWearLog: View {
                                     .frame(maxWidth: .infinity, minHeight: 51)
                             }
                             .buttonStyle(.borderedProminent).tint(archive.theme.palette.accent)
+                            if selected.count > 1 {
+                                Button {
+                                    newLayerName = ""
+                                    namingLayer = true
+                                } label: {
+                                    Label("Save combination for later", systemImage: "bookmark")
+                                        .font(.subheadline.weight(.medium))
+                                        .frame(maxWidth: .infinity, minHeight: 45)
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(archive.theme.palette.accent)
+                            }
                         }
                         .padding(15).atelierPlate(20)
                     }
@@ -884,6 +933,15 @@ struct AtelierWearLog: View {
             .padding(.horizontal, 22).padding(.top, 15).padding(.bottom, 32)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .alert("Save this combination", isPresented: $namingLayer) {
+            TextField("e.g. Workday layer", text: $newLayerName)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                archive.saveLayer(name: newLayerName, bottleIDs: selectedIDs)
+            }
+        } message: {
+            Text("Give these fragrances a name so you can wear them together again.")
+        }
         .onAppear { includeStartingBottle() }
         .onChange(of: startingBottleID) { _, _ in includeStartingBottle() }
     }

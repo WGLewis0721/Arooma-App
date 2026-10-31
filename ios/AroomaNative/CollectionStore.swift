@@ -16,6 +16,7 @@ import SwiftUI
     @Published var rotations: [SavedRotation] = [] { didSet { persist() } }
     @Published var shelfNames: [String: String] = [:] { didSet { persist() } }
     @Published var wearSessions: [WearSession] = [] { didSet { persist() } }
+    @Published var customFragrances: [Fragrance] = [] { didSet { persist() } }
     @Published var onboarded = false { didSet { persist() } }
 
     private var hydrating = true
@@ -32,6 +33,7 @@ import SwiftUI
             rotationID = saved.rotationID; bottles = saved.bottles
             rotations = saved.rotations; onboarded = saved.onboarded
             shelfNames = saved.shelfNames ?? [:]; wearSessions = saved.wearSessions ?? []
+            customFragrances = saved.customFragrances ?? []
         }
         hydrating = false
     }
@@ -41,7 +43,7 @@ import SwiftUI
             layout: layout, selectedDemoID: selectedDemoID, selectedMineID: selectedMineID,
             selectedShelf: selectedShelf, rotationID: rotationID, bottles: bottles,
             rotations: rotations, onboarded: onboarded,
-            shelfNames: shelfNames, wearSessions: wearSessions)
+            shelfNames: shelfNames, wearSessions: wearSessions, customFragrances: customFragrances)
         do {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: Self.location, options: .atomic)
@@ -49,13 +51,41 @@ import SwiftUI
             NSLog("Arooma could not save native collection: %@", error.localizedDescription)
         }
     }
+    var catalog: [Fragrance] { Fragrance.catalog + customFragrances }
+    func fragrance(id: String) -> Fragrance? { catalog.first(where: { $0.id == id }) }
+    func photoURL(for fragrance: Fragrance) -> URL? {
+        guard let name = fragrance.photoFileName else { return nil }
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(name)
+    }
+    @discardableResult
+    func quickAdd(name: String, imageData: Data? = nil) -> Fragrance? {
+        let clean = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(90))
+        guard !clean.isEmpty || imageData != nil else { return nil }
+        let identifier = UUID().uuidString
+        var photoFile: String?
+        if let imageData {
+            let filename = "capture-\(identifier).jpg"
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent(filename)
+            if (try? imageData.write(to: url, options: .atomic)) != nil { photoFile = filename }
+        }
+        let label = clean.isEmpty ? "New fragrance" : clean
+        let fragrance = Fragrance(id: "personal-\(identifier)", house: "My Collection",
+            name: label, concentration: "Personal discovery", year: "",
+            top: [], heart: [], base: [], shelf: .autumn, archival: false,
+            photoFileName: photoFile)
+        customFragrances.append(fragrance)
+        add(fragrance)
+        return fragrance
+    }
     var cards: [DisplayCard] {
         switch mode {
         case .demo:
             return Fragrance.catalog.map { DisplayCard(id: $0.id, fragrance: $0, bottleID: nil) }
         case .mine:
             return bottles.compactMap { b in
-                guard let f = Fragrance.find(b.fragranceID) else { return nil }
+                guard let f = fragrance(id: b.fragranceID) else { return nil }
                 return DisplayCard(id: b.id.uuidString, fragrance: f, bottleID: b.id)
             }
         }
@@ -222,8 +252,8 @@ import SwiftUI
     var lowStock: [BottleRecord] { bottles.filter(\.lowStock) }
     func matches(_ query: String, scope: CollectionMode? = nil) -> [Fragrance] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let pool: [Fragrance] = (scope ?? mode) == .demo ? Fragrance.catalog :
-            bottles.compactMap { Fragrance.find($0.fragranceID) }
+        let pool: [Fragrance] = (scope ?? mode) == .demo ? catalog :
+            bottles.compactMap { fragrance(id: $0.fragranceID) }
         guard !q.isEmpty else { return pool }
         let tokens = q.split(whereSeparator: \.isWhitespace).map(String.init)
         return pool.filter { f in

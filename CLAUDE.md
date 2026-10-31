@@ -1,12 +1,10 @@
 # Arooma: instructions for Claude Code
 
-Arooma is a personal cabinet for a fragrance collection, shipped as an installable iOS web app. The whole app is `index.html` (one self-contained file). `.github/workflows/pages.yml` tests it and deploys it to GitHub Pages.
+**ACTIVE OWNER OVERRIDE (2026-10-30):** The PWA is retired. Build a native SwiftUI iOS 26+ app for immediate simulator demo (no TestFlight). Do not port the single-file web app.
 
-All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**. The block below is generated from `docs/design/RULES_CARD.md` (`npm run docs:sync`); do not edit it here. Plans and specs follow [docs/design/PLAN_SPEC_PROTOCOL.md](docs/design/PLAN_SPEC_PROTOCOL.md). Setup for each AI tool: [docs/design/AI_TOOL_SETUP.md](docs/design/AI_TOOL_SETUP.md).
+Read [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and the brand board. Preserve design objectives, art masters, and interactions. Liquid Glass on functional layer only.
 
-Commands: `npm start` serves the folder on port 8080. `npm run docs:check` verifies the design docs. `npm test` runs the smoke test (needs Playwright). `npm run assets` regenerates icons and launch images.
-
-`docs/reference/spread/` holds unchanged iOS documents from a different product (Spread). Use them as reference, never as Arooma rules.
+All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**.
 
 <!-- design-rules-card:start -->
 **Start here:** `docs/design/README.md` (router). Plans/specs: `docs/design/PLAN_SPEC_PROTOCOL.md`. Visual authority: `docs/design/brand/BRAND_BOARD.md`; V2 spec in `docs/design/specs/`.
@@ -31,11 +29,11 @@ Commands: `npm start` serves the folder on port 8080. `npm run docs:check` verif
 - Seven fictional demo bottles and four independent branded illustrations; no endorsement or scraped images.
 - Rights follow `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`.
 - No new backend, account, analytics, ads, or IAP without a dedicated implementation spec.
-- Preserve self-contained PWA; never claim it is SwiftUI.
+- Native SwiftUI only. PWA is retired.
 - Never force-push `main`.
 
 **Verify**
-- 375/390/430 px, landscape, reduced motion, no overflow, offline cards, fast entry.
-- `npm run docs:check`, `npm run test:docs` and `npm test` before merge. iPhone Safari, Home Screen install, touch physics and haptics need real-device validation.
+- Simulator on iPhone sizes, reduced motion, safe areas, Dynamic Type.
+- Design docs check. Real device optional for final polish.
 - Existing owner backups, photos, saved rotations, migration and Undo remain intact.
 <!-- design-rules-card:end -->

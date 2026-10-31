@@ -98,7 +98,7 @@ if [ "$LABEL" = "after" ]; then
     seed mine
     extra=(); [ "$variant" = "foil-off" ] && extra=(-AroomaFoilOff YES)
     xcrun simctl launch --terminate-running-process --stdout="$OUT/after-pacing-$variant.log" \
-      "$DEVICE" "$BUNDLE" -AroomaAutoplay YES -AroomaFramePacing YES "${extra[@]}" >/dev/null 2>&1
+      "$DEVICE" "$BUNDLE" -AroomaAutoplay YES -AroomaFramePacing YES ${extra[@]+"${extra[@]}"} >/dev/null 2>&1
     sleep 30
     xcrun simctl terminate "$DEVICE" "$BUNDLE" >/dev/null 2>&1
   done

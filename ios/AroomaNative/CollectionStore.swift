@@ -17,6 +17,7 @@ import SwiftUI
     @Published var shelfNames: [String: String] = [:] { didSet { persist() } }
     @Published var wearSessions: [WearSession] = [] { didSet { persist() } }
     @Published var customFragrances: [Fragrance] = [] { didSet { persist() } }
+    @Published var savedLayers: [LayerPreset] = [] { didSet { persist() } }
     @Published var onboarded = false { didSet { persist() } }
 
     private var hydrating = true
@@ -34,6 +35,7 @@ import SwiftUI
             rotations = saved.rotations; onboarded = saved.onboarded
             shelfNames = saved.shelfNames ?? [:]; wearSessions = saved.wearSessions ?? []
             customFragrances = saved.customFragrances ?? []
+            savedLayers = saved.savedLayers ?? []
         }
         hydrating = false
     }
@@ -43,7 +45,7 @@ import SwiftUI
             layout: layout, selectedDemoID: selectedDemoID, selectedMineID: selectedMineID,
             selectedShelf: selectedShelf, rotationID: rotationID, bottles: bottles,
             rotations: rotations, onboarded: onboarded,
-            shelfNames: shelfNames, wearSessions: wearSessions, customFragrances: customFragrances)
+            shelfNames: shelfNames, wearSessions: wearSessions, customFragrances: customFragrances, savedLayers: savedLayers)
         do {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: Self.location, options: .atomic)
@@ -163,6 +165,22 @@ import SwiftUI
 
     // A wear is one event, whether it contains one bottle or a layered combination.
     // Its per-bottle events use the same session ID for reversible history and estimates.
+    func saveLayer(name: String, bottleIDs: [UUID]) {
+        let title = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(38))
+        var ids: [UUID] = []
+        for id in bottleIDs where bottles.contains(where: { $0.id == id }) {
+            if !ids.contains(id) { ids.append(id) }
+        }
+        guard !title.isEmpty && ids.count >= 2 else { return }
+        savedLayers.insert(LayerPreset(name: title, bottleIDs: ids), at: 0)
+        HapticEngine.shared.play(.completed)
+    }
+
+    func deleteLayer(_ id: UUID) {
+        savedLayers.removeAll { $0.id == id }
+        HapticEngine.shared.play(.completed)
+    }
+
     func recordWear(bottleIDs: [UUID], note: String = "") {
         var unique: [UUID] = []
         for id in bottleIDs where bottles.contains(where: { $0.id == id }) {
@@ -229,6 +247,11 @@ import SwiftUI
         HapticEngine.shared.play(.completed)
     }
     func delete(_ bottle: BottleRecord) {
+        savedLayers = savedLayers.compactMap { original in
+            var entry = original
+            entry.bottleIDs.removeAll { $0 == bottle.id }
+            return entry.bottleIDs.count < 2 ? nil : entry
+        }
         wearSessions = wearSessions.compactMap { old in
             var session = old
             session.bottleIDs.removeAll { $0 == bottle.id }

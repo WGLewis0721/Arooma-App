@@ -1,9 +1,12 @@
 import SwiftUI
+import PhotosUI
+import UIKit
 
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var revealed = false
+    @State private var ink: CGFloat = 0
     let openDemo: () -> Void
     let openMine: () -> Void
 
@@ -22,12 +25,28 @@ struct AtelierWelcome: View {
                 Spacer(minLength: 12)
                 VStack(spacing: 13) {
                     Text("Arooma")
-                        .font(.custom("Snell Roundhand", size: min(82, geo.size.width * 0.22)))
+                        .font(.custom("Snell Roundhand", size: min(88, geo.size.width * 0.235)))
+                        .italic()
                         .foregroundStyle(archive.theme.palette.accent)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .opacity(revealed ? 1 : 0.01)
-                        .offset(x: revealed ? 0 : -16)
+                        .minimumScaleFactor(0.72)
+                        .mask(alignment: .leading) {
+                            GeometryReader { letters in
+                                Rectangle().frame(width: letters.size.width * ink)
+                            }
+                        }
+                        .accessibilityLabel("Arooma")
+                    Path { path in
+                        path.move(to: CGPoint(x: 22, y: 15))
+                        path.addCurve(to: CGPoint(x: 278, y: 13),
+                                      control1: CGPoint(x: 98, y: 34),
+                                      control2: CGPoint(x: 195, y: -6))
+                    }
+                    .trim(from: 0, to: ink)
+                    .stroke(archive.theme.palette.accent.opacity(0.65),
+                            style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+                    .frame(width: min(290, geo.size.width * 0.76), height: 30)
+                    .accessibilityHidden(true)
                     AtelierDisplay(title: "A collection worth keeping.", size: 30)
                         .multilineTextAlignment(.center)
                 }
@@ -94,8 +113,11 @@ struct AtelierWelcome: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onAppear {
-                if reduceMotion { revealed = true }
-                else { withAnimation(.easeOut(duration: 0.8)) { revealed = true } }
+                if reduceMotion { revealed = true; ink = 1 }
+                else {
+                    withAnimation(.easeOut(duration: 0.35)) { revealed = true }
+                    withAnimation(.easeInOut(duration: 1.55)) { ink = 1 }
+                }
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))
@@ -104,6 +126,8 @@ struct AtelierWelcome: View {
 
 struct AtelierShelves: View {
     @EnvironmentObject private var archive: CollectionStore
+    @State private var renaming: FragranceShelf?
+    @State private var newName = ""
     let focus: (DisplayCard) -> Void
     let add: () -> Void
 
@@ -119,7 +143,7 @@ struct AtelierShelves: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 27) {
                 VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: "Organized by season", accent: archive.theme.palette.accent)
+                    AtelierEyebrow(text: "Your personalized collection", accent: archive.theme.palette.accent)
                     HStack(alignment: .firstTextBaseline) {
                         AtelierDisplay(title: "The shelves", size: 37)
                         Spacer()
@@ -141,8 +165,15 @@ struct AtelierShelves: View {
                             Image(systemName: shelf.icon)
                                 .font(.system(.subheadline, weight: .light))
                                 .foregroundStyle(archive.theme.palette.accent)
-                            AtelierDisplay(title: shelf.rawValue, size: 28)
+                            AtelierDisplay(title: archive.shelfName(shelf), size: 28)
                             Spacer()
+                            Button {
+                                newName = archive.shelfName(shelf)
+                                renaming = shelf
+                            } label: {
+                                Image(systemName: "pencil").frame(width: 44, height: 44)
+                            }
+                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
                             Text("\(cards.count, format: .number.precision(.integerLength(2)))")
                                 .font(.caption.monospacedDigit())
                                 .foregroundStyle(.secondary)
@@ -198,6 +229,106 @@ struct AtelierShelves: View {
             .padding(.bottom, 36)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .alert("Rename shelf", isPresented: Binding(
+            get: { renaming != nil },
+            set: { if !$0 { renaming = nil } }
+        )) {
+            TextField("Shelf name", text: $newName)
+            Button("Cancel", role: .cancel) { renaming = nil }
+            Button("Save") {
+                if let shelf = renaming { archive.renameShelf(shelf, to: newName) }
+                renaming = nil
+            }
+        } message: {
+            Text("Choose a name for this shelf. Your bottles stay where they are.")
+        }
+    }
+}
+
+
+struct AtelierCompactShelves: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @State private var renaming: FragranceShelf?
+    @State private var newName = ""
+    let focus: (DisplayCard) -> Void
+    let add: () -> Void
+
+    private func shelf(for card: DisplayCard) -> FragranceShelf {
+        guard let id = card.bottleID,
+              let owned = archive.bottles.first(where: { $0.id == id }) else {
+            return card.fragrance.shelf
+        }
+        return owned.shelf
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 13) {
+                Text("Pinch open a shelf, or tap a collectible.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ForEach(FragranceShelf.allCases) { shelf in
+                    let cards = archive.cards.filter { self.shelf(for: $0) == shelf }
+                    VStack(alignment: .leading, spacing: 9) {
+                        HStack(spacing: 8) {
+                            AtelierDisplay(title: archive.shelfName(shelf), size: 22)
+                            Spacer()
+                            Text("\(cards.count)").font(.caption.monospacedDigit())
+                            Button {
+                                newName = archive.shelfName(shelf)
+                                renaming = shelf
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .font(.caption).frame(width: 42, height: 42)
+                            }
+                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
+                        }
+                        if cards.isEmpty {
+                            Button(action: add) {
+                                Label("Add first fragrance", systemImage: "plus")
+                                    .frame(maxWidth: .infinity, minHeight: 72)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 11) {
+                                    ForEach(cards) { card in
+                                        Button { focus(card) } label: {
+                                            VStack(spacing: 3) {
+                                                AtelierCardSurface(fragranceID: card.fragrance.id)
+                                                    .frame(width: 65, height: 96)
+                                                Text(card.fragrance.name)
+                                                    .font(.system(size: 10))
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(1)
+                                                    .frame(width: 67)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Open \(card.fragrance.name)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(11).atelierPlate(15)
+                }
+            }
+            .padding(.horizontal, 17).padding(.vertical, 12)
+        }
+        .alert("Rename shelf", isPresented: Binding(
+            get: { renaming != nil },
+            set: { if !$0 { renaming = nil } }
+        )) {
+            TextField("Shelf name", text: $newName)
+            Button("Cancel", role: .cancel) { renaming = nil }
+            Button("Save") {
+                if let shelf = renaming { archive.renameShelf(shelf, to: newName) }
+                renaming = nil
+            }
+        } message: {
+            Text("The bottles on this shelf stay put.")
+        }
     }
 }
 
@@ -210,7 +341,7 @@ struct AtelierSearch: View {
 
     private var results: [Fragrance] {
         let tokens = query.split(whereSeparator: \.isWhitespace).map(String.init)
-        return Fragrance.catalog.filter { fragrance in
+        return archive.catalog.filter { fragrance in
             guard !tokens.isEmpty else { return true }
             let all = ([fragrance.name, fragrance.house, fragrance.concentration, fragrance.year] +
                        fragrance.notes).joined(separator: " ")
@@ -310,7 +441,7 @@ struct AtelierOwnership: View {
     private var current: BottleRecord? { archive.selectedBottle }
     private var perfume: Fragrance? {
         guard let record = current else { return nil }
-        return Fragrance.find(record.fragranceID)
+        return archive.fragrance(id: record.fragranceID)
     }
 
     var body: some View {
@@ -499,7 +630,7 @@ struct AtelierOwnership: View {
                     .frame(minWidth: 44, minHeight: 44)
             }
             ForEach(archive.bottles) { record in
-                if let fragrance = Fragrance.find(record.fragranceID) {
+                if let fragrance = archive.fragrance(id: record.fragranceID) {
                     Button {
                         archive.selectedMineID = record.id
                         focus(DisplayCard(id: record.id.uuidString, fragrance: fragrance, bottleID: record.id))
@@ -609,5 +740,323 @@ struct AtelierStyle: View {
             .padding(.bottom, 35)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+    }
+}
+
+
+// MARK: - The wear log. One session can include several bottles worn together.
+struct AtelierWearLog: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @State private var selected: [UUID] = []
+    @State private var impression = ""
+    @State private var showAll = false
+    let add: () -> Void
+    let focus: (DisplayCard) -> Void
+
+    private var selectedIDs: [UUID] {
+        selected.filter { id in archive.bottles.contains(where: { $0.id == id }) }
+    }
+    private var displayedSessions: [WearSession] {
+        showAll ? archive.wearSessions :
+            archive.wearSessions.filter { Calendar.current.isDateInToday($0.date) }
+    }
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 19) {
+                VStack(alignment: .leading, spacing: 7) {
+                    AtelierEyebrow(text: "Your daily ritual", accent: archive.theme.palette.accent)
+                    AtelierDisplay(title: "What are you wearing?", size: 34)
+                    Text("Log a fragrance by itself or layer several together.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
+                if archive.mode == .demo {
+                    AtelierEmptyState(title: "Your personal wear log",
+                        detail: "Switch to Mine to track what you wear and your favorite combinations.",
+                        action: "Open My Collection",
+                        callback: { archive.enter(.mine) }, accent: archive.theme.palette.accent)
+                } else if archive.bottles.isEmpty {
+                    AtelierEmptyState(title: "Your first wear begins here",
+                        detail: "Save a bottle with just its name or a photograph. Add the details later.",
+                        action: "Add a bottle", callback: add, accent: archive.theme.palette.accent)
+                } else {
+                    HStack {
+                        AtelierEyebrow(text: "Choose your bottles", accent: archive.theme.palette.accent)
+                        Spacer()
+                        Text("\(selected.count) selected")
+                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    }
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 12) {
+                        ForEach(archive.bottles) { bottle in
+                            if let scent = archive.fragrance(id: bottle.fragranceID) {
+                                Button {
+                                    if selected.contains(bottle.id) { selected.removeAll { $0 == bottle.id } }
+                                    else { selected.append(bottle.id) }
+                                } label: {
+                                    VStack(spacing: 7) {
+                                        AtelierCardSurface(fragranceID: scent.id, selected: selected.contains(bottle.id))
+                                            .frame(height: 131)
+                                            .overlay(alignment: .topTrailing) {
+                                                Image(systemName: selected.contains(bottle.id) ? "checkmark.circle.fill" : "circle")
+                                                    .font(.title3).foregroundStyle(selected.contains(bottle.id) ? archive.theme.palette.accent : .white)
+                                                    .padding(5).shadow(radius: 3)
+                                            }
+                                        Text(scent.name)
+                                            .font(.caption).foregroundStyle(.primary)
+                                            .lineLimit(2).multilineTextAlignment(.center)
+                                            .frame(height: 32, alignment: .top)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(scent.name), \(selected.contains(bottle.id) ? "selected" : "not selected")")
+                            }
+                        }
+                    }
+                    Button(action: add) {
+                        Label("Quick add another bottle", systemImage: "plus.circle")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.plain).foregroundStyle(archive.theme.palette.accent)
+
+                    if !selected.isEmpty {
+                        VStack(spacing: 12) {
+                            HStack(spacing: -15) {
+                                ForEach(selectedIDs, id: \.self) { id in
+                                    if let bottle = archive.bottles.first(where: { $0.id == id }) {
+                                        AtelierCardSurface(fragranceID: bottle.fragranceID)
+                                            .frame(width: 62, height: 90)
+                                            .rotationEffect(.degrees(Double(selectedIDs.firstIndex(of: id) ?? 0) * 4 - 4))
+                                    }
+                                }
+                                Spacer(minLength: 0)
+                                VStack(alignment: .trailing, spacing: 3) {
+                                    Text(selected.count > 1 ? "Layered wear" : "Solo wear")
+                                        .font(.headline)
+                                    Text("\(selected.count) \(selected.count == 1 ? "fragrance" : "fragrances")")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            TextField("Optional impression", text: $impression, axis: .vertical)
+                                .lineLimit(1...3).textFieldStyle(.roundedBorder)
+                            Button {
+                                archive.recordWear(bottleIDs: selectedIDs, note: impression)
+                                selected.removeAll()
+                                impression = ""
+                            } label: {
+                                Label(selected.count > 1 ? "Log this combination" : "Log this wear", systemImage: "checkmark")
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity, minHeight: 51)
+                            }
+                            .buttonStyle(.borderedProminent).tint(archive.theme.palette.accent)
+                        }
+                        .padding(15).atelierPlate(20)
+                    }
+
+                    HStack {
+                        AtelierEyebrow(text: showAll ? "Your wear history" : "Worn today",
+                            accent: archive.theme.palette.accent)
+                        Spacer()
+                        Button(showAll ? "Today only" : "All history") { showAll.toggle() }
+                            .font(.caption.weight(.medium))
+                    }
+                    if displayedSessions.isEmpty {
+                        Text("Nothing logged here yet. Choose a fragrance above to begin.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .padding(18).frame(maxWidth: .infinity, alignment: .leading)
+                            .atelierPlate()
+                    }
+                    ForEach(displayedSessions) { session in
+                        sessionRow(session)
+                    }
+                    let legacy = archive.bottles.filter {
+                        $0.wears.contains(where: { $0.sessionID == nil })
+                    }
+                    if showAll && !legacy.isEmpty {
+                        VStack(alignment: .leading, spacing: 9) {
+                            AtelierEyebrow(text: "Earlier solo wears", accent: archive.theme.palette.accent)
+                            ForEach(legacy) { bottle in
+                                if let scent = archive.fragrance(id: bottle.fragranceID) {
+                                    Text("\(scent.name) · \(bottle.wears.filter { $0.sessionID == nil }.count) earlier records")
+                                        .font(.subheadline)
+                                }
+                            }
+                        }
+                        .padding(15).atelierPlate()
+                    }
+                }
+            }
+            .padding(.horizontal, 22).padding(.top, 15).padding(.bottom, 32)
+        }
+        .background(AtelierAtmosphere(theme: archive.theme))
+    }
+
+    private func sessionRow(_ session: WearSession) -> some View {
+        VStack(alignment: .leading, spacing: 11) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(session.bottleIDs.count > 1 ? "Layered combination" : "Solo wear")
+                        .font(.system(.headline, design: .serif))
+                    Text(session.date.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Wear again") { selected = session.bottleIDs }
+                    .font(.caption.weight(.semibold))
+            }
+            ForEach(session.bottleIDs, id: \.self) { id in
+                if let bottle = archive.bottles.first(where: { $0.id == id }),
+                   let scent = archive.fragrance(id: bottle.fragranceID) {
+                    HStack(spacing: 10) {
+                        AtelierCardSurface(fragranceID: scent.id)
+                            .frame(width: 35, height: 51)
+                        Text(scent.name).font(.subheadline)
+                        Spacer()
+                        Button {
+                            archive.removeBottle(id, from: session.id)
+                        } label: {
+                            Image(systemName: "minus.circle")
+                                .frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel("Remove \(scent.name) from wear")
+                    }
+                }
+            }
+            if !session.note.isEmpty {
+                Text(session.note).font(.subheadline).italic().foregroundStyle(.secondary)
+            }
+            Button(role: .destructive) { archive.deleteWearSession(session.id) } label: {
+                Label("Undo this session", systemImage: "arrow.uturn.backward")
+                    .font(.caption)
+            }
+        }
+        .padding(15).atelierPlate(18)
+    }
+}
+
+// MARK: - Capture first, catalog later. No long mandatory form.
+struct QuickAddSheet: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var photoData: Data?
+    @State private var libraryItem: PhotosPickerItem?
+    @State private var cameraOpen = false
+    @FocusState private var typing: Bool
+    let onAdded: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    AtelierEyebrow(text: "Capture now · details later", accent: archive.theme.palette.accent)
+                    AtelierDisplay(title: "Add a bottle", size: 38)
+                    Text("Someone just recommended a fragrance? Save the name or snap the bottle in seconds.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+
+                    TextField("Fragrance name", text: $name)
+                        .font(.title3).textInputAutocapitalization(.words)
+                        .textFieldStyle(.roundedBorder)
+                        .submitLabel(.done)
+                        .focused($typing)
+                        .onSubmit(save)
+
+                    if let photoData, let photo = UIImage(data: photoData) {
+                        Image(uiImage: photo).resizable().scaledToFit()
+                            .frame(maxWidth: .infinity).frame(height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .accessibilityLabel("Captured bottle photograph")
+                    }
+                    HStack(spacing: 10) {
+                        Button {
+                            typing = false
+                            cameraOpen = true
+                        } label: {
+                            Label("Take Photo", systemImage: "camera")
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+
+                        PhotosPicker(selection: $libraryItem, matching: .images) {
+                            Label("Choose Photo", systemImage: "photo")
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    Button(action: save) {
+                        Label("Save to My Collection", systemImage: "checkmark")
+                            .font(.headline).frame(maxWidth: .infinity, minHeight: 53)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(archive.theme.palette.accent)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && photoData == nil)
+                    Text("Only a name or photo is required. Everything is stored privately on this iPhone.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                .padding(22)
+            }
+            .navigationTitle("Quick Add")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) {
+                Button("Cancel") { dismiss() }
+            }}
+            .onChange(of: libraryItem) { _, item in
+                Task {
+                    if let bytes = try? await item?.loadTransferable(type: Data.self),
+                       let image = UIImage(data: bytes) {
+                        photoData = image.jpegData(compressionQuality: 0.84)
+                    }
+                }
+            }
+            .fullScreenCover(isPresented: $cameraOpen) {
+                CameraCapture { image in
+                    photoData = image.jpegData(compressionQuality: 0.84)
+                    cameraOpen = false
+                } onCancel: {
+                    cameraOpen = false
+                }
+                .ignoresSafeArea()
+            }
+        }
+    }
+
+    private func save() {
+        let typed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !typed.isEmpty || photoData != nil else { return }
+        if photoData == nil,
+           let known = archive.catalog.first(where: {
+               $0.name.localizedCaseInsensitiveCompare(typed) == .orderedSame
+           }) {
+            archive.add(known)
+        } else {
+            archive.quickAdd(name: typed, imageData: photoData)
+        }
+        onAdded()
+        dismiss()
+    }
+}
+
+struct CameraCapture: UIViewControllerRepresentable {
+    let onImage: (UIImage) -> Void
+    let onCancel: () -> Void
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraCaptureMode = .photo
+        picker.delegate = context.coordinator
+        return picker
+    }
+    func updateUIViewController(_ controller: UIImagePickerController, context: Context) {}
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let parent: CameraCapture
+        init(parent: CameraCapture) { self.parent = parent }
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage { parent.onImage(image) }
+            else { parent.onCancel() }
+        }
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.onCancel()
+        }
     }
 }

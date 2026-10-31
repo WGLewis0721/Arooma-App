@@ -4,7 +4,12 @@ struct AtelierGallery: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
     @GestureState private var dragX: CGFloat = 0
+    @State private var pinchScale: CGFloat = 1
+    @State private var shelfOverview = false
+    let transitionNamespace: Namespace.ID
+    let inspectedID: String?
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
 
@@ -41,6 +46,46 @@ struct AtelierGallery: View {
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .overlay {
+            if shelfOverview {
+                VStack(spacing: 0) {
+                    HStack {
+                        AtelierDisplay(title: "Your shelves", size: 28)
+                        Spacer()
+                        Button {
+                            withAnimation(.spring(response: 0.44, dampingFraction: 0.86)) { shelfOverview = false }
+                        } label: {
+                            Image(systemName: "xmark").frame(width: 46, height: 46)
+                        }
+                        .atelierGlass()
+                        .accessibilityLabel("Return to cards")
+                    }
+                    .padding(.horizontal, 23).padding(.top, 10)
+                    AtelierCompactShelves(focus: { card in
+                        archive.choose(card, haptic: false)
+                        withAnimation(.spring(response: 0.47, dampingFraction: 0.88)) { shelfOverview = false }
+                    }, add: add)
+                }
+                .background(AtelierAtmosphere(theme: archive.theme))
+                .simultaneousGesture(MagnifyGesture().onEnded { value in
+                    if value.magnification > 1.12 {
+                        withAnimation(.spring(response: 0.42, dampingFraction: 0.9)) { shelfOverview = false }
+                    }
+                })
+                .transition(.opacity.combined(with: .scale(scale: 0.91)))
+                .zIndex(10)
+            }
+        }
+        .onAppear { FoilMotion.shared.start() }
+        .onDisappear { FoilMotion.shared.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active && !shelfOverview { FoilMotion.shared.start() }
+            else { FoilMotion.shared.stop() }
+        }
+        .onChange(of: shelfOverview) { _, showing in
+            if showing { FoilMotion.shared.stop() }
+            else { FoilMotion.shared.start() }
+        }
     }
 
     private var heading: some View {
@@ -53,6 +98,13 @@ struct AtelierGallery: View {
                     .foregroundStyle(.primary)
             }
             Spacer(minLength: 10)
+            Button(action: add) {
+                Image(systemName: "plus")
+                    .font(.system(size: 17, weight: .semibold))
+                    .frame(width: 46, height: 46)
+            }
+            .atelierGlass()
+            .accessibilityLabel("Quick add a fragrance")
             Button {
                 archive.enter(archive.mode == .demo ? .mine : .demo)
             } label: {
@@ -110,18 +162,39 @@ struct AtelierGallery: View {
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .scaleEffect(max(0.72, min(1, pinchScale)))
             .contentShape(Rectangle())
             .highPriorityGesture(
                 DragGesture(minimumDistance: 11)
                     .updating($dragX) { value, state, _ in state = value.translation.width }
                     .onEnded { value in
                         let predicted = value.predictedEndTranslation.width
-                        guard abs(predicted) > max(39, cardWidth * 0.23) else { return }
-                        withAnimation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.82)) {
-                            archive.move(predicted < 0 ? 1 : -1)
+                        guard abs(predicted) > max(38, cardWidth * 0.17) else { return }
+                        // Velocity carries across more than one card when the flick is decisive.
+                        let steps = max(1, min(3, Int((abs(predicted) / (cardWidth * 0.7)).rounded())))
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.51, dampingFraction: 0.86),
+                                      completionCriteria: .logicallyComplete) {
+                            archive.move(predicted < 0 ? steps : -steps, haptic: false)
+                        } completion: {
+                            HapticEngine.shared.play(.selection)
                         }
                     }
             )
+            .simultaneousGesture(
+                MagnifyGesture(minimumScaleDelta: 0.02)
+                    .onChanged { value in pinchScale = min(1, max(0.72, value.magnification)) }
+                    .onEnded { value in
+                        if value.magnification < 0.88 {
+                            withAnimation(reduceMotion ? nil : .spring(response: 0.46, dampingFraction: 0.88)) {
+                                shelfOverview = true
+                            }
+                        }
+                        withAnimation(.spring(response: 0.42, dampingFraction: 0.9)) { pinchScale = 1 }
+                    }
+            )
+            .accessibilityAction(named: "See all shelves") {
+                withAnimation { shelfOverview = true }
+            }
             .accessibilityAction(named: "Next fragrance") { archive.move(1) }
             .accessibilityAction(named: "Previous fragrance") { archive.move(-1) }
         }
@@ -157,17 +230,22 @@ struct AtelierGallery: View {
         }
         return AtelierCardSurface(fragranceID: card.fragrance.id, selected: distance == 0)
             .frame(width: width, height: width * 86.0 / 59.0)
+            .matchedGeometryEffect(id: "collectible-\(card.id)", in: transitionNamespace, isSource: true)
+            .opacity(inspectedID == card.id ? 0 : 1)
             .scaleEffect(scale)
             .rotation3DEffect(.degrees(Double(turn)), axis: (x: 0, y: 1, z: 0), perspective: 0.67)
             .rotationEffect(.degrees(Double(roll)))
-            .offset(x: x, y: y)
+            .offset(x: x, y: y - (distance == 0 ? min(8, abs(dragX) * 0.04) : 0))
             .animation(reduceMotion ? nil : .interactiveSpring(response: 0.40, dampingFraction: 0.82),
                        value: archive.selectedID)
             .onTapGesture {
                 if distance == 0 { inspect(card) }
                 else {
-                    withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.84)) {
-                        archive.choose(card)
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.84),
+                                  completionCriteria: .logicallyComplete) {
+                        archive.choose(card, haptic: false)
+                    } completion: {
+                        HapticEngine.shared.play(.selection)
                     }
                 }
             }
@@ -252,6 +330,7 @@ struct AtelierInspector: View {
     @State private var flipped = false
     @State private var editing: BottleRecord?
     let card: DisplayCard
+    let transitionNamespace: Namespace.ID
     let close: () -> Void
 
     private var palette: ArchivePalette { archive.theme.palette }
@@ -286,6 +365,7 @@ struct AtelierInspector: View {
                         .opacity(flipped ? 1 : 0)
                 }
                 .frame(width: max(155, cardWidth), height: max(155, cardWidth) * 86.0 / 59.0)
+                .matchedGeometryEffect(id: "collectible-\(card.id)", in: transitionNamespace, isSource: false)
                 .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.69)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: flip)

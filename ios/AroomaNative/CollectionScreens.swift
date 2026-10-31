@@ -85,8 +85,8 @@ struct DiscoveryScreen: View {
 
     private var results: [Fragrance] {
         let tokens = query.split(whereSeparator: \.isWhitespace).map(String.init)
-        guard !tokens.isEmpty else { return Fragrance.catalog }
-        return Fragrance.catalog.filter { fragrance in
+        guard !tokens.isEmpty else { return archive.catalog }
+        return archive.catalog.filter { fragrance in
             let fullText = ([fragrance.house, fragrance.name, fragrance.concentration, fragrance.year] +
                             fragrance.notes).joined(separator: " ")
             return tokens.allSatisfy { fullText.localizedStandardContains($0) }
@@ -226,7 +226,7 @@ struct MyBottleScreen: View {
                                 .foregroundStyle(.orange)
                         }
                         if let record = archive.selectedBottle,
-                           let fragrance = Fragrance.find(record.fragranceID) {
+                           let fragrance = archive.fragrance(id: record.fragranceID) {
                             HStack(alignment: .top, spacing: 18) {
                                 CollectibleCard(id: fragrance.id, cornerRadius: 9)
                                     .frame(width: 112, height: 164)
@@ -279,7 +279,7 @@ struct MyBottleScreen: View {
                                 Button("Add") { openAdd() }.frame(minHeight: 44)
                             }
                             ForEach(archive.bottles) { bottle in
-                                if let item = Fragrance.find(bottle.fragranceID) {
+                                if let item = archive.fragrance(id: bottle.fragranceID) {
                                     Button { archive.selectedMineID = bottle.id } label: {
                                         HStack {
                                             Text(item.name).font(.system(.body, design: .serif))
@@ -328,15 +328,23 @@ struct BottleEditor: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft: BottleRecord
     @State private var confirmDelete = false
+    @State private var customName = ""
+    @State private var customHouse = ""
 
     init(bottle: BottleRecord) {
         _draft = State(initialValue: bottle)
     }
     var body: some View {
         Form {
+            if draft.fragranceID.hasPrefix("personal-") {
+                Section("Captured fragrance") {
+                    TextField("Fragrance name", text: $customName)
+                    TextField("House or brand (optional)", text: $customHouse)
+                }
+            }
             Section("Ownership") {
                 Picker("Shelf", selection: $draft.shelf) {
-                    ForEach(FragranceShelf.allCases) { shelf in Text(shelf.rawValue).tag(shelf) }
+                    ForEach(FragranceShelf.allCases) { shelf in Text(archive.shelfName(shelf)).tag(shelf) }
                 }
                 Stepper("Bottle size · \(draft.volumeML) ml", value: $draft.volumeML, in: 5...1000, step: 5)
                 VStack(alignment: .leading) {
@@ -358,12 +366,24 @@ struct BottleEditor: View {
                 }
             }
         }
+        .onAppear {
+            if let fragrance = archive.fragrance(id: draft.fragranceID) {
+                customName = fragrance.name
+                customHouse = fragrance.house == "My Collection" ? "" : fragrance.house
+            }
+        }
         .navigationTitle("My Bottle")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { archive.update(draft); dismiss() }
+                Button("Save") {
+                    archive.update(draft)
+                    if draft.fragranceID.hasPrefix("personal-") {
+                        archive.renamePersonalFragrance(id: draft.fragranceID, name: customName, house: customHouse)
+                    }
+                    dismiss()
+                }
                     .fontWeight(.semibold)
             }
         }
@@ -419,7 +439,7 @@ struct RotationManager: View {
             Section("New rotation") {
                 TextField("A name for your rotation", text: $name)
                 ForEach(archive.bottles, id: \.id) { bottle in
-                    if let fragrance = Fragrance.find(bottle.fragranceID) {
+                    if let fragrance = archive.fragrance(id: bottle.fragranceID) {
                         Toggle(fragrance.name, isOn: Binding(
                             get: { picked.contains(fragrance.id) },
                             set: { selected in

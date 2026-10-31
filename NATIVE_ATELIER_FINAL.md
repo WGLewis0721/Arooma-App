@@ -73,6 +73,14 @@ These are **approved design requirements for the next native motion/polish pass*
 - **Cards** = admire and inspect a fragrance; **Shelves** = see and organize your entire collection (including pinch overview); **Wear Log/Today** = record what you actually wore, alone or layered; **Style** = choose the surrounding visual finish. Search supports discovery. Don't mix the meanings of card Stack layout and multi-fragrance wearing.
 - A layer composition should feel like arranging physical collectible cards together, with restrained shared motion and haptics; no additional dense trackers, charts, or unnecessary controls.
 
+## Implementation notes — Quick Add and native product loop
+- **Capture-first Quick Add:** an accessible + action in Cards and Today presents a lightweight sheet. The owner can enter a fragrance name and save with Return, take a photo and save unnamed for later, or choose an image from the photo library. Name and photo are never both required.
+- **Non-catalog bottles:** user-created fragrances are first-class local collection records; their original photos render on personal cards. Store photo bytes on-device with stable filenames; persist custom fragrance metadata with the existing archive JSON. Do not require a network lookup, an account, a pre-existing catalog match or a long metadata form.
+- **No auto-ID promise yet:** the first implementation does not recognize fragrance identity from camera images or query external catalogs. Review and fill in brand/concentration later without friction; automated recognition should be separately validated before it is marketed.
+- **Wear events:** a wear session is an ordered list of bottle IDs with optional impressions; one event can contain one bottle or several. Individual bottle counts and fill estimates remain consistent, removing a component only undoes that component, and session undo reverses all linked events.
+- **Compatibility:** legacy standalone wear records remain available and are not falsely grouped. The new optional saved fields preserve older archives. Custom shelf labels do not rewrite the stable shelf IDs.
+- **Physical device QA still required:** confirm camera permission and both success/cancel paths, 10–15 second captured-photo save, custom photo persistence after termination, low-motion/low-power foil fallback, stable pinch-to-shelf navigation, layered wear save/undo/repeat, and that all four original photographic card masters remain unchanged.
+
 ## Data and releases
 Retain `CollectionStore` model and existing `arooma-native-v1.json` encoding without migrations, deletions, or resetting onboarding. Keep the bundle ID `com.graymatter.arooma` so TestFlight updates install over the existing app. Use the existing `codemagic.yaml` workflow and App Store distribution profile; do not regenerate signing files.
 

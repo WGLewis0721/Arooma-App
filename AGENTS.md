@@ -1,5 +1,7 @@
 # Arooma: instructions for coding agents
 
+**ACTIVE OWNER V3 ATELIER OVERRIDE:** Follow [AROOMA_ATELIER_V3_OWNER_OVERRIDE.md](AROOMA_ATELIER_V3_OWNER_OVERRIDE.md) for the current substantial card-first redesign. This owner decision supersedes older aesthetic/one-file/liquid-animation requirements where they conflict. Preserve existing storage/backups and third-party image rights. The approved source art and root Sol Extra handoff remain the asset authority.
+
 **CURRENT OWNER ASSIGNMENT FOR GPT-6 SOL (EXTRA HIGH):** Read [SOL_EXTRA_HANDOFF.md](SOL_EXTRA_HANDOFF.md) and [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) **before touching app UI or card assets**. The original photographic card PNG masters are already committed under `assets/collectibles/masters/`; do not regenerate or substitute them. This single owner-commissioned root spec supersedes older demo-art instructions for the final polish pass. Keep local owner records safe and use the compact QA gate in the root spec.
 
 For Codex, Cursor, Grok Build and any other tool that reads `AGENTS.md`.

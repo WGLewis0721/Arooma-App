@@ -7,6 +7,8 @@ const SHELL = [
   './',
   'index.html',
   'manifest.webmanifest',
+  'assets/atelier/atelier.css',
+  'assets/atelier/atelier.js',
   'assets/icons/icon.svg',
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',

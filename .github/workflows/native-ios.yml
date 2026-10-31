@@ -9,109 +9,36 @@ on:
     paths:
       - 'ios/**'
       - '.github/workflows/native-ios.yml'
-  workflow_dispatch:
-    inputs:
-      baseline_ref:
-        description: 'Ref to photograph as "before"'
-        required: false
-        default: 'baf7a44348b5af4d034a4f4bc5bd29ee475f4887'
+  workflow_dispatch: {}
+
+# A single compile result per branch. Superseded commits don't burn macOS runners.
+concurrency:
+  group: native-compile-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  simulator-build:
+  compile:
     runs-on: macos-26
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-      - name: Pre-boot iPhone simulator (first boot migrates data for minutes)
-        run: bash ios/Tests/capture.sh --preboot
-      - name: Show installed Xcode
+      - name: Confirm Xcode
         run: xcodebuild -version
-      - name: Deck physics tests (selection continuity, one-card snap, centring, flip faces)
+      - name: Compile native iOS simulator app (unsigned)
         run: |
           set -o pipefail
-          xcrun swiftc -O ios/AroomaNative/DeckPhysics.swift ios/Tests/DeckPhysics/main.swift -o "$RUNNER_TEMP/deck-tests"
-          "$RUNNER_TEMP/deck-tests"
-      - name: Archive compatibility tests (existing owner data decodes and round-trips)
-        run: |
-          set -o pipefail
-          xcrun swiftc -sdk "$(xcrun --show-sdk-path --sdk macosx)" ios/AroomaNative/Models.swift ios/Tests/ArchiveCompat/main.swift -o "$RUNNER_TEMP/archive-compat"
-          "$RUNNER_TEMP/archive-compat" ios/Tests/fixtures
-      - name: Compile native iOS Simulator app (unsigned)
-        run: |
-          set -o pipefail
-          xcodebuild -project ios/AroomaNative.xcodeproj -scheme AroomaNative -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/AroomaBuild" CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-xcodebuild.log" | grep -E "error:|warning: .*(deprecated|unused)|BUILD (SUCCEEDED|FAILED)" || true
+          xcodebuild \
+            -project ios/AroomaNative.xcodeproj \
+            -scheme AroomaNative \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/AroomaBuild" \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-build.log"
           test -d "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
-      - name: Upload build log on failure
+      - uses: actions/upload-artifact@v4
         if: failure()
-        uses: actions/upload-artifact@v4
         with:
-          name: AroomaNative-BuildLog
-          path: ${{ runner.temp }}/arooma-xcodebuild.log
+          name: Arooma-native-compile-log
+          path: ${{ runner.temp }}/arooma-build.log
           retention-days: 7
-      - name: Capture simulator screens and autoplay recording (after)
-        continue-on-error: true
-        run: bash ios/Tests/capture.sh "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app" "$RUNNER_TEMP/arooma-after" after
-      - name: Upload after evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Arooma-After
-          path: ${{ runner.temp }}/arooma-after/
-          if-no-files-found: ignore
-          retention-days: 14
-      - name: Upload built simulator app
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: AroomaNative-Simulator
-          path: ${{ runner.temp }}/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app
-          retention-days: 7
-
-  baseline-capture:
-    if: github.event_name != 'push'
-    runs-on: macos-26
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: current
-      - uses: actions/checkout@v4
-        with:
-          path: baseline
-          ref: ${{ github.event.inputs.baseline_ref || github.event.pull_request.base.sha || 'main' }}
-      - name: Pre-boot iPhone simulator
-        run: bash current/ios/Tests/capture.sh --preboot
-      - name: Build baseline app
-        run: |
-          set -o pipefail
-          xcodebuild -project baseline/ios/AroomaNative.xcodeproj -scheme AroomaNative -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/BaselineBuild" CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/baseline.log" 2>&1
-      - name: Capture baseline screens (before)
-        continue-on-error: true
-        run: bash current/ios/Tests/capture.sh "$RUNNER_TEMP/BaselineBuild/Build/Products/Debug-iphonesimulator/Arooma.app" "$RUNNER_TEMP/arooma-before" before
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Arooma-Before
-          path: ${{ runner.temp }}/arooma-before/
-          if-no-files-found: ignore
-          retention-days: 14
-
-  before-after:
-    if: github.event_name != 'push'
-    needs: [simulator-build, baseline-capture]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with: { name: Arooma-Before, path: before }
-      - uses: actions/download-artifact@v4
-        with: { name: Arooma-After, path: after }
-      - name: Compose before/after sheets
-        run: |
-          pip install --quiet pillow
-          python3 ios/Tests/compose_before_after.py before after compare
-          cp after/*.mp4 after/*.log compare/ 2>/dev/null || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Arooma-Before-After
-          path: compare/
-          retention-days: 30

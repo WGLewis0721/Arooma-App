@@ -667,11 +667,18 @@ struct AtelierStyle: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                AtelierEyebrow(text: "Four signature finishes", accent: archive.theme.palette.accent)
-                AtelierDisplay(title: "The atmosphere", size: 37)
-                Text("Your cards never change. The environment around them does.")
+                AtelierEyebrow(text: "The way it feels", accent: archive.theme.palette.accent)
+                AtelierDisplay(title: "Your gallery", size: 35)
+                Text("One collection. Three ways to experience it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 10) {
+                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
+                    Text("Cover Flow for depth, Stack for focus, Fan for a spread.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                AtelierEyebrow(text: "Color & atmosphere", accent: archive.theme.palette.accent)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 13), GridItem(.flexible(), spacing: 13)], spacing: 16) {
                     ForEach(FragranceTheme.allCases) { theme in
                         Button {
@@ -684,7 +691,7 @@ struct AtelierStyle: View {
                                     .fill(LinearGradient(
                                         colors: [theme.palette.field, theme.palette.secondary, theme.palette.accent.opacity(0.64)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(height: 120)
+                                    .frame(height: 88)
                                     .overlay {
                                         RoundedRectangle(cornerRadius: 8)
                                             .strokeBorder(theme.palette.accent.opacity(0.6), lineWidth: 0.8)
@@ -710,30 +717,19 @@ struct AtelierStyle: View {
                         .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
                     }
                 }
-                VStack(alignment: .leading, spacing: 9) {
-                    AtelierEyebrow(text: "Gallery view", accent: archive.theme.palette.accent)
-                    Text("Choose how your collectible cards are arranged.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
-                }
                 AtelierEyebrow(text: "Appearance", accent: archive.theme.palette.accent)
                 Picker("Appearance", selection: $archive.appearance) {
                     ForEach(Appearance.allCases) { a in Text(a.rawValue).tag(a) }
                 }
                 .pickerStyle(.segmented)
                 .frame(minHeight: 48)
-                VStack(alignment: .leading, spacing: 12) {
-                    AtelierDisplay(title: "An independent archive", size: 24)
-                    Text("Arooma is a private fragrance companion, not endorsed by the featured houses. The collectible compositions remain the original approved artwork.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    Text("Local-first · iOS 26 · No account required")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                DisclosureGroup("About this archive") {
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
-                .padding(18)
-                .atelierPlate(19)
+                .font(.footnote)
+                .padding(15)
+                .atelierPlate(16)
             }
             .padding(.horizontal, 22)
             .padding(.top, 17)

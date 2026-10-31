@@ -26,7 +26,7 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 
 ---
 
-**Current V2 polish:** read [root spec](../../AROOMA_V2_FINAL_POLISH_SPEC.md) and [handoff](../../SOL_EXTRA_HANDOFF.md) first. Approved source art is indexed in [masters](../../assets/collectibles/masters/README.md).
+**Native source:** ios/AroomaNative. Approved artwork lives in [masters](../../assets/collectibles/masters/README.md).
 
 ## 2. Task router
 
@@ -42,6 +42,7 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 | App icon, launch images, generated assets | [brand/ICON_HANDOFF.md](brand/ICON_HANDOFF.md) | Files in `assets/icons/` |
 | Widget, Live Activity, native iOS release | [specs/2026-10-29-widget-live-activity.md](specs/2026-10-29-widget-live-activity.md) (draft) | [../reference/spread/README.md](../reference/spread/README.md) and the Spread documents it lists |
 | Recording a decision or checking what is undecided | [DECISIONS.md](DECISIONS.md) | |
+| Opus implementation prompts | [prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md) | [Earlier motion and signature handoff](prompts/OPUS_55_NATIVE_INTEGRATION.md) |
 | Pointing an AI tool at these docs | [AI_TOOL_SETUP.md](AI_TOOL_SETUP.md) | |
 
 A change touching both the shelf and a device concern needs both packs. If no row fits, add one.
@@ -75,14 +76,9 @@ All paths are under `docs/design/`.
 
 ---
 
-## 4. Where the design truth lives in code
+## 4. Code locations
 
-All app behavior is in `index.html`. Original collectible faces load from `assets/collectibles/production/`, derived from checksum-locked masters. In `index.html`:
-- Tokens: the `:root` block at the top of the `<style>`. Read them as data in [tokens.json](tokens.json).
-- Bottle art: `bLinen`, `bInk`, `bFig`, `bMilk`, `bCedar`, `bSmoke`, `bEarth` (SVG, one per material family). Sample data: `BOTTLES`.
-- Layouts: `place` (Cover Flow and Stack) and `fanPlace` (Fan). One DOM, three arrangements.
-- Island timer, share image export and the iOS install layer: the sections of the script with those names.
-- Icons: `assets/icons/icon.svg` is the source; PNGs and launch images come from `tools/generate_assets.py`.
+Current native app: ios/AroomaNative. Original cards: assets/collectibles/masters/approved. Historic index.html is not the native source. See [native motion](specs/2026-10-31-native-premium-motion-interaction-system.md) and [gesture-first discovery](specs/2026-10-31-gesture-first-wishlist-discovery.md).
 
 ---
 

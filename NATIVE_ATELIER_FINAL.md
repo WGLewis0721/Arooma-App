@@ -42,6 +42,36 @@ These are **approved design requirements for the next native motion/polish pass*
 - Graceful fallback: when motion permissions/data are unavailable, in Simulator, for Reduce Motion, Low Power Mode or thermal/performance constraints, use a static premium finish or a minimal input-driven highlight; no device-orientation dependency for basic usability.
 - Performance and behavior acceptance: smooth, finger-coupled drag/flick motion with velocity-continuous settling; no hitching from foil compositing; low battery/CPU impact and no continuous sensor activity when gallery is not visible. Confirm on an actual iPhone under dark/light themes and different lighting, including stationary idle, gentle tilts and quick flicks.
 
+## Owner additions — shelf overview, custom shelves and multi-fragrance wears (2026-10-30)
+**Status: product requirements for the next native iOS pass; NOT implemented or validated in the installed TestFlight build.** These restore useful web-prototype functionality and redesign the confusing one-bottle-only native Journal. Preserve the already approved premium, card-first design and responsive gestures.
+
+### 1. Pinch to reveal the whole collection / shelf overview
+- Restore the previous web app's **continuous pinch-out from the focused shelf/card view to the full multi-shelf overview, and pinch-in to return to the selected shelf or card**. This is not just image enlargement or a navigation shortcut; it is a spatial zoom out/in between a focused collectible and the whole organized collection.
+- Use native SwiftUI multi-touch scale/magnification plus interactive transformations; the transition should track fingers, preserve zoom intent and selection, settle with restrained spring momentum, and be reversible/interruption-safe without accidental card swipes or inspector opens.
+- Overview displays named shelves with photographic miniature cards, counts and immediate access to a specific bottle; tapping a shelf or item zooms into that context. Add a visible Shelves/tab path for discoverability and for users unable to pinch. Honor Reduce Motion.
+- Reference behavior in retired **index.html**: section `all shelves: pinch out to see every shelf, pinch in to go back` (~lines 2683–2870), including the overview, `zoomToBottle`, `zoomInto`, pinch and explicit Shelves-button fallback. Reimplement natively, do not restore or wrap the PWA.
+
+### 2. Editable, configurable shelf names
+- Restore **Rename shelf** directly from the shelf header or contextual action; preview/confirm name, preserve its content, and update the name everywhere including overview, detail, move, share and search.
+- Preserve four seasonal shelves as **initial suggestions**, not unchangeable enum labels. Do not replace stored shelf identities when renaming, and do not silently reclassify fragrances when labels change. Allow future shelf creation/reordering without making this screen administrative or crowded.
+- Keep in-app persistence compatible with already-installed iOS collections. Shelf identity and display name should be distinct, stable fields; safely migrate the existing four enum-based values to persistent shelf records rather than resetting owned bottles or their assignments.
+- Reference retired web behavior at `index.html` ~lines 2879–2895 (`renameShelf`, `openRename`) and the shelf overview pencil action. Preserve the original ease of use.
+
+### 3. Replace ambiguous 'My Bottle' / 'The journal' experience with a clear wear journal
+- User report from iPhone: **the purpose of the Journal was unclear, and trying to log two or three fragrances worn together was unsuccessful.** Treat this as a core usability failure, not a styling defect.
+- Rename the tab to **Wear Log** or **Today** (validate the clearest label on device); present an obvious action: **What are you wearing today?** with a preview of today's entries, not an ownership page masquerading as a diary. Keep ownership details accessible from the selected card or collection.
+- Support **wearing/layering/stacking multiple different fragrances in one session**. In the logging flow, tap one fragrance, tap a second and third (or more if reasonable), then **Log wear**. Show all selected collectible thumbnails as a grouped composition, make multi-selection obvious, and allow adding/removing before confirmation.
+- Create an explicit durable **Wear Session** entity containing a session ID, time/date, an ordered set of bottle IDs and optional notes/impression. Optionally capture placement or spray counts later without blocking the first useful action. One session with three bottles is **one combination/event**, not three unrelated logs; each affected bottle must also display its wear count/remaining estimate coherently.
+- Permit **more than one session a day**, including repeating a fragrance when intentionally worn again. Today's entries should show the full combinations worn, with edit/undo for an entire session or one component, and never remove unrelated earlier wears. No arbitrary same-day lockout; prevent accidental double-submit at the UI level instead.
+- One-tap reuse from a previous combination, with optional naming/pinning of favorite layers (e.g., 'Office combo'), so repeated layering does not require finding all the bottles again. Distinguish the **Stack** visual gallery layout from **Layer / Wear Together** fragrance activity.
+- Aim for the common path in 3 interactions: open Today/Wear Log → select the fragrances → log the session (multi-select taps naturally scale with count). User should see a clear recorded confirmation and the grouped cards immediately; accessibility labels describe the combination.
+- Migration/data safety: the current native `WearEvent` belongs to a single `BottleRecord`, and `wearSelected()` only updates the selected bottle while blocking another wear for that bottle on the same day. Implement additive/backward-compatible storage and reconcile old per-bottle events into history without fabricating groupings. Don't discard existing wear logs or change their meaning.
+- Acceptance: from a new TestFlight install, create two-bottle and three-bottle combinations, see one grouped session for each, view them in history, edit/remove just one component, undo, repeat the combination on the same day, restart app and retain all data. Try on an actual iPhone; verify the experience is understandable without explanation.
+
+### Interaction hierarchy
+- **Cards** = admire and inspect a fragrance; **Shelves** = see and organize your entire collection (including pinch overview); **Wear Log/Today** = record what you actually wore, alone or layered; **Style** = choose the surrounding visual finish. Search supports discovery. Don't mix the meanings of card Stack layout and multi-fragrance wearing.
+- A layer composition should feel like arranging physical collectible cards together, with restrained shared motion and haptics; no additional dense trackers, charts, or unnecessary controls.
+
 ## Data and releases
 Retain `CollectionStore` model and existing `arooma-native-v1.json` encoding without migrations, deletions, or resetting onboarding. Keep the bundle ID `com.graymatter.arooma` so TestFlight updates install over the existing app. Use the existing `codemagic.yaml` workflow and App Store distribution profile; do not regenerate signing files.
 

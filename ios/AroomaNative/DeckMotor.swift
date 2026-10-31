@@ -122,6 +122,7 @@ final class DeckMotor {
             source = MorphSource.blend(source, layoutTo, morph.value).collapsed()
         }
         layoutTo = layout
+        morph.parameters = .morph // live-tunable
         morph.value = 0
         morph.target = 1
         morph.velocity = 0
@@ -132,6 +133,7 @@ final class DeckMotor {
 
     func hold() {
         deck.hold()
+        press.parameters = .press // live-tunable
         press.target = 1
         run()
     }

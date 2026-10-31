@@ -557,8 +557,8 @@ struct ScanReview: View {
                 Text("\(matched.house) · \(matched.name) · \(matched.concentration)").font(.subheadline)
                 let rows = [("Top", matched.top), ("Heart", matched.heart), ("Base", matched.base)].filter { !$0.1.isEmpty }
                 if rows.isEmpty { Text("Notes: Unknown").font(.footnote).foregroundStyle(.secondary) }
-                ForEach(rows, id: \.0) { row in
-                    Text("\(row.0): \(row.1.joined(separator: ", "))").font(.footnote).foregroundStyle(.secondary)
+                ForEach(rows.indices, id: \.self) { i in
+                    Text("\(rows[i].0): \(rows[i].1.joined(separator: ", "))").font(.footnote).foregroundStyle(.secondary)
                 }
                 if archive.isOwned(matched.id) { Label("Already in your collection", systemImage: "checkmark.seal").font(.caption) }
                 if archive.isWishlisted(matched.id) { Label("Already on your Wishlist", systemImage: "heart").font(.caption) }

@@ -427,6 +427,7 @@ struct FlipModel: Equatable {
     @discardableResult
     mutating func release(velocity: Double) -> Double {
         dragging = false
+        axis.parameters = .flip
         let v = velocity.isFinite ? velocity : 0
         let base = (axis.value / 180).rounded(.down) * 180
         let target: Double
@@ -440,6 +441,7 @@ struct FlipModel: Equatable {
     /// Tap / button flip: half a turn from wherever the card currently is.
     mutating func flip(direction: Double = 1) {
         dragging = false
+        axis.parameters = .flip
         let resting = (axis.target / 180).rounded() * 180
         axis.target = resting + (direction >= 0 ? 180 : -180)
     }

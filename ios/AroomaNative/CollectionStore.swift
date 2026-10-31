@@ -79,6 +79,14 @@ import SwiftUI
         add(fragrance)
         return fragrance
     }
+    func renamePersonalFragrance(id: String, name: String, house: String) {
+        guard let i = customFragrances.firstIndex(where: { $0.id == id }) else { return }
+        let cleanName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanName.isEmpty else { return }
+        customFragrances[i].name = String(cleanName.prefix(90))
+        let cleanHouse = house.trimmingCharacters(in: .whitespacesAndNewlines)
+        customFragrances[i].house = cleanHouse.isEmpty ? "My Collection" : String(cleanHouse.prefix(80))
+    }
     var cards: [DisplayCard] {
         switch mode {
         case .demo:
@@ -221,6 +229,11 @@ import SwiftUI
         HapticEngine.shared.play(.completed)
     }
     func delete(_ bottle: BottleRecord) {
+        wearSessions = wearSessions.compactMap { old in
+            var session = old
+            session.bottleIDs.removeAll { $0 == bottle.id }
+            return session.bottleIDs.isEmpty ? nil : session
+        }
         bottles.removeAll { $0.id == bottle.id }
         if selectedMineID == bottle.id { selectedMineID = bottles.first?.id }
         HapticEngine.shared.play(.completed)

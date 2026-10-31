@@ -254,7 +254,7 @@ struct AtelierSearch: View {
 
     private var results: [Fragrance] {
         let tokens = query.split(whereSeparator: \.isWhitespace).map(String.init)
-        return Fragrance.catalog.filter { fragrance in
+        return archive.catalog.filter { fragrance in
             guard !tokens.isEmpty else { return true }
             let all = ([fragrance.name, fragrance.house, fragrance.concentration, fragrance.year] +
                        fragrance.notes).joined(separator: " ")
@@ -354,7 +354,7 @@ struct AtelierOwnership: View {
     private var current: BottleRecord? { archive.selectedBottle }
     private var perfume: Fragrance? {
         guard let record = current else { return nil }
-        return Fragrance.find(record.fragranceID)
+        return archive.fragrance(id: record.fragranceID)
     }
 
     var body: some View {
@@ -543,7 +543,7 @@ struct AtelierOwnership: View {
                     .frame(minWidth: 44, minHeight: 44)
             }
             ForEach(archive.bottles) { record in
-                if let fragrance = Fragrance.find(record.fragranceID) {
+                if let fragrance = archive.fragrance(id: record.fragranceID) {
                     Button {
                         archive.selectedMineID = record.id
                         focus(DisplayCard(id: record.id.uuidString, fragrance: fragrance, bottleID: record.id))

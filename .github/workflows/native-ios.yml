@@ -1,0 +1,31 @@
+name: Native iOS 26 SwiftUI Build
+on:
+  pull_request:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/native-ios.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/native-ios.yml'
+  workflow_dispatch:
+jobs:
+  simulator-build:
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show installed Xcode
+        run: xcodebuild -version
+      - name: Compile native iOS Simulator app (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/AroomaNative.xcodeproj -scheme AroomaNative -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/AroomaBuild" CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-xcodebuild.log"
+      - name: Upload built simulator app
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AroomaNative-Simulator
+          path: ${{ runner.temp }}/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app
+          retention-days: 7

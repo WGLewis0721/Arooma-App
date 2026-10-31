@@ -85,8 +85,8 @@ struct DiscoveryScreen: View {
 
     private var results: [Fragrance] {
         let tokens = query.split(whereSeparator: \.isWhitespace).map(String.init)
-        guard !tokens.isEmpty else { return Fragrance.catalog }
-        return Fragrance.catalog.filter { fragrance in
+        guard !tokens.isEmpty else { return archive.catalog }
+        return archive.catalog.filter { fragrance in
             let fullText = ([fragrance.house, fragrance.name, fragrance.concentration, fragrance.year] +
                             fragrance.notes).joined(separator: " ")
             return tokens.allSatisfy { fullText.localizedStandardContains($0) }
@@ -226,7 +226,7 @@ struct MyBottleScreen: View {
                                 .foregroundStyle(.orange)
                         }
                         if let record = archive.selectedBottle,
-                           let fragrance = Fragrance.find(record.fragranceID) {
+                           let fragrance = archive.fragrance(id: record.fragranceID) {
                             HStack(alignment: .top, spacing: 18) {
                                 CollectibleCard(id: fragrance.id, cornerRadius: 9)
                                     .frame(width: 112, height: 164)
@@ -279,7 +279,7 @@ struct MyBottleScreen: View {
                                 Button("Add") { openAdd() }.frame(minHeight: 44)
                             }
                             ForEach(archive.bottles) { bottle in
-                                if let item = Fragrance.find(bottle.fragranceID) {
+                                if let item = archive.fragrance(id: bottle.fragranceID) {
                                     Button { archive.selectedMineID = bottle.id } label: {
                                         HStack {
                                             Text(item.name).font(.system(.body, design: .serif))
@@ -419,7 +419,7 @@ struct RotationManager: View {
             Section("New rotation") {
                 TextField("A name for your rotation", text: $name)
                 ForEach(archive.bottles, id: \.id) { bottle in
-                    if let fragrance = Fragrance.find(bottle.fragranceID) {
+                    if let fragrance = archive.fragrance(id: bottle.fragranceID) {
                         Toggle(fragrance.name, isOn: Binding(
                             get: { picked.contains(fragrance.id) },
                             set: { selected in

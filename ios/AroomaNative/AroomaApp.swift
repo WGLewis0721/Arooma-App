@@ -166,7 +166,7 @@ struct TodayAccessory: View {
                     .foregroundStyle(archive.theme.palette.accent)
                     .contentTransition(.symbolEffect(.replace))
                 if archive.mode == .demo {
-                    Text("Sample archive · open your collection to log wears")
+                    Text("Sample archive · log wears in My Collection")
                 } else if todays.isEmpty {
                     Text("What are you wearing today?")
                 } else {

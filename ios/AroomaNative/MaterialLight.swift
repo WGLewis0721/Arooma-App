@@ -92,6 +92,35 @@ enum RenderQuality {
         let thermal = ProcessInfo.processInfo.thermalState
         return !ProcessInfo.processInfo.isLowPowerModeEnabled && thermal != .serious && thermal != .critical
     }
+    /// QA switch (`-AroomaFoilOff YES`) used by CI to A/B the shader's cost in frame pacing.
+    static let foilDisabledForQA = UserDefaults.standard.bool(forKey: "AroomaFoilOff")
+}
+
+// MARK: - Contact shadow sprite
+
+/// A soft card shadow rendered ONCE with Core Graphics, then only scaled, moved and faded per
+/// frame. Replaces a live Gaussian blur per card per frame (an offscreen pass each).
+enum ShadowSprite {
+    static let shape = CGSize(width: 118, height: 172)
+    static let pad: CGFloat = 46
+    static let image: UIImage = {
+        let size = CGSize(width: shape.width + pad * 2, height: shape.height + pad * 2)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 2
+        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            let cg = ctx.cgContext
+            // Draw the shape far off-canvas and cast only its shadow back into view.
+            let shift: CGFloat = 4000
+            cg.setShadow(offset: CGSize(width: shift * 2, height: 0), blur: 34,
+                         color: UIColor.black.cgColor)
+            let rect = CGRect(x: pad - shift * 2, y: pad, width: shape.width, height: shape.height)
+            UIColor.black.setFill()
+            UIBezierPath(roundedRect: rect, cornerRadius: 12).fill()
+        }.withRenderingMode(.alwaysTemplate)
+    }()
+    /// Scale that makes the sprite's inner shape match the view it is placed behind.
+    static let overscan = CGSize(width: (shape.width + pad * 2) / shape.width,
+                                 height: (shape.height + pad * 2) / shape.height)
 }
 
 // MARK: - Theme lighting
@@ -132,10 +161,11 @@ struct LiveFoil: ViewModifier {
     @State private var motion = MotionField.shared
 
     func body(content: Content) -> some View {
-        let live = strength > 0.01 && !reduceTransparency
+        let live = strength > 0.01 && !reduceTransparency && !RenderQuality.foilDisabledForQA
         let level = strength
         let tintColor = tint
-        let animate = live && !reduceMotion && scenePhase == .active && RenderQuality.allowsLiveMaterial
+        // Only the hero's clock runs; neighbours keep a still (but tilt-responsive) light.
+        let animate = live && strength > 0.5 && !reduceMotion && scenePhase == .active && RenderQuality.allowsLiveMaterial
         TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: !animate)) { clock in
             let t = clock.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600)
             let drift = animate ? CGPoint(x: sin(t * 0.37) * 0.10, y: cos(t * 0.29) * 0.07) : .zero

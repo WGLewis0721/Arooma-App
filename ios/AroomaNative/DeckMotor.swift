@@ -298,6 +298,7 @@ final class FramePacingProbe {
                           frames, fps, target, hitches, hitchMsPerS, worst * 1000)
         summary = line
         print("AroomaFramePacing \(line)")
+        fflush(stdout)
         frames = 0; hitches = 0; hitchTime = 0; animatedTime = 0; worst = 0; expectedSum = 0
     }
 }

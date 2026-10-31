@@ -93,6 +93,15 @@ if [ "$LABEL" = "after" ]; then
   sleep 30
   kill -INT "$REC" 2>/dev/null; wait "$REC" 2>/dev/null
   xcrun simctl terminate "$DEVICE" "$BUNDLE" >/dev/null 2>&1
-  grep AroomaFramePacing "$OUT/after-frame-pacing.log" || echo "no frame pacing lines captured"
+  # Same choreography without screen recording: full material, then with the foil shader off.
+  for variant in full foil-off; do
+    seed mine
+    extra=(); [ "$variant" = "foil-off" ] && extra=(-AroomaFoilOff YES)
+    xcrun simctl launch --terminate-running-process --stdout="$OUT/after-pacing-$variant.log" \
+      "$DEVICE" "$BUNDLE" -AroomaAutoplay YES -AroomaFramePacing YES "${extra[@]}" >/dev/null 2>&1
+    sleep 30
+    xcrun simctl terminate "$DEVICE" "$BUNDLE" >/dev/null 2>&1
+  done
+  for f in "$OUT"/after-frame-pacing.log "$OUT"/after-pacing-*.log; do echo "== $f"; grep AroomaFramePacing "$f" || echo "(no lines)"; done
 fi
 ls -la "$OUT"

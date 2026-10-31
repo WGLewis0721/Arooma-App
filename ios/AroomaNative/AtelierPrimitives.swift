@@ -160,12 +160,15 @@ struct AtelierCardSurface: View {
             }
             .background {
                 if shadowed {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(theme.shadowTint.opacity(0.46 - 0.1 * lift))
-                        .scaleEffect(x: 0.92 - 0.02 * lift, y: 0.94)
+                    Image(uiImage: ShadowSprite.image)
+                        .resizable()
+                        .foregroundStyle(theme.shadowTint)
+                        .scaleEffect(x: ShadowSprite.overscan.width * (0.94 + 0.06 * lift),
+                                     y: ShadowSprite.overscan.height * (0.96 + 0.04 * lift))
+                        .opacity(0.78 - 0.18 * lift)
                         .offset(x: -yaw * 0.12, y: 10 + 18 * lift)
-                        .blur(radius: 11 + 15 * lift)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
             }
             .modifier(TiltLean(amount: lean))

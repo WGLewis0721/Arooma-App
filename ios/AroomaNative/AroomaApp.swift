@@ -138,18 +138,24 @@ struct AtelierRoot: View {
         HapticEngine.shared.play(.completed)
     }
 
+    /// Brings a card to the front in the deck that holds it. Never changes ownership: a catalog
+    /// fragrance you don't own opens in the sample archive instead of being added.
     private func focus(_ card: DisplayCard) {
-        if archive.mode == .mine {
-            if let owned = archive.bottles.first(where: { $0.id == card.bottleID }) {
-                archive.selectedMineID = owned.id
-            } else if let owned = archive.bottles.first(where: { $0.fragranceID == card.fragrance.id }) {
-                archive.selectedMineID = owned.id
-            } else {
-                archive.add(card.fragrance)
-            }
-        } else {
-            archive.choose(DisplayCard(id: card.fragrance.id,
-                                       fragrance: card.fragrance, bottleID: nil), haptic: false)
+        let f = card.fragrance.id
+        let ownedID = card.bottleID ?? archive.bottles.first(where: { $0.fragranceID == f })?.id
+        let wishID = card.wishID ?? archive.wishlist.first(where: { $0.fragranceID == f })?.id
+        if card.bottleID == nil, card.wishID == nil, archive.mode == .demo,
+           Fragrance.catalog.contains(where: { $0.id == f }) {
+            archive.selectedDemoID = f
+        } else if card.wishID == nil, let ownedID {
+            archive.mode = .mine
+            archive.selectedMineID = ownedID
+        } else if let wishID {
+            archive.mode = .wishlist
+            archive.selectedWishID = wishID
+        } else if Fragrance.catalog.contains(where: { $0.id == f }) {
+            archive.mode = .demo
+            archive.selectedDemoID = f
         }
         tab = .gallery
     }

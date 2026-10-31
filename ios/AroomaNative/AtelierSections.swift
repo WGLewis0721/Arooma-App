@@ -20,84 +20,95 @@ struct PressableCardStyle: ButtonStyle {
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var ink: CGFloat = 0
+    @AppStorage(SignatureIntroPolicy.seenKey) private var introSeen = false
+    /// First launch only: the pen-writing intro, ending on the exact master signature.
+    @State private var showingIntro = !UserDefaults.standard.bool(forKey: SignatureIntroPolicy.seenKey)
+    @State private var cameFromIntro = false
+    @State private var settled = false
     @State private var dealt = false
     @State private var handle: CGSize = .zero
+    @State private var handleUV = CGPoint(x: 0.5, y: 0.5)
     @Namespace private var swatchRing
+    @Namespace private var signatureSpace
     let openDemo: () -> Void
     let openMine: () -> Void
 
     var body: some View {
+        ZStack {
+            if showingIntro {
+                SignatureIntro(namespace: signatureSpace) {
+                    introSeen = true
+                    cameFromIntro = true
+                    withAnimation(reduceMotion ? .easeInOut(duration: 0.3) : .spring(response: 0.8, dampingFraction: 0.9)) {
+                        showingIntro = false
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(2)
+            } else {
+                welcome
+                    .transition(.opacity)
+            }
+        }
+    }
+
+    private var welcome: some View {
         GeometryReader { geo in
             let accent = archive.theme.palette.accent
             VStack(spacing: 0) {
                 AtelierEyebrow(text: "The private fragrance archive", accent: accent)
                     .padding(.top, 18)
+                    .opacity(settled ? 1 : 0)
                 Spacer(minLength: 8)
-                VStack(spacing: 6) {
-                    Text("Arooma")
-                        .font(.custom("Snell Roundhand", size: min(92, geo.size.width * 0.24)))
-                        .foregroundStyle(accent)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .mask(alignment: .leading) {
-                            GeometryReader { letters in
-                                LinearGradient(stops: [
-                                    .init(color: .black, location: 0),
-                                    .init(color: .black, location: max(0, ink - 0.06)),
-                                    .init(color: .clear, location: ink)
-                                ], startPoint: .leading, endPoint: .trailing)
-                                .frame(width: letters.size.width * 1.1)
-                            }
-                        }
+                VStack(spacing: 10) {
+                    // The exact master signature (assets/brand), inked in the theme's metal.
+                    AroomaSignatureMark(ink: accent)
+                        .frame(width: min(geo.size.width * 0.8, 330),
+                               height: min(geo.size.width * 0.8, 330) / SignatureGeometry.logoAspect)
+                        .matchedGeometryEffect(id: "arooma-signature", in: signatureSpace)
+                        .accessibilityElement()
                         .accessibilityLabel("Arooma")
                         .accessibilityAddTraits(.isHeader)
-                    Path { path in
-                        path.move(to: CGPoint(x: 22, y: 15))
-                        path.addCurve(to: CGPoint(x: 278, y: 13),
-                                      control1: CGPoint(x: 98, y: 34),
-                                      control2: CGPoint(x: 195, y: -6))
-                    }
-                    .trim(from: 0, to: ink)
-                    .stroke(accent.opacity(0.6), style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
-                    .frame(width: 290, height: 30)
-                    .accessibilityHidden(true)
+                        .accessibilityHidden(cameFromIntro) // already announced by the intro
                     AtelierDisplay(title: "A collection worth keeping.", size: 27)
                         .multilineTextAlignment(.center)
-                        .opacity(ink > 0.6 ? 1 : 0)
-                        .animation(.easeOut(duration: 0.5), value: ink > 0.6)
+                        .opacity(settled ? 1 : 0)
+                        .offset(y: settled ? 0 : 8)
                 }
                 Spacer(minLength: 10)
                 hand(width: min(geo.size.width * 0.44, 200))
                     .frame(height: min(geo.size.width * 0.44, 200) * 86 / 59 + 20)
                 Spacer(minLength: 14)
-                themePicker(accent: accent)
-                    .padding(.bottom, 18)
-                VStack(spacing: 10) {
-                    Button(action: openDemo) {
-                        Text("Explore the Archive")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 40)
+                Group {
+                    themePicker(accent: accent)
+                        .padding(.bottom, 18)
+                    VStack(spacing: 10) {
+                        Button(action: openDemo) {
+                            Text("Explore the Archive")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, minHeight: 40)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(accent)
+                        Button(action: openMine) {
+                            Text("Start My Collection")
+                                .font(.subheadline.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 36)
+                        }
+                        .buttonStyle(.glass)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(accent)
-                    Button(action: openMine) {
-                        Text("Start My Collection")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 36)
-                    }
-                    .buttonStyle(.glass)
+                    .padding(.horizontal, 26)
+                    .padding(.bottom, 16)
                 }
-                .padding(.horizontal, 26)
-                .padding(.bottom, 16)
+                .opacity(settled ? 1 : 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(AtelierAtmosphere(theme: archive.theme))
         .onAppear {
-            if reduceMotion { ink = 1; dealt = true; return }
-            withAnimation(.easeInOut(duration: 1.6)) { ink = 1 }
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(0.35)) { dealt = true }
+            if reduceMotion { settled = true; dealt = true; return }
+            withAnimation(.easeOut(duration: 0.55).delay(cameFromIntro ? 0.35 : 0.1)) { settled = true }
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(cameFromIntro ? 0.45 : 0.25)) { dealt = true }
         }
     }
 
@@ -117,7 +128,7 @@ struct AtelierWelcome: View {
                 .offset(x: dealt ? w * 0.42 : 0, y: dealt ? 16 : 440)
                 .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.78).delay(0.08), value: dealt)
             AtelierCardSurface(fragranceID: "dior", yaw: yaw, lift: handle == .zero ? 0.2 : 0.8,
-                               foil: .live, lean: 1)
+                               foil: .live, lean: 1, touch: handleUV, pressure: handle == .zero ? 0 : 1)
                 .frame(width: w, height: w * 86 / 59)
                 .rotation3DEffect(.degrees(yaw), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
                 .rotation3DEffect(.degrees(pitch), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
@@ -125,7 +136,10 @@ struct AtelierWelcome: View {
                 .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.16), value: dealt)
                 .gesture(
                     DragGesture(minimumDistance: 0)
-                        .onChanged { value in handle = value.translation }
+                        .onChanged { value in
+                            handle = value.translation
+                            handleUV = CGPoint(x: value.location.x / w, y: value.location.y / (w * 86 / 59))
+                        }
                         .onEnded { _ in
                             withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) { handle = .zero }
                         }
@@ -811,6 +825,8 @@ struct AtelierOwnership: View {
 struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var replayingIntro = false
+    @State private var probe = FramePacingProbe.shared
 
     var body: some View {
         ScrollView {
@@ -868,6 +884,19 @@ struct AtelierStyle: View {
                     ForEach(Appearance.allCases) { a in Text(a.rawValue).tag(a) }
                 }
                 .pickerStyle(.segmented)
+                AtelierEyebrow(text: "Signature", accent: archive.theme.palette.accent)
+                Button { replayingIntro = true } label: {
+                    HStack(spacing: 14) {
+                        AroomaSignatureMark(ink: archive.theme.palette.accent)
+                            .frame(height: 30)
+                        Spacer(minLength: 8)
+                        Label("Replay intro", systemImage: "play.circle")
+                            .font(.subheadline.weight(.medium))
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                }
+                .buttonStyle(.glass)
+                .accessibilityLabel("Replay the Arooma signature intro")
                 DisclosureGroup("About this archive") {
                     Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it switches off in Low Power Mode and with Reduce Motion.")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -876,12 +905,25 @@ struct AtelierStyle: View {
                 .font(.footnote)
                 .padding(15)
                 .atelierPlate(16)
+                // Hidden owner tool: long-press to show or hide the frame-time readout.
+                Text(probe.enabled ? "Arooma · frame-time readout on" : "Arooma · private and on-device")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                    .contentShape(Rectangle())
+                    .onLongPressGesture(minimumDuration: 1.2) {
+                        probe.enabled.toggle()
+                        HapticEngine.shared.play(.completed)
+                    }
+                    .accessibilityHidden(true)
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
             .padding(.bottom, 30)
         }
         .scrollContentBackground(.hidden)
+        .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay() }
     }
 }
 
@@ -995,6 +1037,7 @@ struct AtelierWearLog: View {
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
                         action: "Add a bottle", callback: add, accent: accent)
                 } else {
+                    if selectedIDs.isEmpty, let last = lastRitual { repeatLast(last) }
                     if !archive.savedLayers.isEmpty { savedLayers }
                     picker
                     history
@@ -1035,6 +1078,45 @@ struct AtelierWearLog: View {
     private func toggle(_ id: UUID) {
         if selected.contains(id) { selected.removeAll { $0 == id } }
         else { selected.append(id) }
+    }
+
+    // MARK: Repeat the last ritual
+
+    /// The most recent wear from an earlier day whose bottles are all still owned.
+    private var lastRitual: WearSession? {
+        archive.wearSessions.first { session in
+            !Calendar.current.isDateInToday(session.date) &&
+            session.bottleIDs.allSatisfy { id in archive.bottles.contains(where: { $0.id == id }) }
+        }
+    }
+
+    /// One tap re-selects yesterday's solo wear or layer; one more logs it.
+    private func repeatLast(_ session: WearSession) -> some View {
+        Button { selected = session.bottleIDs } label: {
+            HStack(spacing: 14) {
+                ComposedSet(bottleIDs: session.bottleIDs, cardWidth: 34, spread: 7)
+                    .frame(width: 70, height: 58)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Wear it again")
+                        .font(.system(.subheadline, design: .serif))
+                        .foregroundStyle(.primary)
+                    Text(session.bottleIDs.compactMap { id in archive.bottles.first(where: { $0.id == id })
+                        .flatMap { archive.fragrance(id: $0.fragranceID)?.name } }.joined(separator: " + "))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(session.date, format: .relative(presentation: .named))
+                        .font(.caption2).foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "arrow.clockwise.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(accent)
+            }
+            .padding(12)
+            .atelierPlate(18)
+        }
+        .buttonStyle(PressableCardStyle())
+        .accessibilityHint("Selects the same bottles so you can log them again")
     }
 
     // MARK: Saved layers

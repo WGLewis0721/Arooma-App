@@ -1,8 +1,14 @@
 import SwiftUI
+import AVFoundation
 
 @main
 struct AroomaNativeApp: App {
     @StateObject private var archive = CollectionStore()
+
+    init() {
+        // The intro clips are silent; never interrupt the owner's own audio.
+        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -42,6 +48,7 @@ struct AtelierRoot: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.96)))
             }
         }
+        .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
         .onAppear(perform: applyQALaunchArguments)
         .fullScreenCover(item: $inspection) { card in
             AtelierInspector(card: card, close: { inspection = nil })

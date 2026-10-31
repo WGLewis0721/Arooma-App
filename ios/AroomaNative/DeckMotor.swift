@@ -42,7 +42,6 @@ final class FrameDriver {
         let now = link.timestamp
         let dt = last == 0 ? (link.targetTimestamp - link.timestamp) : (now - last)
         last = now
-        FramePacingProbe.shared.record(timestamp: now, expected: link.targetTimestamp - link.timestamp)
         guard let tick else { stop(); return }
         if !tick(max(1.0 / 240.0, dt)) { stop() }
     }
@@ -68,12 +67,17 @@ final class DeckMotor {
     private(set) var deck = DeckModel(count: 0)
     private(set) var press = SpringAxis(value: 0, parameters: .press)
     private(set) var morph = SpringAxis(value: 1, parameters: .morph)
-    private(set) var layoutFrom: DeckLayoutKind = .coverFlow
+    /// What the cards are morphing FROM: a layout, or the exact blend that was on screen when a
+    /// new layout was chosen mid-morph (so a second switch never snaps).
+    private(set) var source: MorphSource = .layout(.coverFlow)
     private(set) var layoutTo: DeckLayoutKind = .coverFlow
     /// Sign of the most recent travel, used to choose the direction label text slides.
     private(set) var travelDirection: Double = 1
 
     @ObservationIgnored var onSettle: ((Int, Bool, Double) -> Void)?
+    /// Called the moment a release or glide commits to a card, so the selection is saved before
+    /// the spring finishes (quitting mid-settle never loses it).
+    @ObservationIgnored var onCommit: ((Int) -> Void)?
     @ObservationIgnored var reduceMotion = false
     @ObservationIgnored private let driver = FrameDriver(label: "deck")
     @ObservationIgnored private var lastReleaseSpeed = 0.0
@@ -85,9 +89,10 @@ final class DeckMotor {
 
     func pose(distance: Double, index: Int, cardWidth: Double) -> CardPose {
         let target = DeckLayoutEngine.pose(distance: distance, index: index, layout: layoutTo, cardWidth: cardWidth)
-        guard morph.value < 1 || layoutFrom != layoutTo else { return target }
-        let source = DeckLayoutEngine.pose(distance: distance, index: index, layout: layoutFrom, cardWidth: cardWidth)
-        return CardPose.blend(source, target, morph.value)
+        if case .layout(let kind) = source, kind == layoutTo { return target }
+        guard morph.value < 1 else { return target }
+        let from = source.pose(distance: distance, index: index, cardWidth: cardWidth)
+        return CardPose.blend(from, target, morph.value)
     }
 
     func stride(cardWidth: Double) -> Double {
@@ -100,20 +105,24 @@ final class DeckMotor {
         if deck.count != count || (!deck.isInteracting && !deck.isAnimating && deck.settledIndex != index) {
             deck.updateCount(count, focusing: index)
         }
-        if layoutTo != layout && morph.isResting { layoutFrom = layout; layoutTo = layout }
+        if layoutTo != layout && morph.isResting { source = .layout(layout); layoutTo = layout }
     }
 
     func morph(to layout: DeckLayoutKind) {
         guard layout != layoutTo else { return }
         if reduceMotion {
-            layoutFrom = layout; layoutTo = layout
+            source = .layout(layout); layoutTo = layout
             morph = SpringAxis(value: 1, parameters: .morph)
             return
         }
-        // Start the new morph from the currently displayed blend so a second switch mid-morph
-        // does not snap: freeze the visible pose as the new "from" by keeping the old pair when
-        // the previous morph is less than half done.
-        if morph.value < 0.5 { layoutTo = layout } else { layoutFrom = layoutTo; layoutTo = layout; morph.value = 0 }
+        // The new morph starts from exactly what is on screen now.
+        if morph.isResting {
+            source = .layout(layoutTo)
+        } else {
+            source = MorphSource.blend(source, layoutTo, morph.value).collapsed()
+        }
+        layoutTo = layout
+        morph.value = 0
         morph.target = 1
         morph.velocity = 0
         run()
@@ -142,7 +151,8 @@ final class DeckMotor {
             place(target, notify: true)
             return
         }
-        deck.release(velocity: velocity)
+        let target = deck.release(velocity: velocity)
+        onCommit?(target)
         run()
     }
 
@@ -160,6 +170,7 @@ final class DeckMotor {
         lastReleaseSpeed = 0
         if reduceMotion { place(index, notify: true); return }
         deck.glide(to: index)
+        onCommit?(deck.targetIndex)
         run()
     }
 
@@ -188,9 +199,39 @@ final class DeckMotor {
         }
         if !morph.isResting {
             morph.step(dt)
-            if morph.snapIfResting() { layoutFrom = layoutTo }
+            if morph.snapIfResting() { source = .layout(layoutTo) }
         }
         return deck.isInteracting || deck.isAnimating || !press.isResting || !morph.isResting
+    }
+}
+
+/// The pose a card is morphing from: a plain layout, or a blend frozen mid-morph.
+indirect enum MorphSource {
+    case layout(DeckLayoutKind)
+    case blend(MorphSource, DeckLayoutKind, Double)
+
+    func pose(distance: Double, index: Int, cardWidth: Double) -> CardPose {
+        switch self {
+        case .layout(let kind):
+            return DeckLayoutEngine.pose(distance: distance, index: index, layout: kind, cardWidth: cardWidth)
+        case .blend(let from, let to, let t):
+            let a = from.pose(distance: distance, index: index, cardWidth: cardWidth)
+            let b = DeckLayoutEngine.pose(distance: distance, index: index, layout: to, cardWidth: cardWidth)
+            return CardPose.blend(a, b, t)
+        }
+    }
+
+    private var depth: Int {
+        if case .blend(let from, _, _) = self { return from.depth + 1 }
+        return 0
+    }
+
+    /// Bounds the nesting for someone tapping layouts very fast. Only the oldest, almost
+    /// finished blend is resolved, so the visible pose barely moves.
+    func collapsed() -> MorphSource {
+        guard depth > 3, case .blend(let from, let to, let t) = self else { return self }
+        if case .blend(_, let inner, _) = from, t > 0 { return .blend(.layout(inner), to, t) }
+        return self
     }
 }
 
@@ -250,57 +291,80 @@ final class FlipMotor {
     }
 }
 
-// MARK: - Frame pacing probe
+// MARK: - Frame-time readout (hidden, off by default)
 
-/// Real frame-interval measurement for every animated frame the deck and flip motors render.
-/// Enabled with the launch argument `-AroomaFramePacing YES` (Xcode scheme → Arguments), on a
-/// device or simulator. Reports to the console every 3 seconds of animation and drives the HUD.
-/// A hitch is any frame that arrived later than 1.5× the display's target interval; hitch time
-/// is the time beyond the target, summed, per second of animation (Apple's hitch-ratio metric).
+/// On-device pacing check for the owner. Off by default; toggled by a long press on
+/// "About this archive" in View & Style (or launch argument `-AroomaFramePacing YES`).
+/// While on, its own CADisplayLink times every frame the app delivers, whatever is animating,
+/// and the readout shows the last second: average frame time, fps against the display's target,
+/// hitches (frames later than 1.5× target) and the worst frame. Nothing is logged or sent.
 @MainActor
 @Observable
 final class FramePacingProbe {
     static let shared = FramePacingProbe()
-    let enabled = UserDefaults.standard.bool(forKey: "AroomaFramePacing")
+    static let key = "AroomaFramePacing"
 
+    var enabled: Bool = UserDefaults.standard.bool(forKey: FramePacingProbe.key) {
+        didSet {
+            UserDefaults.standard.set(enabled, forKey: Self.key)
+            enabled ? start() : stop()
+        }
+    }
     private(set) var summary = "measuring…"
-    @ObservationIgnored private var lastTimestamp: CFTimeInterval = 0
+    private(set) var hitchedLastSecond = false
+
+    @ObservationIgnored private var link: CADisplayLink?
+    @ObservationIgnored private var last: CFTimeInterval = 0
+    @ObservationIgnored private var windowStart: CFTimeInterval = 0
     @ObservationIgnored private var frames = 0
     @ObservationIgnored private var hitches = 0
-    @ObservationIgnored private var hitchTime: Double = 0
-    @ObservationIgnored private var animatedTime: Double = 0
     @ObservationIgnored private var worst: Double = 0
-    @ObservationIgnored private var expectedSum: Double = 0
+    @ObservationIgnored private var total: Double = 0
+    @ObservationIgnored private var expected: Double = 1.0 / 60.0
 
-    func record(timestamp: CFTimeInterval, expected: Double) {
-        guard enabled else { return }
-        defer { lastTimestamp = timestamp }
-        guard lastTimestamp > 0 else { return }
-        let delta = timestamp - lastTimestamp
-        // A gap longer than 250 ms is a new animation, not a hitch.
-        guard delta < 0.25, expected > 0 else { return }
+    private init() {
+        if enabled { start() }
+    }
+
+    private func start() {
+        guard link == nil else { return }
+        let proxy = ProbeProxy()
+        let link = CADisplayLink(target: proxy, selector: #selector(ProbeProxy.fire(_:)))
+        link.preferredFrameRateRange = CAFrameRateRange(minimum: 60, maximum: 120, preferred: 120)
+        link.add(to: .main, forMode: .common)
+        self.link = link
+        last = 0
+    }
+
+    private func stop() {
+        link?.invalidate()
+        link = nil
+    }
+
+    fileprivate func tick(_ link: CADisplayLink) {
+        let now = link.timestamp
+        expected = max(1.0 / 240.0, link.targetTimestamp - link.timestamp)
+        defer { last = now }
+        guard last > 0 else { windowStart = now; return }
+        let delta = now - last
+        guard delta < 0.5 else { windowStart = now; return } // app was suspended
         frames += 1
-        animatedTime += delta
-        expectedSum += expected
+        total += delta
         worst = max(worst, delta)
-        if delta > expected * 1.5 {
-            hitches += 1
-            hitchTime += delta - expected
+        if delta > expected * 1.5 { hitches += 1 }
+        if now - windowStart >= 1 {
+            let avg = total / Double(max(1, frames))
+            summary = String(format: "%.1f ms · %.0f fps / %.0f Hz · hitches %d · worst %.0f ms",
+                             avg * 1000, Double(frames) / (now - windowStart), 1 / expected, hitches, worst * 1000)
+            hitchedLastSecond = hitches > 0
+            frames = 0; hitches = 0; worst = 0; total = 0; windowStart = now
         }
-        if animatedTime >= 3 { flush() }
     }
+}
 
-    private func flush() {
-        let fps = Double(frames) / animatedTime
-        let target = Double(frames) / expectedSum
-        let hitchMsPerS = hitchTime * 1000 / animatedTime
-        let line = String(format: "frames=%d fps=%.1f target=%.0fHz hitches=%d hitch=%.1fms/s worst=%.1fms",
-                          frames, fps, target, hitches, hitchMsPerS, worst * 1000)
-        summary = line
-        print("AroomaFramePacing \(line)")
-        fflush(stdout)
-        frames = 0; hitches = 0; hitchTime = 0; animatedTime = 0; worst = 0; expectedSum = 0
-    }
+@MainActor
+private final class ProbeProxy: NSObject {
+    @objc func fire(_ link: CADisplayLink) { FramePacingProbe.shared.tick(link) }
 }
 
 struct FramePacingHUD: View {
@@ -308,10 +372,10 @@ struct FramePacingHUD: View {
     var body: some View {
         if probe.enabled {
             Text(probe.summary)
-                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .padding(.horizontal, 8).padding(.vertical, 4)
-                .background(.black.opacity(0.62), in: Capsule())
-                .foregroundStyle(.green)
+                .background(.black.opacity(0.66), in: Capsule())
+                .foregroundStyle(probe.hitchedLastSecond ? .orange : .green)
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
         }

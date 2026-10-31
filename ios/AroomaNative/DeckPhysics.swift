@@ -302,7 +302,9 @@ enum DeckLayoutEngine {
         switch layout {
         case .coverFlow: return w * 0.60
         case .stack: return w * 1.04
-        case .fan: return w * 0.62
+        // Arc length per card at the card centre: pivot 1.85 card heights below, 11.5° apart.
+        // Matching it keeps the fanned card exactly under the finger.
+        case .fan: return w * 0.54
         }
     }
 

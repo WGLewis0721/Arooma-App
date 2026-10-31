@@ -245,6 +245,93 @@ struct AtelierShelves: View {
     }
 }
 
+
+struct AtelierCompactShelves: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @State private var renaming: FragranceShelf?
+    @State private var newName = ""
+    let focus: (DisplayCard) -> Void
+    let add: () -> Void
+
+    private func shelf(for card: DisplayCard) -> FragranceShelf {
+        guard let id = card.bottleID,
+              let owned = archive.bottles.first(where: { $0.id == id }) else {
+            return card.fragrance.shelf
+        }
+        return owned.shelf
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 13) {
+                Text("Pinch open a shelf, or tap a collectible.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ForEach(FragranceShelf.allCases) { shelf in
+                    let cards = archive.cards.filter { self.shelf(for: $0) == shelf }
+                    VStack(alignment: .leading, spacing: 9) {
+                        HStack(spacing: 8) {
+                            AtelierDisplay(title: archive.shelfName(shelf), size: 22)
+                            Spacer()
+                            Text("\(cards.count)").font(.caption.monospacedDigit())
+                            Button {
+                                newName = archive.shelfName(shelf)
+                                renaming = shelf
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .font(.caption).frame(width: 42, height: 42)
+                            }
+                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
+                        }
+                        if cards.isEmpty {
+                            Button(action: add) {
+                                Label("Add first fragrance", systemImage: "plus")
+                                    .frame(maxWidth: .infinity, minHeight: 72)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 11) {
+                                    ForEach(cards) { card in
+                                        Button { focus(card) } label: {
+                                            VStack(spacing: 3) {
+                                                AtelierCardSurface(fragranceID: card.fragrance.id)
+                                                    .frame(width: 65, height: 96)
+                                                Text(card.fragrance.name)
+                                                    .font(.system(size: 10))
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(1)
+                                                    .frame(width: 67)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Open \(card.fragrance.name)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(11).atelierPlate(15)
+                }
+            }
+            .padding(.horizontal, 17).padding(.vertical, 12)
+        }
+        .alert("Rename shelf", isPresented: Binding(
+            get: { renaming != nil },
+            set: { if !$0 { renaming = nil } }
+        )) {
+            TextField("Shelf name", text: $newName)
+            Button("Cancel", role: .cancel) { renaming = nil }
+            Button("Save") {
+                if let shelf = renaming { archive.renameShelf(shelf, to: newName) }
+                renaming = nil
+            }
+        } message: {
+            Text("The bottles on this shelf stay put.")
+        }
+    }
+}
+
 struct AtelierSearch: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.dismiss) private var dismiss
@@ -660,14 +747,14 @@ struct AtelierStyle: View {
 // MARK: - The wear log. One session can include several bottles worn together.
 struct AtelierWearLog: View {
     @EnvironmentObject private var archive: CollectionStore
-    @State private var selected: Set<UUID> = []
+    @State private var selected: [UUID] = []
     @State private var impression = ""
     @State private var showAll = false
     let add: () -> Void
     let focus: (DisplayCard) -> Void
 
     private var selectedIDs: [UUID] {
-        archive.bottles.filter { selected.contains($0.id) }.map(\.id)
+        selected.filter { id in archive.bottles.contains(where: { $0.id == id }) }
     }
     private var displayedSessions: [WearSession] {
         showAll ? archive.wearSessions :
@@ -702,8 +789,8 @@ struct AtelierWearLog: View {
                         ForEach(archive.bottles) { bottle in
                             if let scent = archive.fragrance(id: bottle.fragranceID) {
                                 Button {
-                                    if selected.contains(bottle.id) { selected.remove(bottle.id) }
-                                    else { selected.insert(bottle.id) }
+                                    if selected.contains(bottle.id) { selected.removeAll { $0 == bottle.id } }
+                                    else { selected.append(bottle.id) }
                                 } label: {
                                     VStack(spacing: 7) {
                                         AtelierCardSurface(fragranceID: scent.id, selected: selected.contains(bottle.id))
@@ -812,7 +899,7 @@ struct AtelierWearLog: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("Wear again") { selected = Set(session.bottleIDs) }
+                Button("Wear again") { selected = session.bottleIDs }
                     .font(.caption.weight(.semibold))
             }
             ForEach(session.bottleIDs, id: \.self) { id in

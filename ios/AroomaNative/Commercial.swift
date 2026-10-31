@@ -214,6 +214,63 @@ struct CommercialArchive: Codable {
         grants.contains { $0.editionID == edition.id } ||
         ownedProductIDs.contains(AroomaProducts.cardPrefix + edition.id)
     }
+    func hasLibraryAccess(_ edition: CardEdition) -> Bool {
+        owns(edition) || membershipActive
+    }
+    /// A portable, complete backup for personal Card Studio creations.
+    /// Purchased entitlements are deliberately excluded; StoreKit owns those.
+    func backupData() -> Data? {
+        var photos: [String: Data] = [:]
+        for card in created {
+            guard let data = try? Data(contentsOf: Self.documentDirectory.appendingPathComponent(card.photoName)) else {
+                status = "Some source photos are missing. The backup was not created."
+                return nil
+            }
+            photos[card.photoName] = data
+        }
+        return try? JSONEncoder().encode(StudioBackup(version: 1, cards: created, photos: photos))
+    }
+    func importBackup(_ data: Data) -> Bool {
+        guard data.count <= 200_000_000,
+              let backup = try? JSONDecoder().decode(StudioBackup.self, from: data),
+              backup.version == 1, backup.cards.count <= 2000 else {
+            status = "Unsupported or oversized backup. Nothing was imported."
+            return false
+        }
+        let names = Set(backup.cards.map(\.photoName))
+        guard names.count == backup.cards.count,
+              names.allSatisfy({ $0.hasPrefix("studio-") && $0.hasSuffix(".jpg") && !$0.contains("/") }),
+              names.allSatisfy({ name in
+                  guard let bytes = backup.photos[name] else { return false }
+                  return bytes.count <= 12_000_000 && UIImage(data: bytes) != nil
+              }) else {
+            status = "Backup contains missing or invalid photos. Nothing was imported."
+            return false
+        }
+        // Merge into the existing library, never replace it. Names are remapped to prevent
+        // overwriting files already on the phone and the backed-up UUIDs are preserved.
+        var imported: [CreatedCard] = []
+        var written: [URL] = []
+        do {
+            for card in backup.cards where !created.contains(where: { $0.id == card.id }) {
+                let filename = "studio-\(UUID().uuidString).jpg"
+                let destination = Self.documentDirectory.appendingPathComponent(filename)
+                try backup.photos[card.photoName]!.write(to: destination, options: .atomic)
+                written.append(destination)
+                var replacement = card
+                replacement.photoName = filename
+                imported.append(replacement)
+            }
+        } catch {
+            for file in written { try? FileManager.default.removeItem(at: file) }
+            status = "Import failed. Existing cards were not changed."
+            return false
+        }
+        created.insert(contentsOf: imported, at: 0)
+        save()
+        status = "Imported \(imported.count) personal cards. Existing cards were preserved."
+        return true
+    }
     func photo(for card: CreatedCard) -> UIImage? {
         UIImage(contentsOfFile: Self.documentDirectory.appendingPathComponent(card.photoName).path)
     }
@@ -259,12 +316,35 @@ struct CommercialArchive: Codable {
     }
 }
 
+struct StudioBackup: Codable {
+    let version: Int
+    let cards: [CreatedCard]
+    let photos: [String: Data]
+}
+
+struct StudioBackupDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+    static var writableContentTypes: [UTType] { [.json] }
+    var data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws {
+        guard let contents = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        data = contents
+    }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
+    }
+}
+
 // MARK: - Reusable card compositions
 struct StudioCardFace: View {
     let title: String
     let caption: String
     let image: UIImage?
     let finish: CardFinish
+    var liveFoil = true
     var body: some View {
         let palette = finish.theme.palette
         ZStack {
@@ -309,6 +389,8 @@ struct StudioCardFace: View {
         }
         .aspectRatio(59.0 / 86.0, contentMode: .fit)
         .clipped()
+        .modifier(LiveFoil(strength: liveFoil ? 0.55 : 0,
+                           yaw: 0, radius: 19, tint: palette.accent))
     }
 }
 
@@ -322,7 +404,8 @@ struct StudioPNG: Transferable {
     }
     enum Failure: Error { case rendering }
     @MainActor func png() throws -> Data {
-        let view = StudioCardFace(title: card.title, caption: card.caption, image: photo, finish: card.finish)
+        let view = StudioCardFace(title: card.title, caption: card.caption, image: photo,
+                                  finish: card.finish, liveFoil: false)
             .frame(width: 590, height: 860)
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
@@ -411,6 +494,9 @@ struct MyCardsScreen: View {
     @State private var studio = false
     @State private var selectedCard: CreatedCard?
     @State private var section = 0
+    @State private var exporting = false
+    @State private var importing = false
+    @State private var exportDocument: StudioBackupDocument?
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -440,7 +526,22 @@ struct MyCardsScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { studio = true } label: { Label("Studio", systemImage: "paintbrush.pointed") }
+                    Menu {
+                        Button("Card Studio", systemImage: "paintbrush.pointed") { studio = true }
+                        Button("Export My Cards", systemImage: "square.and.arrow.up") {
+                            if let data = commerce.backupData() {
+                                exportDocument = StudioBackupDocument(data: data)
+                                exporting = true
+                            }
+                        }
+                        Button("Import My Cards", systemImage: "square.and.arrow.down") {
+                            importing = true
+                        }
+                        Button("Restore Purchases", systemImage: "arrow.clockwise") {
+                            Task { await commerce.restore() }
+                        }
+                    } label: { Image(systemName: "ellipsis.circle") }
+                        .accessibilityLabel("Card library actions")
                 }
             }
             .sheet(isPresented: $studio) {
@@ -450,12 +551,27 @@ struct MyCardsScreen: View {
                 CreatedCardDetails(card: card)
                     .environmentObject(commerce)
             }
+            .fileExporter(isPresented: $exporting, document: $exportDocument,
+                          contentType: .json, defaultFilename: "Arooma-My-Cards") { result in
+                if case .failure(let error) = result { commerce.status = error.localizedDescription }
+            }
+            .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
+                switch result {
+                case .success(let url):
+                    let scoped = url.startAccessingSecurityScopedResource()
+                    defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                    if let data = try? Data(contentsOf: url) { _ = commerce.importBackup(data) }
+                    else { commerce.status = "Could not read the chosen backup file." }
+                case .failure(let error):
+                    commerce.status = error.localizedDescription
+                }
+            }
         }
     }
 
     private var ownedSection: some View {
         VStack(alignment: .leading, spacing: 18) {
-            if commerce.created.isEmpty && !CardEdition.catalog.contains(where: commerce.owns) {
+            if commerce.created.isEmpty && !CardEdition.catalog.contains(where: commerce.hasLibraryAccess) {
                 ContentUnavailableView("No digital cards yet", systemImage: "rectangle.on.rectangle.angled",
                     description: Text("Create your first personal card in Studio, or browse available editions."))
                 Button("Open Card Studio") { studio = true }.buttonStyle(.borderedProminent)
@@ -470,10 +586,14 @@ struct MyCardsScreen: View {
                         }
                     }.buttonStyle(.plain)
                 }
-                ForEach(CardEdition.catalog.filter(commerce.owns)) { edition in
+                ForEach(CardEdition.catalog.filter(commerce.hasLibraryAccess)) { edition in
                     VStack(alignment: .leading, spacing: 7) {
                         CollectibleCard(id: edition.fragranceID).frame(maxWidth: .infinity)
                         Text(edition.title).font(.subheadline.weight(.medium))
+                        if commerce.membershipActive && !commerce.owns(edition) {
+                            Text("Library access · subscription")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
@@ -500,6 +620,13 @@ struct MyCardsScreen: View {
                             .font(.caption).foregroundStyle(.secondary)
                         if let product = commerce.products[AroomaProducts.cardPrefix + edition.id] {
                             Text(product.displayPrice).font(.caption.weight(.medium))
+                        }
+                        if !commerce.owns(edition) {
+                            Button("Acquire exact card") {
+                                Task { await commerce.purchase(AroomaProducts.cardPrefix + edition.id) }
+                            }
+                            .font(.caption.weight(.semibold))
+                            .disabled(!CommercialRelease.paidCardsApproved || commerce.busy)
                         }
                     }
                     Spacer()

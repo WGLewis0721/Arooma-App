@@ -1,5 +1,8 @@
 # Claude Opus 5.5 — Arooma native premium interaction + supplied signature integration
 
+> Part of the [Arooma design brain](../README.md). Earlier native interaction and signature handoff.
+> Summary: Integrate the approved animated calligraphy assets and polish SwiftUI card physics and tilt-reactive holographic material; the separate Wishlist/discovery prompt governs newer capture and search requirements.
+
 ## Role and goal
 
 Act as Arooma's principal native iOS motion engineer and luxury digital product designer. Deliver a coherent, responsive, production-quality native SwiftUI fragrance collection experience worthy of a $25/year subscription. Implement substantive changes in real source; do not deliver another cosmetic mockup or stop after planning.

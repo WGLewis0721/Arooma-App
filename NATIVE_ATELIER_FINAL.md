@@ -23,6 +23,7 @@ The collectible is jewelry; every other surface is its fitted velvet tray. Photo
 - **Search:** readable cards, house/note matching, no network requests or fake filters.
 - **Ownership:** large card hero, local metrics, wear/undo, history, notes, rotations, and bottle editing in three taps or fewer from common entry points.
 - **Themes:** four materially different atmospheric palettes, both light and dark, one coherent system.
+- **Gallery view setting:** the Cover Flow / Stack / Fan switcher belongs in the **Style** options screen alongside the theme and appearance pickers. Remove the three-way selector from the bottom of the Cards gallery so the collectible gains visual breathing room. Choosing a layout in Style immediately updates the gallery and persists across app restarts. No second switcher on Cards; the selector controls presentation only and must not be confused with wearing multiple fragrances together.
 - **Haptics:** selection settle, wear confirmation, completed actions only; no tapping/hover/flip haptics.
 - Liquid wave simulation is deliberately absent from this native experience; preserve stored fill estimates.
 

@@ -22,6 +22,7 @@ struct AtelierRoot: View {
     @State private var tab: AtelierTab = .gallery
     @State private var inspection: DisplayCard?
     @State private var adding = false
+    @Namespace private var cardSpace
 
     var body: some View {
         ZStack {
@@ -29,7 +30,12 @@ struct AtelierRoot: View {
             if archive.onboarded {
                 TabView(selection: $tab) {
                     Tab("Cards", systemImage: "rectangle.stack", value: AtelierTab.gallery) {
-                        AtelierGallery(inspect: { inspection = $0 }, add: { adding = true })
+                        AtelierGallery(transitionNamespace: cardSpace, inspectedID: inspection?.id,
+                            inspect: { card in
+                                withAnimation(.spring(response: 0.55, dampingFraction: 0.9)) {
+                                    inspection = card
+                                }
+                            }, add: { adding = true })
                     }
                     Tab("Shelves", systemImage: "square.grid.2x2", value: AtelierTab.shelves) {
                         AtelierShelves(focus: focus, add: { adding = true })
@@ -51,10 +57,16 @@ struct AtelierRoot: View {
                     openMine: { archive.mode = .mine; archive.onboarded = true }
                 )
             }
-        }
-        .fullScreenCover(item: $inspection) { card in
-            AtelierInspector(card: card, close: { inspection = nil })
+            if let card = inspection {
+                AtelierInspector(card: card, transitionNamespace: cardSpace, close: {
+                    withAnimation(.spring(response: 0.51, dampingFraction: 0.9)) {
+                        inspection = nil
+                    }
+                })
                 .environmentObject(archive)
+                .transition(.opacity)
+                .zIndex(100)
+            }
         }
         .sheet(isPresented: $adding) {
             QuickAddSheet(onAdded: {

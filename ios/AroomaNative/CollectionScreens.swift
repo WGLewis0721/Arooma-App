@@ -328,15 +328,23 @@ struct BottleEditor: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft: BottleRecord
     @State private var confirmDelete = false
+    @State private var customName = ""
+    @State private var customHouse = ""
 
     init(bottle: BottleRecord) {
         _draft = State(initialValue: bottle)
     }
     var body: some View {
         Form {
+            if draft.fragranceID.hasPrefix("personal-") {
+                Section("Captured fragrance") {
+                    TextField("Fragrance name", text: $customName)
+                    TextField("House or brand (optional)", text: $customHouse)
+                }
+            }
             Section("Ownership") {
                 Picker("Shelf", selection: $draft.shelf) {
-                    ForEach(FragranceShelf.allCases) { shelf in Text(shelf.rawValue).tag(shelf) }
+                    ForEach(FragranceShelf.allCases) { shelf in Text(archive.shelfName(shelf)).tag(shelf) }
                 }
                 Stepper("Bottle size · \(draft.volumeML) ml", value: $draft.volumeML, in: 5...1000, step: 5)
                 VStack(alignment: .leading) {
@@ -358,12 +366,24 @@ struct BottleEditor: View {
                 }
             }
         }
+        .onAppear {
+            if let fragrance = archive.fragrance(id: draft.fragranceID) {
+                customName = fragrance.name
+                customHouse = fragrance.house == "My Collection" ? "" : fragrance.house
+            }
+        }
         .navigationTitle("My Bottle")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { archive.update(draft); dismiss() }
+                Button("Save") {
+                    archive.update(draft)
+                    if draft.fragranceID.hasPrefix("personal-") {
+                        archive.renamePersonalFragrance(id: draft.fragranceID, name: customName, house: customHouse)
+                    }
+                    dismiss()
+                }
                     .fontWeight(.semibold)
             }
         }

@@ -579,6 +579,13 @@ struct AtelierStyle: View {
                         .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
                     }
                 }
+                VStack(alignment: .leading, spacing: 9) {
+                    AtelierEyebrow(text: "Gallery view", accent: archive.theme.palette.accent)
+                    Text("Choose how your collectible cards are arranged.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
+                }
                 AtelierEyebrow(text: "Appearance", accent: archive.theme.palette.accent)
                 Picker("Appearance", selection: $archive.appearance) {
                     ForEach(Appearance.allCases) { a in Text(a.rawValue).tag(a) }

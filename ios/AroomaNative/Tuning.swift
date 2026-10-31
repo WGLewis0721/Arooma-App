@@ -7,7 +7,8 @@ import Observation
 // Every physics, layout, tilt and foil constant the owner may want to refine on an iPhone lives
 // here, with today's shipped value as its default. Values persist in UserDefaults, apply
 // immediately, and can be copied out as plain text ("key = value" lines) and pasted back.
-// The panel is hidden: long-press the Version row in View & Style.
+// The panel is hidden: long-press the Version row in View & Style. It opens on five presets
+// ("feels") and five quick-adjust sliders; every individual value is under Advanced.
 
 /// Tilt values read by MotionField / TiltLean.
 enum TiltTuning {
@@ -46,34 +47,204 @@ struct TuningSpec: Identifiable {
     let apply: (Double) -> Void
 }
 
+// MARK: - Presets ("feels")
+
+/// A named starting point. Only values that differ from the shipped defaults are listed.
+struct TuningPreset: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let summary: String
+    let symbol: String
+    let values: [String: Double]
+
+    static let signature = TuningPreset(id: "signature", name: "Signature", summary: "The shipped balance: weighted cards, gentle foil.",
+                                        symbol: "seal", values: [:])
+    static let silk = TuningPreset(id: "silk", name: "Silk", summary: "Slow, smooth and calm. Broad soft sheen.",
+                                   symbol: "wind", values: [
+        "physics.settle.response": 0.56, "physics.settle.damping": 0.92,
+        "physics.glide.response": 0.62, "physics.glide.damping": 0.95,
+        "physics.press.response": 0.30, "physics.press.damping": 0.80,
+        "physics.flip.response": 0.64, "physics.flip.damping": 0.90,
+        "physics.morph.response": 0.74, "physics.morph.damping": 0.92,
+        "physics.deck.flickThreshold": 1.0, "physics.deck.maxReleaseVelocity": 6,
+        "tilt.gain": 0.85, "tilt.smoothing": 110,
+        "foil.sheenWidth": 11, "foil.glintTightness": 150, "foil.diffractionStrength": 0.26,
+        "foil.sheenStrength": 1.15, "foil.glintStrength": 0.8, "foil.glitterStrength": 0.5
+    ])
+    static let crisp = TuningPreset(id: "crisp", name: "Crisp", summary: "Quick, snappy settles. Tight, bright glints.",
+                                    symbol: "bolt", values: [
+        "physics.settle.response": 0.36, "physics.settle.damping": 0.80,
+        "physics.glide.response": 0.42, "physics.glide.damping": 0.86,
+        "physics.press.response": 0.18, "physics.press.damping": 0.62,
+        "physics.flip.response": 0.42, "physics.flip.damping": 0.76,
+        "physics.morph.response": 0.50, "physics.morph.damping": 0.82,
+        "physics.deck.flickThreshold": 0.55, "physics.deck.maxReleaseVelocity": 9,
+        "physics.flip.flickThreshold": 200,
+        "tilt.smoothing": 30, "tilt.sampleRate": 120,
+        "foil.sheenWidth": 26, "foil.glintTightness": 340, "foil.glintStrength": 1.2
+    ])
+    static let vivid = TuningPreset(id: "vivid", name: "Vivid Holo", summary: "Dramatic rainbow foil that answers every tilt.",
+                                    symbol: "sparkles", values: [
+        "tilt.gain": 1.35, "tilt.range": 40, "tilt.leanMax": 6,
+        "foil.lightTravelX": 1.25, "foil.lightTravelY": 1.25, "foil.eyeDistance": 1.7,
+        "foil.diffractionStrength": 0.6, "foil.diffractionPhase": 3.4,
+        "foil.sheenStrength": 1.5, "foil.glintStrength": 1.6, "foil.glitterStrength": 1.4
+    ])
+    static let quiet = TuningPreset(id: "quiet", name: "Quiet", summary: "Understated. Barely-there foil, steady cards.",
+                                    symbol: "moon", values: [
+        "physics.settle.response": 0.50, "physics.settle.damping": 0.92,
+        "tilt.gain": 0.7, "tilt.leanMax": 1.5,
+        "foil.diffractionStrength": 0.14, "foil.sheenStrength": 0.6,
+        "foil.glintStrength": 0.5, "foil.glitterStrength": 0.2
+    ])
+
+    static let all: [TuningPreset] = [.signature, .silk, .crisp, .vivid, .quiet]
+}
+
+// MARK: - Quick adjust
+
+/// One plain-language slider that moves a related group of values together, on top of the
+/// chosen preset. 1.0 is neutral (the preset as designed).
+struct TuningMacro: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let low: String
+    let high: String
+    let range: ClosedRange<Double>
+    let affects: [String]
+
+    static let springIDs = ["settle", "glide", "press", "flip", "morph"]
+    static let weight = TuningMacro(id: "weight", name: "Card weight", low: "Light", high: "Heavy", range: 0.6...1.6,
+                                    affects: springIDs.flatMap { ["physics.\($0).response", "physics.\($0).damping"] })
+    static let flick = TuningMacro(id: "flick", name: "Flick sensitivity", low: "Calm", high: "Eager", range: 0.5...2.0,
+                                   affects: ["physics.deck.flickThreshold", "physics.deck.maxReleaseVelocity", "physics.flip.flickThreshold"])
+    static let tilt = TuningMacro(id: "tilt", name: "Tilt response", low: "Subtle", high: "Strong", range: 0.4...2.5,
+                                  affects: ["tilt.gain", "tilt.leanMax"])
+    static let foil = TuningMacro(id: "foil", name: "Foil intensity", low: "Quiet", high: "Vivid", range: 0...2,
+                                  affects: ["foil.diffractionStrength", "foil.sheenStrength", "foil.glintStrength", "foil.glitterStrength"])
+    static let shine = TuningMacro(id: "shine", name: "Shine size", low: "Pinpoint", high: "Broad", range: 0.5...2,
+                                   affects: ["foil.sheenWidth", "foil.glintTightness"])
+
+    static let all: [TuningMacro] = [.weight, .flick, .tilt, .foil, .shine]
+
+    /// How each quick adjust bends a preset value.
+    static func transform(_ id: String, _ base: Double, macros: [String: Double]) -> Double {
+        func m(_ macro: TuningMacro) -> Double { macros[macro.id] ?? 1 }
+        switch id {
+        case _ where id.hasSuffix(".response") && id.hasPrefix("physics."):
+            return base * m(.weight)
+        case _ where id.hasSuffix(".damping") && id.hasPrefix("physics."):
+            return base + (m(.weight) - 1) * 0.1
+        case "physics.deck.flickThreshold", "physics.flip.flickThreshold":
+            return base / m(.flick)
+        case "physics.deck.maxReleaseVelocity":
+            return base * m(.flick).squareRoot()
+        case "tilt.gain":
+            return base * m(.tilt)
+        case "tilt.leanMax":
+            return base * min(m(.tilt), 1.6)
+        case "foil.diffractionStrength", "foil.sheenStrength", "foil.glintStrength", "foil.glitterStrength":
+            return base * m(.foil)
+        case "foil.sheenWidth", "foil.glintTightness":
+            return base / m(.shine)
+        default:
+            return base
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class Tuning {
     static let shared = Tuning()
-    private static let prefix = "arooma.tuning."
+    private static let legacyPrefix = "arooma.tuning."
+    private static let presetKey = "arooma.tuning.v2.preset"
+    private static let macrosKey = "arooma.tuning.v2.macros"
+    private static let overridesKey = "arooma.tuning.v2.overrides"
 
-    private(set) var values: [String: Double] = [:]
+    /// The chosen feel. Every value starts from it.
+    private(set) var presetID: String = TuningPreset.signature.id
+    /// Quick-adjust multipliers on top of the preset (1 = neutral).
+    private(set) var macros: [String: Double] = [:]
+    /// Individual edits from the Advanced list or pasted values; they win over everything.
+    private(set) var overrides: [String: Double] = [:]
     /// Bumped on every change so views that read static tuning re-render live.
     private(set) var revision = 0
 
     private init() {
+        let defaults = UserDefaults.standard
+        presetID = defaults.string(forKey: Self.presetKey) ?? TuningPreset.signature.id
+        macros = (defaults.dictionary(forKey: Self.macrosKey) as? [String: Double]) ?? [:]
+        overrides = (defaults.dictionary(forKey: Self.overridesKey) as? [String: Double]) ?? [:]
+        // One-time migration from the first tuning panel: keep any value the owner changed.
         for spec in Self.specs {
-            let stored = UserDefaults.standard.object(forKey: Self.prefix + spec.id) as? Double
-            values[spec.id] = Self.sanitize(stored ?? spec.defaultValue, spec)
+            let key = Self.legacyPrefix + spec.id
+            if let old = defaults.object(forKey: key) as? Double {
+                if abs(old - spec.defaultValue) > spec.step / 2 { overrides[spec.id] = Self.sanitize(old, spec) }
+                defaults.removeObject(forKey: key)
+            }
         }
+        save()
         applyAll()
     }
 
-    func value(_ id: String) -> Double { values[id] ?? Self.spec(id)?.defaultValue ?? 0 }
+    var preset: TuningPreset { TuningPreset.all.first { $0.id == presetID } ?? .signature }
 
+    /// Final value: edit → quick-adjust applied to the preset → shipped default.
+    func value(_ id: String) -> Double {
+        if let o = overrides[id] { return o }
+        return derived(id)
+    }
+
+    /// The value before any individual edit.
+    func derived(_ id: String) -> Double {
+        guard let spec = Self.spec(id) else { return 0 }
+        let base = preset.values[id] ?? spec.defaultValue
+        return Self.sanitize(TuningMacro.transform(id, base, macros: macros), spec)
+    }
+
+    func macro(_ m: TuningMacro) -> Double { macros[m.id] ?? 1 }
+
+    var isEdited: Bool { !overrides.isEmpty }
+    var isCustomized: Bool { isEdited || macros.values.contains { abs($0 - 1) > 0.001 } }
+
+    // MARK: Changes
+
+    func selectPreset(_ p: TuningPreset) {
+        presetID = p.id
+        macros = [:]
+        overrides = [:]
+        commit(tilt: true)
+    }
+
+    func setMacro(_ m: TuningMacro, _ raw: Double) {
+        macros[m.id] = min(max(raw, m.range.lowerBound), m.range.upperBound)
+        // A quick adjust takes over the values it controls.
+        for id in m.affects { overrides[id] = nil }
+        commit(tilt: m.id == TuningMacro.tilt.id)
+    }
+
+    /// Advanced edit of a single value.
     func set(_ id: String, _ raw: Double) {
         guard let spec = Self.spec(id) else { return }
         let v = Self.sanitize(raw, spec)
-        values[id] = v
-        UserDefaults.standard.set(v, forKey: Self.prefix + id)
-        spec.apply(v)
+        if abs(v - derived(id)) <= spec.step / 2 { overrides[id] = nil } else { overrides[id] = v }
+        spec.apply(value(id))
+        save()
         revision &+= 1
         if spec.group == "Tilt" { MotionField.shared.tuningChanged() }
+    }
+
+    func clearEdits() {
+        overrides = [:]
+        commit(tilt: true)
+    }
+
+    func resetAll() {
+        presetID = TuningPreset.signature.id
+        macros = [:]
+        overrides = [:]
+        commit(tilt: true)
     }
 
     func applyAll() {
@@ -81,39 +252,69 @@ final class Tuning {
         revision &+= 1
     }
 
-    func resetAll() {
-        for spec in Self.specs {
-            UserDefaults.standard.removeObject(forKey: Self.prefix + spec.id)
-            values[spec.id] = spec.defaultValue
-        }
+    private func commit(tilt: Bool) {
+        save()
         applyAll()
-        MotionField.shared.tuningChanged()
+        if tilt { MotionField.shared.tuningChanged() }
     }
+
+    private func save() {
+        let defaults = UserDefaults.standard
+        defaults.set(presetID, forKey: Self.presetKey)
+        defaults.set(macros, forKey: Self.macrosKey)
+        defaults.set(overrides, forKey: Self.overridesKey)
+    }
+
+    // MARK: Copy / paste
 
     func exportText() -> String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        var lines = ["Arooma tuning values (version \(version), build \(build))"]
+        var lines = ["Arooma tuning (version \(version), build \(build))",
+                     "preset = \(presetID)"]
+        for m in TuningMacro.all { lines.append("macro.\(m.id) = \(String(format: "%.2f", macro(m)))") }
         var group = ""
         for spec in Self.specs {
             if spec.group != group { group = spec.group; lines.append(""); lines.append("# \(group)") }
-            let changed = abs(value(spec.id) - spec.defaultValue) > spec.step / 2 ? "  (default \(Self.format(spec.defaultValue, spec)))" : ""
-            lines.append("\(spec.id) = \(Self.format(value(spec.id), spec))\(changed)")
+            let edited = overrides[spec.id] != nil ? "  (edited)" : ""
+            lines.append("\(spec.id) = \(Self.format(value(spec.id), spec))\(edited)")
         }
         return lines.joined(separator: "\n")
     }
 
-    /// Accepts the text produced by exportText (or any "key = value" lines). Returns how many
-    /// known values were applied.
+    /// Accepts the text produced by exportText (or any "key = value" lines): the preset first,
+    /// then quick adjusts, then individual values (kept only where they differ). Returns how
+    /// many lines were applied.
     @discardableResult
     func importText(_ text: String) -> Int {
-        var applied = 0
+        var pairs: [(String, String)] = []
         for line in text.split(whereSeparator: \.isNewline) {
             let parts = line.split(separator: "=", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
-            guard parts.count == 2, Self.spec(parts[0]) != nil else { continue }
-            let number = parts[1].split(separator: " ").first.map(String.init) ?? parts[1]
-            if let v = Double(number) { set(parts[0], v); applied += 1 }
+            guard parts.count == 2 else { continue }
+            pairs.append((parts[0], parts[1].split(separator: " ").first.map(String.init) ?? parts[1]))
         }
+        var applied = 0
+        if let p = pairs.first(where: { $0.0 == "preset" }), let preset = TuningPreset.all.first(where: { $0.id == p.1 }) {
+            presetID = preset.id
+            macros = [:]
+            overrides = [:]
+            applied += 1
+        }
+        for (key, raw) in pairs where key.hasPrefix("macro.") {
+            if let m = TuningMacro.all.first(where: { "macro.\($0.id)" == key }), let v = Double(raw) {
+                macros[m.id] = min(max(v, m.range.lowerBound), m.range.upperBound)
+                applied += 1
+            }
+        }
+        for (key, raw) in pairs {
+            guard let spec = Self.spec(key) else { continue }
+            let v = raw == "Off" ? 0 : Double(raw)
+            guard let v else { continue }
+            let clean = Self.sanitize(v, spec)
+            overrides[key] = abs(clean - derived(key)) <= spec.step / 2 ? nil : clean
+            applied += 1
+        }
+        commit(tilt: true)
         return applied
     }
 
@@ -122,7 +323,7 @@ final class Tuning {
         return String(format: "%.\(spec.digits)f", v)
     }
 
-    private static func sanitize(_ v: Double, _ spec: TuningSpec) -> Double {
+    fileprivate static func sanitize(_ v: Double, _ spec: TuningSpec) -> Double {
         guard v.isFinite else { return spec.defaultValue }
         return min(max(v, spec.range.lowerBound), spec.range.upperBound)
     }
@@ -235,11 +436,66 @@ struct TuningPanel: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Frame-time readout", isOn: Binding(get: { probe.enabled }, set: { probe.enabled = $0 }))
-                    Button("Recenter tilt now", systemImage: "scope") {
-                        MotionField.shared.recenter()
-                        flash("Tilt baseline set to the current angle.")
+                    ForEach(TuningPreset.all) { preset in
+                        Button { tuning.selectPreset(preset); flash("\(preset.name) applied.") } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: preset.symbol)
+                                    .frame(width: 26)
+                                    .foregroundStyle(.tint)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(preset.name).font(.body.weight(.medium)).foregroundStyle(.primary)
+                                    Text(preset.summary).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if tuning.presetID == preset.id {
+                                    Image(systemName: "checkmark").font(.body.weight(.semibold)).foregroundStyle(.tint)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(tuning.presetID == preset.id ? .isSelected : [])
                     }
+                } header: {
+                    Text("Feel")
+                } footer: {
+                    Text(tuning.isCustomized ? "\(tuning.preset.name), adjusted below." : "Pick a starting point, then fine-tune below.")
+                }
+
+                Section("Quick adjust") {
+                    ForEach(TuningMacro.all) { macro in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(macro.name).font(.subheadline)
+                                Spacer()
+                                Text(String(format: "%.2f×", tuning.macro(macro)))
+                                    .font(.subheadline.monospacedDigit())
+                                    .foregroundStyle(abs(tuning.macro(macro) - 1) < 0.005 ? .secondary : .primary)
+                            }
+                            Slider(value: Binding(get: { tuning.macro(macro) }, set: { tuning.setMacro(macro, $0) }),
+                                   in: macro.range, step: 0.05) {
+                                Text(macro.name)
+                            } minimumValueLabel: {
+                                Text(macro.low).font(.caption2).foregroundStyle(.secondary)
+                            } maximumValueLabel: {
+                                Text(macro.high).font(.caption2).foregroundStyle(.secondary)
+                            }
+                        }
+                        .contextMenu {
+                            Button("Back to 1.00×", systemImage: "arrow.counterclockwise") { tuning.setMacro(macro, 1) }
+                        }
+                    }
+                }
+
+                Section {
+                    Button("Recenter tilt", systemImage: "scope") {
+                        MotionField.shared.recenter()
+                        flash("Tilt baseline set to how you're holding the phone.")
+                    }
+                    Toggle("Frame-time readout", isOn: Binding(get: { probe.enabled }, set: { probe.enabled = $0 }))
+                }
+
+                Section {
                     Button("Copy values", systemImage: "doc.on.doc") {
                         UIPasteboard.general.string = tuning.exportText()
                         flash("Copied. Paste them into the conversation.")
@@ -248,19 +504,23 @@ struct TuningPanel: View {
                         let count = tuning.importText(UIPasteboard.general.string ?? "")
                         flash(count == 0 ? "No tuning values found on the clipboard." : "Applied \(count) values.")
                     }
-                    Button("Reset to defaults", systemImage: "arrow.counterclockwise", role: .destructive) {
+                    NavigationLink {
+                        TuningAdvanced()
+                    } label: {
+                        HStack {
+                            Label("Advanced", systemImage: "slider.horizontal.3")
+                            Spacer()
+                            if tuning.isEdited {
+                                Text("\(tuning.overrides.count) edited").font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    Button("Reset everything", systemImage: "arrow.counterclockwise", role: .destructive) {
                         confirmReset = true
                     }
                 } footer: {
                     if let message { Text(message) }
                     else { Text("Changes apply immediately and are kept on this iPhone.") }
-                }
-                ForEach(Tuning.groups, id: \.self) { group in
-                    Section(group) {
-                        ForEach(Tuning.specs.filter { $0.group == group }) { spec in
-                            row(spec)
-                        }
-                    }
                 }
             }
             .navigationTitle("Tuning")
@@ -268,11 +528,11 @@ struct TuningPanel: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } }
             }
-            .confirmationDialog("Reset every tuning value to the shipped defaults?", isPresented: $confirmReset,
+            .confirmationDialog("Back to Signature with no adjustments or edits?", isPresented: $confirmReset,
                                 titleVisibility: .visible) {
-                Button("Reset to defaults", role: .destructive) {
+                Button("Reset everything", role: .destructive) {
                     tuning.resetAll()
-                    flash("All values reset.")
+                    flash("Back to Signature.")
                 }
             }
         }
@@ -280,29 +540,56 @@ struct TuningPanel: View {
         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
     }
 
+    private func flash(_ text: String) {
+        message = text
+        HapticEngine.shared.play(.completed)
+    }
+}
+
+/// Every individual value, for fine edits. Edits win over the preset and quick adjusts.
+struct TuningAdvanced: View {
+    @State private var tuning = Tuning.shared
+
+    var body: some View {
+        Form {
+            if tuning.isEdited {
+                Section {
+                    Button("Clear \(tuning.overrides.count) edits", systemImage: "arrow.uturn.backward") { tuning.clearEdits() }
+                } footer: {
+                    Text("Edited values are marked with a dot. Long-press a value to undo just that one.")
+                }
+            }
+            ForEach(Tuning.groups, id: \.self) { group in
+                Section(group) {
+                    ForEach(Tuning.specs.filter { $0.group == group }) { spec in
+                        row(spec)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Advanced")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
     private func row(_ spec: TuningSpec) -> some View {
         let current = tuning.value(spec.id)
-        let isDefault = abs(current - spec.defaultValue) <= spec.step / 2
+        let edited = tuning.overrides[spec.id] != nil
         return VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            HStack(spacing: 6) {
+                if edited { Circle().fill(.tint).frame(width: 6, height: 6) }
                 Text(spec.label).font(.subheadline)
                 Spacer()
                 Text(Tuning.format(current, spec))
                     .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(isDefault ? .secondary : .primary)
+                    .foregroundStyle(edited ? .primary : .secondary)
             }
             Slider(value: Binding(get: { tuning.value(spec.id) }, set: { tuning.set(spec.id, $0) }),
                    in: spec.range, step: spec.step)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityValue(Tuning.format(current, spec))
+        .accessibilityValue(Tuning.format(current, spec) + (edited ? ", edited" : ""))
         .contextMenu {
-            Button("Reset this value", systemImage: "arrow.counterclockwise") { tuning.set(spec.id, spec.defaultValue) }
+            Button("Undo this edit", systemImage: "arrow.counterclockwise") { tuning.set(spec.id, tuning.derived(spec.id)) }
         }
-    }
-
-    private func flash(_ text: String) {
-        message = text
-        HapticEngine.shared.play(.completed)
     }
 }

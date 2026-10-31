@@ -32,6 +32,7 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
+| Native gesture-first cards, Wishlist, scan destination choices, image sharing, quick fragrance insights or advanced search | [specs/2026-10-31-gesture-first-wishlist-discovery.md](specs/2026-10-31-gesture-first-wishlist-discovery.md) | [Opus implementation prompt](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md) and [native motion spec](specs/2026-10-31-native-premium-motion-interaction-system.md); do not assume a verified catalog or media license |
 | Real fragrance catalog, brand-photo use, independent-app disclosure, image rights, ads or optional IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [brand/THIRD_PARTY_CONTENT_POLICY.md](brand/THIRD_PARTY_CONTENT_POLICY.md). Strategy only; do not import or publish third-party media based on these docs | 
 | Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
 | A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |

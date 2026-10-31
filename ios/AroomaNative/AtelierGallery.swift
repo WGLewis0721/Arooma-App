@@ -13,6 +13,7 @@ struct AtelierGallery: View {
     @State private var pinchScale: CGFloat = 1
     @State private var pinching = false
     @State private var shelfOverview = false
+    @AppStorage("arooma.deckTipV2") private var understoodDeck = false
 
     let transitionNamespace: Namespace.ID
     let inspectedID: String?
@@ -171,6 +172,22 @@ struct AtelierGallery: View {
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
+            .overlay(alignment: .bottom) {
+                if !understoodDeck {
+                    HStack(spacing: 7) {
+                        Image(systemName: "hand.draw")
+                        Text("SWIPE TO BROWSE · TAP TO INSPECT")
+                    }
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(0.7)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 7)
+                    .padding(.horizontal, 12)
+                    .background(.thinMaterial, in: Capsule())
+                    .padding(.bottom, 2)
+                    .allowsHitTesting(false)
+                }
+            }
             .scaleEffect(pinchScale)
             .contentShape(Rectangle())
             .highPriorityGesture(dragGesture(stride: stride))
@@ -178,6 +195,7 @@ struct AtelierGallery: View {
                 MagnifyGesture(minimumScaleDelta: 0.025)
                     .onChanged { gesture in
                         pinching = true
+                        if !understoodDeck { understoodDeck = true }
                         pinchScale = max(0.79, min(1, gesture.magnification))
                     }
                     .onEnded { gesture in
@@ -207,6 +225,7 @@ struct AtelierGallery: View {
             .onChanged { gesture in
                 guard !pinching && !shelfOverview else { return }
                 if dragStart == nil { dragStart = deckPosition }
+                if !understoodDeck { understoodDeck = true }
                 isDragging = true
                 let start = dragStart ?? deckPosition
                 let proposed = start - gesture.translation.width / max(1, stride)
@@ -275,6 +294,7 @@ struct AtelierGallery: View {
             .rotationEffect(.degrees(roll))
             .offset(x: x, y: y - (isDragging && isFocused ? 7 : 0))
             .onTapGesture {
+                understoodDeck = true
                 if isFocused { inspect(card) }
                 else { settle(at: index) }
             }

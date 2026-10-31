@@ -26,6 +26,22 @@ The collectible is jewelry; every other surface is its fitted velvet tray. Photo
 - **Haptics:** selection settle, wear confirmation, completed actions only; no tapping/hover/flip haptics.
 - Liquid wave simulation is deliberately absent from this native experience; preserve stored fill estimates.
 
+## Owner additions — intro calligraphy and living holographic cards (2026-10-30)
+These are **approved design requirements for the next native motion/polish pass**, not claims that the current TestFlight build implements them. They take precedence over older blanket restrictions against ambient card shimmer, while preserving the requirement that the card photography itself remains unchanged.
+
+### Signature calligraphy for the app intro
+- User-provided visual references: screenshots of ornate pointed-pen monograms and flourishing brush calligraphy, with dramatic thick/thin strokes, confident swashes, hand-drawn rhythm, and an ink-on-paper character (shared in the Arooma design conversation on 2026-10-30).
+- The opening **Arooma** wordmark should feel like a bespoke luxury-house hand-lettered signature, **not** default casual cursive or a generic italic serif. Use beautiful letter construction, readable connected forms, and controlled, expressive flourishes; avoid excess loops that harm legibility.
+- Animate the **writing of the lettering** as if an actual calligrapher is drawing it: stroke-reveal with variable line weight, a few organic pauses, and a final restrained flourish. Respect Reduce Motion with an immediate static wordmark. No lengthy/replayed intro on returning users.
+- Calligraphy remains exclusive to the brand introduction/mark; functional typography stays SF Pro and editorial fragrance headings stay serif. Obtain the appropriate typeface licensing or create original vector lettering before shipping.
+
+### Holography that responds to the physical phone
+- **Device tilt changes the perceived foil:** use Core Motion device-attitude/gravity to map the phone's orientation into an angle-dependent light source. Foil rims, select metallic details, spectral reflections, and gentle depth/parallax should respond continuously as the person tilts the iPhone. This is a *simulation of angle-dependent holographic material*, not a literal optical hologram.
+- The visual response must be coherent and physically plausible: coordinated highlight direction, restrained rainbow diffraction confined primarily to foil/metal regions, matching card-edge lighting, and a subtly changing contact shadow. The product photograph, wording and original approved card art remain crisp, opaque, and unwarped. Implement any foil treatment as a non-destructive overlay/mask, never rewriting the masters.
+- **Idle should not be dead:** a resting focused card has extremely subtle visual life (slow low-amplitude foil scintillation, micro-glints or near-imperceptible atmospheric motion), even when the phone is stationary. No high-frequency flashing, screen-wide automatic shimmer, particle effects, or restless bobbing. User touch/tilt takes precedence immediately over idle behavior.
+- Graceful fallback: when motion permissions/data are unavailable, in Simulator, for Reduce Motion, Low Power Mode or thermal/performance constraints, use a static premium finish or a minimal input-driven highlight; no device-orientation dependency for basic usability.
+- Performance and behavior acceptance: smooth, finger-coupled drag/flick motion with velocity-continuous settling; no hitching from foil compositing; low battery/CPU impact and no continuous sensor activity when gallery is not visible. Confirm on an actual iPhone under dark/light themes and different lighting, including stationary idle, gentle tilts and quick flicks.
+
 ## Data and releases
 Retain `CollectionStore` model and existing `arooma-native-v1.json` encoding without migrations, deletions, or resetting onboarding. Keep the bundle ID `com.graymatter.arooma` so TestFlight updates install over the existing app. Use the existing `codemagic.yaml` workflow and App Store distribution profile; do not regenerate signing files.
 

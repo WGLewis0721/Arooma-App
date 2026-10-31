@@ -23,7 +23,10 @@ enum ApprovedArtwork {
         let rect = CGRect(x: side == .front ? 0 : half, y: 0,
                           width: side == .front ? half : bitmap.width - half, height: bitmap.height)
         guard let cropped = bitmap.cropping(to: rect) else { return nil }
-        let image = UIImage(cgImage: cropped, scale: 1, orientation: .up)
+        // Decode once, off the animation path: the first frame a card appears never stalls on
+        // PNG inflation. Pixels are unchanged.
+        let raw = UIImage(cgImage: cropped, scale: 1, orientation: .up)
+        let image = raw.preparingForDisplay() ?? raw
         cache.setObject(image, forKey: key)
         return image
     }

@@ -2,40 +2,56 @@ import SwiftUI
 import PhotosUI
 import UIKit
 
+// MARK: - Shared press feel
+
+/// Cards used as buttons sink slightly under the finger and spring back: immediate, physical,
+/// no default highlight flash.
+struct PressableCardStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.955 : 1)
+            .brightness(configuration.isPressed ? -0.035 : 0)
+            .animation(.spring(response: 0.26, dampingFraction: 0.62), value: configuration.isPressed)
+    }
+}
+
+// MARK: - First run
+
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var revealed = false
     @State private var ink: CGFloat = 0
+    @State private var dealt = false
+    @State private var handle: CGSize = .zero
+    @Namespace private var swatchRing
     let openDemo: () -> Void
     let openMine: () -> Void
 
     var body: some View {
         GeometryReader { geo in
+            let accent = archive.theme.palette.accent
             VStack(spacing: 0) {
-                HStack {
-                    AtelierEyebrow(text: "The private fragrance archive", accent: archive.theme.palette.accent)
-                    Spacer()
-                    Text("01 / 01")
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 26)
-                .padding(.top, 19)
-                Spacer(minLength: 12)
-                VStack(spacing: 13) {
+                AtelierEyebrow(text: "The private fragrance archive", accent: accent)
+                    .padding(.top, 18)
+                Spacer(minLength: 8)
+                VStack(spacing: 6) {
                     Text("Arooma")
-                        .font(.custom("Snell Roundhand", size: min(88, geo.size.width * 0.235)))
-                        .italic()
-                        .foregroundStyle(archive.theme.palette.accent)
+                        .font(.custom("Snell Roundhand", size: min(92, geo.size.width * 0.24)))
+                        .foregroundStyle(accent)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.72)
+                        .minimumScaleFactor(0.7)
                         .mask(alignment: .leading) {
                             GeometryReader { letters in
-                                Rectangle().frame(width: letters.size.width * ink)
+                                LinearGradient(stops: [
+                                    .init(color: .black, location: 0),
+                                    .init(color: .black, location: max(0, ink - 0.06)),
+                                    .init(color: .clear, location: ink)
+                                ], startPoint: .leading, endPoint: .trailing)
+                                .frame(width: letters.size.width * 1.1)
                             }
                         }
                         .accessibilityLabel("Arooma")
+                        .accessibilityAddTraits(.isHeader)
                     Path { path in
                         path.move(to: CGPoint(x: 22, y: 15))
                         path.addCurve(to: CGPoint(x: 278, y: 13),
@@ -43,107 +59,140 @@ struct AtelierWelcome: View {
                                       control2: CGPoint(x: 195, y: -6))
                     }
                     .trim(from: 0, to: ink)
-                    .stroke(archive.theme.palette.accent.opacity(0.65),
-                            style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
-                    .frame(width: min(290, geo.size.width * 0.76), height: 30)
+                    .stroke(accent.opacity(0.6), style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+                    .frame(width: 290, height: 30)
                     .accessibilityHidden(true)
-                    AtelierDisplay(title: "A collection worth keeping.", size: 30)
+                    AtelierDisplay(title: "A collection worth keeping.", size: 27)
                         .multilineTextAlignment(.center)
+                        .opacity(ink > 0.6 ? 1 : 0)
+                        .animation(.easeOut(duration: 0.5), value: ink > 0.6)
                 }
-                .padding(.horizontal, 23)
-                Spacer(minLength: 17)
-                HStack(alignment: .center, spacing: -38) {
-                    AtelierCardSurface(fragranceID: "hawas")
-                        .frame(width: min(geo.size.width * 0.37, 158))
-                        .rotationEffect(.degrees(-10))
-                        .offset(y: 16)
-                    AtelierCardSurface(fragranceID: "dior", selected: true)
-                        .frame(width: min(geo.size.width * 0.47, 197))
-                        .rotationEffect(.degrees(5))
-                }
-                .padding(.horizontal, 30)
-                .accessibilityHidden(true)
-                Spacer(minLength: 20)
-                VStack(spacing: 14) {
-                    Text("CHOOSE YOUR FINISH")
-                        .font(.caption2.weight(.semibold))
-                        .tracking(2)
-                        .foregroundStyle(.secondary)
-                    HStack(spacing: 17) {
-                        ForEach(FragranceTheme.allCases) { theme in
-                            Button {
-                                archive.theme = theme
-                            } label: {
-                                Circle()
-                                    .fill(LinearGradient(colors: [
-                                        theme.palette.field, theme.palette.secondary, theme.palette.accent
-                                    ], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(width: 40, height: 40)
-                                    .overlay {
-                                        Circle()
-                                            .strokeBorder(archive.theme == theme ? Color.primary : Color.clear, lineWidth: 2)
-                                            .padding(-5)
-                                    }
-                                    .frame(minWidth: 53, minHeight: 53)
-                            }
-                            .accessibilityLabel(theme.rawValue)
-                            .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
-                        }
+                Spacer(minLength: 10)
+                hand(width: min(geo.size.width * 0.44, 200))
+                    .frame(height: min(geo.size.width * 0.44, 200) * 86 / 59 + 20)
+                Spacer(minLength: 14)
+                themePicker(accent: accent)
+                    .padding(.bottom, 18)
+                VStack(spacing: 10) {
+                    Button(action: openDemo) {
+                        Text("Explore the Archive")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 40)
                     }
-                    Text(archive.theme.rawValue)
-                        .font(.system(.subheadline, design: .serif))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    .buttonStyle(.glassProminent)
+                    .tint(accent)
+                    Button(action: openMine) {
+                        Text("Start My Collection")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 36)
+                    }
+                    .buttonStyle(.glass)
                 }
-                .padding(.bottom, 17)
-
-                VStack(spacing: 9) {
-                    Button("Explore the Archive", action: openDemo)
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .buttonStyle(.borderedProminent)
-                        .tint(archive.theme.palette.accent)
-                    Button("Open My Collection", action: openMine)
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 46)
-                        .atelierGlass()
-                }
-                .padding(.horizontal, 25)
-                .padding(.bottom, 20)
+                .padding(.horizontal, 26)
+                .padding(.bottom, 16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onAppear {
-                if reduceMotion { revealed = true; ink = 1 }
-                else {
-                    withAnimation(.easeOut(duration: 0.35)) { revealed = true }
-                    withAnimation(.easeInOut(duration: 1.55)) { ink = 1 }
-                }
-            }
         }
         .background(AtelierAtmosphere(theme: archive.theme))
+        .onAppear {
+            if reduceMotion { ink = 1; dealt = true; return }
+            withAnimation(.easeInOut(duration: 1.6)) { ink = 1 }
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(0.35)) { dealt = true }
+        }
+    }
+
+    /// Three collectibles dealt onto the table. The front card can be picked up and tilted:
+    /// the first thing a new owner touches already answers like an object.
+    private func hand(width w: CGFloat) -> some View {
+        let yaw = Double(handle.width / 3).clamped(to: -34...34)
+        let pitch = Double(-handle.height / 4).clamped(to: -22...22)
+        return ZStack {
+            AtelierCardSurface(fragranceID: "hawas", foil: .sheen)
+                .frame(width: w * 0.86, height: w * 0.86 * 86 / 59)
+                .rotationEffect(.degrees(dealt ? -13 : -40), anchor: .bottom)
+                .offset(x: dealt ? -w * 0.42 : 0, y: dealt ? 14 : 420)
+            AtelierCardSurface(fragranceID: "myslf", foil: .sheen)
+                .frame(width: w * 0.86, height: w * 0.86 * 86 / 59)
+                .rotationEffect(.degrees(dealt ? 12 : 40), anchor: .bottom)
+                .offset(x: dealt ? w * 0.42 : 0, y: dealt ? 16 : 440)
+                .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.78).delay(0.08), value: dealt)
+            AtelierCardSurface(fragranceID: "dior", yaw: yaw, lift: handle == .zero ? 0.2 : 0.8,
+                               foil: .live, lean: 1)
+                .frame(width: w, height: w * 86 / 59)
+                .rotation3DEffect(.degrees(yaw), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
+                .rotation3DEffect(.degrees(pitch), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
+                .offset(y: dealt ? -6 : 460)
+                .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.16), value: dealt)
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in handle = value.translation }
+                        .onEnded { _ in
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) { handle = .zero }
+                        }
+                )
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func themePicker(accent: Color) -> some View {
+        VStack(spacing: 10) {
+            Text("CHOOSE YOUR FINISH")
+                .font(.caption2.weight(.semibold))
+                .tracking(2)
+                .foregroundStyle(.secondary)
+            HStack(spacing: 14) {
+                ForEach(FragranceTheme.allCases) { theme in
+                    Button {
+                        withAnimation(reduceMotion ? nil : .smooth(duration: 0.6)) { archive.theme = theme }
+                    } label: {
+                        ZStack {
+                            if archive.theme == theme {
+                                Circle()
+                                    .strokeBorder(Color.primary.opacity(0.85), lineWidth: 1.5)
+                                    .matchedGeometryEffect(id: "ring", in: swatchRing)
+                                    .frame(width: 50, height: 50)
+                            }
+                            Circle()
+                                .fill(LinearGradient(colors: [theme.palette.field, theme.palette.secondary,
+                                                              theme.palette.accent],
+                                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 38, height: 38)
+                        }
+                        .frame(width: 52, height: 52)
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    .accessibilityLabel(theme.rawValue)
+                    .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
+                }
+            }
+            Text(archive.theme.rawValue)
+                .font(.system(.subheadline, design: .serif))
+                .foregroundStyle(.secondary)
+                .contentTransition(.opacity)
+        }
     }
 }
 
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self { min(max(self, range.lowerBound), range.upperBound) }
+}
+
+// MARK: - Shelves
+
 struct AtelierShelves: View {
     @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var renaming: FragranceShelf?
     @State private var newName = ""
     let focus: (DisplayCard) -> Void
     let add: () -> Void
 
-    private func shelf(for card: DisplayCard) -> FragranceShelf {
-        guard let id = card.bottleID,
-              let owned = archive.bottles.first(where: { $0.id == id }) else {
-            return card.fragrance.shelf
-        }
-        return owned.shelf
-    }
-
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 27) {
+            LazyVStack(alignment: .leading, spacing: 30) {
                 VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: "Your personalized collection", accent: archive.theme.palette.accent)
+                    AtelierEyebrow(text: archive.mode == .mine ? "Your collection" : "The sample archive",
+                                   accent: archive.theme.palette.accent)
                     HStack(alignment: .firstTextBaseline) {
                         AtelierDisplay(title: "The shelves", size: 37)
                         Spacer()
@@ -151,7 +200,7 @@ struct AtelierShelves: View {
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
                     }
-                    Text("A private arrangement, composed one bottle at a time.")
+                    Text("Drag along a shelf. Tap a card to bring it to the front. Hold to move it.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -159,71 +208,8 @@ struct AtelierShelves: View {
                 .padding(.top, 16)
 
                 ForEach(FragranceShelf.allCases) { shelf in
-                    let cards = archive.cards.filter { self.shelf(for: $0) == shelf }
-                    VStack(alignment: .leading, spacing: 14) {
-                        HStack(alignment: .firstTextBaseline, spacing: 10) {
-                            Image(systemName: shelf.icon)
-                                .font(.system(.subheadline, weight: .light))
-                                .foregroundStyle(archive.theme.palette.accent)
-                            AtelierDisplay(title: archive.shelfName(shelf), size: 28)
-                            Spacer()
-                            Button {
-                                newName = archive.shelfName(shelf)
-                                renaming = shelf
-                            } label: {
-                                Image(systemName: "pencil").frame(width: 44, height: 44)
-                            }
-                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
-                            Text("\(cards.count, format: .number.precision(.integerLength(2)))")
-                                .font(.caption.monospacedDigit())
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal, 23)
-
-                        if cards.isEmpty {
-                            Button {
-                                add()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "plus")
-                                    Text("An empty shelf. Place something here.")
-                                    Spacer()
-                                }
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .frame(minHeight: 100)
-                                .padding(.horizontal, 22)
-                                .atelierPlate()
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 22)
-                        } else {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                LazyHStack(alignment: .top, spacing: 17) {
-                                    ForEach(cards) { card in
-                                        Button { focus(card) } label: {
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                AtelierCardSurface(fragranceID: card.fragrance.id)
-                                                    .frame(width: 150, height: 218)
-                                                Text(card.fragrance.name)
-                                                    .font(.system(.subheadline, design: .serif, weight: .semibold))
-                                                    .lineLimit(1)
-                                                Text(card.fragrance.house)
-                                                    .font(.caption2)
-                                                    .foregroundStyle(.secondary)
-                                                    .lineLimit(1)
-                                            }
-                                            .frame(width: 150, alignment: .leading)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .accessibilityLabel("Open \(card.fragrance.name)")
-                                    }
-                                }
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 8)
-                            }
-                        }
-                    }
+                    ShelfLedge(shelf: shelf, cards: archive.cardsOnShelf(shelf), focus: focus, add: add,
+                               rename: { newName = archive.shelfName(shelf); renaming = shelf })
                 }
             }
             .padding(.bottom, 36)
@@ -245,90 +231,229 @@ struct AtelierShelves: View {
     }
 }
 
-
-struct AtelierCompactShelves: View {
-    @EnvironmentObject private var archive: CollectionStore
-    @State private var renaming: FragranceShelf?
-    @State private var newName = ""
-    let focus: (DisplayCard) -> Void
-    let add: () -> Void
-
-    private func shelf(for card: DisplayCard) -> FragranceShelf {
-        guard let id = card.bottleID,
-              let owned = archive.bottles.first(where: { $0.id == id }) else {
+extension CollectionStore {
+    func shelf(for card: DisplayCard) -> FragranceShelf {
+        guard let id = card.bottleID, let owned = bottles.first(where: { $0.id == id }) else {
             return card.fragrance.shelf
         }
         return owned.shelf
     }
+    func cardsOnShelf(_ shelf: FragranceShelf) -> [DisplayCard] {
+        cards.filter { self.shelf(for: $0) == shelf }
+    }
+    func moveCard(_ card: DisplayCard, to shelf: FragranceShelf) {
+        guard let id = card.bottleID, var record = bottles.first(where: { $0.id == id }) else { return }
+        record.shelf = shelf
+        update(record)
+    }
+}
+
+/// One physical shelf: cards stand on a lit ledge and turn toward you as they scroll to centre.
+struct ShelfLedge: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let shelf: FragranceShelf
+    let cards: [DisplayCard]
+    let focus: (DisplayCard) -> Void
+    let add: () -> Void
+    let rename: () -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 13) {
-                Text("Pinch open a shelf, or tap a collectible.")
-                    .font(.caption).foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                ForEach(FragranceShelf.allCases) { shelf in
-                    let cards = archive.cards.filter { self.shelf(for: $0) == shelf }
-                    VStack(alignment: .leading, spacing: 9) {
-                        HStack(spacing: 8) {
-                            AtelierDisplay(title: archive.shelfName(shelf), size: 22)
-                            Spacer()
-                            Text("\(cards.count)").font(.caption.monospacedDigit())
-                            Button {
-                                newName = archive.shelfName(shelf)
-                                renaming = shelf
-                            } label: {
-                                Image(systemName: "pencil")
-                                    .font(.caption).frame(width: 42, height: 42)
+        let accent = archive.theme.palette.accent
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Image(systemName: shelf.icon)
+                    .font(.system(.subheadline, weight: .light))
+                    .foregroundStyle(accent)
+                AtelierDisplay(title: archive.shelfName(shelf), size: 27)
+                Spacer()
+                Text("\(cards.count, format: .number.precision(.integerLength(2)))")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.numericText(value: Double(cards.count)))
+                Button(action: rename) {
+                    Image(systemName: "pencil").frame(width: 30, height: 30)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel("Rename \(archive.shelfName(shelf))")
+            }
+            .padding(.horizontal, 23)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .bottom, spacing: 16) {
+                    ForEach(cards) { card in
+                        Button { focus(card) } label: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                AtelierCardSurface(fragranceID: card.fragrance.id, radius: 11, foil: .sheen)
+                                    .frame(width: 132, height: 192)
+                                Text(card.fragrance.name)
+                                    .font(.system(.subheadline, design: .serif, weight: .semibold))
+                                    .lineLimit(1)
+                                Text(card.fragrance.house)
+                                    .font(.caption2).foregroundStyle(.secondary)
+                                    .lineLimit(1)
                             }
-                            .accessibilityLabel("Rename \(archive.shelfName(shelf))")
+                            .frame(width: 132, alignment: .leading)
                         }
-                        if cards.isEmpty {
-                            Button(action: add) {
-                                Label("Add first fragrance", systemImage: "plus")
-                                    .frame(maxWidth: .infinity, minHeight: 72)
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 11) {
-                                    ForEach(cards) { card in
-                                        Button { focus(card) } label: {
-                                            VStack(spacing: 3) {
-                                                AtelierCardSurface(fragranceID: card.fragrance.id)
-                                                    .frame(width: 65, height: 96)
-                                                Text(card.fragrance.name)
-                                                    .font(.system(size: 10))
-                                                    .foregroundStyle(.primary)
-                                                    .lineLimit(1)
-                                                    .frame(width: 67)
-                                            }
-                                        }
-                                        .buttonStyle(.plain)
-                                        .accessibilityLabel("Open \(card.fragrance.name)")
+                        .buttonStyle(PressableCardStyle())
+                        .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                            content
+                                .rotation3DEffect(.degrees(reduceMotion ? 0 : phase.value * -32),
+                                                  axis: (x: 0, y: 1, z: 0), perspective: 0.6)
+                                .scaleEffect(1 - abs(phase.value) * 0.08)
+                                .offset(y: abs(phase.value) * 8)
+                        }
+                        .contextMenu { moveMenu(card) }
+                        .accessibilityLabel("\(card.fragrance.house) \(card.fragrance.name)")
+                        .accessibilityHint("Opens it in the collection")
+                    }
+                    Button(action: add) {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
+                            .foregroundStyle(.secondary.opacity(0.6))
+                            .frame(width: cards.isEmpty ? 132 : 76, height: 192)
+                            .overlay {
+                                VStack(spacing: 6) {
+                                    Image(systemName: "plus").font(.title3.weight(.light))
+                                    if cards.isEmpty {
+                                        Text("Place a bottle here").font(.caption)
                                     }
+                                }
+                                .foregroundStyle(.secondary)
+                            }
+                            .padding(.bottom, cards.isEmpty ? 0 : 44)
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    .accessibilityLabel("Add a bottle")
+                }
+                .scrollTargetLayout()
+                .padding(.vertical, 10)
+            }
+            .scrollTargetBehavior(.viewAligned)
+            .contentMargins(.horizontal, 23, for: .scrollContent)
+            .scrollClipDisabled()
+            .background(alignment: .bottom) {
+                // The ledge itself: a lit edge with a soft shadow beneath, in the theme's accent.
+                VStack(spacing: 0) {
+                    LinearGradient(colors: [accent.opacity(0.55), accent.opacity(0.08)],
+                                   startPoint: .top, endPoint: .bottom)
+                        .frame(height: 3)
+                    LinearGradient(colors: [archive.theme.shadowTint.opacity(0.3), .clear],
+                                   startPoint: .top, endPoint: .bottom)
+                        .frame(height: 16)
+                }
+                .padding(.horizontal, 14)
+                .offset(y: -38)
+                .allowsHitTesting(false)
+            }
+        }
+    }
+
+    @ViewBuilder private func moveMenu(_ card: DisplayCard) -> some View {
+        Button("Bring to front", systemImage: "rectangle.stack") { focus(card) }
+        if card.bottleID != nil {
+            Menu("Move to shelf", systemImage: "arrow.right.square") {
+                ForEach(FragranceShelf.allCases.filter { $0 != shelf }) { other in
+                    Button(archive.shelfName(other), systemImage: other.icon) {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                            archive.moveCard(card, to: other)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Pinch-out from the deck. Every shelf at a glance, mini cards fanned like a held set.
+/// Pinch back in (or tap a card) to return; progress is the same value the pinch drives.
+struct ShelfOverview: View {
+    @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Binding var progress: CGFloat
+    let focus: (DisplayCard) -> Void
+    let add: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                AtelierDisplay(title: "Every shelf", size: 30)
+                Spacer()
+                Button {
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.88)) { progress = 0 }
+                } label: {
+                    Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).frame(width: 30, height: 30)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel("Back to cards")
+            }
+            .padding(.horizontal, 22)
+            .padding(.top, 10)
+            Text("Tap a card to bring it forward, or pinch open to return.")
+                .font(.caption).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 6)
+            ScrollView {
+                VStack(spacing: 14) {
+                    ForEach(Array(FragranceShelf.allCases.enumerated()), id: \.element) { i, shelf in
+                        let cards = archive.cardsOnShelf(shelf)
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Image(systemName: shelf.icon).foregroundStyle(archive.theme.palette.accent)
+                                Text(archive.shelfName(shelf)).font(.system(.title3, design: .serif))
+                                Spacer()
+                                Text("\(cards.count)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                            }
+                            if cards.isEmpty {
+                                Button(action: add) {
+                                    Label("Place a first bottle", systemImage: "plus")
+                                        .font(.subheadline)
+                                        .frame(maxWidth: .infinity, minHeight: 60)
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.secondary)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: -22) {
+                                        ForEach(Array(cards.enumerated()), id: \.element.id) { j, card in
+                                            Button { focus(card) } label: {
+                                                AtelierCardSurface(fragranceID: card.fragrance.id, radius: 7, foil: .sheen)
+                                                    .frame(width: 70, height: 102)
+                                                    .rotationEffect(.degrees(Double(j % 3) * 2.5 - 2.5), anchor: .bottom)
+                                            }
+                                            .buttonStyle(PressableCardStyle())
+                                            .accessibilityLabel("Bring \(card.fragrance.name) to the front")
+                                        }
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 8)
                                 }
                             }
                         }
+                        .padding(14)
+                        .atelierPlate(18)
+                        .offset(y: (1 - progress) * CGFloat(30 + i * 22))
                     }
-                    .padding(11).atelierPlate(15)
                 }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 17).padding(.vertical, 12)
         }
-        .alert("Rename shelf", isPresented: Binding(
-            get: { renaming != nil },
-            set: { if !$0 { renaming = nil } }
-        )) {
-            TextField("Shelf name", text: $newName)
-            Button("Cancel", role: .cancel) { renaming = nil }
-            Button("Save") {
-                if let shelf = renaming { archive.renameShelf(shelf, to: newName) }
-                renaming = nil
-            }
-        } message: {
-            Text("The bottles on this shelf stay put.")
-        }
+        .simultaneousGesture(
+            MagnifyGesture(minimumScaleDelta: 0.02)
+                .onChanged { value in
+                    progress = min(1, max(0, 1 - (value.magnification - 1) / 0.42))
+                }
+                .onEnded { value in
+                    let close = progress < 0.6 || value.velocity > 0.6
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.86)) {
+                        progress = close ? 0 : 1
+                    }
+                }
+        )
     }
 }
 
@@ -680,60 +805,61 @@ struct AtelierOwnership: View {
     }
 }
 
+
+// MARK: - View & Style
+
 struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                AtelierEyebrow(text: "The way it feels", accent: archive.theme.palette.accent)
-                AtelierDisplay(title: "Your gallery", size: 35)
-                Text("One collection. Three ways to experience it.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 10) {
-                    AtelierModePicker(selected: $archive.layout, accent: archive.theme.palette.accent)
-                    Text("Cover Flow for depth, Stack for focus, Fan for a spread.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                AtelierEyebrow(text: "Color & atmosphere", accent: archive.theme.palette.accent)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 13), GridItem(.flexible(), spacing: 13)], spacing: 16) {
-                    ForEach(FragranceTheme.allCases) { theme in
+            VStack(alignment: .leading, spacing: 20) {
+                AtelierEyebrow(text: "Arrangement", accent: archive.theme.palette.accent)
+                HStack(spacing: 10) {
+                    ForEach(CardLayout.allCases) { layout in
                         Button {
-                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
-                                archive.theme = theme
-                            }
+                            withAnimation(reduceMotion ? nil : .snappy) { archive.layout = layout }
                         } label: {
-                            VStack(alignment: .leading, spacing: 11) {
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(LinearGradient(
-                                        colors: [theme.palette.field, theme.palette.secondary, theme.palette.accent.opacity(0.64)],
-                                        startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(height: 88)
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .strokeBorder(theme.palette.accent.opacity(0.6), lineWidth: 0.8)
-                                            .padding(23)
-                                    }
-                                    .overlay(alignment: .bottomTrailing) {
-                                        Circle().fill(theme.palette.accent)
-                                            .frame(width: 22, height: 22)
-                                            .padding(12)
-                                    }
-                                Text(theme.rawValue)
-                                    .font(.system(.subheadline, design: .serif))
-                                    .foregroundStyle(.primary)
-                                HStack(spacing: 4) {
-                                    if archive.theme == theme { Image(systemName: "checkmark.circle.fill") }
-                                    Text(archive.theme == theme ? "Selected" : "Preview")
+                            VStack(spacing: 8) {
+                                LayoutThumbnail(layout: layout, selected: archive.layout == layout,
+                                                accent: archive.theme.palette.accent)
+                                    .frame(height: 74)
+                                Text(layout.rawValue)
+                                    .font(.system(.caption, weight: archive.layout == layout ? .semibold : .regular))
+                                    .foregroundStyle(archive.layout == layout ? archive.theme.palette.accent : .primary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .atelierPlate(16)
+                            .overlay {
+                                if archive.layout == layout {
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .strokeBorder(archive.theme.palette.accent.opacity(0.8), lineWidth: 1.2)
                                 }
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
                             }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableCardStyle())
+                        .accessibilityLabel(layout.rawValue)
+                        .accessibilityAddTraits(archive.layout == layout ? .isSelected : [])
+                    }
+                }
+                Text(archive.layout.choreography)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: archive.layout)
+
+                AtelierEyebrow(text: "Atmosphere", accent: archive.theme.palette.accent)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                    ForEach(FragranceTheme.allCases) { theme in
+                        Button {
+                            withAnimation(reduceMotion ? nil : .smooth(duration: 0.55)) { archive.theme = theme }
+                        } label: {
+                            ThemeSwatch(theme: theme, selected: archive.theme == theme)
+                        }
+                        .buttonStyle(PressableCardStyle())
+                        .accessibilityLabel(theme.rawValue)
                         .accessibilityAddTraits(archive.theme == theme ? .isSelected : [])
                     }
                 }
@@ -742,36 +868,106 @@ struct AtelierStyle: View {
                     ForEach(Appearance.allCases) { a in Text(a.rawValue).tag(a) }
                 }
                 .pickerStyle(.segmented)
-                .frame(minHeight: 48)
                 DisclosureGroup("About this archive") {
-                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown.")
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it switches off in Low Power Mode and with Reduce Motion.")
                         .font(.footnote).foregroundStyle(.secondary)
+                        .padding(.top, 6)
                 }
                 .font(.footnote)
                 .padding(15)
                 .atelierPlate(16)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 17)
-            .padding(.bottom, 35)
+            .padding(.horizontal, 20)
+            .padding(.top, 14)
+            .padding(.bottom, 30)
         }
-        .background(AtelierAtmosphere(theme: archive.theme))
+        .scrollContentBackground(.hidden)
     }
 }
 
+/// Five tiny cards posed by the SAME layout engine the gallery uses, so the preview is honest.
+struct LayoutThumbnail: View {
+    let layout: CardLayout
+    let selected: Bool
+    let accent: Color
+    var body: some View {
+        GeometryReader { geo in
+            let w = min(geo.size.width * 0.34, geo.size.height * 0.62)
+            ZStack {
+                ForEach([-2, -1, 1, 2, 0], id: \.self) { d in
+                    let pose = DeckLayoutEngine.pose(distance: Double(d), index: d + 2, layout: layout.kind, cardWidth: Double(w))
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(d == 0 ? (selected ? accent : Color.primary.opacity(0.55)) : Color.primary.opacity(0.18 + 0.08 * Double(2 - abs(d))))
+                        .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(.white.opacity(0.25), lineWidth: 0.5))
+                        .frame(width: w, height: w * 86 / 59)
+                        .scaleEffect(pose.scale)
+                        .rotation3DEffect(.degrees(pose.yaw), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
+                        .rotationEffect(.degrees(pose.roll), anchor: UnitPoint(x: 0.5, y: pose.pivotY))
+                        .offset(x: pose.x, y: pose.y)
+                        .opacity(pose.opacity)
+                        .zIndex(pose.depth)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .accessibilityHidden(true)
+    }
+}
 
-// MARK: - The wear log. One session can include several bottles worn together.
+struct ThemeSwatch: View {
+    let theme: FragranceTheme
+    let selected: Bool
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            ZStack {
+                LinearGradient(colors: [theme.palette.field, theme.palette.secondary],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
+                RadialGradient(colors: [theme.keyLight.opacity(0.35), .clear], center: .init(x: 0.7, y: 0.2),
+                               startRadius: 2, endRadius: 90)
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(theme.palette.field.opacity(0.9))
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(theme.palette.accent, lineWidth: 1))
+                    .frame(width: 34, height: 50)
+                    .rotationEffect(.degrees(-6))
+                    .shadow(color: theme.shadowTint.opacity(0.5), radius: 6, y: 4)
+            }
+            .frame(height: 84)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(selected ? theme.palette.accent : Color.primary.opacity(0.1), lineWidth: selected ? 1.6 : 0.6)
+            }
+            HStack(spacing: 5) {
+                Text(theme.rawValue).font(.system(.subheadline, design: .serif)).foregroundStyle(.primary)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(theme.palette.accent)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Today: the wear and layering journal
+
 struct AtelierWearLog: View {
     @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selected: [UUID] = []
     @State private var impression = ""
     @State private var showAll = false
     @State private var namingLayer = false
     @State private var newLayerName = ""
+    @State private var addingNote = false
+    @State private var stamp = 0
+    @State private var justLogged: UUID?
     @Binding var startingBottleID: UUID?
     let add: () -> Void
     let focus: (DisplayCard) -> Void
 
+    private var accent: Color { archive.theme.palette.accent }
     private var selectedIDs: [UUID] {
         selected.filter { id in archive.bottles.contains(where: { $0.id == id }) }
     }
@@ -779,186 +975,48 @@ struct AtelierWearLog: View {
         showAll ? archive.wearSessions :
             archive.wearSessions.filter { Calendar.current.isDateInToday($0.date) }
     }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 19) {
-                VStack(alignment: .leading, spacing: 7) {
-                    AtelierEyebrow(text: "Your daily ritual", accent: archive.theme.palette.accent)
-                    AtelierDisplay(title: "What did you wear?", size: 34)
-                    Text("Tap one or more bottles. Log them together as one wear.")
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 6) {
+                    AtelierEyebrow(text: Date.now.formatted(.dateTime.weekday(.wide).month().day()), accent: accent)
+                    AtelierDisplay(title: "What are you wearing?", size: 34)
+                    Text("Tap one bottle, or several to layer them. Log it as one wear.")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 if archive.mode == .demo {
                     AtelierEmptyState(title: "Your personal wear log",
-                        detail: "Switch to Mine to track what you wear and your favorite combinations.",
+                        detail: "Switch to your collection to track what you wear and the layers you love.",
                         action: "Open My Collection",
-                        callback: { archive.enter(.mine) }, accent: archive.theme.palette.accent)
+                        callback: { archive.enter(.mine) }, accent: accent)
                 } else if archive.bottles.isEmpty {
                     AtelierEmptyState(title: "Your first wear begins here",
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
-                        action: "Add a bottle", callback: add, accent: archive.theme.palette.accent)
+                        action: "Add a bottle", callback: add, accent: accent)
                 } else {
-                    if !archive.savedLayers.isEmpty {
-                        VStack(alignment: .leading, spacing: 9) {
-                            AtelierEyebrow(text: "Your saved combinations", accent: archive.theme.palette.accent)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 9) {
-                                    ForEach(archive.savedLayers) { layer in
-                                        Button {
-                                            selected = layer.bottleIDs.filter { id in
-                                                archive.bottles.contains(where: { $0.id == id })
-                                            }
-                                        } label: {
-                                            VStack(alignment: .leading, spacing: 5) {
-                                                Text(layer.name)
-                                                    .font(.system(.subheadline, design: .serif))
-                                                    .lineLimit(1)
-                                                Text("\(layer.bottleIDs.count) scents · tap to wear")
-                                                    .font(.caption2)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                            .frame(width: 146, alignment: .leading)
-                                            .padding(13)
-                                            .atelierPlate(13)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .contextMenu {
-                                            Button("Delete saved combination", role: .destructive) {
-                                                archive.deleteLayer(layer.id)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    HStack {
-                        AtelierEyebrow(text: "Choose your bottles", accent: archive.theme.palette.accent)
-                        Spacer()
-                        Text("\(selected.count) selected")
-                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 12) {
-                        ForEach(archive.bottles) { bottle in
-                            if let scent = archive.fragrance(id: bottle.fragranceID) {
-                                Button {
-                                    if selected.contains(bottle.id) { selected.removeAll { $0 == bottle.id } }
-                                    else { selected.append(bottle.id) }
-                                    HapticEngine.shared.play(.selection)
-                                } label: {
-                                    VStack(spacing: 7) {
-                                        AtelierCardSurface(fragranceID: scent.id, selected: selected.contains(bottle.id))
-                                            .frame(height: 131)
-                                            .overlay(alignment: .topTrailing) {
-                                                Image(systemName: selected.contains(bottle.id) ? "checkmark.circle.fill" : "circle")
-                                                    .font(.title3).foregroundStyle(selected.contains(bottle.id) ? archive.theme.palette.accent : .white)
-                                                    .padding(5).shadow(radius: 3)
-                                            }
-                                        Text(scent.name)
-                                            .font(.caption).foregroundStyle(.primary)
-                                            .lineLimit(2).multilineTextAlignment(.center)
-                                            .frame(height: 32, alignment: .top)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("\(scent.name), \(selected.contains(bottle.id) ? "selected" : "not selected")")
-                            }
-                        }
-                    }
-                    Button(action: add) {
-                        Label("Quick add another bottle", systemImage: "plus.circle")
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                    .buttonStyle(.plain).foregroundStyle(archive.theme.palette.accent)
-
-                    if !selected.isEmpty {
-                        VStack(spacing: 12) {
-                            HStack(spacing: -15) {
-                                ForEach(selectedIDs, id: \.self) { id in
-                                    if let bottle = archive.bottles.first(where: { $0.id == id }) {
-                                        AtelierCardSurface(fragranceID: bottle.fragranceID)
-                                            .frame(width: 62, height: 90)
-                                            .rotationEffect(.degrees(Double(selectedIDs.firstIndex(of: id) ?? 0) * 4 - 4))
-                                    }
-                                }
-                                Spacer(minLength: 0)
-                                VStack(alignment: .trailing, spacing: 3) {
-                                    Text(selected.count > 1 ? "Layered wear" : "Solo wear")
-                                        .font(.headline)
-                                    Text("\(selected.count) \(selected.count == 1 ? "fragrance" : "fragrances")")
-                                        .font(.caption).foregroundStyle(.secondary)
-                                }
-                            }
-                            TextField("Optional impression", text: $impression, axis: .vertical)
-                                .lineLimit(1...3).textFieldStyle(.roundedBorder)
-                            Button {
-                                archive.recordWear(bottleIDs: selectedIDs, note: impression)
-                                selected.removeAll()
-                                impression = ""
-                            } label: {
-                                Label(selected.count > 1 ? "Log this combination" : "Log this wear", systemImage: "checkmark")
-                                    .font(.subheadline.weight(.semibold))
-                                    .frame(maxWidth: .infinity, minHeight: 51)
-                            }
-                            .buttonStyle(.borderedProminent).tint(archive.theme.palette.accent)
-                            if selected.count > 1 {
-                                Button {
-                                    newLayerName = ""
-                                    namingLayer = true
-                                } label: {
-                                    Label("Save combination for later", systemImage: "bookmark")
-                                        .font(.subheadline.weight(.medium))
-                                        .frame(maxWidth: .infinity, minHeight: 45)
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(archive.theme.palette.accent)
-                            }
-                        }
-                        .padding(15).atelierPlate(20)
-                    }
-
-                    HStack {
-                        AtelierEyebrow(text: showAll ? "Your wear history" : "Worn today",
-                            accent: archive.theme.palette.accent)
-                        Spacer()
-                        Button(showAll ? "Today only" : "All history") { showAll.toggle() }
-                            .font(.caption.weight(.medium))
-                    }
-                    if displayedSessions.isEmpty {
-                        Text("Nothing logged here yet. Choose a fragrance above to begin.")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                            .padding(18).frame(maxWidth: .infinity, alignment: .leading)
-                            .atelierPlate()
-                    }
-                    ForEach(displayedSessions) { session in
-                        sessionRow(session)
-                    }
-                    let legacy = archive.bottles.filter {
-                        $0.wears.contains(where: { $0.sessionID == nil })
-                    }
-                    if showAll && !legacy.isEmpty {
-                        VStack(alignment: .leading, spacing: 9) {
-                            AtelierEyebrow(text: "Earlier solo wears", accent: archive.theme.palette.accent)
-                            ForEach(legacy) { bottle in
-                                if let scent = archive.fragrance(id: bottle.fragranceID) {
-                                    Text("\(scent.name) · \(bottle.wears.filter { $0.sessionID == nil }.count) earlier records")
-                                        .font(.subheadline)
-                                }
-                            }
-                        }
-                        .padding(15).atelierPlate()
-                    }
+                    if !archive.savedLayers.isEmpty { savedLayers }
+                    picker
+                    history
                 }
             }
-            .padding(.horizontal, 22).padding(.top, 15).padding(.bottom, 32)
+            .padding(.horizontal, 20).padding(.top, 14).padding(.bottom, selected.isEmpty ? 30 : 250)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(AtelierAtmosphere(theme: archive.theme))
+        .safeAreaInset(edge: .bottom) {
+            if !selectedIDs.isEmpty {
+                compositionTray
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 6)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.84), value: selectedIDs)
         .alert("Save this combination", isPresented: $namingLayer) {
             TextField("e.g. Workday layer", text: $newLayerName)
             Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                archive.saveLayer(name: newLayerName, bottleIDs: selectedIDs)
-            }
+            Button("Save") { archive.saveLayer(name: newLayerName, bottleIDs: selectedIDs) }
         } message: {
             Text("Give these fragrances a name so you can wear them together again.")
         }
@@ -974,81 +1032,377 @@ struct AtelierWearLog: View {
         startingBottleID = nil
     }
 
-    private func sessionRow(_ session: WearSession) -> some View {
-        VStack(alignment: .leading, spacing: 11) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(session.bottleIDs.count > 1 ? "Layered combination" : "Solo wear")
-                        .font(.system(.headline, design: .serif))
-                    Text(session.date.formatted(date: .abbreviated, time: .shortened))
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button("Wear again") { selected = session.bottleIDs }
-                    .font(.caption.weight(.semibold))
-            }
-            ForEach(session.bottleIDs, id: \.self) { id in
-                if let bottle = archive.bottles.first(where: { $0.id == id }),
-                   let scent = archive.fragrance(id: bottle.fragranceID) {
-                    HStack(spacing: 10) {
-                        AtelierCardSurface(fragranceID: scent.id)
-                            .frame(width: 35, height: 51)
-                        Text(scent.name).font(.subheadline)
-                        Spacer()
-                        Button {
-                            archive.removeBottle(id, from: session.id)
-                        } label: {
-                            Image(systemName: "minus.circle")
-                                .frame(width: 44, height: 44)
+    private func toggle(_ id: UUID) {
+        if selected.contains(id) { selected.removeAll { $0 == id } }
+        else { selected.append(id) }
+    }
+
+    // MARK: Saved layers
+
+    private var savedLayers: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            AtelierEyebrow(text: "Your layers", accent: accent)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(archive.savedLayers) { layer in
+                        let ids = layer.bottleIDs.filter { id in archive.bottles.contains(where: { $0.id == id }) }
+                        Button { selected = ids } label: {
+                            HStack(spacing: 12) {
+                                ComposedSet(bottleIDs: ids, cardWidth: 34, spread: 7)
+                                    .frame(width: 70, height: 60)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(layer.name)
+                                        .font(.system(.subheadline, design: .serif))
+                                        .foregroundStyle(.primary)
+                                        .lineLimit(1)
+                                    Text("\(ids.count) scents · tap to wear")
+                                        .font(.caption2).foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(.vertical, 10).padding(.horizontal, 12)
+                            .frame(width: 220, alignment: .leading)
+                            .atelierPlate(16)
                         }
-                        .accessibilityLabel("Remove \(scent.name) from wear")
+                        .buttonStyle(PressableCardStyle())
+                        .contextMenu {
+                            Button("Delete saved layer", systemImage: "trash", role: .destructive) {
+                                archive.deleteLayer(layer.id)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            .scrollClipDisabled()
+        }
+    }
+
+    // MARK: Picker
+
+    private var picker: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                AtelierEyebrow(text: "Your bottles", accent: accent)
+                Spacer()
+                Button(action: add) {
+                    Label("Add", systemImage: "plus").font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.glass)
+            }
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 98), spacing: 14)], spacing: 16) {
+                ForEach(archive.bottles) { bottle in
+                    if let scent = archive.fragrance(id: bottle.fragranceID) {
+                        let isOn = selected.contains(bottle.id)
+                        let order = selectedIDs.firstIndex(of: bottle.id)
+                        Button { toggle(bottle.id) } label: {
+                            VStack(spacing: 7) {
+                                AtelierCardSurface(fragranceID: scent.id, radius: 9,
+                                                   lift: isOn ? 1 : 0, foil: isOn ? .sheen : FoilMode.none)
+                                    .frame(height: 138)
+                                    .overlay(alignment: .topTrailing) {
+                                        ZStack {
+                                            Circle().fill(isOn ? accent : Color.black.opacity(0.35))
+                                            if let order {
+                                                Text("\(order + 1)")
+                                                    .font(.caption2.weight(.bold)).foregroundStyle(.white)
+                                                    .contentTransition(.numericText(value: Double(order)))
+                                            }
+                                        }
+                                        .frame(width: 22, height: 22)
+                                        .overlay(Circle().strokeBorder(.white.opacity(0.8), lineWidth: 1))
+                                        .padding(6)
+                                    }
+                                    .offset(y: isOn ? -6 : 0)
+                                    .scaleEffect(isOn ? 1.03 : 1)
+                                Text(scent.name)
+                                    .font(.caption).foregroundStyle(.primary)
+                                    .lineLimit(2).multilineTextAlignment(.center)
+                                    .frame(height: 32, alignment: .top)
+                            }
+                            .opacity(!selected.isEmpty && !isOn ? 0.72 : 1)
+                        }
+                        .buttonStyle(PressableCardStyle())
+                        .sensoryFeedback(.selection, trigger: isOn)
+                        .animation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.7), value: isOn)
+                        .accessibilityLabel(scent.name)
+                        .accessibilityValue(isOn ? "Selected, \(order.map { "layer \($0 + 1)" } ?? "")" : "Not selected")
+                        .accessibilityAddTraits(isOn ? .isSelected : [])
                     }
                 }
             }
-            if !session.note.isEmpty {
-                Text(session.note).font(.subheadline).italic().foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: Composition tray
+
+    private var compositionTray: some View {
+        let ids = selectedIDs
+        return VStack(spacing: 12) {
+            HStack(alignment: .center, spacing: 14) {
+                ComposedSet(bottleIDs: ids, cardWidth: 50, spread: 10)
+                    .frame(width: 120, height: 86)
+                    .keyframeAnimator(initialValue: StampPose(), trigger: stamp) { content, pose in
+                        content.scaleEffect(pose.scale).offset(y: pose.y)
+                    } keyframes: { _ in
+                        KeyframeTrack(\.scale) {
+                            CubicKeyframe(0.9, duration: 0.08)
+                            SpringKeyframe(1.06, duration: 0.16, spring: .snappy)
+                            SpringKeyframe(1.0, duration: 0.3, spring: .bouncy)
+                        }
+                        KeyframeTrack(\.y) {
+                            CubicKeyframe(6, duration: 0.08)
+                            SpringKeyframe(-4, duration: 0.16, spring: .snappy)
+                            SpringKeyframe(0, duration: 0.3, spring: .smooth)
+                        }
+                    }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(ids.count > 1 ? "Layered · \(ids.count)" : "Solo wear")
+                        .font(.system(.headline, design: .serif))
+                        .contentTransition(.numericText(value: Double(ids.count)))
+                    Text(ids.compactMap { id in archive.bottles.first(where: { $0.id == id })
+                        .flatMap { archive.fragrance(id: $0.fragranceID)?.name } }.joined(separator: " + "))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                Spacer(minLength: 0)
+                Button { selected.removeAll(); impression = "" } label: {
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).frame(width: 26, height: 26)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel("Clear selection")
             }
-            Button(role: .destructive) { archive.deleteWearSession(session.id) } label: {
-                Label("Undo this session", systemImage: "arrow.uturn.backward")
-                    .font(.caption)
+            if addingNote {
+                TextField("How does it wear today?", text: $impression, axis: .vertical)
+                    .lineLimit(1...3)
+                    .padding(10)
+                    .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            HStack(spacing: 10) {
+                Button(action: log) {
+                    Label(ids.count > 1 ? "Log this layer" : "Log this wear", systemImage: "checkmark")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 36)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(accent)
+                Button {
+                    withAnimation(.snappy) { addingNote.toggle() }
+                } label: {
+                    Image(systemName: addingNote ? "text.badge.checkmark" : "text.bubble")
+                        .frame(width: 36, height: 36)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel("Add an impression")
+                if ids.count > 1 {
+                    Button { newLayerName = ""; namingLayer = true } label: {
+                        Image(systemName: "bookmark").frame(width: 36, height: 36)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .accessibilityLabel("Save this layer for later")
+                }
             }
         }
-        .padding(15).atelierPlate(18)
+        .padding(14)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+
+    private func log() {
+        let ids = selectedIDs
+        guard !ids.isEmpty else { return }
+        stamp += 1
+        archive.recordWear(bottleIDs: ids, note: impression)
+        justLogged = archive.wearSessions.first?.id
+        // Let the stamp land before the tray leaves.
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 0 : 380))
+            selected.removeAll()
+            impression = ""
+            addingNote = false
+        }
+    }
+
+    // MARK: History
+
+    private var history: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                AtelierEyebrow(text: showAll ? "Your wear history" : "Worn today", accent: accent)
+                Spacer()
+                Button(showAll ? "Today only" : "All history") {
+                    withAnimation(.snappy) { showAll.toggle() }
+                }
+                .font(.caption.weight(.medium))
+            }
+            if displayedSessions.isEmpty {
+                Text("Nothing logged here yet. Choose a fragrance above to begin.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                    .padding(18).frame(maxWidth: .infinity, alignment: .leading)
+                    .atelierPlate()
+            }
+            ForEach(displayedSessions) { session in
+                sessionRow(session)
+                    .transition(.asymmetric(insertion: .scale(scale: 0.92).combined(with: .opacity),
+                                            removal: .opacity))
+            }
+            let legacy = archive.bottles.filter { $0.wears.contains(where: { $0.sessionID == nil }) }
+            if showAll && !legacy.isEmpty {
+                VStack(alignment: .leading, spacing: 9) {
+                    AtelierEyebrow(text: "Earlier solo wears", accent: accent)
+                    ForEach(legacy) { bottle in
+                        if let scent = archive.fragrance(id: bottle.fragranceID) {
+                            Text("\(scent.name) · \(bottle.wears.filter { $0.sessionID == nil }.count) earlier records")
+                                .font(.subheadline)
+                        }
+                    }
+                }
+                .padding(15).atelierPlate()
+            }
+        }
+        .animation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85), value: archive.wearSessions.map(\.id))
+    }
+
+    private func sessionRow(_ session: WearSession) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            ComposedSet(bottleIDs: session.bottleIDs, cardWidth: 36, spread: 8)
+                .frame(width: 78, height: 64)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(session.bottleIDs.count > 1 ? "Layered · \(session.bottleIDs.count)" : "Solo wear")
+                    .font(.system(.headline, design: .serif))
+                Text(session.bottleIDs.compactMap { id in archive.bottles.first(where: { $0.id == id })
+                    .flatMap { archive.fragrance(id: $0.fragranceID)?.name } }.joined(separator: " + "))
+                    .font(.subheadline)
+                    .lineLimit(2)
+                Text(session.date.formatted(date: showAll ? .abbreviated : .omitted, time: .shortened))
+                    .font(.caption).foregroundStyle(.secondary)
+                if !session.note.isEmpty {
+                    Text("“\(session.note)”").font(.footnote).italic().foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+            Menu {
+                Button("Wear again", systemImage: "arrow.clockwise") { selected = session.bottleIDs }
+                ForEach(session.bottleIDs, id: \.self) { id in
+                    if let bottle = archive.bottles.first(where: { $0.id == id }),
+                       let scent = archive.fragrance(id: bottle.fragranceID), session.bottleIDs.count > 1 {
+                        Button("Remove \(scent.name)", systemImage: "minus.circle") {
+                            archive.removeBottle(id, from: session.id)
+                        }
+                    }
+                }
+                Button("Undo this wear", systemImage: "arrow.uturn.backward", role: .destructive) {
+                    archive.deleteWearSession(session.id)
+                }
+            } label: {
+                Image(systemName: "ellipsis").frame(width: 32, height: 32)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel("Wear options")
+        }
+        .padding(14)
+        .atelierPlate(18)
+        .overlay {
+            if justLogged == session.id {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(accent.opacity(0.7), lineWidth: 1.2)
+                    .allowsHitTesting(false)
+            }
+        }
     }
 }
 
-// MARK: - Capture first, catalog later. No long mandatory form.
+/// Several bottles shown as one composed set: aligned on a shared baseline, overlapped and
+/// fanned symmetrically, top layer last. Re-fans with a spring as members change.
+struct ComposedSet: View {
+    @EnvironmentObject private var archive: CollectionStore
+    let bottleIDs: [UUID]
+    let cardWidth: CGFloat
+    let spread: Double
+
+    var body: some View {
+        let ids = bottleIDs.filter { id in archive.bottles.contains(where: { $0.id == id }) }
+        let n = ids.count
+        ZStack {
+            ForEach(Array(ids.enumerated()), id: \.element) { i, id in
+                if let bottle = archive.bottles.first(where: { $0.id == id }) {
+                    let centred = Double(i) - Double(n - 1) / 2
+                    AtelierCardSurface(fragranceID: bottle.fragranceID, radius: max(3, cardWidth * 0.08), foil: .sheen)
+                        .frame(width: cardWidth, height: cardWidth * 86 / 59)
+                        .rotationEffect(.degrees(centred * spread), anchor: .bottom)
+                        .offset(x: CGFloat(centred) * cardWidth * 0.42)
+                        .zIndex(Double(i))
+                        .transition(.scale(scale: 0.5).combined(with: .opacity))
+                }
+            }
+        }
+        .animation(.spring(response: 0.42, dampingFraction: 0.78), value: ids)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Quick Add: capture now, details later
+
 struct QuickAddSheet: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var name = ""
     @State private var photoData: Data?
     @State private var libraryItem: PhotosPickerItem?
     @State private var cameraOpen = false
+    @State private var saving = false
+    @State private var photoFailed = false
     @FocusState private var typing: Bool
     let onAdded: () -> Void
+
+    private var trimmed: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var suggestions: [Fragrance] {
+        guard trimmed.count >= 2 else { return [] }
+        return Array(archive.matches(trimmed, scope: .demo).prefix(3))
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    AtelierEyebrow(text: "Capture now · details later", accent: archive.theme.palette.accent)
-                    AtelierDisplay(title: "Add a bottle", size: 38)
-                    Text("Someone just recommended a fragrance? Save the name or snap the bottle in seconds.")
-                        .font(.subheadline).foregroundStyle(.secondary)
-
+                VStack(alignment: .leading, spacing: 18) {
+                    preview
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
                     TextField("Fragrance name", text: $name)
-                        .font(.title3).textInputAutocapitalization(.words)
-                        .textFieldStyle(.roundedBorder)
+                        .font(.title3)
+                        .textInputAutocapitalization(.words)
                         .submitLabel(.done)
                         .focused($typing)
                         .onSubmit(save)
-
-                    if let photoData, let photo = UIImage(data: photoData) {
-                        Image(uiImage: photo).resizable().scaledToFit()
-                            .frame(maxWidth: .infinity).frame(height: 220)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .accessibilityLabel("Captured bottle photograph")
+                        .padding(14)
+                        .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    if !suggestions.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            AtelierEyebrow(text: "In the archive", accent: archive.theme.palette.accent)
+                            ForEach(suggestions) { fragrance in
+                                Button { addKnown(fragrance) } label: {
+                                    HStack(spacing: 12) {
+                                        AtelierCardSurface(fragranceID: fragrance.id, radius: 4, shadowed: false)
+                                            .frame(width: 30, height: 44)
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(fragrance.name).font(.subheadline.weight(.medium))
+                                            Text(fragrance.house).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "plus.circle.fill")
+                                            .foregroundStyle(archive.theme.palette.accent)
+                                    }
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(PressableCardStyle())
+                                .accessibilityLabel("Add \(fragrance.house) \(fragrance.name)")
+                            }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                     HStack(spacing: 10) {
                         Button {
@@ -1056,39 +1410,58 @@ struct QuickAddSheet: View {
                             cameraOpen = true
                         } label: {
                             Label("Take Photo", systemImage: "camera")
-                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .frame(maxWidth: .infinity, minHeight: 36)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.glass)
                         .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
 
                         PhotosPicker(selection: $libraryItem, matching: .images) {
-                            Label("Choose Photo", systemImage: "photo")
-                                .frame(maxWidth: .infinity, minHeight: 52)
+                            Label(photoData == nil ? "Choose Photo" : "Change Photo", systemImage: "photo")
+                                .frame(maxWidth: .infinity, minHeight: 36)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.glass)
                     }
-                    Button(action: save) {
-                        Label("Save to My Collection", systemImage: "checkmark")
-                            .font(.headline).frame(maxWidth: .infinity, minHeight: 53)
+                    if photoFailed {
+                        Label("That photo could not be read. Try another, or save with the name only.",
+                              systemImage: "exclamationmark.triangle")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(archive.theme.palette.accent)
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && photoData == nil)
-                    Text("Only a name or photo is required. Everything is stored privately on this iPhone.")
+                    Text("Only a name or a photo is needed. Everything stays private on this iPhone.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                .padding(22)
+                .padding(20)
+                .animation(reduceMotion ? nil : .snappy, value: suggestions.map(\.id))
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom) {
+                Button(action: save) {
+                    Label("Save to My Collection", systemImage: "checkmark")
+                        .font(.headline).frame(maxWidth: .infinity, minHeight: 40)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(archive.theme.palette.accent)
+                .disabled((trimmed.isEmpty && photoData == nil) || saving)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
             }
             .navigationTitle("Quick Add")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) {
-                Button("Cancel") { dismiss() }
-            }}
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel", systemImage: "xmark") { dismiss() }
+                }
+            }
+            .onAppear { typing = true }
             .onChange(of: libraryItem) { _, item in
                 Task {
                     if let bytes = try? await item?.loadTransferable(type: Data.self),
                        let image = UIImage(data: bytes) {
-                        photoData = image.jpegData(compressionQuality: 0.84)
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            photoData = image.jpegData(compressionQuality: 0.84)
+                        }
+                        photoFailed = false
+                    } else if item != nil {
+                        photoFailed = true
                     }
                 }
             }
@@ -1104,19 +1477,74 @@ struct QuickAddSheet: View {
         }
     }
 
+    /// A live collectible preview: the card you are making, updating as you type or add a photo.
+    private var preview: some View {
+        let draft = Fragrance(id: "personal-preview", house: "My Collection",
+                              name: trimmed.isEmpty ? "Your discovery" : trimmed,
+                              concentration: "", year: "", top: [], heart: [], base: [],
+                              shelf: .autumn, archival: false)
+        return ZStack {
+            if let photoData, let photo = UIImage(data: photoData) {
+                Image(uiImage: photo)
+                    .resizable().scaledToFill()
+                    .frame(width: 150, height: 150 * 86 / 59)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(alignment: .bottomLeading) {
+                        Text(draft.name)
+                            .font(.system(size: 15, design: .serif))
+                            .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .top, endPoint: .bottom))
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .transition(.scale(scale: 0.9).combined(with: .opacity))
+                    .accessibilityLabel("Captured bottle photograph")
+            } else {
+                PersonalCardArt(fragrance: draft)
+                    .frame(width: 150, height: 150 * 86 / 59)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .accessibilityHidden(true)
+            }
+        }
+        .shadow(color: archive.theme.shadowTint.opacity(0.4), radius: 18, y: 12)
+        .rotation3DEffect(.degrees(saving ? 0 : -6), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
+        .scaleEffect(saving ? 0.6 : 1)
+        .offset(y: saving ? 260 : 0)
+        .opacity(saving ? 0 : 1)
+        .animation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.8), value: saving)
+        .animation(reduceMotion ? nil : .snappy, value: trimmed)
+    }
+
+    private func addKnown(_ fragrance: Fragrance) {
+        guard !saving else { return }
+        saving = true
+        archive.add(fragrance)
+        finish()
+    }
+
     private func save() {
-        let typed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !typed.isEmpty || photoData != nil else { return }
+        guard !saving, !trimmed.isEmpty || photoData != nil else { return }
+        saving = true
         if photoData == nil,
            let known = archive.catalog.first(where: {
-               $0.name.localizedCaseInsensitiveCompare(typed) == .orderedSame
+               $0.name.localizedCaseInsensitiveCompare(trimmed) == .orderedSame
            }) {
             archive.add(known)
         } else {
-            archive.quickAdd(name: typed, imageData: photoData)
+            archive.quickAdd(name: trimmed, imageData: photoData)
         }
-        onAdded()
-        dismiss()
+        finish()
+    }
+
+    private func finish() {
+        typing = false
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 0 : 340))
+            onAdded()
+            dismiss()
+        }
     }
 }
 

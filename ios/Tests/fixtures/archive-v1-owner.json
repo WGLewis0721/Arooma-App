@@ -1,0 +1,141 @@
+{
+ "mode": "Mine",
+ "theme": "Obsidian Gold",
+ "appearance": "System",
+ "layout": "Cover Flow",
+ "selectedDemoID": "dior",
+ "selectedMineID": "00000000-0000-4000-8000-000000000001",
+ "selectedShelf": "Autumn",
+ "rotationID": null,
+ "bottles": [
+  {
+   "id": "00000000-0000-4000-8000-000000000001",
+   "fragranceID": "dior",
+   "shelf": "Autumn",
+   "purchased": 752000000.0,
+   "volumeML": 100,
+   "remaining": 0.8,
+   "personalNotes": "",
+   "authenticityNotes": "",
+   "favorite": true,
+   "wears": [
+    {
+     "id": "20000000-0000-4000-8000-000000000001",
+     "date": 815141515.6479967,
+     "impression": "",
+     "sessionID": "10000000-0000-4000-8000-000000000001"
+    }
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000002",
+   "fragranceID": "hawas",
+   "shelf": "Summer",
+   "purchased": 752000000.0,
+   "volumeML": 100,
+   "remaining": 0.8,
+   "personalNotes": "",
+   "authenticityNotes": "",
+   "favorite": false,
+   "wears": [
+    {
+     "id": "20000000-0000-4000-8000-000000000002",
+     "date": 815141515.6479967,
+     "impression": "",
+     "sessionID": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+     "id": "20000000-0000-4000-8000-000000000003",
+     "date": 814972315.6479967,
+     "impression": "",
+     "sessionID": "10000000-0000-4000-8000-000000000002"
+    }
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000003",
+   "fragranceID": "myslf",
+   "shelf": "Spring",
+   "purchased": 752000000.0,
+   "volumeML": 100,
+   "remaining": 0.8,
+   "personalNotes": "",
+   "authenticityNotes": "",
+   "favorite": false,
+   "wears": []
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000004",
+   "fragranceID": "prodigy",
+   "shelf": "Winter",
+   "purchased": 752000000.0,
+   "volumeML": 100,
+   "remaining": 0.15,
+   "personalNotes": "",
+   "authenticityNotes": "",
+   "favorite": false,
+   "wears": []
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000005",
+   "fragranceID": "personal-ABC",
+   "shelf": "Autumn",
+   "purchased": 752000000.0,
+   "volumeML": 100,
+   "remaining": 0.8,
+   "personalNotes": "",
+   "authenticityNotes": "",
+   "favorite": false,
+   "wears": []
+  }
+ ],
+ "rotations": [],
+ "onboarded": true,
+ "shelfNames": {
+  "Autumn": "Night Cabinet"
+ },
+ "wearSessions": [
+  {
+   "id": "10000000-0000-4000-8000-000000000001",
+   "date": 815141515.6479967,
+   "bottleIDs": [
+    "00000000-0000-4000-8000-000000000001",
+    "00000000-0000-4000-8000-000000000002"
+   ],
+   "note": "Warm and spiced"
+  },
+  {
+   "id": "10000000-0000-4000-8000-000000000002",
+   "date": 814972315.6479967,
+   "bottleIDs": [
+    "00000000-0000-4000-8000-000000000002"
+   ],
+   "note": ""
+  }
+ ],
+ "customFragrances": [
+  {
+   "id": "personal-ABC",
+   "house": "My Collection",
+   "name": "Oud Wood Sample",
+   "concentration": "Personal discovery",
+   "year": "",
+   "top": [],
+   "heart": [],
+   "base": [],
+   "shelf": "Autumn",
+   "archival": false
+  }
+ ],
+ "savedLayers": [
+  {
+   "id": "30000000-0000-4000-8000-000000000001",
+   "name": "Evening layer",
+   "bottleIDs": [
+    "00000000-0000-4000-8000-000000000001",
+    "00000000-0000-4000-8000-000000000002"
+   ],
+   "created": 815058715.6479967
+  }
+ ]
+}

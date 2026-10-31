@@ -38,9 +38,6 @@ struct AtelierGallery: View {
                 action
                     .padding(.horizontal, 24)
                     .padding(.bottom, 13)
-                AtelierModePicker(selected: $archive.layout, accent: palette.accent)
-                    .padding(.horizontal, 22)
-                    .padding(.bottom, 13)
             }
         }
         .background(AtelierAtmosphere(theme: archive.theme))

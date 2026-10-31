@@ -331,6 +331,30 @@ struct AtelierOwnership: View {
                 } else if let current, let perfume {
                     featured(record: current, perfume: perfume)
                     metrics(record: current)
+                    if let pick = archive.dailyPick {
+                        Button {
+                            archive.choose(pick)
+                            focus(pick)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "sparkle")
+                                    .foregroundStyle(archive.theme.palette.accent)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    AtelierEyebrow(text: "Today's pick", accent: archive.theme.palette.accent)
+                                    Text(pick.fragrance.name)
+                                        .font(.system(.subheadline, design: .serif))
+                                        .foregroundStyle(.primary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(15)
+                            .atelierPlate(16)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     primary(record: current)
                     secondary(record: current)
                     collectionList

@@ -219,6 +219,10 @@ Status: implemented in the native target; simulator-built and simulator-captured
 4. Tap the hero, scrub the flip back and forth across edge-on, pull down to dismiss.
 5. `-AroomaAutoplay YES` replays the scripted engine choreography used in the CI recording (synthetic finger, real physics).
 
+### Evidence and measurements
+
+Before/after captures, engine-playback recordings and the simulator frame-pacing A/B are in [docs/evidence/2026-10-31-native-motion](../../evidence/2026-10-31-native-motion/README.md). Simulator figures only rank relative cost (the foil shader was the largest); device pacing is still unmeasured.
+
 ### Tests
 
 - `ios/Tests/DeckPhysics/main.swift`: centring for all layouts and widths, pose continuity, exact rest snap, one-card snap under violent flicks, 5,000 random release-policy cases, 200 interrupted alternating swipes on a 24-card deck with no visible jump, end stops, bounded overshoot, empty/single decks, count changes, glide interruption, flip face visibility and flip landing, 60/120 Hz agreement.

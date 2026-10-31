@@ -50,8 +50,8 @@ enum FragranceShelf: String, Codable, CaseIterable, Identifiable {
 
 struct Fragrance: Identifiable, Hashable, Codable {
     let id: String
-    let house: String
-    let name: String
+    var house: String
+    var name: String
     let concentration: String
     let year: String
     let top: [String]

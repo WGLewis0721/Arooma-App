@@ -12,6 +12,7 @@ struct AtelierGallery: View {
     @State private var isDragging = false
     @State private var pinchScale: CGFloat = 1
     @State private var pinching = false
+    @State private var ignoreDragRelease = false
     @State private var shelfOverview = false
     @AppStorage("arooma.deckTipV2") private var understoodDeck = false
 
@@ -209,7 +210,12 @@ struct AtelierGallery: View {
                         }
                         dragStart = nil
                         isDragging = false
+                        ignoreDragRelease = true
                         pinching = false
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(350))
+                            ignoreDragRelease = false
+                        }
                     }
             )
             .accessibilityAction(named: "Previous card") { moveBy(-1) }
@@ -238,9 +244,11 @@ struct AtelierGallery: View {
                 withTransaction(transaction) { deckPosition = bounded }
             }
             .onEnded { gesture in
-                guard !pinching && !shelfOverview else {
+                guard !pinching && !shelfOverview && !ignoreDragRelease else {
                     dragStart = nil
                     isDragging = false
+                    ignoreDragRelease = false
+                    synchronizeSelection(animated: true)
                     return
                 }
                 let start = Int((dragStart ?? deckPosition).rounded())

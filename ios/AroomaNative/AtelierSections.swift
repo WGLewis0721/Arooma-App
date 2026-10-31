@@ -355,13 +355,33 @@ struct AtelierSearch: View {
                     VStack(alignment: .leading, spacing: 5) {
                         AtelierEyebrow(text: "The fragrance index", accent: archive.theme.palette.accent)
                         AtelierDisplay(title: adding ? "Add a fragrance" : "Discover", size: 38)
-                        Text("Find a house, an accord or a familiar name.")
+                        Text("Search by name or note. If it’s missing, save the name instantly.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.bottom, 12)
                     if results.isEmpty {
                         ContentUnavailableView.search(text: query)
+                        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Button {
+                                if let fragrance = archive.quickAdd(name: query) {
+                                    let bottle = archive.bottles.first(where: {
+                                        $0.fragranceID == fragrance.id
+                                    })
+                                    focus(DisplayCard(id: bottle?.id.uuidString ?? fragrance.id,
+                                                      fragrance: fragrance, bottleID: bottle?.id))
+                                    dismiss()
+                                }
+                            } label: {
+                                Label("Save this fragrance name now", systemImage: "plus")
+                                    .frame(maxWidth: .infinity, minHeight: 51)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(archive.theme.palette.accent)
+                            Text("No catalog match required. You can add the house or a photo later.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
                         ForEach(results) { fragrance in
                             Button { select(fragrance) } label: {

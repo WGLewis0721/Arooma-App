@@ -87,6 +87,7 @@ struct WearEvent: Codable, Identifiable, Hashable {
     var id = UUID()
     var date = Date()
     var impression = ""
+    var sessionID: UUID? = nil // Optional for existing single-bottle history.
 }
 struct BottleRecord: Codable, Identifiable, Hashable {
     var id = UUID()
@@ -103,6 +104,13 @@ struct BottleRecord: Codable, Identifiable, Hashable {
     var lowStock: Bool { remaining <= 0.2 }
     var wornToday: Bool { wears.contains { Calendar.current.isDateInToday($0.date) } }
 }
+struct WearSession: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var date = Date()
+    var bottleIDs: [UUID]
+    var note = ""
+}
+
 struct SavedRotation: Codable, Identifiable, Hashable {
     var id = UUID()
     var name: String
@@ -125,4 +133,7 @@ struct SavedArchive: Codable {
     var bottles: [BottleRecord] = []
     var rotations: [SavedRotation] = []
     var onboarded: Bool = false
+    // Optional fields keep already-installed native JSON decodable without a reset.
+    var shelfNames: [String: String]? = nil
+    var wearSessions: [WearSession]? = nil
 }

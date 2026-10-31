@@ -3,77 +3,80 @@ import SwiftUI
 @main
 struct AroomaNativeApp: App {
     @StateObject private var archive = CollectionStore()
+
     var body: some Scene {
         WindowGroup {
-            ArchiveRoot()
+            AtelierRoot()
                 .environmentObject(archive)
                 .preferredColorScheme(archive.appearance.colorScheme)
         }
     }
 }
 
-private enum ArchiveTab: Hashable {
-    case cards, shelves, search, bottle, style
+private enum AtelierTab: Hashable {
+    case gallery, shelves, discover, journal, atmosphere
 }
 
-struct ArchiveRoot: View {
+struct AtelierRoot: View {
     @EnvironmentObject private var archive: CollectionStore
-    @State private var tab: ArchiveTab = .cards
-    @State private var inspected: DisplayCard?
-    @State private var showAdd = false
+    @State private var tab: AtelierTab = .gallery
+    @State private var inspection: DisplayCard?
+    @State private var adding = false
 
     var body: some View {
         ZStack {
-            ArchiveBackdrop(theme: archive.theme)
+            AtelierAtmosphere(theme: archive.theme)
             if archive.onboarded {
                 TabView(selection: $tab) {
-                    Tab("Cards", systemImage: "rectangle.stack", value: ArchiveTab.cards) {
-                        GalleryView(openInspector: { inspected = $0 }, openAdd: { showAdd = true })
+                    Tab("Cards", systemImage: "rectangle.stack", value: AtelierTab.gallery) {
+                        AtelierGallery(inspect: { inspection = $0 }, add: { adding = true })
                     }
-                    Tab("Shelves", systemImage: "square.grid.2x2", value: ArchiveTab.shelves) {
-                        ShelfScreen(open: focusCard)
+                    Tab("Shelves", systemImage: "square.grid.2x2", value: AtelierTab.shelves) {
+                        AtelierShelves(focus: focus, add: { adding = true })
                     }
-                    Tab("Search", systemImage: "magnifyingglass", value: ArchiveTab.search) {
-                        DiscoveryScreen(open: focusCard)
+                    Tab("Search", systemImage: "magnifyingglass", value: AtelierTab.discover) {
+                        AtelierSearch(focus: focus)
                     }
-                    Tab("My Bottle", systemImage: "drop", value: ArchiveTab.bottle) {
-                        MyBottleScreen(openAdd: { showAdd = true })
+                    Tab("My Bottle", systemImage: "drop", value: AtelierTab.journal) {
+                        AtelierOwnership(add: { adding = true }, focus: focus)
                     }
-                    Tab("Style", systemImage: "paintpalette", value: ArchiveTab.style) {
-                        StyleScreen()
+                    Tab("Style", systemImage: "paintpalette", value: AtelierTab.atmosphere) {
+                        AtelierStyle()
                     }
                 }
                 .tint(archive.theme.palette.accent)
             } else {
-                WelcomeScreen(
+                AtelierWelcome(
                     openDemo: { archive.mode = .demo; archive.onboarded = true },
                     openMine: { archive.mode = .mine; archive.onboarded = true }
                 )
             }
         }
-        .fullScreenCover(item: $inspected) { card in
-            InspectorScreen(card: card, close: { inspected = nil })
+        .fullScreenCover(item: $inspection) { card in
+            AtelierInspector(card: card, close: { inspection = nil })
                 .environmentObject(archive)
         }
-        .sheet(isPresented: $showAdd) {
-            NavigationStack {
-                DiscoveryScreen(open: { card in
-                    archive.add(card.fragrance)
-                    showAdd = false
-                    tab = .cards
-                }, addMode: true)
-            }
+        .sheet(isPresented: $adding) {
+            AtelierSearch(focus: { card in
+                archive.add(card.fragrance)
+                adding = false
+                tab = .gallery
+            }, adding: true)
             .environmentObject(archive)
         }
     }
 
-    private func focusCard(_ card: DisplayCard) {
-        // Catalog choices from Search or Shelves keep their identity when moved into Cards.
-        if archive.mode == .mine && card.bottleID == nil {
-            archive.add(card.fragrance)
+    private func focus(_ card: DisplayCard) {
+        if archive.mode == .mine {
+            if let owned = archive.bottles.first(where: { $0.id == card.bottleID }) {
+                archive.selectedMineID = owned.id
+            } else {
+                archive.add(card.fragrance)
+            }
         } else {
-            archive.choose(card, haptic: false)
+            archive.choose(DisplayCard(id: card.fragrance.id,
+                                       fragrance: card.fragrance, bottleID: nil), haptic: false)
         }
-        tab = .cards
+        tab = .gallery
     }
 }

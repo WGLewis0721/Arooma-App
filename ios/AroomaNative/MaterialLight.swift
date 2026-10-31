@@ -8,11 +8,12 @@ import simd
 // MARK: - Motion field
 //
 // One shared Core Motion feed, reference-counted by the views that render live foil.
-// It tracks the iPhone's full attitude (not just gravity, so turning an upright phone left/right
-// counts) relative to a reference orientation that drifts slowly toward the current one: the way
-// the owner is holding the phone becomes "neutral" after ~15 s, and every deliberate tilt moves
-// the light. The light and the viewer are treated as fixed in the room; the card turns under
-// them. Off when nothing visible needs it, in the background, in Low Power Mode, or when hot.
+// It tracks the iPhone's full attitude relative to a reference orientation. By default the
+// reference is FIXED when the gallery opens (drift Off), so a card held at an angle keeps the
+// look of that angle; the owner can recenter manually or enable a slow drift in the tuning panel.
+// Light and viewer are fixed in the room; the card turns under them. Sensor samples (30-120 Hz)
+// are interpolated at display rate so the light never steps on a 120 Hz screen.
+// Off in the background, in Low Power Mode, when hot, or when nothing visible needs it.
 
 @MainActor
 @Observable
@@ -20,7 +21,7 @@ final class MotionField {
     static let shared = MotionField()
 
     /// Rotation taking room-fixed directions (as seen at the reference pose) into the device's
-    /// current frame. Identity when still at the reference, or when no sensor is running.
+    /// current frame, after sensitivity and the soft range limit. Identity when no sensor runs.
     private(set) var relative = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
     /// -1...1 summary of the same rotation, for the hero card's small physical lean.
     private(set) var tilt = CGPoint.zero
@@ -29,9 +30,14 @@ final class MotionField {
     @ObservationIgnored private let manager = CMMotionManager()
     @ObservationIgnored private var users = 0
     @ObservationIgnored private var reference: simd_quatd?
-    @ObservationIgnored private var smoothed = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
+    @ObservationIgnored private var lastRaw: simd_quatd?
+    @ObservationIgnored private var lastSampleTime: TimeInterval = 0
+    @ObservationIgnored private var target = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var foreground = true
+    @ObservationIgnored private var pendingStop: Task<Void, Never>?
+    @ObservationIgnored private var stoppedAt: Date?
+    @ObservationIgnored private let interpolator = FrameDriver(label: "tilt")
 
     private init() {
         let center = NotificationCenter.default
@@ -53,8 +59,39 @@ final class MotionField {
         })
     }
 
-    func acquire() { users += 1; reconcile() }
-    func release() { users = max(0, users - 1); reconcile() }
+    func acquire() {
+        users += 1
+        pendingStop?.cancel()
+        pendingStop = nil
+        reconcile()
+    }
+
+    /// Cards hand the sensor to each other as the deck moves; a short grace period keeps it
+    /// (and its reference) alive across those hand-offs instead of re-centring mid-browse.
+    func release() {
+        users = max(0, users - 1)
+        guard users == 0 else { return }
+        pendingStop?.cancel()
+        pendingStop = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.2))
+            guard !Task.isCancelled else { return }
+            MotionField.shared.reconcile()
+        }
+    }
+
+    /// Makes the current physical angle the neutral one (gallery open, or the Recenter action).
+    func recenter() {
+        if let lastRaw { reference = lastRaw } else { reference = nil }
+        recompute()
+    }
+
+    /// Called by the tuning panel when any tilt value changes.
+    func tuningChanged() {
+        if manager.isDeviceMotionActive {
+            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, TiltTuning.sampleRateHz))
+        }
+        recompute()
+    }
 
     private var shouldRun: Bool {
         users > 0 && foreground && manager.isDeviceMotionAvailable && RenderQuality.allowsLiveMaterial
@@ -62,37 +99,74 @@ final class MotionField {
 
     private func reconcile() {
         if shouldRun && !manager.isDeviceMotionActive {
-            reference = nil
-            manager.deviceMotionUpdateInterval = 1.0 / 60.0
+            // Keep the reference across brief stops; a real absence (left the gallery) resets it.
+            if let stoppedAt, Date().timeIntervalSince(stoppedAt) > 3 { reference = nil }
+            stoppedAt = nil
+            lastSampleTime = 0
+            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, TiltTuning.sampleRateHz))
             manager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: .main) { motion, _ in
                 guard let motion else { return }
-                MainActor.assumeIsolated { MotionField.shared.ingest(motion.attitude.quaternion) }
+                MainActor.assumeIsolated {
+                    MotionField.shared.ingest(motion.attitude.quaternion, at: motion.timestamp)
+                }
             }
             isLive = true
         } else if !shouldRun && manager.isDeviceMotionActive {
             manager.stopDeviceMotionUpdates()
+            interpolator.stop()
+            stoppedAt = Date()
             isLive = false
             relative = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
-            smoothed = relative
+            target = relative
             tilt = .zero
         }
     }
 
-    private func ingest(_ q: CMQuaternion) {
+    private func ingest(_ q: CMQuaternion, at time: TimeInterval) {
         let current = simd_quatd(ix: q.x, iy: q.y, iz: q.z, r: q.w)
+        let dt = lastSampleTime > 0 ? max(0, min(0.25, time - lastSampleTime)) : 0
+        lastSampleTime = time
+        lastRaw = current
         if reference == nil { reference = current }
-        guard var ref = reference else { return }
-        // Re-centre very slowly (~15 s at 60 Hz) so posture is absorbed but tilts are not.
-        ref = simd_slerp(ref, current, 0.0011)
-        reference = ref
-        let rel = simd_normalize(simd_mul(simd_inverse(current), ref))
-        // Light low-pass removes hand tremor without adding perceptible lag.
-        smoothed = simd_normalize(simd_slerp(smoothed, rel, 0.4))
-        let change = simd_mul(simd_inverse(relative), smoothed).angle
-        guard change > 0.0012 else { return }
-        relative = smoothed
-        let eye = smoothed.act(simd_double3(0, 0, 1))
-        tilt = CGPoint(x: max(-1, min(1, eye.x / 0.3)), y: max(-1, min(1, eye.y / 0.3)))
+        // Optional slow re-centring; Off by default so a held angle keeps its look.
+        if TiltTuning.driftSeconds > 0, dt > 0, let ref = reference {
+            let alpha = 1 - exp(-dt / TiltTuning.driftSeconds)
+            reference = simd_slerp(ref, current, alpha)
+        }
+        recompute()
+    }
+
+    /// Raw rotation since the reference → sensitivity → soft range limit (no hard clipping).
+    private func recompute() {
+        guard let ref = reference, let raw = lastRaw else { return }
+        let rel = simd_normalize(simd_mul(simd_inverse(raw), ref))
+        let angle = rel.angle
+        if angle > 1e-6 {
+            let range = max(5, TiltTuning.rangeDegrees) * .pi / 180
+            let shaped = range * tanh(angle * max(0.1, TiltTuning.gain) / range)
+            target = simd_quatd(angle: shaped, axis: rel.axis)
+        } else {
+            target = simd_quatd(ix: 0, iy: 0, iz: 0, r: 1)
+        }
+        interpolator.run { [weak self] dt in
+            guard let self else { return false }
+            return self.interpolate(dt)
+        }
+    }
+
+    /// Display-rate easing toward the latest sample, so 60 Hz sensor data looks continuous at
+    /// 120 Hz. Stops as soon as it has converged.
+    private func interpolate(_ dt: Double) -> Bool {
+        let tau = TiltTuning.smoothingMS / 1000
+        let alpha = tau <= 0.001 ? 1 : 1 - exp(-dt / tau)
+        let next = simd_normalize(simd_slerp(relative, target, alpha))
+        let remaining = simd_mul(simd_inverse(next), target).angle
+        if simd_mul(simd_inverse(relative), next).angle > 0.00005 || remaining < 0.0002 {
+            relative = remaining < 0.0002 ? target : next
+            let eye = relative.act(simd_double3(0, 0, 1))
+            tilt = CGPoint(x: tanh(eye.x / 0.35), y: tanh(eye.y / 0.35))
+        }
+        return remaining >= 0.0002
     }
 }
 
@@ -103,11 +177,17 @@ enum MaterialOptics {
     static let eye0 = simd_double3(0, 0, 1)
 
     /// `yaw` is the card's own rotation about its vertical axis in degrees (deck pose, flip).
-    static func vectors(relative: simd_quatd, yaw: Double) -> (light: simd_float3, eye: simd_float3) {
+    /// `idle` is an optional, tiny extra light offset (tuning; Off by default).
+    static func vectors(relative: simd_quatd, yaw: Double, idle: CGPoint = .zero) -> (light: simd_float3, eye: simd_float3) {
         let theta = -yaw * .pi / 180
         let turn = simd_quatd(angle: theta, axis: simd_double3(0, 1, 0))
         let q = simd_mul(turn, relative)
-        let l = q.act(light0), e = q.act(eye0)
+        var l = q.act(light0)
+        // Light-travel gains: how far the highlight moves per degree, horizontally / vertically.
+        l.x = l.x * FoilTuning.lightTravelX + Double(idle.x)
+        l.y = l.y * FoilTuning.lightTravelY + Double(idle.y)
+        l = simd_normalize(l)
+        let e = q.act(eye0)
         return (simd_float3(Float(l.x), Float(l.y), Float(l.z)), simd_float3(Float(e.x), Float(e.y), Float(e.z)))
     }
 }
@@ -175,9 +255,10 @@ extension FragranceTheme {
 
 // MARK: - Live holographic foil
 
-/// GPU foil on the card that is in front. There is no clock: the shader re-renders only when the
-/// phone's attitude, the card's pose or a finger press changes, so a still card on a still phone
-/// is static, and tilting only the phone visibly moves the highlight, colour and glitter.
+/// GPU foil on the card that is in front. The shader re-renders only when the phone's attitude
+/// (interpolated at display rate), the card's pose, a finger press or a tuning value changes, so
+/// a still card on a still phone is static and tilting only the phone visibly moves the light.
+/// The optional idle drift (tuning, Off by default) is tiny and added on top of real motion.
 struct LiveFoil: ViewModifier {
     var strength: Double
     var yaw: Double
@@ -188,17 +269,41 @@ struct LiveFoil: ViewModifier {
     var pressure: Double = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.scenePhase) private var scenePhase
     @State private var motion = MotionField.shared
+    @State private var tuning = Tuning.shared
 
     func body(content: Content) -> some View {
+        let _ = tuning.revision
+        let drifting = FoilTuning.idleDrift > 0 && !reduceMotion && scenePhase == .active && strength > 0.5
+        if drifting {
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { clock in
+                let t = clock.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600)
+                let a = FoilTuning.idleDrift
+                foil(content, idle: CGPoint(x: sin(t * 0.37) * a, y: cos(t * 0.29) * a * 0.7))
+            }
+            .onAppear { motion.acquire() }
+            .onDisappear { motion.release() }
+        } else {
+            foil(content, idle: .zero)
+                .onAppear { motion.acquire() }
+                .onDisappear { motion.release() }
+        }
+    }
+
+    private func foil(_ content: Content, idle: CGPoint) -> some View {
         let live = strength > 0.01 && !reduceTransparency && !RenderQuality.foilDisabledForQA
         let level = Float(strength)
         let tintColor = tint
-        // Reduce Motion: the light holds still (no tilt-driven change), touch still answers.
+        // Reduce Motion: the light holds still (no tilt-driven change); touch still answers.
         let attitude = reduceMotion ? simd_quatd(ix: 0, iy: 0, iz: 0, r: 1) : motion.relative
-        let v = MaterialOptics.vectors(relative: attitude, yaw: yaw)
+        let v = MaterialOptics.vectors(relative: attitude, yaw: yaw, idle: idle)
         let press = SIMD3<Float>(Float(touch.x), Float(touch.y), Float(max(0, min(1, pressure))))
-        content
+        let shape = SIMD4<Float>(Float(max(1, FoilTuning.sheenWidth)), Float(max(4, FoilTuning.glintTightness)),
+                                 Float(FoilTuning.diffractionStrength), Float(FoilTuning.diffractionPhase))
+        let gains = SIMD4<Float>(Float(FoilTuning.sheenStrength), Float(FoilTuning.glintStrength),
+                                 Float(FoilTuning.glitterStrength), Float(max(0.5, FoilTuning.eyeDistance)))
+        return content
             .visualEffect { view, proxy in
                 view.colorEffect(
                     ShaderLibrary.aroomaFoil(
@@ -206,6 +311,8 @@ struct LiveFoil: ViewModifier {
                         .float3(v.light.x, v.light.y, v.light.z),
                         .float3(v.eye.x, v.eye.y, v.eye.z),
                         .float3(press.x, press.y, press.z),
+                        .float4(shape.x, shape.y, shape.z, shape.w),
+                        .float4(gains.x, gains.y, gains.z, gains.w),
                         .float(live ? level : 0),
                         .float(max(6, proxy.size.width * 0.045)),
                         .color(tintColor)
@@ -213,21 +320,21 @@ struct LiveFoil: ViewModifier {
                     isEnabled: live
                 )
             }
-            .onAppear { motion.acquire() }
-            .onDisappear { motion.release() }
     }
 }
 
-/// The focused card answers the handset with a very small physical lean (Apple TV-icon style).
+/// The focused card answers the handset with a small physical lean (Apple TV-icon style),
+/// up to the tunable maximum.
 struct TiltLean: ViewModifier {
     var amount: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var motion = MotionField.shared
     func body(content: Content) -> some View {
         let t = (reduceMotion || amount == 0) ? .zero : motion.tilt
+        let maxDeg = TiltTuning.leanMaxDegrees * amount
         content
-            .rotation3DEffect(.degrees(Double(t.x) * 4 * amount), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
-            .rotation3DEffect(.degrees(Double(t.y) * 3 * amount), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
+            .rotation3DEffect(.degrees(Double(t.x) * maxDeg), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
+            .rotation3DEffect(.degrees(Double(t.y) * maxDeg * 0.75), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
     }
 }
 

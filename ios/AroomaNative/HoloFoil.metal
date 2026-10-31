@@ -40,6 +40,8 @@ static float2 aroomaHash2(float2 p) {
                                   float3 lightDir,   // toward the light, card frame (x right, y up, z out)
                                   float3 eyeDir,     // toward the viewer, card frame
                                   float3 touch,      // uv.x, uv.y, pressure 0...1
+                                  float4 shape,      // sheen exponent, glint exponent, diffraction strength, diffraction phase gain
+                                  float4 gains,      // sheen strength, glint strength, glitter strength, eye distance
                                   float strength,
                                   float rimWidth,
                                   half4 tint) {
@@ -51,7 +53,7 @@ static float2 aroomaHash2(float2 p) {
 
     // Surface point in card-height units, origin at the centre, y up.
     float3 P = float3((uv.x - 0.5) * aspect, 0.5 - uv.y, 0.0);
-    float3 eye = normalize(eyeDir) * 2.1;          // viewer ~2 card heights away
+    float3 eye = normalize(eyeDir) * max(gains.w, 0.5); // viewer distance in card heights
     float3 V = normalize(eye - P);
     float3 L = normalize(lightDir);
 
@@ -67,8 +69,8 @@ static float2 aroomaHash2(float2 p) {
     float ndv = max(dot(N, V), 0.0);
     float fresnel = 0.04 + 0.96 * pow(1.0 - ndv, 5.0);
 
-    float sheen = pow(ndh, 18.0);
-    float core = pow(ndh, 220.0);
+    float sheen = pow(ndh, max(shape.x, 1.0));
+    float core = pow(ndh, max(shape.y, 4.0));
 
     // Selective foil edge.
     float2 edge = min(position, size - position);
@@ -87,7 +89,7 @@ static float2 aroomaHash2(float2 p) {
     // Diffraction grating along a diagonal; order m=1 colour from the grating equation.
     float3 T = normalize(float3(0.82, 0.57, 0.0));
     float g = dot(L, T) + dot(V, T);
-    half3 rainbow = aroomaSpectrum(g * 2.4 + dot(P.xy, float2(0.35, 0.2)));
+    half3 rainbow = aroomaSpectrum(g * shape.w + dot(P.xy, float2(0.35, 0.2)));
     float diffractWindow = pow(max(dot(N, normalize(L + V + float3(T * 0.35))), 0.0), 6.0);
     float diffraction = foil * (0.25 + 0.75 * diffractWindow);
 
@@ -98,10 +100,10 @@ static float2 aroomaHash2(float2 p) {
     float glint = pow(max(dot(facet, H), 0.0), 900.0) * step(0.55, aroomaHash2(cell + 7.0).x);
     float glitter = glint * (rim + metallic * 0.5);
 
-    half3 add = rainbow * half(diffraction * 0.34)
-              + tint.rgb * half(sheen * (0.16 + 0.2 * fresnel))
-              + half3(1.0h) * half(core * (0.18 + 0.4 * metallic))
-              + half3(1.0h) * half(min(glitter, 1.0) * 0.9);
+    half3 add = rainbow * half(diffraction * shape.z)
+              + tint.rgb * half(sheen * (0.16 + 0.2 * fresnel) * gains.x)
+              + half3(1.0h) * half(core * (0.18 + 0.4 * metallic) * gains.y)
+              + half3(1.0h) * half(min(glitter, 1.0) * gains.z);
     add *= half(strength);
 
     // Screen blend in unpremultiplied space, then re-premultiply.

@@ -25,6 +25,7 @@ struct AtelierGallery: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var motor = DeckMotor()
+    @State private var tuning = Tuning.shared
     @State private var touching = false
     @State private var dragging = false
     @State private var slop: CGFloat = 0
@@ -102,6 +103,8 @@ struct AtelierGallery: View {
         .onAppear {
             motor.reduceMotion = reduceMotion
             bindMotor()
+            // The tilt baseline is fixed to however the phone is held when the gallery opens.
+            MotionField.shared.recenter()
             configure()
             if UserDefaults.standard.bool(forKey: "AroomaAutoplay") {
                 Task { await autoplay() }
@@ -185,6 +188,7 @@ struct AtelierGallery: View {
         GeometryReader { geo in
             let w = cardWidth(for: geo.size)
             let h = w * 86.0 / 59.0
+            let _ = tuning.revision // live layout tuning
             let unit = motor.stride(cardWidth: Double(w))
             let position = motor.position
             ZStack {

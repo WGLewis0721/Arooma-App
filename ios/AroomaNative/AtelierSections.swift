@@ -20,37 +20,15 @@ struct PressableCardStyle: ButtonStyle {
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage(SignatureIntroPolicy.seenKey) private var introSeen = false
-    /// First launch only: the pen-writing intro, ending on the exact master signature.
-    @State private var showingIntro = !UserDefaults.standard.bool(forKey: SignatureIntroPolicy.seenKey)
-    @State private var cameFromIntro = false
     @State private var settled = false
     @State private var dealt = false
     @State private var handle: CGSize = .zero
     @State private var handleUV = CGPoint(x: 0.5, y: 0.5)
     @Namespace private var swatchRing
-    @Namespace private var signatureSpace
     let openDemo: () -> Void
     let openMine: () -> Void
 
-    var body: some View {
-        ZStack {
-            if showingIntro {
-                SignatureIntro(namespace: signatureSpace) {
-                    introSeen = true
-                    cameFromIntro = true
-                    withAnimation(reduceMotion ? .easeInOut(duration: 0.3) : .spring(response: 0.8, dampingFraction: 0.9)) {
-                        showingIntro = false
-                    }
-                }
-                .transition(.opacity)
-                .zIndex(2)
-            } else {
-                welcome
-                    .transition(.opacity)
-            }
-        }
-    }
+    var body: some View { welcome }
 
     private var welcome: some View {
         GeometryReader { geo in
@@ -61,15 +39,15 @@ struct AtelierWelcome: View {
                     .opacity(settled ? 1 : 0)
                 Spacer(minLength: 8)
                 VStack(spacing: 10) {
-                    // The exact master signature (assets/brand), inked in the theme's metal.
-                    AroomaSignatureMark(ink: accent)
+                    // The exact master signature (assets/brand), fully legible from the first frame,
+                    // with a slow metallic highlight. Buttons below act immediately; nothing waits
+                    // for the loop.
+                    AroomaSignatureShimmer(ink: accent, highlight: archive.theme.keyLight)
                         .frame(width: min(geo.size.width * 0.8, 330),
                                height: min(geo.size.width * 0.8, 330) / SignatureGeometry.logoAspect)
-                        .matchedGeometryEffect(id: "arooma-signature", in: signatureSpace)
                         .accessibilityElement()
                         .accessibilityLabel("Arooma")
                         .accessibilityAddTraits(.isHeader)
-                        .accessibilityHidden(cameFromIntro) // already announced by the intro
                     AtelierDisplay(title: "A collection worth keeping.", size: 27)
                         .multilineTextAlignment(.center)
                         .opacity(settled ? 1 : 0)
@@ -107,8 +85,8 @@ struct AtelierWelcome: View {
         .background(AtelierAtmosphere(theme: archive.theme))
         .onAppear {
             if reduceMotion { settled = true; dealt = true; return }
-            withAnimation(.easeOut(duration: 0.55).delay(cameFromIntro ? 0.35 : 0.1)) { settled = true }
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(cameFromIntro ? 0.45 : 0.25)) { dealt = true }
+            withAnimation(.easeOut(duration: 0.55).delay(0.1)) { settled = true }
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.78).delay(0.25)) { dealt = true }
         }
     }
 
@@ -826,7 +804,12 @@ struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var replayingIntro = false
-    @State private var probe = FramePacingProbe.shared
+    @State private var tuning = false
+    private static var versionString: String {
+        let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+        return "\(v) (\(b))"
+    }
 
     var body: some View {
         ScrollView {
@@ -890,13 +873,13 @@ struct AtelierStyle: View {
                         AroomaSignatureMark(ink: archive.theme.palette.accent)
                             .frame(height: 30)
                         Spacer(minLength: 8)
-                        Label("Replay intro", systemImage: "play.circle")
+                        Label("Show signature", systemImage: "sparkles")
                             .font(.subheadline.weight(.medium))
                     }
                     .frame(maxWidth: .infinity, minHeight: 40)
                 }
                 .buttonStyle(.glass)
-                .accessibilityLabel("Replay the Arooma signature intro")
+                .accessibilityLabel("Show the Arooma signature")
                 DisclosureGroup("About this archive") {
                     Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it switches off in Low Power Mode and with Reduce Motion.")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -905,25 +888,101 @@ struct AtelierStyle: View {
                 .font(.footnote)
                 .padding(15)
                 .atelierPlate(16)
-                // Hidden owner tool: long-press to show or hide the frame-time readout.
-                Text(probe.enabled ? "Arooma · frame-time readout on" : "Arooma · private and on-device")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 4)
-                    .contentShape(Rectangle())
-                    .onLongPressGesture(minimumDuration: 1.2) {
-                        probe.enabled.toggle()
-                        HapticEngine.shared.play(.completed)
-                    }
-                    .accessibilityHidden(true)
+                AtelierEyebrow(text: "Card lighting", accent: archive.theme.palette.accent)
+                Button {
+                    MotionField.shared.recenter()
+                    HapticEngine.shared.play(.completed)
+                } label: {
+                    Label("Recenter to how you're holding the phone", systemImage: "scope")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                }
+                .buttonStyle(.glass)
+                StylizedCardSettings()
+                DisclosureGroup("About this archive") {
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it holds still with Reduce Motion and switches off in Low Power Mode.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                        .padding(.top, 6)
+                }
+                .font(.footnote)
+                .padding(15)
+                .atelierPlate(16)
+                // Version row. Long-press opens the hidden owner tuning panel.
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text(Self.versionString).monospacedDigit()
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 15)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+                .onLongPressGesture(minimumDuration: 0.9) {
+                    HapticEngine.shared.play(.completed)
+                    tuning = true
+                }
+                .accessibilityElement(children: .combine)
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
             .padding(.bottom, 30)
         }
         .scrollContentBackground(.hidden)
-        .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay() }
+        .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay().environmentObject(archive) }
+        .sheet(isPresented: $tuning) { TuningPanel() }
+    }
+}
+
+/// Stylized card downloads. The preference is real and stored, but downloading stays
+/// unavailable until an approved, licensed card source exists: no remote catalog is invented
+/// and no manufacturer imagery is fetched.
+struct StylizedCardSettings: View {
+    @AppStorage("arooma.cards.downloadWhenOnline") private var downloadWhenOnline = false
+    @AppStorage("arooma.cards.wifiOnly") private var wifiOnly = true
+    @State private var cacheBytes: Int64 = 0
+    private static let licensedSourceAvailable = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle("Download stylized cards when online", isOn: $downloadWhenOnline)
+                .disabled(!Self.licensedSourceAvailable)
+            Toggle("Wi-Fi only", isOn: $wifiOnly)
+                .disabled(!Self.licensedSourceAvailable || !downloadWhenOnline)
+            HStack {
+                Text("Downloaded cards: \(ByteCountFormatter.string(fromByteCount: cacheBytes, countStyle: .file))")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Clear cache") { clearCache() }
+                    .disabled(cacheBytes == 0)
+            }
+            Text("Unavailable for now: Arooma has no licensed source for stylized card artwork yet. Your bundled cards and photos are unaffected, and nothing is downloaded.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .font(.subheadline)
+        .padding(15)
+        .atelierPlate(16)
+        .onAppear { cacheBytes = Self.cacheSize() }
+    }
+
+    static var cacheDirectory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("StylizedCards", isDirectory: true)
+    }
+
+    static func cacheSize() -> Int64 {
+        guard let files = FileManager.default.enumerator(at: cacheDirectory, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }
+        var total: Int64 = 0
+        for case let url as URL in files {
+            total += Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+        return total
+    }
+
+    private func clearCache() {
+        try? FileManager.default.removeItem(at: Self.cacheDirectory)
+        cacheBytes = Self.cacheSize()
     }
 }
 

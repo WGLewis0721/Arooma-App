@@ -74,6 +74,11 @@ workflows:
           path.write_text(source)
           print(f'Configured Arooma 1.0 ({number})')
           PY
+      - name: Install Xcode 26 Metal Toolchain
+        script: |
+          # Xcode 26 ships the Metal compiler as a separate optional component.
+          # Required to archive ios/AroomaNative/HoloFoil.metal on fresh CI machines.
+          xcodebuild -downloadComponent metalToolchain
       - name: Build signed iPhone IPA
         script: |
           xcode-project build-ipa \

@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Pre-boot iPhone simulator (first boot migrates data for minutes)
+        run: bash ios/Tests/capture.sh --preboot
       - name: Show installed Xcode
         run: xcodebuild -version
       - name: Deck physics tests (selection continuity, one-card snap, centring, flip faces)
@@ -76,6 +78,8 @@ jobs:
         with:
           path: baseline
           ref: ${{ github.event.inputs.baseline_ref || github.event.pull_request.base.sha || 'main' }}
+      - name: Pre-boot iPhone simulator
+        run: bash current/ios/Tests/capture.sh --preboot
       - name: Build baseline app
         run: |
           set -o pipefail

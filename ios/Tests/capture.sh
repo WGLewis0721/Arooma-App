@@ -6,7 +6,7 @@
 # "after" additionally records the QA autoplay (real deck engine, synthetic finger curves)
 # and the frame-pacing probe's console output. Simulator numbers are NOT device numbers.
 set -uo pipefail
-APP="$1"; OUT="$2"; LABEL="$3"
+APP="${1:-}"; OUT="${2:-}"; LABEL="${3:-}"
 BUNDLE=com.graymatter.arooma
 mkdir -p "$OUT"
 DEVICE=$(xcrun simctl list devices available -j | python3 -c '
@@ -20,7 +20,8 @@ for p in pref:
 print(cands[0][1]["udid"] if cands else "")')
 if [ -z "$DEVICE" ]; then echo "No iOS 26 iPhone simulator"; exit 0; fi
 xcrun simctl boot "$DEVICE" 2>/dev/null || true
-perl -e 'alarm 120; exec @ARGV' xcrun simctl bootstatus "$DEVICE" -b || { echo "boot failed"; exit 0; }
+if [ "$APP" = "--preboot" ]; then echo "pre-booting $DEVICE"; exit 0; fi
+perl -e 'alarm 720; exec @ARGV' xcrun simctl bootstatus "$DEVICE" -b || { echo "boot failed"; exit 0; }
 xcrun simctl status_bar "$DEVICE" override --time "9:41" --batteryState charged --batteryLevel 100 --wifiBars 3 2>/dev/null || true
 xcrun simctl uninstall "$DEVICE" "$BUNDLE" 2>/dev/null || true
 xcrun simctl install "$DEVICE" "$APP"

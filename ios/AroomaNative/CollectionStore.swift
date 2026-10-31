@@ -128,12 +128,12 @@ import SwiftUI
             }
         }
     }
-    func move(_ offset: Int) {
+    func move(_ offset: Int, haptic: Bool = true) {
         let items = displayedCards
         guard !items.isEmpty, let selected else { return }
         let index = items.firstIndex(of: selected) ?? 0
         let destination = max(0, min(items.count - 1, index + offset))
-        choose(items[destination])
+        choose(items[destination], haptic: haptic)
     }
     func enter(_ newMode: CollectionMode) {
         guard mode != newMode else { return }

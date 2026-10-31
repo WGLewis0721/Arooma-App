@@ -1,5 +1,7 @@
 # Arooma: instructions for coding agents
 
+**CURRENT NATIVE DELIVERY OVERRIDE (2026-10-30):** The user already has Arooma installed via TestFlight. Implement and refine the native SwiftUI iOS 26 app only. Preserve existing native storage and bundle identifier, use approved photographic masters, and retain the signed Codemagic/TestFlight path. The old no-TestFlight/PWA simulator-only handoffs and liquid-animation instructions do not constrain this owner-approved Atelier redesign. Follow [NATIVE_ATELIER_FINAL.md](NATIVE_ATELIER_FINAL.md). Preserve accessibility, legal asset provenance and data safeguards.
+
 **ACTIVE OWNER OVERRIDE (2026-10-30):** The PWA is retired. Build a native SwiftUI iOS 26+ app. Do not port `index.html`, CSS, or the GitHub Pages demo. The goal is a polished app that can be demoed immediately in the iOS Simulator (clone + open Xcode project + run). No TestFlight required for the demo path.
 
 Read [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and [docs/design/brand/BRAND_BOARD.md](docs/design/brand/BRAND_BOARD.md) first. Preserve all design objectives, photographic art masters, interaction rules, local-first data model, and content-vs-control layering. Liquid Glass only on functional layer; never on cards.

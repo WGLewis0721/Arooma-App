@@ -4,6 +4,8 @@ import PhotosUI
 import UIKit
 import CryptoKit
 import UniformTypeIdentifiers
+import Vision
+import CoreImage
 
 // MARK: - Commercial catalog and StoreKit products
 // Product identifiers must be created in App Store Connect with exactly these values.
@@ -239,7 +241,8 @@ struct CommercialArchive: Codable {
         }
         let names = Set(backup.cards.map(\.photoName))
         guard names.count == backup.cards.count,
-              names.allSatisfy({ $0.hasPrefix("studio-") && $0.hasSuffix(".jpg") && !$0.contains("/") }),
+              names.allSatisfy({ $0.hasPrefix("studio-") &&
+                  ($0.hasSuffix(".jpg") || $0.hasSuffix(".png")) && !$0.contains("/") }),
               names.allSatisfy({ name in
                   guard let bytes = backup.photos[name] else { return false }
                   return bytes.count <= 12_000_000 && UIImage(data: bytes) != nil
@@ -253,7 +256,7 @@ struct CommercialArchive: Codable {
         var written: [URL] = []
         do {
             for card in backup.cards where !created.contains(where: { $0.id == card.id }) {
-                let filename = "studio-\(UUID().uuidString).jpg"
+                let filename = "studio-\(UUID().uuidString).\(cutout ? "png" : "jpg")"
                 let destination = Self.documentDirectory.appendingPathComponent(filename)
                 try backup.photos[card.photoName]!.write(to: destination, options: .atomic)
                 written.append(destination)
@@ -275,16 +278,17 @@ struct CommercialArchive: Codable {
         UIImage(contentsOfFile: Self.documentDirectory.appendingPathComponent(card.photoName).path)
     }
     @discardableResult
-    func create(title: String, caption: String, photo: Data, finish: CardFinish, fragranceID: String?) -> Bool {
+    func create(title: String, caption: String, photo: Data, finish: CardFinish, fragranceID: String?,
+                cutout: Bool = false) -> Bool {
         guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let raw = UIImage(data: photo),
-              let jpg = raw.jpegData(compressionQuality: 0.86) else {
+              let imageBytes = cutout ? raw.pngData() : raw.jpegData(compressionQuality: 0.86) else {
             status = "Choose a readable bottle photo and enter a card name."
             return false
         }
         let filename = "studio-\(UUID().uuidString).jpg"
         do {
-            try jpg.write(to: Self.documentDirectory.appendingPathComponent(filename), options: .atomic)
+            try imageBytes.write(to: Self.documentDirectory.appendingPathComponent(filename), options: .atomic)
             created.insert(.init(fragranceID: fragranceID, title: String(title.prefix(80)),
                                  caption: String(caption.prefix(120)), photoName: filename,
                                  finish: finish), at: 0)
@@ -414,6 +418,34 @@ struct StudioPNG: Transferable {
     }
 }
 
+// MARK: - On-device bottle cutout
+enum BottleCutout {
+    // Optional native Vision segmentation. The original photo always remains available.
+    static func isolate(_ data: Data) async -> Data? {
+        await Task.detached(priority: .userInitiated) {
+            guard let cgImage = UIImage(data: data)?.cgImage else { return nil as Data? }
+            let request = VNGenerateForegroundInstanceMaskRequest()
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+                guard let observation = request.results?.first,
+                      !observation.allInstances.isEmpty else { return nil as Data? }
+                let buffer = try observation.generateMaskedImage(
+                    ofInstances: observation.allInstances,
+                    from: handler,
+                    croppedToInstancesExtent: false
+                )
+                let context = CIContext()
+                let image = CIImage(cvPixelBuffer: buffer)
+                guard let result = context.createCGImage(image, from: image.extent) else { return nil as Data? }
+                return UIImage(cgImage: result).pngData()
+            } catch {
+                return nil as Data?
+            }
+        }.value
+    }
+}
+
 // MARK: - Personal Card Studio
 struct CardStudioScreen: View {
     @EnvironmentObject private var commerce: CardCommerce
@@ -421,6 +453,9 @@ struct CardStudioScreen: View {
     @Environment(\.dismiss) private var dismiss
     @State private var photoItem: PhotosPickerItem?
     @State private var photoData: Data?
+    @State private var sourcePhoto: Data?
+    @State private var usingCutout = false
+    @State private var isolating = false
     @State private var title = ""
     @State private var caption = ""
     @State private var finish: CardFinish = .obsidian
@@ -439,6 +474,32 @@ struct CardStudioScreen: View {
                     PhotosPicker(selection: $photoItem, matching: .images) {
                         Label(photoData == nil ? "Choose bottle photo" : "Change bottle photo", systemImage: "photo.on.rectangle")
                     }.buttonStyle(.bordered)
+                    if sourcePhoto != nil {
+                        Button {
+                            if usingCutout {
+                                photoData = sourcePhoto
+                                usingCutout = false
+                            } else if let sourcePhoto {
+                                isolating = true
+                                Task {
+                                    let isolated = await BottleCutout.isolate(sourcePhoto)
+                                    if let isolated {
+                                        photoData = isolated
+                                        usingCutout = true
+                                    } else {
+                                        commerce.status = "Subject isolation was unavailable. The original photo is intact."
+                                    }
+                                    isolating = false
+                                }
+                            }
+                        } label: {
+                            Label(usingCutout ? "Use original photo" : "Isolate bottle",
+                                  systemImage: usingCutout ? "arrow.uturn.backward" : "person.crop.rectangle.stack")
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isolating)
+                        if isolating { ProgressView("Separating bottle from background") }
+                    }
                     TextField("Card title", text: $title).textInputAutocapitalization(.words)
                     TextField("Edition caption (optional)", text: $caption)
                     Picker("Finish", selection: $finish) {
@@ -459,7 +520,7 @@ struct CardStudioScreen: View {
                         guard let data = photoData else { return }
                         saving = true
                         if commerce.create(title: title, caption: caption, photo: data,
-                                           finish: finish, fragranceID: fragranceID) {
+                                           finish: finish, fragranceID: fragranceID, cutout: usingCutout) {
                             dismiss()
                         }
                         saving = false
@@ -481,7 +542,11 @@ struct CardStudioScreen: View {
             }
             .task(id: photoItem) {
                 if let photoItem, let data = try? await photoItem.loadTransferable(type: Data.self),
-                   UIImage(data: data) != nil { photoData = data }
+                   UIImage(data: data) != nil {
+                    sourcePhoto = data
+                    photoData = data
+                    usingCutout = false
+                }
             }
         }
     }

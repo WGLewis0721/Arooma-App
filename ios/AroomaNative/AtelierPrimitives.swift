@@ -97,25 +97,34 @@ extension View {
 // One shared sensor feed, only while the interactive gallery is visible.
 @MainActor final class FoilMotion: ObservableObject {
     static let shared = FoilMotion()
-    @Published var x: CGFloat = 0
-    @Published var y: CGFloat = 0
+    // One published value per sensor sample; a light low-pass keeps the foil
+    // from jittering during an otherwise steady hold.
+    @Published private(set) var light = CGSize.zero
     private let sensor = CMMotionManager()
     private init() {}
+
     func start() {
         guard sensor.isDeviceMotionAvailable, !sensor.isDeviceMotionActive,
               !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
-        sensor.deviceMotionUpdateInterval = 1.0 / 24.0
+        sensor.deviceMotionUpdateInterval = 1.0 / 30.0
         sensor.startDeviceMotionUpdates(to: .main) { [weak self] sample, _ in
-            guard let sample else { return }
+            guard let self, let sample else { return }
             Task { @MainActor in
-                self?.x = CGFloat(max(-1, min(1, sample.attitude.roll / 0.75)))
-                self?.y = CGFloat(max(-1, min(1, sample.attitude.pitch / 0.75)))
+                let x = CGFloat(max(-1, min(1, sample.attitude.roll / 0.75)))
+                let y = CGFloat(max(-1, min(1, sample.attitude.pitch / 0.75)))
+                let next = CGSize(width: self.light.width * 0.82 + x * 0.18,
+                                  height: self.light.height * 0.82 + y * 0.18)
+                if abs(next.width - self.light.width) > 0.004 ||
+                   abs(next.height - self.light.height) > 0.004 {
+                    self.light = next
+                }
             }
         }
     }
-    func stop() { if sensor.isDeviceMotionActive { sensor.stopDeviceMotionUpdates() } }
+    func stop() {
+        if sensor.isDeviceMotionActive { sensor.stopDeviceMotionUpdates() }
+    }
 }
-
 
 // A responsive, non-destructive interference layer. Tilt controls the spectral
 // highlight; a much slower idle pulse remains when the handset is stationary.
@@ -135,8 +144,8 @@ struct AtelierFoilMaterial: View {
                 let tick = clock.date.timeIntervalSinceReferenceDate
                 let breath = reduceMotion ? 0 : sin(tick * 0.50)
                 let travel = CGFloat(breath) * geo.size.width * 0.13 +
-                             tilt.x * geo.size.width * 0.39
-                let angle = Angle.degrees(Double(tilt.x * 64) + breath * 13)
+                             tilt.light.width * geo.size.width * 0.39
+                let angle = Angle.degrees(Double(tilt.light.width * 64) + breath * 13)
                 ZStack {
                     if !reduceTransparency {
                         RoundedRectangle(cornerRadius: radius, style: .continuous)
@@ -150,7 +159,7 @@ struct AtelierFoilMaterial: View {
                                 ],
                                 startPoint: .topLeading, endPoint: .bottomTrailing
                             ))
-                            .opacity(0.45 + abs(tilt.x) * 0.35)
+                            .opacity(0.45 + abs(tilt.light.width) * 0.35)
 
                         Rectangle()
                             .fill(LinearGradient(
@@ -169,7 +178,7 @@ struct AtelierFoilMaterial: View {
                                    height: geo.size.height * 1.9)
                             .rotationEffect(.degrees(19))
                             .offset(x: travel - geo.size.width * 0.34,
-                                    y: tilt.y * 15)
+                                    y: tilt.light.height * 15)
                             .blendMode(.screen)
                     }
 
@@ -191,7 +200,7 @@ struct AtelierFoilMaterial: View {
                             lineWidth: 3.1
                         )
                     RoundedRectangle(cornerRadius: radius - 2, style: .continuous)
-                        .strokeBorder(.white.opacity(0.10 + abs(tilt.y) * 0.18),
+                        .strokeBorder(.white.opacity(0.10 + abs(tilt.light.height) * 0.18),
                                       lineWidth: 0.9)
                         .padding(4)
                 }

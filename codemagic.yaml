@@ -1,0 +1,92 @@
+# Arooma Native — cloud builds from Windows; no Mac or PWA required.
+# Source: ios/AroomaNative.xcodeproj (iOS 26+, SwiftUI).
+# The 'Spread' integration is the Codemagic App Store Connect API-key integration
+# already used for the user's Spread Studio project. Arooma needs its OWN app
+# identifier and App Store provisioning profile under the same Apple team.
+# Start manually from Codemagic after selecting the main branch.
+workflows:
+  arooma-ios-check:
+    name: Arooma Native | unsigned simulator build
+    max_build_duration: 45
+    instance_type: mac_mini_m2
+    environment:
+      xcode: 26.5
+    scripts:
+      - name: Confirm Xcode project and photographic card masters
+        script: |
+          test -d ios/AroomaNative.xcodeproj
+          test -f assets/collectibles/masters/approved/dior-sauvage-elixir-original-diptych.png
+          test -f assets/collectibles/masters/approved/rasasi-hawas-for-him-original-diptych.png
+          test -f assets/collectibles/masters/approved/ysl-myslf-edp-original-diptych.png
+      - name: Build unsigned iPhone simulator app
+        script: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/AroomaNative.xcodeproj \
+            -scheme AroomaNative \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/build/native-simulator" \
+            CODE_SIGNING_ALLOWED=NO build
+    artifacts:
+      - build/native-simulator/Build/Products/Debug-iphonesimulator/*.app
+      - /tmp/xcodebuild_logs/*.log
+
+  arooma-testflight:
+    name: Arooma Native | signed TestFlight upload
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Spread
+    environment:
+      xcode: 26.5
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.graymatter.arooma
+      vars:
+        XCODE_PROJECT: ios/AroomaNative.xcodeproj
+        XCODE_SCHEME: AroomaNative
+    scripts:
+      - name: Verify native project and approved photographic assets
+        script: |
+          test -d "$CM_BUILD_DIR/$XCODE_PROJECT"
+          test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/dior-sauvage-elixir-original-diptych.png"
+          test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/rasasi-hawas-for-him-original-diptych.png"
+          test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/ysl-myslf-edp-original-diptych.png"
+      - name: Apply Apple distribution signing profile
+        script: xcode-project use-profiles
+      - name: Assign unique TestFlight build version
+        script: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          path = Path(os.environ['CM_BUILD_DIR']) / 'ios/AroomaNative.xcodeproj/project.pbxproj'
+          source = path.read_text()
+          number = os.environ['PROJECT_BUILD_NUMBER']
+          if not number.isdigit():
+              raise SystemExit('Codemagic PROJECT_BUILD_NUMBER must be numeric')
+          source, count = re.subn(r'CURRENT_PROJECT_VERSION\s*=\s*\d+\s*;',
+                                  f'CURRENT_PROJECT_VERSION = {number}; MARKETING_VERSION = 1.0;',
+                                  source)
+          if count < 2:
+              raise SystemExit('Expected two native Xcode target build configurations')
+          path.write_text(source)
+          print(f'Configured Arooma 1.0 ({number})')
+          PY
+      - name: Build signed iPhone IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Upload to App Store Connect, then select the build under TestFlight.
+        # Internal testing does not require submitting to external beta review.
+        submit_to_testflight: false
+        submit_to_app_store: false

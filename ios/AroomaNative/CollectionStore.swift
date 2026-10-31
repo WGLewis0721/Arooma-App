@@ -241,6 +241,22 @@ import SwiftUI
             bottles[index].remaining = min(1, bottles[index].remaining + 0.0075)
         }
     }
+    /// Undo today's most recent wear of one specific bottle (the card in front, not the stored
+    /// selection). A layered session loses only this bottle; the rest of the session survives.
+    func undoTodayWear(bottleID: UUID) {
+        guard let index = bottles.firstIndex(where: { $0.id == bottleID }),
+              let eventIndex = bottles[index].wears.lastIndex(where: { Calendar.current.isDateInToday($0.date) })
+        else { return }
+        if let sessionID = bottles[index].wears[eventIndex].sessionID,
+           wearSessions.contains(where: { $0.id == sessionID }) {
+            removeBottle(bottleID, from: sessionID)
+        } else {
+            bottles[index].wears.remove(at: eventIndex)
+            bottles[index].remaining = min(1, bottles[index].remaining + 0.0075)
+            HapticEngine.shared.play(.completed)
+        }
+    }
+
     func update(_ bottle: BottleRecord) {
         guard let index = bottles.firstIndex(where: { $0.id == bottle.id }) else { return }
         bottles[index] = bottle

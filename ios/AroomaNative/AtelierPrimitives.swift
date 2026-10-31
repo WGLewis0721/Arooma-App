@@ -94,125 +94,14 @@ extension View {
 }
 
 
-// One shared sensor feed, only while the interactive gallery is visible.
-@MainActor final class FoilMotion: ObservableObject {
-    static let shared = FoilMotion()
-    // One published value per sensor sample; a light low-pass keeps the foil
-    // from jittering during an otherwise steady hold.
-    @Published private(set) var light = CGSize.zero
-    private let sensor = CMMotionManager()
-    private init() {}
+// MARK: - The physical collectible
+//
+// A card is drawn as an object: opaque art (never altered), an optional optical layer (live GPU
+// foil on the hero, a cheap static sheen elsewhere), Lambert shading from its angle to the light,
+// a rim catch-light, a visible edge thickness that shows as it turns, and a contact shadow that
+// widens and softens as the card lifts off the table.
 
-    func start() {
-        guard sensor.isDeviceMotionAvailable, !sensor.isDeviceMotionActive,
-              !ProcessInfo.processInfo.isLowPowerModeEnabled else { return }
-        sensor.deviceMotionUpdateInterval = 1.0 / 30.0
-        sensor.startDeviceMotionUpdates(to: .main) { [weak self] sample, _ in
-            guard let self, let sample else { return }
-            Task { @MainActor in
-                let x = CGFloat(max(-1, min(1, sample.attitude.roll / 0.75)))
-                let y = CGFloat(max(-1, min(1, sample.attitude.pitch / 0.75)))
-                let next = CGSize(width: self.light.width * 0.82 + x * 0.18,
-                                  height: self.light.height * 0.82 + y * 0.18)
-                if abs(next.width - self.light.width) > 0.004 ||
-                   abs(next.height - self.light.height) > 0.004 {
-                    self.light = next
-                }
-            }
-        }
-    }
-    func stop() {
-        if sensor.isDeviceMotionActive { sensor.stopDeviceMotionUpdates() }
-    }
-}
-
-// A responsive, non-destructive interference layer. Tilt controls the spectral
-// highlight; a much slower idle pulse remains when the handset is stationary.
-// The approved card photography and lettering never change.
-struct AtelierFoilMaterial: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @ObservedObject private var tilt = FoilMotion.shared
-    var radius: CGFloat
-
-    var body: some View {
-        GeometryReader { geo in
-            TimelineView(.animation(
-                minimumInterval: 1.0 / 20.0,
-                paused: reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled
-            )) { clock in
-                let tick = clock.date.timeIntervalSinceReferenceDate
-                let breath = reduceMotion ? 0 : sin(tick * 0.50)
-                let travel = CGFloat(breath) * geo.size.width * 0.13 +
-                             tilt.light.width * geo.size.width * 0.39
-                let angle = Angle.degrees(Double(tilt.light.width * 64) + breath * 13)
-                ZStack {
-                    if !reduceTransparency {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .fill(LinearGradient(
-                                colors: [
-                                    .clear,
-                                    Color.cyan.opacity(0.16),
-                                    Color.purple.opacity(0.14),
-                                    Color.yellow.opacity(0.13),
-                                    .clear
-                                ],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            ))
-                            .opacity(0.45 + abs(tilt.light.width) * 0.35)
-
-                        Rectangle()
-                            .fill(LinearGradient(
-                                stops: [
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .white.opacity(0.04), location: 0.19),
-                                    .init(color: Color.cyan.opacity(0.15), location: 0.35),
-                                    .init(color: Color.purple.opacity(0.19), location: 0.51),
-                                    .init(color: .white.opacity(0.27), location: 0.57),
-                                    .init(color: Color.yellow.opacity(0.11), location: 0.68),
-                                    .init(color: .clear, location: 1)
-                                ],
-                                startPoint: .leading, endPoint: .trailing
-                            ))
-                            .frame(width: geo.size.width * 0.64,
-                                   height: geo.size.height * 1.9)
-                            .rotationEffect(.degrees(19))
-                            .offset(x: travel - geo.size.width * 0.34,
-                                    y: tilt.light.height * 15)
-                            .blendMode(.screen)
-                    }
-
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .strokeBorder(
-                            AngularGradient(
-                                colors: [
-                                    .white.opacity(0.34),
-                                    Color.cyan.opacity(0.74),
-                                    Color.purple.opacity(0.58),
-                                    Color.yellow.opacity(0.72),
-                                    .white.opacity(0.70),
-                                    Color.blue.opacity(0.49),
-                                    .white.opacity(0.31)
-                                ],
-                                center: .center,
-                                angle: angle
-                            ),
-                            lineWidth: 3.1
-                        )
-                    RoundedRectangle(cornerRadius: radius - 2, style: .continuous)
-                        .strokeBorder(.white.opacity(0.10 + abs(tilt.light.height) * 0.18),
-                                      lineWidth: 0.9)
-                        .padding(4)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-                .compositingGroup()
-            }
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-}
+enum FoilMode: Equatable { case none, sheen, live }
 
 struct AtelierCardSurface: View {
     @EnvironmentObject private var archive: CollectionStore
@@ -220,69 +109,230 @@ struct AtelierCardSurface: View {
     var side: CardSide = .front
     var radius: CGFloat = 14
     var selected = false
+    /// Rotation about the vertical axis the card is drawn at (degrees), for lighting only.
+    var yaw: Double = 0
+    /// 0 resting on the table ... 1 lifted under the finger.
+    var lift: Double = 0
+    /// Extra darkening from distance / depth.
+    var shade: Double = 0
+    var foil: FoilMode? = nil
+    var foilStrength: Double = 1
+    /// How much the card leans toward device tilt (0 = none, 1 = hero).
+    var lean: Double = 0
+    var shadowed = true
 
     var body: some View {
-        ZStack {
-            if let fragrance = archive.fragrance(id: fragranceID),
-               let path = archive.photoURL(for: fragrance),
-               let picture = UIImage(contentsOfFile: path.path) {
-                GeometryReader { bounds in
-                    Image(uiImage: picture)
-                        .resizable().scaledToFill()
-                        .frame(width: bounds.size.width, height: bounds.size.height)
-                        .clipped()
+        let mode = foil ?? (selected ? .live : .none)
+        let fragrance = archive.fragrance(id: fragranceID)
+        let photo = fragrance.flatMap { archive.photoURL(for: $0) }
+        let theme = archive.theme
+        let facing = cos(yaw * .pi / 180)
+        let lambert = min(0.62, shade + (1 - max(0, facing)) * 0.5)
+        CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo, side: side, radius: radius)
+            .equatable()
+            .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw, radius: radius, tint: theme.keyLight))
+            .overlay {
+                if lambert > 0.004 {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .fill(Color.black.opacity(lambert))
+                        .allowsHitTesting(false)
+                }
+            }
+            .overlay {
+                // Catch-light along the edge facing the key light.
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(colors: [
+                            .white.opacity(0.34 + 0.2 * lift),
+                            .white.opacity(0.04),
+                            .white.opacity(0.12)
+                        ], startPoint: UnitPoint(x: 0.5 - yaw / 120, y: 0), endPoint: UnitPoint(x: 0.5 + yaw / 120, y: 1)),
+                        lineWidth: 0.8
+                    )
+                    .allowsHitTesting(false)
+            }
+            .background {
+                // Edge thickness: visible when the card is turned or lifted.
+                RoundedRectangle(cornerRadius: radius + 0.6, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(hex: 0x2A2620), Color(hex: 0x0E0F14)],
+                                         startPoint: .top, endPoint: .bottom))
+                    .offset(x: sin(yaw * .pi / 180) * 3.4 + 0.5, y: 1.8 + lift * 1.2)
+            }
+            .background {
+                if shadowed {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .fill(theme.shadowTint.opacity(0.46 - 0.1 * lift))
+                        .scaleEffect(x: 0.92 - 0.02 * lift, y: 0.94)
+                        .offset(x: -yaw * 0.12, y: 10 + 18 * lift)
+                        .blur(radius: 11 + 15 * lift)
+                        .allowsHitTesting(false)
+                }
+            }
+            .modifier(TiltLean(amount: lean))
+            .accessibilityLabel(fragrance.map { "\($0.house) \($0.name), \(side == .front ? "front" : "reverse")" } ?? "Collectible")
+    }
+}
+
+/// Art only. Equatable so 120 Hz pose changes never rebuild or re-decode the image.
+struct CardFace: View, Equatable {
+    let fragranceID: String
+    let fragrance: Fragrance?
+    let photoURL: URL?
+    let side: CardSide
+    let radius: CGFloat
+
+    var body: some View {
+        Group {
+            if let photoURL, let picture = OwnerPhotoCache.image(at: photoURL) {
+                ZStack(alignment: .bottomLeading) {
+                    Color(hex: 0x14161D)
+                    GeometryReader { bounds in
+                        Image(uiImage: picture)
+                            .resizable().scaledToFill()
+                            .frame(width: bounds.size.width, height: bounds.size.height)
+                            .clipped()
+                    }
+                    if side == .front {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text((fragrance?.house ?? "").uppercased())
+                                .font(.system(size: 9, weight: .semibold)).tracking(1.4)
+                            Text(fragrance?.name ?? "")
+                                .font(.system(size: 19, weight: .regular, design: .serif))
+                                .lineLimit(2)
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(13)
+                        .background(LinearGradient(colors: [.clear, .black.opacity(0.84)],
+                                                   startPoint: .top, endPoint: .bottom))
+                    } else {
+                        PersonalReverse(fragrance: fragrance)
+                    }
                 }
                 .aspectRatio(59.0 / 86.0, contentMode: .fit)
-                .overlay(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(fragrance.house.uppercased())
-                            .font(.system(size: 9, weight: .semibold)).tracking(1.4)
-                        Text(fragrance.name)
-                            .font(.system(size: 19, weight: .regular, design: .serif))
-                            .lineLimit(2)
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(13)
-                    .background(LinearGradient(colors: [.clear, .black.opacity(0.87)],
-                                               startPoint: .top, endPoint: .bottom))
-                }
-                .clipShape(RoundedRectangle(cornerRadius: radius))
-            } else if let fragrance = archive.fragrance(id: fragranceID),
-                      fragrance.id.hasPrefix("personal-") {
-                RoundedRectangle(cornerRadius: radius)
-                    .fill(LinearGradient(colors: [Color(hex: 0x232939), Color(hex: 0x493749)],
-                                         startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .aspectRatio(59.0 / 86.0, contentMode: .fit)
-                    .overlay {
-                        VStack(spacing: 13) {
-                            Image(systemName: "sparkles.rectangle.stack").font(.largeTitle)
-                            Text(fragrance.name).font(.system(.title3, design: .serif))
-                                .multilineTextAlignment(.center).padding(.horizontal, 9)
-                            Text("PERSONAL COLLECTION").font(.system(size: 9)).tracking(1)
-                        }
-                        .foregroundStyle(.white.opacity(0.92))
-                    }
+            } else if let fragrance, fragrance.id.hasPrefix("personal-") {
+                if side == .front { PersonalCardArt(fragrance: fragrance) }
+                else { PersonalReverse(fragrance: fragrance) }
             } else {
-                // Original photographic card master is never changed by the foil overlay.
+                // Original photographic card master; the optical layer never changes it.
                 CollectibleCard(id: fragranceID, side: side, cornerRadius: radius)
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-        .background {
-            RoundedRectangle(cornerRadius: radius + 0.7, style: .continuous)
-                .fill(Color(hex: 0x171A20))
-                .offset(x: 1.6, y: 3)
-        }
-        .overlay {
-            if selected {
-                AtelierFoilMaterial(radius: radius)
+    }
+}
+
+/// Personal discoveries get a composed, archival card of their own instead of a placeholder.
+struct PersonalCardArt: View {
+    let fragrance: Fragrance
+    private static let inks: [(Color, Color)] = [
+        (Color(hex: 0x1A2133), Color(hex: 0x3D2C44)),
+        (Color(hex: 0x1C2A26), Color(hex: 0x3B4B3F)),
+        (Color(hex: 0x2B1C22), Color(hex: 0x5A3436)),
+        (Color(hex: 0x221E2E), Color(hex: 0x45385A))
+    ]
+    private var ink: (Color, Color) {
+        let seed = fragrance.id.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
+        return Self.inks[seed % Self.inks.count]
+    }
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            ZStack {
+                LinearGradient(colors: [ink.0, ink.1], startPoint: .topLeading, endPoint: .bottomTrailing)
+                RadialGradient(colors: [Color(hex: 0xE9CF9A).opacity(0.22), .clear],
+                               center: .init(x: 0.7, y: 0.25), startRadius: 2, endRadius: w * 0.9)
+                RoundedRectangle(cornerRadius: w * 0.045, style: .continuous)
+                    .strokeBorder(Color(hex: 0xD8B877).opacity(0.65), lineWidth: max(0.6, w * 0.004))
+                    .padding(w * 0.055)
+                Text(String(fragrance.name.prefix(1)).uppercased())
+                    .font(.system(size: w * 0.56, weight: .light, design: .serif))
+                    .foregroundStyle(LinearGradient(colors: [Color(hex: 0xF3DDAA), Color(hex: 0xA77F45)],
+                                                    startPoint: .top, endPoint: .bottom))
+                    .opacity(0.88)
+                    .offset(y: -w * 0.12)
+                VStack(alignment: .leading, spacing: w * 0.02) {
+                    Text("PERSONAL ARCHIVE")
+                        .font(.system(size: max(6, w * 0.032), weight: .semibold))
+                        .tracking(w * 0.008)
+                        .foregroundStyle(Color(hex: 0xD8B877))
+                    Spacer()
+                    Text(fragrance.house.uppercased())
+                        .font(.system(size: max(6, w * 0.036), weight: .semibold))
+                        .tracking(w * 0.006)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .lineLimit(1)
+                    Text(fragrance.name)
+                        .font(.system(size: max(9, w * 0.085), weight: .regular, design: .serif))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(w * 0.1)
             }
         }
-        .shadow(color: .black.opacity(selected ? 0.33 : 0.15),
-                radius: selected ? 28 : 13,
-                x: 0, y: selected ? 19 : 10)
-        .accessibilityLabel("Collectible \(fragranceID)")
+        .aspectRatio(59.0 / 86.0, contentMode: .fit)
+    }
+}
+
+struct PersonalReverse: View {
+    let fragrance: Fragrance?
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            ZStack {
+                Color(hex: 0x15161E)
+                RoundedRectangle(cornerRadius: w * 0.045, style: .continuous)
+                    .strokeBorder(Color(hex: 0xD8B877).opacity(0.5), lineWidth: max(0.6, w * 0.004))
+                    .padding(w * 0.055)
+                VStack(spacing: w * 0.04) {
+                    Text("Arooma")
+                        .font(.custom("Snell Roundhand", size: w * 0.16))
+                        .foregroundStyle(Color(hex: 0xD8B877))
+                    Text((fragrance?.name ?? "").uppercased())
+                        .font(.system(size: max(6, w * 0.035), weight: .semibold))
+                        .tracking(w * 0.008)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, w * 0.12)
+                    Text("Notes to be discovered")
+                        .font(.system(size: max(7, w * 0.045), design: .serif))
+                        .italic()
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+            }
+        }
+        .aspectRatio(59.0 / 86.0, contentMode: .fit)
+    }
+}
+
+/// Chooses the optical channel without changing view identity as strength varies.
+private struct FoilLayer: ViewModifier {
+    let mode: FoilMode
+    let strength: Double
+    let yaw: Double
+    let radius: CGFloat
+    let tint: Color
+    func body(content: Content) -> some View {
+        switch mode {
+        case .live:
+            content.modifier(LiveFoil(strength: strength, yaw: yaw, radius: radius, tint: tint))
+        case .sheen:
+            content.overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .fill(LinearGradient(stops: [
+                        .init(color: .clear, location: 0.18),
+                        .init(color: tint.opacity(0.13), location: 0.42),
+                        .init(color: .white.opacity(0.10), location: 0.5),
+                        .init(color: .clear, location: 0.7)
+                    ], startPoint: UnitPoint(x: 0 - yaw / 90, y: 0), endPoint: UnitPoint(x: 1 - yaw / 90, y: 1)))
+                    .blendMode(.screen)
+                    .allowsHitTesting(false)
+            }
+        case .none:
+            content
+        }
     }
 }
 

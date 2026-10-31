@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreHaptics
+import QuartzCore
 
 struct ArchiveBackdrop: View {
     var theme: FragranceTheme
@@ -50,17 +51,32 @@ extension View {
         modifier(FunctionalGlass(corner: corner))
     }
 }
-enum HapticCue { case selection, wear, completed }
+enum HapticCue {
+    /// A card came to rest in the centre slot after a user-driven move.
+    case selection
+    /// Same, scaled by how fast the card was travelling when released (0...~8 cards/s).
+    case settle(speed: Double)
+    /// The inspector card turned edge-on and the other face became visible.
+    case flipEdge
+    /// One wear (solo or layered) was logged.
+    case wear
+    /// A save, add, rename or delete finished.
+    case completed
+}
 
-/// Direct Core Haptics; simulator and devices without a haptic engine silently skip.
+/// Arooma's tactile vocabulary, on Core Haptics. Every cue is short and discrete; nothing buzzes
+/// continuously and nothing fires per frame. Devices without a haptic engine, and the simulator,
+/// skip silently. The engine is prewarmed so the first cue is not late.
 @MainActor final class HapticEngine {
     static let shared = HapticEngine()
     private var engine: CHHapticEngine?
+    private var lastPlayed: [String: CFTimeInterval] = [:]
     private init() {
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
         do {
             let newEngine = try CHHapticEngine()
             newEngine.isAutoShutdownEnabled = true
+            newEngine.playsHapticsOnly = true
             newEngine.resetHandler = { [weak newEngine] in
                 try? newEngine?.start()
             }
@@ -68,22 +84,56 @@ enum HapticCue { case selection, wear, completed }
             try newEngine.start()
         } catch { engine = nil }
     }
+
+    private func transient(_ intensity: Float, _ sharpness: Float, at time: TimeInterval = 0) -> CHHapticEvent {
+        CHHapticEvent(eventType: .hapticTransient, parameters: [
+            CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
+            CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness)
+        ], relativeTime: time)
+    }
+
     func play(_ cue: HapticCue) {
         guard let engine else { return }
-        let intensity: Float
-        let sharpness: Float
+        var events: [CHHapticEvent] = []
+        var curves: [CHHapticParameterCurve] = []
+        let key: String
         switch cue {
-        case .selection: intensity = 0.25; sharpness = 0.65
-        case .wear: intensity = 0.58; sharpness = 0.45
-        case .completed: intensity = 0.4; sharpness = 0.7
+        case .selection:
+            key = "settle"
+            events = [transient(0.32, 0.42)]
+        case .settle(let speed):
+            key = "settle"
+            // A card set down gently is a soft tap; one thrown into place lands with more weight.
+            let weight = Float(min(1, speed / 6))
+            events = [transient(0.24 + 0.28 * weight, 0.30 + 0.15 * weight)]
+        case .flipEdge:
+            key = "flip"
+            events = [transient(0.30, 0.92)]
+        case .wear:
+            key = "wear"
+            // A stamp: firm strike, a short resonant decay, then a light confirming tap.
+            events = [
+                transient(0.78, 0.48),
+                CHHapticEvent(eventType: .hapticContinuous, parameters: [
+                    CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.36),
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.18)
+                ], relativeTime: 0.012, duration: 0.16),
+                transient(0.36, 0.7, at: 0.2)
+            ]
+            curves = [CHHapticParameterCurve(parameterID: .hapticIntensityControl, controlPoints: [
+                .init(relativeTime: 0.012, value: 1.0),
+                .init(relativeTime: 0.17, value: 0.0)
+            ], relativeTime: 0)]
+        case .completed:
+            key = "completed"
+            events = [transient(0.46, 0.68), transient(0.30, 0.8, at: 0.085)]
         }
+        // Debounce identical cues (e.g. two settles inside one frame burst).
+        let now = CACurrentMediaTime()
+        if let last = lastPlayed[key], now - last < 0.06 { return }
+        lastPlayed[key] = now
         do {
-            let event = CHHapticEvent(eventType: .hapticTransient,
-                parameters: [
-                    CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
-                    CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness)
-                ], relativeTime: 0)
-            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let pattern = try CHHapticPattern(events: events, parameterCurves: curves)
             try engine.start()
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: CHHapticTimeImmediate)

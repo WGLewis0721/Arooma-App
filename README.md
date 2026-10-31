@@ -1,3 +1,13 @@
+# Arooma · Native iOS 26+
+
+**Current app:** [AroomaNative.xcodeproj](ios/AroomaNative.xcodeproj) — a standalone SwiftUI iPhone app, not a web wrapper. [Native build and iPhone Home Screen installation instructions](ios/README.md).
+
+The native project bundles the exact approved photographic card masters from `assets/collectibles/masters/approved/`, preserves independent Demo and Mine collections, and uses iOS 26 Liquid Glass only on controls. Open the whole repository in **Xcode 26+**, choose **AroomaNative**, select your iPhone and development team, then press **Run** to install the app and its Home Screen icon. **Safari's Add to Home Screen is not the native installation route.**
+
+---
+
+## Earlier web prototype (historical reference only)
+
 # Arooma
 
 Native SwiftUI iOS 26+ app for a private collectible fragrance archive.

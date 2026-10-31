@@ -33,11 +33,11 @@ All design guidance lives in one place: **[docs/design/README.md](docs/design/RE
 - Seven fictional demo bottles and four independent branded illustrations; no endorsement or scraped images.
 - Rights follow `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`.
 - No new backend, account, analytics, ads, or IAP without a dedicated implementation spec.
-- Native SwiftUI only. Do not preserve or extend the retired PWA.
+- Preserve self-contained PWA; never claim it is SwiftUI.
 - Never force-push `main`.
 
 **Verify**
-- Simulator on iPhone sizes, reduced motion, safe areas, Dynamic Type.
-- Design docs check. Real device optional for final polish.
+- 375/390/430 px, landscape, reduced motion, no overflow, offline cards, fast entry.
+- `npm run docs:check`, `npm run test:docs` and `npm test` before merge. iPhone Safari, Home Screen install, touch physics and haptics need real-device validation.
 - Existing owner backups, photos, saved rotations, migration and Undo remain intact.
 <!-- design-rules-card:end -->

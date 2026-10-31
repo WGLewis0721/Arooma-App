@@ -14,6 +14,8 @@ import SwiftUI
     @Published var rotationID: UUID? { didSet { persist() } }
     @Published var bottles: [BottleRecord] = [] { didSet { persist() } }
     @Published var rotations: [SavedRotation] = [] { didSet { persist() } }
+    @Published var shelfNames: [String: String] = [:] { didSet { persist() } }
+    @Published var wearSessions: [WearSession] = [] { didSet { persist() } }
     @Published var onboarded = false { didSet { persist() } }
 
     private var hydrating = true
@@ -29,6 +31,7 @@ import SwiftUI
             selectedMineID = saved.selectedMineID; selectedShelf = saved.selectedShelf
             rotationID = saved.rotationID; bottles = saved.bottles
             rotations = saved.rotations; onboarded = saved.onboarded
+            shelfNames = saved.shelfNames ?? [:]; wearSessions = saved.wearSessions ?? []
         }
         hydrating = false
     }
@@ -37,7 +40,8 @@ import SwiftUI
         let snapshot = SavedArchive(mode: mode, theme: theme, appearance: appearance,
             layout: layout, selectedDemoID: selectedDemoID, selectedMineID: selectedMineID,
             selectedShelf: selectedShelf, rotationID: rotationID, bottles: bottles,
-            rotations: rotations, onboarded: onboarded)
+            rotations: rotations, onboarded: onboarded,
+            shelfNames: shelfNames, wearSessions: wearSessions)
         do {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: Self.location, options: .atomic)
@@ -109,19 +113,77 @@ import SwiftUI
         mode = .mine
         HapticEngine.shared.play(.completed)
     }
-    func wearSelected() {
-        guard let id = selectedBottle?.id, let index = bottles.firstIndex(where: { $0.id == id }) else { return }
-        guard !bottles[index].wornToday else { return }
-        bottles[index].wears.append(WearEvent())
-        bottles[index].remaining = max(0, bottles[index].remaining - 0.0075)
+    func shelfName(_ shelf: FragranceShelf) -> String {
+        shelfNames[shelf.rawValue] ?? shelf.rawValue
+    }
+    func renameShelf(_ shelf: FragranceShelf, to name: String) {
+        let normalized = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(28))
+        guard !normalized.isEmpty else { return }
+        shelfNames[shelf.rawValue] = normalized
+        HapticEngine.shared.play(.completed)
+    }
+
+    // A wear is one event, whether it contains one bottle or a layered combination.
+    // Its per-bottle events use the same session ID for reversible history and estimates.
+    func recordWear(bottleIDs: [UUID], note: String = "") {
+        var unique: [UUID] = []
+        for id in bottleIDs where bottles.contains(where: { $0.id == id }) {
+            if !unique.contains(id) { unique.append(id) }
+        }
+        guard !unique.isEmpty else { return }
+        let session = WearSession(bottleIDs: unique, note: note.trimmingCharacters(in: .whitespacesAndNewlines))
+        for id in unique {
+            guard let index = bottles.firstIndex(where: { $0.id == id }) else { continue }
+            bottles[index].wears.append(WearEvent(sessionID: session.id))
+            bottles[index].remaining = max(0, bottles[index].remaining - 0.0075)
+        }
+        wearSessions.insert(session, at: 0)
         HapticEngine.shared.play(.wear)
+    }
+
+    func removeBottle(_ bottleID: UUID, from sessionID: UUID) {
+        guard let sessionIndex = wearSessions.firstIndex(where: { $0.id == sessionID }),
+              wearSessions[sessionIndex].bottleIDs.contains(bottleID) else { return }
+        if let bottleIndex = bottles.firstIndex(where: { $0.id == bottleID }),
+           let eventIndex = bottles[bottleIndex].wears.firstIndex(where: { $0.sessionID == sessionID }) {
+            bottles[bottleIndex].wears.remove(at: eventIndex)
+            bottles[bottleIndex].remaining = min(1, bottles[bottleIndex].remaining + 0.0075)
+        }
+        wearSessions[sessionIndex].bottleIDs.removeAll { $0 == bottleID }
+        if wearSessions[sessionIndex].bottleIDs.isEmpty {
+            wearSessions.remove(at: sessionIndex)
+        }
+        HapticEngine.shared.play(.completed)
+    }
+
+    func deleteWearSession(_ sessionID: UUID) {
+        guard let session = wearSessions.first(where: { $0.id == sessionID }) else { return }
+        for id in session.bottleIDs {
+            if let index = bottles.firstIndex(where: { $0.id == id }),
+               let eventIndex = bottles[index].wears.firstIndex(where: { $0.sessionID == sessionID }) {
+                bottles[index].wears.remove(at: eventIndex)
+                bottles[index].remaining = min(1, bottles[index].remaining + 0.0075)
+            }
+        }
+        wearSessions.removeAll { $0.id == sessionID }
+        HapticEngine.shared.play(.completed)
+    }
+
+    func wearSelected() {
+        guard let id = selectedBottle?.id else { return }
+        recordWear(bottleIDs: [id])
     }
     func undoWear() {
         guard let id = selectedBottle?.id, let index = bottles.firstIndex(where: { $0.id == id }),
-              let lastIndex = bottles[index].wears.lastIndex(where: { Calendar.current.isDateInToday($0.date) }) else { return }
-        bottles[index].wears.remove(at: lastIndex)
-        bottles[index].remaining = min(1, bottles[index].remaining + 0.0075)
-        HapticEngine.shared.play(.completed)
+              let eventIndex = bottles[index].wears.lastIndex(where: { Calendar.current.isDateInToday($0.date) }) else { return }
+        let event = bottles[index].wears[eventIndex]
+        if let sessionID = event.sessionID {
+            deleteWearSession(sessionID)
+        } else {
+            // Preserve reversibility for pre-existing ungrouped events.
+            bottles[index].wears.remove(at: eventIndex)
+            bottles[index].remaining = min(1, bottles[index].remaining + 0.0075)
+        }
     }
     func update(_ bottle: BottleRecord) {
         guard let index = bottles.firstIndex(where: { $0.id == bottle.id }) else { return }

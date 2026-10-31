@@ -244,7 +244,7 @@ struct QuickAddSheet: View {
                     .font(.headline).frame(maxWidth: .infinity, minHeight: 40)
             }
             .buttonStyle(.glassProminent)
-            .tint(archive.theme.palette.accent)
+            .legibleTint(archive.theme.palette.accent)
             .disabled(draft.isEmpty && draft.matchedID == nil)
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
@@ -272,7 +272,7 @@ struct QuickAddSheet: View {
                             }
                             Spacer()
                             Image(systemName: draft.matchedID == fragrance.id ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(archive.theme.palette.accent)
+                                .legibleForeground(archive.theme.palette.accent)
                         }
                         .contentShape(Rectangle())
                     }
@@ -471,7 +471,7 @@ struct ScanReview: View {
                         Label("Collection", systemImage: "checkmark.seal").frame(maxWidth: .infinity, minHeight: 36)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(accent)
+                    .legibleTint(accent)
                 }
                 HStack(spacing: 10) {
                     Button(action: back) { Label("Back", systemImage: "chevron.down").frame(maxWidth: .infinity, minHeight: 32) }
@@ -494,7 +494,7 @@ struct ScanReview: View {
             Image(systemName: symbol).font(.title2)
             Text(title.uppercased()).font(.system(size: 10, weight: .bold)).tracking(1.2)
         }
-        .foregroundStyle(archive.theme.palette.accent)
+        .legibleForeground(archive.theme.palette.accent)
         .opacity(active ? Double(min(1, max(0.15, progress))) : 0.12)
         .scaleEffect(active && progress >= 1 ? 1.12 : 1)
         .animation(.snappy(duration: 0.18), value: active && progress >= 1)
@@ -580,7 +580,7 @@ struct ScanReview: View {
     private func confirmation(_ c: Commit) -> some View {
         HStack(spacing: 10) {
             Image(systemName: c.destination == .collection ? "checkmark.seal.fill" : "heart.fill")
-                .foregroundStyle(archive.theme.palette.accent)
+                .legibleForeground(archive.theme.palette.accent)
             Text(c.alreadyThere ? "Already there — selected it"
                  : (c.destination == .collection ? "Added to your collection" : "Saved to your Wishlist"))
                 .font(.subheadline.weight(.medium))

@@ -105,7 +105,7 @@ struct AtelierRoot: View {
                 AtelierSearch(focus: { card in focus(card) })
             }
         }
-        .tint(archive.theme.palette.accent)
+        .legibleTint(archive.theme.palette.accent)
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
             TodayAccessory(open: { tab = .journal })
@@ -175,7 +175,7 @@ struct TodayAccessory: View {
         Button(action: open) {
             HStack(spacing: 10) {
                 Image(systemName: todays.isEmpty ? "drop" : "checkmark.seal.fill")
-                    .foregroundStyle(archive.theme.palette.accent)
+                    .legibleForeground(archive.theme.palette.accent)
                     .contentTransition(.symbolEffect(.replace))
                 if archive.mode == .demo {
                     Text("Sample archive · log wears in My Collection")

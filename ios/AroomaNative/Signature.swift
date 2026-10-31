@@ -89,13 +89,14 @@ struct AroomaSignatureShimmer: View {
 /// Full-screen replay from the options sheet: the living signature, dismissed by any tap.
 struct SignatureReplay: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @EnvironmentObject private var archive: CollectionStore
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 AtelierAtmosphere(theme: archive.theme)
-                AroomaSignatureShimmer(ink: archive.theme.palette.accent, highlight: archive.theme.keyLight)
+                AroomaSignatureShimmer(ink: archive.theme.ink(scheme), highlight: archive.theme.keyLight)
                     .frame(width: min(geo.size.width * 0.84, 420))
                     .position(x: geo.size.width / 2, y: geo.size.height * 0.45)
                 Text("Tap to close")

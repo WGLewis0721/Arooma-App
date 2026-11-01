@@ -44,6 +44,58 @@
 
 **Definition of done:** Exactly one compact Arooma signature at upper-left per top-level view where applicable; **0** menu gestures attached to logo; approved master unchanged; **a repeatable gold-sheen sweep** while foregrounded, paused while inactive, static on Reduce Motion; no layout overlap, duplicate Explore title or card-performance regression.
 
+## 1B. Owner amendment — Gyro Flip (device-rotation-triggered collectible flip)
+
+**Owner decision, November 1, 2026:** When a collectible is open in the **existing full-screen Inspector**, a deliberate twist of the iPhone at the appropriate **angular velocity** should flip that card from front to back (and vice versa). The feature is **user-disableable**. Do not introduce a new card viewer, flip-button destination, motion onboarding screen, or change deck swipe navigation.
+
+### Interaction and settings
+
+- In the Inspector, twisting the phone about its **portrait vertical axis** (a natural left/right wrist rotation) should trigger the **same `FlipMotor.flip(direction:)`** 3D animation used by tapping or dragging the card. Clockwise and counterclockwise gestures both work; direction can control flip direction where the motor supports it. Return movement must **not** immediately flip the card back.
+- Add a persistent native `Toggle("Flip cards with wrist twist", isOn: ...)` under **View & Style → Card lighting / Motion**. `@AppStorage("arooma.gyroFlipEnabled")` is a suitable setting (default **On** with conservative accidental-activation filters); **Off** means zero motion-triggered flips and zero extra gyro-processing work. Keep the normal tap, horizontal drag and VoiceOver `Flip card` alternatives fully functional. Do not disable holographic foil lighting when this toggle is Off; it is an independent feature.
+- Automatically suppress motion flips for **Reduce Motion** (while still letting manual flip reveal the opposite face), when app/background/Inspector inactive, when an edit/photo/Compare/system sheet is covering the Inspector, during direct touch/drag, while a prior flip animation is still settling, and when Core Motion is unavailable or suspended in Low Power/thermal conditions. Never show a broken enabled row if sensors are unavailable; display a concise availability explanation instead.
+
+### Mathematical detector, with explicit initial tuning (NOT measurements of a real device)
+
+Use Apple's **`CMDeviceMotion.rotationRate`**, in radians per second; obtain samples and precise `timestamp` **from the existing `MotionField.shared` Core Motion feed** in `ios/AroomaNative/MaterialLight.swift`. There is already one `CMMotionManager` driving card foil. **Do not create a second motion manager or start a competing sensor stream.** `MotionField` currently ingests `motion.attitude.quaternion` only; extend this path to expose raw (unshaped) rotation-rate and user-acceleration samples to one small **pure `GyroFlipDetector`** subscriber. Avoid publishing every 60 Hz sample as observable UI state: emit **only** one discrete `flipRequested(direction)` event when valid. Constrain updates to an active Inspector subscriber and obey `MotionField`'s reference counting, foreground, low-power and thermal lifecycle.
+
+Let `ω(t) = (ωx, ωy, ωz)` be gyro rotation rate. In normal portrait the relevant physical wrist turn is approximately the **device y-axis**, not screen-plane spin `z` or a tilt `x`; adjust coordinate projection for supported orientations when necessary rather than reading a fixed `y` in landscape.
+
+```text
+dt = clamp(sample.timestamp - last.timestamp, 0, 0.05) seconds
+if dt <= 0 or gap > 0.15s: reset candidate
+α  = 1 - exp(-dt / 0.045)         // 45 ms exponential low-pass
+ωf = ωf + α * (ω - ωf)
+r  = abs(ωf.y) / max(0.001, sqrt(ωf.x² + ωf.y² + ωf.z²))
+θ  = sum(ωf.y * dt)               // signed rotation since candidate start, radians
+
+candidate starts when abs(ωf.y) > 1.0 rad/s and r >= 0.75
+trigger only when:
+   max(abs(ωf.y)) >= 2.2 rad/s    // about 126 degrees/second
+   abs(θ) >= 0.55 rad             // about 32 degrees of deliberate turn
+   0.12s <= candidateDuration <= 0.45s
+   r >= 0.75 during qualifying samples (dominant twist axis)
+   userAcceleration magnitude < 0.8 g (reject large shakes/translations)
+   no sign reversal, active touch/gesture, overlay, or flip animation
+
+on trigger: emit one flip event; enter COOLDOWN
+rearm only after >= 1.2 seconds AND
+            abs(ωf.y) < 0.35 rad/s for >= 0.30 seconds
+reset on view disappearance, foreground transitions, toggle Off,
+      invalid timestamps, nonqualifying gesture, and selection change
+```
+
+- These numerical values are **initial calibration hypotheses**. A physical iPhone test must confirm comfort and false-positive resistance; tune peak rate, integrated angle, dominance and cooldown with recordings before claiming success. The rate alone is insufficient: an accidental shake often rotates briefly but does not have the required integrated angular displacement and dominant axis.
+- Don't integrate `CMAttitude.yaw` naively across ±π (wraparound). The signed `rotationRate` integral with actual timestamps is sufficient for this short gesture. Do not compare device motion to a fixed compass heading; users must be able to flip in any room orientation.
+- Feed this into the existing `@State private var flip = FlipMotor()` in `AtelierInspector` via `flip.flip(direction: sign)`. Retain reverse artwork, all three card layouts, local data, foil shading and existing `HapticEngine.shared.play(.flipEdge)`. Do not make a second card 3D renderer. Prevent overlapping physics drivers and consecutive events while `FlipMotor` is animating.
+
+### Proof and testing (do not claim physical sensor behavior from Maestro)
+
+- Add deterministic Swift unit tests or equivalent test target for the **pure classifier**, injecting timestamped synthetic traces: slow tilt, deliberate ±y twist, accidental shake/translation, x/z rotation, turn-back rebound, two separate twists after cooldown, sample dropouts, pause, toggle Off, Reduce Motion and simultaneous touch. Require **no false flip** in rejected traces and **exactly one flip event** in each valid trace.
+- Maestro on the iOS 26 Simulator: verify Settings toggle persists across relaunch, Off preserves tap/drag flip, inspector and controls remain accessible, and simulated events (via Debug-only dependency-injection bridge) route to the same `FlipMotor`. Maestro cannot establish real gyroscope thresholds or physical haptics: mark those **NOT RUN** pending real iPhone validation.
+- On a **physical iPhone**, capture at least 20 deliberate twists (10 each direction) and 100 incidental movement trials (ordinary browsing, lifting phone, switching grip, walking, simple tilts, phone shakes). **Acceptance target ≥ 18/20 intentional flips and ≤ 1/100 accidental flips**, zero double flips from one twist, no mistaken selected-card flips, and no performance regression. Confirm six-second gold wordmark loop, live foil and new motion flip can coexist without competing sensor services.
+- Update user-facing **motion privacy wording**: the sensor values are processed **on device, transiently**, used only for foil lighting and opted-in card flips, not stored/transmitted. Do not add an external service, analytics, or new permissions.
+- Report raw threshold values, tests, device/iOS build, false positive/negative counts, toggle behavior, and real captures in the PR. If hardware is unavailable, the motion gesture remains **not physically verified** even when its Swift code and synthetic tests pass.
+
 ## 2. My Collection tab quick-action column
 
 ### Interaction

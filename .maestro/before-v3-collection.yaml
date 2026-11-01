@@ -1,0 +1,30 @@
+# BEFORE capture for Arooma V3 (taken on the V2 app). Not a regression gate: it only saves screenshots.
+# The QA argument keeps the Quick Add toast open (see quick-add-undo.yaml); nothing here uses Quick Add.
+appId: com.graymatter.arooma
+tags:
+  - capture-before
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "explore-add-to-collection"
+- tapOn: "My Collection"
+- assertVisible:
+    id: "wear-today"
+- takeScreenshot: before-05-my-collection-owned
+- longPressOn: "My Collection"
+- takeScreenshot: before-06-hold-my-collection-tab
+- tapOn: "Today"
+- assertVisible: "What are you wearing?"
+- takeScreenshot: before-07-today-tab
+- tapOn: "My Collection"
+- assertVisible:
+    id: "my-cards"
+- tapOn:
+    id: "my-cards"
+- assertVisible: "My Cards"
+- takeScreenshot: before-08-my-cards
+- tapOn: "Create card"
+- assertVisible: "Card Studio"
+- takeScreenshot: before-09-card-studio

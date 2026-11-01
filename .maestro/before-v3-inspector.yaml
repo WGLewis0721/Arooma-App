@@ -1,0 +1,16 @@
+# BEFORE capture for Arooma V3 (taken on the V2 app). Not a regression gate: it only saves screenshots.
+appId: com.graymatter.arooma
+tags:
+  - capture-before
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "explore-add-to-collection"
+- tapOn: "Inspect .*"
+- assertVisible: "FRONT.*TOP NOTES"
+- takeScreenshot: before-04-inspector-front
+- tapOn: "Close"
+- assertVisible:
+    id: "explore-add-to-collection"

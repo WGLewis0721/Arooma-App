@@ -702,6 +702,7 @@ struct CompareSheet: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.dismiss) private var dismiss
     let primary: DisplayCard
+    var suggested: Fragrance? = nil
     @State private var others: [Fragrance] = []
 
     private var pool: [Fragrance] {
@@ -770,6 +771,12 @@ struct CompareSheet: View {
             }
             .navigationTitle("Compare")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if let suggested, suggested.id != primary.fragrance.id,
+                   !others.contains(where: { $0.id == suggested.id }) {
+                    others = [suggested]
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } }
                 if !others.isEmpty {

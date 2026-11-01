@@ -4,7 +4,7 @@ The one place to start for how Arooma looks, feels or adapts to a device. This m
 
 **Audience:** developers and coding agents. Keep design guidance here.
 
-**Product model:** a personal cabinet of fragrance objects. Shelf, then Bottle, then Ownership record. Today Arooma is an installable iOS web app demo in one HTML file. A native app is an open decision ([DECISIONS.md](DECISIONS.md)).
+**Product model:** a personal cabinet of fragrance objects. Shelf, then Bottle, then Ownership record. Arooma's active delivery is a native SwiftUI iOS 26+ app in `ios/AroomaNative`; the earlier web prototype is historical. Older decision and design docs may still discuss the PWA.
 
 **Origin:** structure and checks came from Spread (`WGLewis0721/spread-app`, `4c23d25`); its iOS reference remains in [../reference/spread/](../reference/spread/README.md).
 
@@ -32,6 +32,8 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
+| Foundational UX laws, decision hierarchy, cognitive load or touch-target review | [FOUNDATIONAL_UX_PRINCIPLES.md](FOUNDATIONAL_UX_PRINCIPLES.md) | Follow the task's product-specific pack below; principles do not override the native brand and asset rules |
+| SwiftUI iOS design, navigation, safe areas, native motion or accessibility | [platforms/AROOMA_IOS_DESIGN_GUIDE.md](platforms/AROOMA_IOS_DESIGN_GUIDE.md) | [platforms/APPLE_DESIGN_PRINCIPLES.md](platforms/APPLE_DESIGN_PRINCIPLES.md) and [Spread reference guides](../reference/spread/README.md) for research only |
 | Native gesture-first cards, Wishlist, scan destination choices, image sharing, quick fragrance insights or advanced search | [specs/2026-10-31-gesture-first-wishlist-discovery.md](specs/2026-10-31-gesture-first-wishlist-discovery.md) | [Opus implementation prompt](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md) and [native motion spec](specs/2026-10-31-native-premium-motion-interaction-system.md); do not assume a verified catalog or media license |
 | Real fragrance catalog, brand-photo use, independent-app disclosure, image rights, ads or optional IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [brand/THIRD_PARTY_CONTENT_POLICY.md](brand/THIRD_PARTY_CONTENT_POLICY.md). Strategy only; do not import or publish third-party media based on these docs | 
 | Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
@@ -55,6 +57,8 @@ All paths are under `docs/design/`.
 
 | Path | Governs | Status and authority |
 | --- | --- | --- |
+| FOUNDATIONAL_UX_PRINCIPLES.md | Cross-product design principles and UX-law acceptance criteria | Foundational guidance subordinate to native product authority |
+| platforms/AROOMA_IOS_DESIGN_GUIDE.md | Native SwiftUI design and accessibility checks adapted from Spread's iOS research | Native app guidance; references existing unchanged Spread copies in `docs/reference/spread` |
 | RULES_CARD.md | The hard rules, in brief | Source of the generated card in agent files. Summarizes the rows below; they win if they differ |
 | DECISIONS.md | Open decisions and the decision log | Current |
 | PLAN_SPEC_PROTOCOL.md, specs/TEMPLATE.md | How every plan and spec is made and shaped | Process authority; never overrides a design rule |
@@ -72,7 +76,7 @@ All paths are under `docs/design/`.
 | brand/ICON_HANDOFF.md | Icon files, generation and placement | Highest for icon files |
 | platforms/APPLE_DESIGN_PRINCIPLES.md | Native feel: materials, color, sheets | Advisory, below the brand board. Apple facts carried over from Spread, not re-read |
 
-**Priority:** (1) running `index.html`; (2) brand board; (3) `[Apple]` facts; (4) `[3P]` and `[Rec]` leads; (5) Spread references and history. Fix lower-priority conflicts in the same change.
+**Priority:** (1) active native SwiftUI app and its approved persisted behavior; (2) brand board and current native direction; (3) `[Apple]` facts; (4) `[3P]` and `[Rec]` leads; (5) Spread references and history. Fix lower-priority conflicts in the same change.
 
 ---
 

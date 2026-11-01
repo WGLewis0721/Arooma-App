@@ -685,6 +685,7 @@ struct MyCardsScreen: View {
     @EnvironmentObject private var archive: CollectionStore
     @EnvironmentObject private var commerce: CardCommerce
     @State private var studio = false
+    @State private var autumnArchive = false
     @State private var selectedCard: CreatedCard?
     @State private var section = 0
     @State private var exporting = false
@@ -704,6 +705,31 @@ struct MyCardsScreen: View {
                         Button { studio = true } label: {
                             Image(systemName: "plus").frame(width: 44, height: 44)
                         }.buttonStyle(.glass).accessibilityLabel("Create card")
+                    }
+                    if Fall2026Collection.available {
+                        Button {
+                            autumnArchive = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "leaf")
+                                    .font(.title2)
+                                    .foregroundStyle(archive.theme.palette.accent)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("Autumn Archive · 2026")
+                                        .font(.system(.title3, design: .serif))
+                                    Text("Explore 30 finished fall fragrance cards")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(14)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Browse the curated fall fragrance artwork")
                     }
                     if CommercialRelease.storefrontVisible {
                         Picker("Cards", selection: $section) {
@@ -743,6 +769,9 @@ struct MyCardsScreen: View {
             }
             .sheet(isPresented: $studio) {
                 CardStudioScreen().environmentObject(archive).environmentObject(commerce)
+            }
+            .sheet(isPresented: $autumnArchive) {
+                AutumnArchiveScreen()
             }
             .sheet(item: $selectedCard) { card in
                 CreatedCardDetails(card: card)

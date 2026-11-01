@@ -1,5 +1,7 @@
 # Arooma — Native SwiftUI UX Consolidation & Frosted-Tray Implementation Plan
 
+> **SUPERSEDED as implementation plan (2026-11-01):** Use [`AROOMA_NATIVE_NAVIGATION_UX_V2_PLAN.md`](AROOMA_NATIVE_NAVIGATION_UX_V2_PLAN.md) for the approved **Explore / Today / My Collection** navigation, elimination of the square mode popup (including long press), and yellow-annotation fixes. This file is retained as historical research and the earlier 18-item audit, not as an alternate four-tab navigation target.
+
 > Summary: Implement the 18 owner-reviewed before/after UX concepts against the **existing native iOS 26+ app**. Reduce genuinely redundant paths and controls without deleting features, breaking local data, or changing the collectible visual identity. Give swipe-up trays a restrained **frosted, translucent native-glass** presentation. Prove the result with running-app screenshots and **Maestro MCP + repeatable YAML user-flow tests**.
 >
 > Date: 2026-11-01. Owner-directed handoff to Claude. **This document is a plan, not an implementation report.** No native app code or Maestro flow was changed by the creation of this plan. The Instagram/Appbrainy inspiration shots and Arooma before/after mockups in the owner's conversation are **conceptual**, not authoritative screenshots of the shipping SwiftUI app. Some contain invented labels, controls, product imagery, or screens. Never implement those inventions.

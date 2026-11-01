@@ -970,12 +970,8 @@ struct AtelierWearLog: View {
                     Text("Tap one bottle, or several to layer them. Log it as one wear.")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
-                if archive.mode == .demo {
-                    AtelierEmptyState(title: "Your personal wear log",
-                        detail: "Switch to your collection to track what you wear and the layers you love.",
-                        action: "Open My Collection",
-                        callback: { archive.enter(.mine) }, accent: accent)
-                } else if archive.bottles.isEmpty {
+                // Today always logs owned bottles. Explore's sample deck is never a wear record.
+                if archive.bottles.isEmpty {
                     AtelierEmptyState(title: "Your first wear begins here",
                         detail: "Save a bottle with just its name or a photograph. Add the details later.",
                         action: "Add a bottle", callback: add, accent: accent)

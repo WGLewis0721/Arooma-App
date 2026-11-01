@@ -165,72 +165,534 @@ enum InsightEngine {
     }
 }
 
-// MARK: - Insight panel (peek / expanded)
+// MARK: - Season Compass (owner-approved visual Insights design)
+//
+// Native, data-driven interpretation of the approved Layton mockup.
+// No hard-coded Layton/Hawas values, fake similarity, or season guarantees.
+// Every owned or sample fragrance gets the exact same visual grammar.
+
+private enum SeasonCompassArt {
+    static func glyph(for note: String) -> String {
+        let n = note.lowercased()
+        let illustrations: [(String, String)] = [
+            ("apple","🍎"), ("pear","🍐"), ("plum","🍑"), ("lemon","🍋"),
+            ("lime","🍋‍🟩"), ("bergamot","🍋"), ("grapefruit","🍊"),
+            ("orange blossom","🌼"), ("orange","🍊"), ("mandarin","🍊"),
+            ("lavender","🪻"), ("violet","🌺"), ("iris","🌸"), ("jasmine","🌼"),
+            ("rose","🌹"), ("floral","🌺"), ("flower","🌼"), ("neroli","🌼"),
+            ("tobacco","🍂"), ("vanilla","🌼"), ("cinnamon","🪵"),
+            ("sandalwood","🪵"), ("cedar","🪵"), ("wood","🪵"), ("oud","🪵"),
+            ("patchouli","🌿"), ("vetiver","🌿"), ("musk","🌾"), ("amber","🟤"),
+            ("pepper","🌶️"), ("ginger","🫚"), ("cardamom","🌱"), ("saffron","🌺"),
+            ("sage","🌿"), ("mint","🌿"), ("honey","🍯"), ("coffee","☕️"),
+            ("cacao","🍫"), ("chocolate","🍫"), ("tonka","🫘"), ("praline","🍬"),
+            ("chestnut","🌰"), ("rum","🥃"), ("cognac","🥃"), ("whisk","🥃"),
+            ("leather","🟫"), ("incense","🪵"), ("benzoin","🟠"),
+            ("resin","🟡"), ("fig","🫒"), ("marine","🌊"), ("sea","🌊")
+        ]
+        return illustrations.first { n.contains($0.0) }?.1 ?? "✦"
+    }
+
+    static func symbol(for accord: Accord) -> String {
+        switch accord {
+        case .citrus: "circle.dotted"
+        case .spicy: "sparkle"
+        case .woody: "leaf"
+        case .amber: "sun.max"
+        case .floral: "camera.macro"
+        case .fruity: "circle.grid.2x2"
+        case .aromatic: "wind"
+        case .musky: "cloud"
+        case .sweet: "squareshape.split.2x2"
+        }
+    }
+}
+
+/// The original recommendation data is preserved and presented as visual affordances.
+/// One score is a relative overlap heuristic, not a measured fragrance performance score.
+private struct CompassInsights {
+    let fragrance: Fragrance
+    let accords: [Accord]
+    let season: String?
+    let occasion: String?
+    let closest: Fragrance?
+    let layer: Fragrance?
+    let recordedLayer: Bool
+    let affinity: Int?
+    let extra: [InsightLine]
+
+    @MainActor
+    init(card: DisplayCard, store: CollectionStore) {
+        let f = card.fragrance
+        fragrance = f
+        accords = Accord.accords(for: f.notes)
+        season = InsightEngine.season(for: f)?.0
+        occasion = InsightEngine.occasion(for: f)?.0
+        extra = InsightEngine.lines(for: card, in: store)
+
+        // Only compare with actual owned fragrances, never with sample demo cards.
+        var seen = Set<String>()
+        let owned = store.bottles.compactMap { bottle -> Fragrance? in
+            guard bottle.fragranceID != f.id, seen.insert(bottle.fragranceID).inserted else { return nil }
+            return store.fragrance(id: bottle.fragranceID)
+        }
+        let ranked = owned.map { ($0, InsightEngine.similarity(f, $0)) }
+            .filter { $0.1 > 0.05 }
+            .sorted { $0.1 > $1.1 }
+        closest = ranked.first?.0
+        // Quantize the existing similarity heuristic into five labelled comparison ticks.
+        if let best = ranked.first {
+            affinity = max(1, min(5, Int((best.1 * 5).rounded())))
+        } else {
+            affinity = nil
+        }
+
+        var historyPartner: Fragrance?
+        if let bottleID = card.bottleID {
+            var counts: [UUID: Int] = [:]
+            for session in store.wearSessions
+                where session.bottleIDs.contains(bottleID) && session.bottleIDs.count > 1 {
+                for other in session.bottleIDs where other != bottleID {
+                    counts[other, default: 0] += 1
+                }
+            }
+            if let top = counts.max(by: { $0.value < $1.value }),
+               let record = store.bottles.first(where: { $0.id == top.key }) {
+                historyPartner = store.fragrance(id: record.fragranceID)
+            }
+        }
+        recordedLayer = historyPartner != nil
+        let currentAccords = Set(accords)
+        let suggestion = owned.first { candidate in
+            let other = Set(Accord.accords(for: candidate.notes))
+            return !currentAccords.isEmpty && !other.isEmpty &&
+                !currentAccords.isDisjoint(with: other) &&
+                !other.subtracting(currentAccords).isEmpty
+        }
+        layer = historyPartner ?? suggestion
+    }
+}
 
 struct InsightPanel: View {
     @EnvironmentObject private var archive: CollectionStore
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     let card: DisplayCard
     let expanded: Bool
-    let compare: () -> Void
+    let compare: (Fragrance?) -> Void
     let close: () -> Void
 
+    @State private var revealedStage: String?
+    @State private var showMore = false
+
+    private var brown: Color { scheme == .dark ? Color(hex: 0xE0BC8F) : Color(hex: 0x794624) }
+    private var ink: Color { scheme == .dark ? Color(hex: 0xF8EEDD) : Color(hex: 0x382418) }
+    private var subdued: Color { ink.opacity(0.64) }
+    private var surface: Color { scheme == .dark ? Color(hex: 0x231D24) : Color(hex: 0xF2E5D4) }
+    private var plate: Color { scheme == .dark ? Color(hex: 0x332B31) : Color(hex: 0xF8EEE2) }
+    private var accentGlow: Color { scheme == .dark ? Color(hex: 0xBB885A) : Color(hex: 0xD5995E) }
+    private var lockedShare: Bool {
+        guard let fall = Fall2026Collection.entry(for: card.fragrance.id) else { return false }
+        return fall.status != "approved" || !fall.artRightsCleared || !fall.referencePhotoApproved
+    }
+
     var body: some View {
-        let lines = InsightEngine.lines(for: card, in: archive)
-        let accent = archive.theme.palette.accent
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    AtelierEyebrow(text: "Insights", accent: accent)
-                    Text(card.fragrance.name)
-                        .font(.system(.title3, design: .serif))
-                        .lineLimit(1)
-                }
-                Spacer()
-                CardShareButton(card: card)
-                Button(action: compare) {
-                    Image(systemName: "square.split.2x1").frame(width: 30, height: 30)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("Compare")
-                Button(action: close) {
-                    Image(systemName: "chevron.down").frame(width: 30, height: 30)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("Close insights")
-            }
+        let insight = CompassInsights(card: card, store: archive)
+        VStack(spacing: 0) {
+            Capsule().fill(brown.opacity(0.35))
+                .frame(width: 36, height: 5)
+                .padding(.top, 9)
+                .padding(.bottom, 8)
+            toolbar
+                .padding(.horizontal, 17)
+                .padding(.bottom, 8)
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(expanded ? lines : Array(lines.prefix(3))) { line in
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack {
-                                Text(line.title).font(.subheadline.weight(.semibold))
-                                Spacer()
-                                Text(line.basis.rawValue.uppercased())
-                                    .font(.system(size: 8, weight: .bold)).tracking(1)
-                                    .foregroundStyle(line.basis == .suggestion ? Color.secondary : accent)
-                            }
-                            Text(line.detail).font(.footnote).foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
-                    if !expanded && lines.count > 3 {
-                        Text("Swipe up for \(lines.count - 3) more")
-                            .font(.caption).foregroundStyle(.tertiary)
+                VStack(alignment: .leading, spacing: expanded ? 17 : 10) {
+                    compassHeading
+                    identityAndCompass(insight)
+                    if expanded {
+                        ingredients(insight)
+                        accords(insight)
+                        recommendedMatches(insight)
+                        overlap(insight)
+                        detailDisclosure(insight)
+                    } else {
+                        Text("Swipe up for notes, accords & matches")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(subdued)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 2)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 17)
+                .padding(.bottom, 22)
             }
+            .scrollIndicators(.hidden)
             .scrollDisabled(!expanded)
         }
-        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(alignment: .top) {
-            Capsule().fill(.secondary.opacity(0.5)).frame(width: 36, height: 5).padding(.top, 6)
+        .foregroundStyle(ink)
+        .background {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(LinearGradient(colors: [plate, surface, plate.opacity(0.96)],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 28)
+                        .strokeBorder(.white.opacity(scheme == .dark ? 0.10 : 0.67), lineWidth: 1)
+                }
         }
+        .shadow(color: .black.opacity(scheme == .dark ? 0.3 : 0.13), radius: 18, y: -5)
+    }
+
+    private var toolbar: some View {
+        HStack(spacing: 10) {
+            Text("INSIGHTS")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(2.3)
+                .foregroundStyle(brown)
+            Spacer(minLength: 0)
+            if !lockedShare {
+                CardShareButton(card: card)
+            }
+            Button { compare(nil) } label: {
+                Image(systemName: "rectangle.split.2x1")
+                    .frame(width: 31, height: 31)
+            }
+            .accessibilityLabel("Compare fragrances")
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            Button(action: close) {
+                Image(systemName: "chevron.down")
+                    .frame(width: 31, height: 31)
+            }
+            .accessibilityLabel("Close Insights")
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+        }
+    }
+
+    private var compassHeading: some View {
+        HStack(spacing: 10) {
+            Rectangle().fill(brown.opacity(0.48)).frame(height: 0.7)
+            Text("SEASON COMPASS")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(2.3)
+                .foregroundStyle(brown)
+                .fixedSize()
+            Rectangle().fill(brown.opacity(0.48)).frame(height: 0.7)
+        }
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private func identityAndCompass(_ insight: CompassInsights) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(insight.fragrance.name)
+                    .font(.system(size: expanded ? 31 : 24, weight: .regular, design: .serif))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                Text(insight.fragrance.house.uppercased())
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(1.8)
+                    .lineLimit(2)
+                    .foregroundStyle(brown)
+                Text(insight.fragrance.concentration.uppercased())
+                    .font(.system(size: 9, weight: .medium))
+                    .tracking(1.0)
+                    .foregroundStyle(brown)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .overlay(Capsule().strokeBorder(brown.opacity(0.4)))
+                    .padding(.top, 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: -9) {
+                SeasonCompassDial(
+                    text: insight.season ?? "Unknown",
+                    icon: insight.season?.contains("Summer") == true ? "sun.max" :
+                        insight.season?.contains("Winter") == true ? "snowflake" : "sun.horizon",
+                    tone: brown, glow: accentGlow, dark: scheme == .dark, size: expanded ? 103 : 76
+                )
+                SeasonCompassDial(
+                    text: insight.occasion ?? "Unknown",
+                    icon: insight.occasion == "Evening" ? "moon.stars" : "sun.max",
+                    tone: brown, glow: accentGlow, dark: scheme == .dark, size: expanded ? 103 : 76
+                )
+            }
+            .accessibilityElement(children: .contain)
+        }
+    }
+
+    private func ingredients(_ insight: CompassInsights) -> some View {
+        VStack(spacing: 6) {
+            ingredientRow("TOP", notes: insight.fragrance.top)
+            ingredientRow("HEART", notes: insight.fragrance.heart)
+            ingredientRow("BASE", notes: insight.fragrance.base)
+        }
+    }
+
+    private func ingredientRow(_ stage: String, notes: [String]) -> some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    revealedStage = revealedStage == stage ? nil : stage
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Text(stage)
+                        .font(.system(size: 10, weight: .semibold))
+                        .tracking(1.6)
+                        .frame(width: 51, alignment: .leading)
+                        .foregroundStyle(brown)
+                    Rectangle()
+                        .fill(brown.opacity(0.4))
+                        .frame(width: 1, height: 27)
+                    if notes.isEmpty {
+                        Text("Notes not recorded")
+                            .font(.system(size: 12, design: .serif))
+                            .foregroundStyle(subdued)
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        HStack(spacing: 0) {
+                            ForEach(0..<min(3, notes.count), id: \.self) { index in
+                                Text(SeasonCompassArt.glyph(for: notes[index]))
+                                    .font(.system(size: typeSize.isAccessibilitySize ? 19 : 27))
+                                    .frame(maxWidth: .infinity)
+                                    .accessibilityHidden(true)
+                            }
+                            if notes.count > 3 {
+                                Text("+\(notes.count - 3)")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(brown)
+                                    .frame(width: 30)
+                            }
+                        }
+                    }
+                }
+                .frame(minHeight: 47)
+                .padding(.horizontal, 13)
+                .background(plate, in: Capsule())
+                .overlay(Capsule().strokeBorder(.white.opacity(0.55), lineWidth: 1))
+                .shadow(color: .black.opacity(0.055), radius: 4, y: 2)
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(stage.capitalized) notes: \(notes.isEmpty ? "not recorded" : notes.joined(separator: ", "))")
+            .accessibilityHint("Show or hide all note names")
+            if revealedStage == stage && !notes.isEmpty {
+                Text(notes.joined(separator: "  ·  "))
+                    .font(.system(size: 11, design: .serif))
+                    .foregroundStyle(subdued)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func accords(_ insight: CompassInsights) -> some View {
+        if !insight.accords.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("ACCORDS  ·  DERIVED FROM NOTES")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(brown)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(insight.accords) { accord in
+                            HStack(spacing: 5) {
+                                Image(systemName: SeasonCompassArt.symbol(for: accord))
+                                    .font(.system(size: 11, weight: .medium))
+                                Text(accord.rawValue)
+                                    .font(.system(size: 11, weight: .medium))
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
+                            .background(plate, in: Capsule())
+                            .overlay(Capsule().strokeBorder(brown.opacity(0.19)))
+                            .accessibilityLabel("\(accord.rawValue) accord, derived from listed notes")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func recommendedMatches(_ insight: CompassInsights) -> some View {
+        HStack(spacing: 9) {
+            recommendation("CLOSEST", fragrance: insight.closest, sub: "Suggested match")
+            recommendation(insight.recordedLayer ? "LAYERED WITH" : "POSSIBLE LAYER",
+                           fragrance: insight.layer,
+                           sub: insight.recordedLayer ? "Your wear history" : "Suggested pairing")
+        }
+    }
+
+    private func recommendation(_ title: String, fragrance: Fragrance?, sub: String) -> some View {
+        Button {
+            if let fragrance { compare(fragrance) }
+        } label: {
+            HStack(spacing: 8) {
+                if let fragrance {
+                    AtelierCardSurface(fragranceID: fragrance.id, radius: 7,
+                                      shadowed: false)
+                        .frame(width: 45, height: 68)
+                        .accessibilityHidden(true)
+                } else {
+                    Image(systemName: "square.stack.3d.up")
+                        .font(.title3)
+                        .foregroundStyle(brown.opacity(0.45))
+                        .frame(width: 45, height: 68)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 9, weight: .semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(brown)
+                    Text(fragrance?.name ?? "No match yet")
+                        .font(.system(size: 15, design: .serif))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
+                        .multilineTextAlignment(.leading)
+                    if fragrance != nil {
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(brown)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, minHeight: 87, alignment: .leading)
+            .padding(7)
+            .background(plate, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.5)))
+            .shadow(color: .black.opacity(0.055), radius: 5, y: 2)
+        }
+        .buttonStyle(.plain)
+        .disabled(fragrance == nil)
+        .accessibilityLabel("\(title): \(fragrance?.name ?? "no owned fragrance available"). \(sub).")
+        .accessibilityHint(fragrance == nil ? "" : "Open fragrance comparison")
+    }
+
+    private func overlap(_ insight: CompassInsights) -> some View {
+        HStack {
+            Text("COLLECTION OVERLAP")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1.2)
+                .foregroundStyle(brown)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Spacer(minLength: 6)
+            ForEach(0..<5, id: \.self) { index in
+                Circle()
+                    .fill(index < (insight.affinity ?? 0) ? brown : brown.opacity(0.14))
+                    .frame(width: 11, height: 11)
+                    .overlay(Circle().strokeBorder(brown.opacity(0.35), lineWidth: 0.6))
+            }
+            Text(insight.affinity.map { "\($0) / 5" } ?? "—")
+                .font(.system(size: 12, weight: .semibold))
+                .monospacedDigit()
+                .padding(.leading, 6)
+                .foregroundStyle(brown)
+        }
+        .padding(.horizontal, 13)
+        .frame(minHeight: 44)
+        .background(plate, in: Capsule())
+        .overlay(Capsule().strokeBorder(.white.opacity(0.5)))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(insight.affinity.map {
+            "Closest collection similarity: \($0) out of 5 relative note and accord overlap ticks, an estimate"
+        } ?? "Collection overlap unavailable, no comparable owned fragrance")
+    }
+
+    private func detailDisclosure(_ insight: CompassInsights) -> some View {
+        DisclosureGroup(isExpanded: $showMore) {
+            VStack(alignment: .leading, spacing: 9) {
+                ForEach(insight.extra.filter {
+                    !["Notes", "Accords", "Season", "Occasion", "Closest in your collection",
+                      "Possible layer", "You layer it with", "Collection overlap"].contains($0.title)
+                }) { line in
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(line.title).font(.system(size: 12, weight: .semibold))
+                            Spacer()
+                            Text(line.basis.rawValue.uppercased())
+                                .font(.system(size: 8, weight: .semibold))
+                                .foregroundStyle(brown)
+                        }
+                        Text(line.detail)
+                            .font(.system(size: 11))
+                            .foregroundStyle(subdued)
+                    }
+                }
+                if !insight.fragrance.notes.isEmpty {
+                    Text("Season, occasion, accord, similarity and layering are suggestions inferred from listed notes, not guaranteed performance.")
+                        .font(.system(size: 10))
+                        .foregroundStyle(subdued)
+                }
+            }
+            .padding(.top, 9)
+        } label: {
+            Text("YOUR RECORDS & HOW IT'S CALCULATED")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1.2)
+                .foregroundStyle(brown)
+        }
+        .tint(brown)
+    }
+}
+
+private struct SeasonCompassDial: View {
+    let text: String
+    let icon: String
+    let tone: Color
+    let glow: Color
+    let dark: Bool
+    let size: CGFloat
+
+    private var caption: String {
+        text.replacingOccurrences(of: " · ", with: "\n")
+            .replacingOccurrences(of: " / ", with: "\n")
+            .uppercased()
+    }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(colors: [
+                        dark ? Color(hex: 0x34272E) : Color(hex: 0xFFF3E4),
+                        dark ? Color(hex: 0x49303A) : Color(hex: 0xE9C7A6)
+                    ], startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+            Circle()
+                .strokeBorder(
+                    AngularGradient(colors: [
+                        glow, .white.opacity(0.9), tone.opacity(0.3), glow,
+                        tone.opacity(0.4), glow
+                    ], center: .center), lineWidth: 5
+                )
+            Circle().strokeBorder(.white.opacity(0.72), lineWidth: 1)
+                .padding(8)
+            VStack(spacing: size > 90 ? 6 : 3) {
+                Image(systemName: icon)
+                    .font(.system(size: size > 90 ? 22 : 17, weight: .ultraLight))
+                Text(caption)
+                    .font(.system(size: size > 90 ? 10 : 8, weight: .semibold))
+                    .tracking(0.6)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.75)
+            }
+            .foregroundStyle(dark ? Color(hex: 0xF1DBC5) : Color(hex: 0x6A3F2C))
+            .padding(7)
+        }
+        .frame(width: size, height: size)
+        .shadow(color: glow.opacity(0.23), radius: 8, y: 3)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Suggested \(text)")
     }
 }
 

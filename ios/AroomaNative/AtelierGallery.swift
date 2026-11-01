@@ -799,7 +799,13 @@ struct AtelierInspector: View {
             .buttonBorderShape(.circle)
             .accessibilityLabel("Close")
             Spacer()
-            CardShareButton(card: card)
+            if let fall = Fall2026Collection.entry(for: card.fragrance.id) {
+                if fall.status == "approved" && fall.artRightsCleared && fall.referencePhotoApproved {
+                    CardShareButton(card: card)
+                }
+            } else {
+                CardShareButton(card: card)
+            }
             if let bottle {
                 Button {
                     var updated = bottle

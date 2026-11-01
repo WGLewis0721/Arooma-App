@@ -38,46 +38,47 @@ enum Fall2026Collection {
         #endif
     }()
 
-    static let cards: [Fall2026Card] = {
+    /// Always retain stable identities for an owner who captured a fragrance in TestFlight.
+    /// A later app without the artwork must not make their bottle or journal disappear.
+    static let entries: [Fall2026Card] = {
         guard let url = Bundle.main.url(forResource: "catalog", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let manifest = try? JSONDecoder().decode(Fall2026Manifest.self, from: data),
               manifest.version == 1, manifest.collectionID == "fall-2026-men",
               manifest.cards.count == 30,
               Set(manifest.cards.map(\.id)).count == 30,
-              Set(manifest.cards.map(\.rank)) == Set(1...30),
-              manifest.cards.allSatisfy({
-                  (frontURL(for: $0) != nil || UIImage(named: $0.assetName) != nil) &&
+              Set(manifest.cards.map(\.rank)) == Set(1...30) else { return [] }
+        return manifest.cards.sorted { $0.rank < $1.rank }
+    }()
+
+    /// Only the private demo or an independently approved commercial set gets artwork.
+    static let cards: [Fall2026Card] = {
+        guard entries.count == 30,
+              entries.allSatisfy({
+                  UIImage(named: $0.assetName) != nil &&
                   (internalProofBuild || ($0.status == "approved" &&
                    $0.referencePhotoApproved && $0.productFactsVerified &&
                    $0.artRightsCleared))
-              }) else {
-            return []
-        }
-        return manifest.cards.sorted { $0.rank < $1.rank }
+              }) else { return [] }
+        return entries
     }()
 
     static var available: Bool { cards.count == 30 }
 
-    /// The existing 30 JPGs are a referenced resource folder in the app bundle.
-    static func frontURL(for card: Fall2026Card) -> URL? {
-        Bundle.main.url(forResource: card.id, withExtension: "jpg", subdirectory: "proofs")
-    }
-
+    /// Generated Image Sets are packaged only for internal TestFlight / local debug.
     static func artwork(for card: Fall2026Card) -> UIImage? {
-        if let file = frontURL(for: card) { return UIImage(contentsOfFile: file.path) }
-        return UIImage(named: card.assetName)
+        UIImage(named: card.assetName)
     }
 
     static func entry(for fragranceID: String) -> Fall2026Card? {
         guard fragranceID.hasPrefix("fall2026-") else { return nil }
         let id = String(fragranceID.dropFirst("fall2026-".count))
-        return cards.first { $0.id == id }
+        return entries.first { $0.id == id }
     }
 
     /// These are catalog entries, not fake ownership grants or paid entitlements.
     static var fragrances: [Fragrance] {
-        cards.map { card in
+        entries.map { card in
             Fragrance(id: card.assetName, house: card.house, name: card.name,
                       concentration: card.variant, year: "",
                       top: [], heart: [], base: [], shelf: .autumn, archival: false)

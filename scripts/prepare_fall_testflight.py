@@ -26,4 +26,23 @@ for card in cards:
         "images":[{"filename":"front.jpg","idiom":"universal"}],
         "info":{"author":"xcode","version":1}
     },indent=2)+"\n")
-print("Prepared 30 on-device, offline collectible proof assets for internal TestFlight only")
+# Full reverse artistry follows the exact same internal/TestFlight-only asset gate.
+# Three distinct photos per fragrance; never substitute cropped front-card art.
+reverse = Path("assets/collectibles/seasons/fall-2026/reverse-art")
+catalog = json.loads(Path("assets/collectibles/seasons/fall-2026/catalog.json").read_text())
+assert len(catalog["cards"]) == 30
+expected = [(c["id"], stage) for c in catalog["cards"] for stage in ("top", "heart", "base")]
+for slug, stage in expected:
+    picture = reverse/(slug+"-"+stage+".jpg")
+    if not picture.exists() or picture.stat().st_size < 20_000:
+        raise SystemExit("Missing reverse photograph: " + str(picture))
+for slug, stage in expected:
+    imageset = dst/("fallnotes-"+slug+"-"+stage+".imageset")
+    imageset.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(reverse/(slug+"-"+stage+".jpg"), imageset/"photo.jpg")
+    (imageset/"Contents.json").write_text(json.dumps({
+        "images":[{"filename":"photo.jpg","idiom":"universal"}],
+        "info":{"author":"xcode","version":1}
+    },indent=2)+"\n")
+print("Prepared 30 card fronts and 90 unique stage photographs for internal TestFlight only")
+

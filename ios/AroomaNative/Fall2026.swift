@@ -17,6 +17,13 @@ struct Fall2026NotePyramid: Decodable, Hashable {
     }
 }
 
+struct Fall2026Editorial: Decodable, Hashable {
+    let year: Int
+    let classification: String
+    let description: String
+    let imageSet: String
+}
+
 struct Fall2026Card: Decodable, Identifiable, Hashable {
     let rank: Int
     let id: String
@@ -26,6 +33,7 @@ struct Fall2026Card: Decodable, Identifiable, Hashable {
     /// Visual scene direction is intentionally kept separate from actual perfume notes.
     let sceneBrief: String
     let notePyramid: Fall2026NotePyramid
+    let reverseEditorial: Fall2026Editorial
     let status: String
     let referencePhotoApproved: Bool
     let productFactsVerified: Bool
@@ -95,25 +103,25 @@ enum Fall2026Collection {
     static var fragrances: [Fragrance] {
         entries.map { card in
             Fragrance(id: card.assetName, house: card.house, name: card.name,
-                      concentration: card.variant, year: "",
+                      concentration: card.variant, year: String(card.reverseEditorial.year),
                       top: card.notePyramid.top, heart: card.notePyramid.heart,
                       base: card.notePyramid.base, shelf: .autumn, archival: false)
         }
     }
 }
 
-/// Uses the same true 3D flip and angle-dependent foil as the four original cards.
-/// The reverse presents the sourced actual note pyramid of the precise fragrance variant.
+/// The owner-locked MYSLF reverse: serif masthead, editorial paragraph, three distinct
+/// photographic ingredient strips, release/classification/concentration, etched foil border.
+/// The actual vintage and stages are data-driven; the physical flip stays in FlipMotor.
 struct Fall2026Reverse: View {
     let card: Fall2026Card
-
     private let bronze = Color(hex: 0xC9AC79)
     private let ink = Color(hex: 0x0F1118)
 
-
     private var accessibilitySummary: String {
-        let pyramid = card.notePyramid
-        return "\(card.house), \(card.name). Top: \(pyramid.top.joined(separator: ", ")). Heart: \(pyramid.heart.joined(separator: ", ")). Base: \(pyramid.base.joined(separator: ", "))."
+        let p = card.notePyramid
+        let e = card.reverseEditorial
+        return "\(card.house), \(card.name), \(e.year), \(e.classification), \(card.variant). \(e.description) Top notes: \(p.top.joined(separator: ", ")). Heart notes: \(p.heart.joined(separator: ", ")). Base notes: \(p.base.joined(separator: ", "))."
     }
 
     var body: some View {
@@ -123,126 +131,199 @@ struct Fall2026Reverse: View {
         .aspectRatio(59.0 / 86.0, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Three illustrated note stages show the published scent pyramid, followed by release year, classification and concentration.")
     }
 
     private func reverseSurface(width: CGFloat) -> some View {
-        let scale = width / 340.0
+        let scale = width / 340
         return ZStack {
             RoundedRectangle(cornerRadius: 16)
                 .fill(ink)
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(bronze.opacity(0.75), lineWidth: max(0.7, 1.1 * scale))
-                .padding(9 * scale)
             reverseContents(width: width, scale: scale)
+            decorativeFrame(scale: scale)
+                .allowsHitTesting(false)
         }
+    }
+
+    private func decorativeFrame(scale: CGFloat) -> some View {
+        ZStack {
+            // Reuse the *actual front's etched iridescent card border*, not a uniform
+            // fake rainbow gradient. This guarantees identical front/back framing.
+            if let front = ApprovedArtwork.image(for: card.assetName, side: .front) {
+                Image(uiImage: front)
+                    .resizable()
+                    .scaledToFill()
+                    .mask(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(lineWidth: 13 * scale)
+                    )
+            } else {
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(
+                        AngularGradient(colors: [
+                            .purple, .cyan, bronze, .indigo, .pink, bronze
+                        ], center: .center),
+                        lineWidth: 8 * scale
+                    )
+            }
+            RoundedRectangle(cornerRadius: 13)
+                .strokeBorder(bronze.opacity(0.95), lineWidth: 0.8 * scale)
+                .padding(13 * scale)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private func reverseContents(width: CGFloat, scale: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: 9 * scale) {
-            heading(width: width, scale: scale)
-            Rectangle().fill(bronze).frame(height: max(0.7, scale))
-            Text("AUTUMN ARCHIVE  ·  2026")
-                .font(.system(size: 10 * scale, weight: .semibold))
-                .tracking(scale)
-                .foregroundStyle(bronze)
-            Text("A sourced olfactory map of the fragrance, from first impression to lasting trail.")
-                .font(.system(size: 11 * scale, design: .serif).italic())
+        VStack(alignment: .leading, spacing: 6 * scale) {
+            masthead(width: width, scale: scale)
+            Rectangle().fill(bronze.opacity(0.88)).frame(height: max(0.6, 0.85 * scale))
+            Text(card.reverseEditorial.description)
+                .font(.system(size: 11 * scale, weight: .regular, design: .serif).italic())
                 .fixedSize(horizontal: false, vertical: true)
-                .foregroundStyle(.white.opacity(0.80))
-            ForEach(0..<3, id: \.self) { index in
-                noteStrip(index: index, width: width, scale: scale)
-            }
+                .lineLimit(4)
+                .minimumScaleFactor(0.84)
+                .foregroundStyle(.white.opacity(0.87))
+            Text("FRAGRANCE MAP")
+                .font(.system(size: 10 * scale, weight: .semibold))
+                .tracking(1.35 * scale)
+                .foregroundStyle(bronze)
+                .padding(.top, 1 * scale)
+            noteRow(stage: .top, width: width, scale: scale)
+            noteRow(stage: .heart, width: width, scale: scale)
+            noteRow(stage: .base, width: width, scale: scale)
             Spacer(minLength: 0)
-            Rectangle().fill(bronze.opacity(0.8)).frame(height: max(0.7, scale))
-            editionFooter(scale: scale)
+            Rectangle().fill(bronze.opacity(0.8)).frame(height: max(0.6, 0.85 * scale))
+            editionFacts(scale: scale)
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                Text("AROOMA  ·  FRAGRANCE COLLECTION")
+                    .font(.system(size: 8 * scale, weight: .medium))
+                    .tracking(1.2 * scale)
+                Spacer(minLength: 0)
+            }
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 24 * scale)
-        .padding(.vertical, 27 * scale)
+        .padding(.vertical, 25 * scale)
     }
 
-    private func heading(width: CGFloat, scale: CGFloat) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+    private func masthead(width: CGFloat, scale: CGFloat) -> some View {
+        HStack(alignment: .top, spacing: 8 * scale) {
             VStack(alignment: .leading, spacing: 2 * scale) {
                 Text(card.house.uppercased())
                     .font(.system(size: 10 * scale, weight: .medium, design: .serif))
-                    .tracking(1.4 * scale)
+                    .tracking(1.35 * scale)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.65)
                 Text(card.name.uppercased())
                     .font(.system(size: 28 * scale, weight: .regular, design: .serif))
                     .lineLimit(2)
                     .minimumScaleFactor(0.6)
             }
-            Spacer(minLength: 2)
+            Spacer(minLength: 0)
             Text(card.variant.uppercased())
                 .font(.system(size: 8 * scale, weight: .medium))
+                .tracking(0.35 * scale)
                 .multilineTextAlignment(.trailing)
-                .frame(maxWidth: width * 0.27)
+                .frame(width: width * 0.23)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    private func editionFooter(scale: CGFloat) -> some View {
-        VStack(spacing: 7 * scale) {
-            HStack(spacing: 0) {
-                footer(card.variant, label: "CONCENTRATION", scale: scale)
-                footer("ARTIST SERIES", label: "COLLECTION", scale: scale)
-                footer("FALL 2026", label: "EDITION", scale: scale)
+    private enum Stage: Int {
+        case top, heart, base
+        var name: String {
+            switch self {
+            case .top: "TOP"
+            case .heart: "HEART"
+            case .base: "BASE"
             }
-            Text("AROOMA  ·  SOURCED FRAGRANCE NOTES")
-                .font(.system(size: 8 * scale))
-                .tracking(1.2 * scale)
         }
-        .frame(maxWidth: .infinity)
+        var imageSuffix: String {
+            switch self {
+            case .top: "top"
+            case .heart: "heart"
+            case .base: "base"
+            }
+        }
     }
 
-    private func noteStrip(index: Int, width: CGFloat, scale: CGFloat) -> some View {
-        let label = ["TOP NOTES", "HEART NOTES", "BASE NOTES"][index]
-        let notes = [card.notePyramid.top, card.notePyramid.heart, card.notePyramid.base][index]
-        let value = notes.joined(separator: " · ")
-        return HStack(spacing: 10 * scale) {
-            if let picture = ApprovedArtwork.image(for: card.assetName, side: .front) {
-                Image(uiImage: picture)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: width * 0.47, height: 65 * scale)
-                    .clipped()
-                    .overlay(ink.opacity(Double(index) * 0.13))
-            } else {
-                Rectangle().fill(bronze.opacity(0.12))
-                    .frame(width: width * 0.47, height: 65 * scale)
-            }
-            VStack(alignment: .leading, spacing: 4 * scale) {
-                Text(label)
-                    .font(.system(size: 9 * scale, weight: .semibold))
+    private func notes(for stage: Stage) -> [String] {
+        switch stage {
+        case .top: card.notePyramid.top
+        case .heart: card.notePyramid.heart
+        case .base: card.notePyramid.base
+        }
+    }
+
+    private func noteRow(stage: Stage, width: CGFloat, scale: CGFloat) -> some View {
+        HStack(alignment: .center, spacing: 10 * scale) {
+            notePhotograph(stage: stage, width: width, scale: scale)
+            VStack(alignment: .leading, spacing: 3 * scale) {
+                Text(stage.name)
+                    .font(.system(size: 9.5 * scale, weight: .semibold))
                     .tracking(0.7 * scale)
                     .foregroundStyle(bronze)
-                Text(value)
-                    .font(.system(size: 10 * scale, design: .serif).italic())
-                    .lineLimit(4)
-                    .minimumScaleFactor(0.65)
-                    .foregroundStyle(.white.opacity(0.85))
+                Text(notes(for: stage).joined(separator: "\n"))
+                    .font(.system(size: 9.2 * scale, weight: .regular, design: .serif).italic())
+                    .lineLimit(6)
+                    .minimumScaleFactor(0.7)
+                    .foregroundStyle(.white.opacity(0.87))
             }
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(height: 65 * scale)
+        .frame(height: 67 * scale)
         .overlay(alignment: .bottom) {
-            Rectangle().fill(bronze.opacity(0.65))
-                .frame(height: max(0.5, scale * 0.7))
+            Rectangle().fill(bronze.opacity(0.68))
+                .frame(height: max(0.5, 0.6 * scale))
         }
     }
 
-    private func footer(_ value: String, label: String, scale: CGFloat) -> some View {
+    private func notePhotograph(stage: Stage, width: CGFloat, scale: CGFloat) -> some View {
+        let imageName = "fallnotes-" + card.id + "-" + stage.imageSuffix
+        return Group {
+            if let art = UIImage(named: imageName) {
+                Image(uiImage: art)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                // Never repeat the bottle-front image as a fake ingredient photograph.
+                ZStack {
+                    ink
+                    Rectangle().fill(bronze.opacity(0.12))
+                    Image(systemName: "leaf")
+                        .font(.system(size: 20 * scale))
+                        .foregroundStyle(bronze.opacity(0.65))
+                }
+            }
+        }
+        .frame(width: width * 0.51, height: 66 * scale)
+        .clipped()
+        .accessibilityHidden(true)
+    }
+
+    private func editionFacts(scale: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            fact(String(card.reverseEditorial.year), label: "RELEASED", scale: scale)
+            Rectangle().fill(bronze.opacity(0.7)).frame(width: 0.7 * scale)
+            fact(card.reverseEditorial.classification.uppercased(), label: "CLASSIFICATION", scale: scale)
+            Rectangle().fill(bronze.opacity(0.7)).frame(width: 0.7 * scale)
+            fact(card.variant.uppercased(), label: "CONCENTRATION", scale: scale)
+        }
+        .frame(height: 33 * scale)
+    }
+
+    private func fact(_ value: String, label: String, scale: CGFloat) -> some View {
         VStack(spacing: 3 * scale) {
-            Text(value.uppercased())
-                .font(.system(size: 8 * scale, weight: .medium))
-                .lineLimit(1)
-                .minimumScaleFactor(0.55)
+            Text(value)
+                .font(.system(size: 10 * scale, weight: .regular, design: .serif))
+                .lineLimit(2)
+                .minimumScaleFactor(0.68)
+                .multilineTextAlignment(.center)
             Text(label)
-                .font(.system(size: 7 * scale))
-                .tracking(0.4 * scale)
-                .foregroundStyle(.white.opacity(0.55))
+                .font(.system(size: 7 * scale, weight: .medium))
+                .tracking(0.5 * scale)
+                .foregroundStyle(.white.opacity(0.64))
         }
         .frame(maxWidth: .infinity)
     }

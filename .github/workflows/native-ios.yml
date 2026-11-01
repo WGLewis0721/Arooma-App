@@ -55,7 +55,10 @@ jobs:
           expected = {"fall2026-" + item["id"] for item in manifest["cards"]}
           missing = expected - names
           assert len(expected) == 30 and not missing, f"Uncompiled fall card images: {sorted(missing)}"
-          print("Verified 30 of 30 uniquely named fall images inside the compiled native app.")
+          back = {"fallnotes-"+item["id"]+"-"+stage for item in manifest["cards"] for stage in ("top","heart","base")}
+          absent = back - names
+          assert len(back) == 90 and not absent, f"Uncompiled reverse note photographs: {sorted(absent)}"
+          print("Verified 30 front images and 90 separate botanical photographs in compiled native app.")
           PY
       - name: Compile internal TestFlight proof configuration (unsigned)
         if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}

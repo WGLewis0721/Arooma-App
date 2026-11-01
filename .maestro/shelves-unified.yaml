@@ -10,6 +10,11 @@ tags:
 - tapOn:
     id: "all-shelves"
 - assertVisible: "The shelves"
+# The shelf list is a LazyVStack: only Spring and Summer are in the accessibility tree
+# until Autumn is scrolled into view.
+- scrollUntilVisible:
+    element: "Rename Autumn"
+    direction: DOWN
 - tapOn: "Rename Autumn"
 - assertVisible: "Rename shelf"
 - tapOn: "Cancel"

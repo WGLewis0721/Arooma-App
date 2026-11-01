@@ -17,10 +17,23 @@ This procedure is tool-neutral. If your agent has no skill support, read it as a
 - **Maestro CLI:** `maestro --version`. If it is missing, install it from the Maestro docs and verify the command before relying on it.
 - Stop and report if any of these are missing. Do not guess results.
 
+## 1a. No Mac? Run the flows from the repo on GitHub's macOS runner
+
+If the owner has no Mac available, the **Maestro iOS** workflow (`.github/workflows/maestro-ios.yml`) does the same job on a GitHub `macos-26` runner with Xcode and an iOS 26 simulator:
+
+1. Push the branch to GitHub.
+2. Start the workflow: GitHub → Actions → **Maestro iOS** → **Run workflow** → pick the branch. Optional: `include_tags` / `exclude_tags` to run a subset.
+3. The run checks flow syntax, builds the Debug app, boots an iPhone simulator, installs the app, runs `maestro test .maestro/`, and always uploads the **Maestro-results** artifact: `junit.xml`, per-run screenshots and logs in `run/`, `final-hierarchy.txt` and `final-screen.png`.
+4. Read the JUnit file for pass/fail per flow. Open the screenshots and hierarchy to see the screen that failed.
+
+What this proves: the flows run on a real iOS 26 simulator with the current code. What it does not prove: anything that needs a physical iPhone (camera, haptics, real tilt, real touch feel, real performance). Say so in the report.
+
+Do not use Maestro Cloud for owner data: `maestro cloud` and `run_on_cloud` upload the app and flows off the machine.
+
 ## 2. Pick a driver
 
-- **MCP (preferred for exploring and debugging):** start the server with `maestro mcp`. Its tools are `list_devices`, `inspect_screen`, `take_screenshot`, `run` (inline `yaml`, specific `files`, or a `dir` with optional `include_tags`/`exclude_tags`), `cheat_sheet`, and cloud tools.
-- **CLI (preferred for repeatable runs):** `maestro test <file.yaml>` or `maestro test <folder>/`.
+- **MCP (preferred for exploring and debugging, needs a Mac):** start the server with `maestro mcp`. The tools it exposes in Maestro CLI 2.12.0 are `list_devices`, `inspect_screen`, `take_screenshot`, `run` (inline `yaml`, specific `files`, or a `dir` with optional `include_tags`/`exclude_tags`), `cheat_sheet`, `open_maestro_viewer`, and the cloud tools. Some tool names in older notes (`launch_app`, `tap_on`, `run_flow`) do not exist in this version: check the live list before relying on a name.
+- **CLI (preferred for repeatable runs, also works from the GitHub workflow):** `maestro test <file.yaml>` or `maestro test <folder>/`. Add `--format JUNIT --output report.xml` for a report and `--include-tags`/`--exclude-tags` to choose flows. `maestro check-syntax <file>` lints a flow without a device.
 - **Maestro Cloud** (`run_on_cloud`, `maestro cloud`) sends your app and flows off the machine. Use it only when the owner has asked for it.
 - Full setup commands and the MCP config are in [reference.md](reference.md).
 

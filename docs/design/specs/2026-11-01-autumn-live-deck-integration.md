@@ -14,13 +14,13 @@
 
 - Four original `Fragrance` IDs and their approved diptychs remain unchanged.
 - 30 separate edition IDs use `fall2026-<slug>`. One Dior Sauvage Elixir edition intentionally coexists with the original Dior illustration. Distinct edition IDs prevent accidental ownership migration.
-- `assets/collectibles/seasons/fall-2026/proofs/*.jpg` (30 JPG files) is copied through an Xcode folder reference to `Arooma.app/proofs`. A bounded 96 MB image cache prevents a 34-card archive retaining every decoded asset indefinitely.
+- `assets/collectibles/seasons/fall-2026/proofs/*.jpg` are retained as candidate sources but **not** copied directly to ordinary App Store builds. The existing `scripts/prepare_fall_testflight.py` packages only the 30 product image sets into `Assets.car` for private Debug and internal Codemagic/TestFlight builds. A bounded 96 MB image cache limits decoded artwork memory.
 - Existing `SavedArchive` persisted fields do not change: bottles, photos, notes, saved layering and card purchases are preserved.
-- The commercial availability and verified-rights gates remain unchanged; DEBUG and `AROOMA_INTERNAL_PREVIEW` can display proofs as **interactive local demo cards**, not approved commercial sales.
+- The commercial availability and verified-rights gates remain unchanged; DEBUG and `AROOMA_INTERNAL_PREVIEW` can display proofs as **interactive local demo cards**, not approved commercial sales. Unapproved seasonal sharing is unavailable. All 30 metadata identities remain resolvable for already-saved owned/wishlisted records even when artwork is unavailable.
 
 ## Acceptance checks
 
-1. Build native iOS Debug; verify **all 30 JPEGs and catalog JSON are actually embedded** in `Arooma.app`.
+1. Stage private image sets and build native iOS Debug; verify the **30 image names inside compiled `Assets.car`** and the catalog JSON in the app bundle.
 2. Launch, select Demo and verify 34 cards, with all 30 readable and no “Artwork unavailable” placeholder.
 3. Test each layout, 3D flip, swipe interruption, phone-tilt lighting, Reduce Motion, and accessibility actions.
 4. From Cards, use the new Autumn Archive shortcut and confirm it lands on the first new card in the original deck.
@@ -29,4 +29,4 @@
 
 ## Distribution limitation
 
-The proof artworks are not yet commercially cleared. The normal App Store release path does **not** unlock the unapproved edition catalog. This is an internal iPhone demonstration; product details and distribution rights need final review before public launch. Editing a bundled JPG still requires a new app build; it is not a remote hot-update.
+The proof artworks are not yet commercially cleared. The normal App Store release path does **not** package or unlock the unapproved image assets. This is an internal iPhone demonstration; product details and distribution rights need final review before public launch. Editing a bundled JPG still requires a new app build; it is not a remote hot-update.

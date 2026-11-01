@@ -10,6 +10,7 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
+| 2026-11-01 | [Season Compass: visual fragrance Insights](2026-11-01-season-compass-visual-insights.md) | Native implementation in PR; iPhone visual sign-off pending |
 | 2026-11-01 | [Native Autumn live-card deck integration](2026-11-01-autumn-live-deck-integration.md) | Implemented; iPhone and TestFlight QA pending |
 | 2026-10-31 | [Autumn Archive: 30 fall cards, generation, storage and native release](2026-10-31-autumn-archive-30-card-release.md) | In review: 30 production briefs seeded; artwork and native implementation pending |
 | 2026-10-31 | [Native Card Studio offline photo filters](2026-10-31-native-card-studio-photo-filters.md) | Implemented; native CI and iPhone QA pending |

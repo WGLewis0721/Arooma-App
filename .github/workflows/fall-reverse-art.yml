@@ -1,0 +1,61 @@
+name: Autumn reverse photographic note-map asset proof
+on:
+  push:
+    branches:
+      - feat/fall-reverse-editorial-art
+    paths:
+      - assets/collectibles/seasons/fall-2026/reverse-art-candidates.json
+      - scripts/stage_fall_reverse_art.py
+      - .github/workflows/fall-reverse-art.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  stage-reverse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install still-life image processing
+        run: python -m pip install 'Pillow>=10,<13'
+      - name: Download 30 unique triptychs and crop 90 photo strips
+        run: python scripts/stage_fall_reverse_art.py
+      - name: Validate complete note imagery
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image
+          base=Path("assets/collectibles/seasons/fall-2026")
+          cards=json.loads((base/"catalog.json").read_text())["cards"]
+          for c in cards:
+              for stage in ("top","heart","base"):
+                  photo=base/"reverse-art"/(c["id"]+"-"+stage+".jpg")
+                  assert photo.exists(),f"Missing: {photo}"
+                  with Image.open(photo) as im:
+                      assert im.size==(1000,390),f"Wrong dimensions: {photo}"
+          assert len(list((base/"reverse-art").glob("*.jpg")))==90
+          print("90/90 photographic note strips verified")
+          PY
+      - name: Upload 30 reverse triptychs as proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autumn-30-reverse-photo-strips
+          path: assets/collectibles/seasons/fall-2026/reverse-art/*.jpg
+          retention-days: 14
+      - name: Save proof photo strips in branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/collectibles/seasons/fall-2026/reverse-art/
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: add 90 source-specific TOP/HEART/BASE botanical image strips"
+            git push origin "HEAD:feat/fall-reverse-editorial-art"
+          fi

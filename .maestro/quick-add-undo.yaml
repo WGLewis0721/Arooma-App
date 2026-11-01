@@ -1,10 +1,15 @@
-# A one-step save can be undone; the bottle does not stay in the collection.
+# A one-step save can be undone: the bottle does not stay in the collection and the typed name comes back.
+# The save toast closes itself after 4 s. Maestro on iOS needs 5 to 6 s between two taps on this
+# animated screen (a fixed 3 s static-screen wait per tap), so the flow holds the toast open with a QA
+# launch argument that only Debug and TestFlight builds read (QuickAddSheet.undoWindow in Capture.swift).
 appId: com.graymatter.arooma
 tags:
   - quick-add
 ---
 - launchApp:
     clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
 - tapOn: "Start My Collection"
 - tapOn: "Add a fragrance"
 - tapOn: "Fragrance name"
@@ -16,3 +21,10 @@ tags:
     id: "direct-undo"
 - assertNotVisible: "Added to your collection"
 - assertVisible: "Undo Test Scent"
+# Quick Add is still open with the draft restored, so Save is offered again. A committed bottle
+# would have closed the sheet and could also show this name on the Collection tab.
+- assertVisible:
+    id: "direct-collection"
+- tapOn: "Close"
+- assertVisible: "Add a fragrance"
+- assertNotVisible: "Undo Test Scent"

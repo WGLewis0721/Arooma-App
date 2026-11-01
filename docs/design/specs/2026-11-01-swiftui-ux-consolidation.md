@@ -20,7 +20,7 @@
 | 05 Return to origin | IMPLEMENTED | Quick Add returns to the tab that opened it (Collection or Today) instead of forcing Collection. Flow: `return-to-today.yaml`. |
 | 06 Duplicate About | IMPLEMENTED | One About disclosure remains, with the complete text (`AtelierStyle`). |
 | 07 Duplicate Studio opener | IMPLEMENTED | The overflow Card Studio entry is removed; the header + and the empty-state button remain (`Commercial.swift`). |
-| 08 Today accessory | IMPLEMENTED | The bottom accessory is disabled while Today is selected (`tabViewBottomAccessory(isEnabled:)`). |
+| 08 Today accessory | IMPLEMENTED | The bottom accessory is disabled while Today is selected on iOS 26.1+ (`tabViewBottomAccessory(isEnabled:)`). On iOS 26.0 the accessory is shown but renders empty on Today, because `isEnabled:` needs 26.1 and the deployment target stays at 26.0. Verified only by compile in CI; not checked on device. |
 | 09 Daily pick vs Repeat Last | NOT APPLICABLE | `AtelierOwnership`, the only view that showed the Daily Pick, is not referenced anywhere. The live Today screen shows only "Wear it again". |
 | 10 Wear history surfaces | NOT APPLICABLE (as written) | The per-bottle `WearHistoryScreen` is reachable only from the unreferenced `AtelierOwnership`. Today's session timeline is the only history on live screens and is unchanged. |
 | 11 Add entry points | RETAINED | Each surface has one Add in its context: the Collection header +, the Today picker header Add, and empty-state buttons that only appear when there is nothing to add. |

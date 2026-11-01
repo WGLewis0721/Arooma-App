@@ -26,9 +26,9 @@
 ### External references (real, verified as of 2026-11-01)
 
 **Refero visual styles:**
-- [D.S. & DURGA — luxury fragrance editorial](https://refero.design/styles/92962483-5537-4be9-a80c-6166e1c9c730) — reference for art direction: product imagery dominates; minimal quiet navigation. **Do not** copy its squared web controls or replace the approved Arooma palette.
-- [Perplexity Computer — botanical, material-backed editorial](https://refero.design/styles/7ac8e085-270b-4af6-a12e-14bf4adc0f8f) — reference for translucent information above atmospheric imagery and text/contrast layering, not its AI product layout.
-- [Eduardo del Fraile — gallery-like dark product composition](https://refero.design/styles/36be0546-da09-4d6b-ba8b-27495bb71cda) — reference for dark-mode image priority and low-chrome navigation.
+- [D.S. & DURGA — luxury fragrance editorial](https://www.dsanddurga.com) (Refero style ID `92962483-5537-4be9-a80c-6166e1c9c730`) — reference for art direction: product imagery dominates; minimal quiet navigation. **Do not** copy its squared web controls or replace the approved Arooma palette.
+- [Perplexity Computer — botanical, material-backed editorial](https://www.perplexity.ai/products/computer) (Refero style ID `7ac8e085-270b-4af6-a12e-14bf4adc0f8f`) — reference for translucent information above atmospheric imagery and text/contrast layering, not its AI product layout.
+- [Eduardo del Fraile — gallery-like dark product composition](https://www.eduardodelfraile.com) (Refero style ID `36be0546-da09-4d6b-ba8b-27495bb71cda`) — reference for dark-mode image priority and low-chrome navigation.
 
 **Refero concrete iOS screens/flows:**
 - [Airbnb contextual bottom sheet](https://refero.design/screens/298bae4d-e0f9-43b0-9248-3a5d369c75bf): clear contextual choices and exit affordance; adapt via native SwiftUI sheet/detents.

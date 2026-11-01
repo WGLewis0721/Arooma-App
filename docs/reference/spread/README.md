@@ -1,6 +1,6 @@
 # Spread reference material
 
-These documents are copied **unchanged** from the Spread repository (`WGLewis0721/spread-app`, commit `4c23d25`, 2026-10-28). Spread is a different product: a local-first weekly planner built as a Capacitor app around React. They are kept here because Arooma is also an iOS product and several of them are good checklists and process. Do not treat them as Arooma rules. The Arooma design brain is in [../../design/README.md](../../design/README.md).
+The iPhone, iPad and iPhone Duo guides are copied **unchanged** from the Spread repository (`WGLewis0721/spread-app`) and were verified identical to Spread `main` on 2026-11-01. The original snapshot was taken at commit `4c23d25` (2026-10-28). Spread is a different product: a local-first weekly planner built as a Capacitor app around React. They are kept here because Arooma is also an iOS product and several of them are good checklists and process. Do not treat them as Arooma rules. The Arooma design brain is in [../../design/README.md](../../design/README.md). For actual SwiftUI application rules use [Arooma's native iOS design guide](../../design/platforms/AROOMA_IOS_DESIGN_GUIDE.md), which translates this research into the current product.
 
 Links inside these files point at Spread's repository layout, so many of them do not resolve here. That is expected.
 
@@ -21,6 +21,6 @@ Links inside these files point at Spread's repository layout, so many of them do
 
 Spread's planner and landing page design systems, its Unified UX record, the Studio rebuild spec, iCloud, sync, backup and waitlist documents, the Astra audit evidence, its icon handoff, and its source code and tests. They describe Spread's product, not Arooma's.
 
-## If Arooma goes native
+## Current native use
 
-Start from `ios-release/IOS_AUTOMATION.md` for a no-Mac TestFlight pipeline and `specs/2026-10-28-widget-live-activity.md` for the widget and Live Activity shape. Replace every identifier, secret name and bundle ID. Record the decision in [../../design/DECISIONS.md](../../design/DECISIONS.md).
+Arooma already targets native SwiftUI iOS 26+. Keep these unchanged research documents for general Apple-platform facts, not as a build recipe. Arooma's existing native Xcode project, actual signing workflow, approved asset masters and current owner direction take precedence over any Spread-specific app identifiers, Capacitor, planner, iCloud or TestFlight instructions. Use [the Arooma iOS design guide](../../design/platforms/AROOMA_IOS_DESIGN_GUIDE.md) for product-specific application.

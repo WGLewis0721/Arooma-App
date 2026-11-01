@@ -1,0 +1,36 @@
+name: Season Compass botanical icon assets
+on:
+  push:
+    branches: [feat/season-compass-insights]
+    paths:
+      - assets/insights/season-compass/atlas-source.json
+      - scripts/stage_season_compass_icons.py
+      - .github/workflows/season-compass-icons.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  bundle-icons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=10,<13'
+      - run: python scripts/stage_season_compass_icons.py
+      - name: Save all 20 original glyph icons on feature branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ios/AroomaNative/Assets.xcassets/insight-*.imageset
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: add 20 original Season Compass botanical glyphs"
+            git fetch origin feat/season-compass-insights
+            git rebase origin/feat/season-compass-insights
+            git push origin "HEAD:feat/season-compass-insights"
+          fi

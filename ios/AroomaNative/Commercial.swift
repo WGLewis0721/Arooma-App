@@ -715,9 +715,9 @@ struct MyCardsScreen: View {
                                     .font(.title2)
                                     .foregroundStyle(archive.theme.palette.accent)
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text("Autumn Archive · 2026")
+                                    Text(Fall2026Collection.internalProofBuild ? "Autumn Archive · Internal proofs" : "Autumn Archive · 2026")
                                         .font(.system(.title3, design: .serif))
-                                    Text("Explore 30 finished fall fragrance cards")
+                                    Text(Fall2026Collection.internalProofBuild ? "Review 30 unapproved card designs offline" : "Explore 30 finished fall fragrance cards")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)

@@ -206,6 +206,8 @@ struct AtelierSearch: View {
                 .padding(.vertical, 12)
                 .animation(.snappy, value: results.map(\.id))
             }
+            // The tab bar hides behind the keyboard, so a scroll or drag in the results must put the keyboard away.
+            .scrollDismissesKeyboard(.interactively)
             .background(AtelierAtmosphere(theme: archive.theme))
             .navigationTitle("Search")
             .navigationBarTitleDisplayMode(.inline)

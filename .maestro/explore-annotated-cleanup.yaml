@@ -26,6 +26,8 @@ tags:
 - assertVisible: "Show insights"
 - takeScreenshot: explore-annotated-after
 - swipe:
-    direction: LEFT
+    start: "75%, 50%"
+    end: "40%, 50%"
+    duration: 700
 - assertVisible: "Card 2 of .*"
 - takeScreenshot: explore-after-swipe

@@ -10,7 +10,7 @@ tags:
 - launchApp:
     clearState: true
     arguments:
-      AroomaQAUndoWindow: 30
+      AroomaQAUndoWindow: 150
 - tapOn: "Start My Collection"
 - tapOn: "Add a fragrance"
 - tapOn: "Fragrance name"
@@ -68,7 +68,11 @@ tags:
 - assertVisible: ".*Sillage Beta.*1 wears · 99% left.*"
 - assertVisible: ".*Sillage Alpha.*1 wears · 99% left.*"
 - takeScreenshot: v3-wear-03-counts-after-wear
-- hideKeyboard
+# Dragging the results puts the keyboard away. (A hideKeyboard tap opened a result and covered the toast.)
+- swipe:
+    start: "50%, 45%"
+    end: "50%, 75%"
+    duration: 400
 # Undo reverses only the session this press created.
 - tapOn:
     id: "wear-toast-undo"

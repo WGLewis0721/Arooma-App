@@ -86,7 +86,8 @@ struct AtelierGallery: View {
                             ? "Heard about a fragrance? Capture its name or a photo, then swipe left to save it here."
                             : "Capture a name or a photo in seconds. Make it yours later.",
                         action: archive.mode == .wishlist ? "Capture a fragrance" : "Add a fragrance",
-                        callback: add, accent: accent
+                        callback: add, accent: accent,
+                        actionIdentifier: "quick-add-a-bottle"
                     )
                     Spacer()
                 } else {
@@ -680,6 +681,8 @@ struct AtelierInspector: View {
     /// same FlipMotor. Off means no motion subscription at all. Tap, drag and VoiceOver always flip.
     @AppStorage(GyroFlipSettings.enabledKey) private var gyroFlipEnabled = true
     @State private var gyro = GyroFlipController()
+    /// Mirrors `gyro.isListening` for the QA marker below only. Never drives behaviour.
+    @State private var gyroListeningForQA = false
     @State private var axisLock: Axis?
     @State private var pull: CGSize = .zero
     @State private var pressUV = CGPoint(x: 0.5, y: 0.5)
@@ -726,6 +729,7 @@ struct AtelierInspector: View {
         }
         .background(AtelierAtmosphere(theme: archive.theme))
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
+        .overlay(alignment: .topLeading) { gyroQAMarker }
         .sheet(item: $editing) { record in
             NavigationStack { BottleEditor(bottle: record) }
                 .environmentObject(archive)
@@ -736,7 +740,7 @@ struct AtelierInspector: View {
             gyro.attach(flip)
             gyro.reduceMotion = reduceMotion
             gyro.sceneActive = scenePhase == .active
-            if gyroFlipEnabled { gyro.start() }
+            syncGyro()
             if let trace = GyroQATrace.requested {
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(1.5))
@@ -751,10 +755,8 @@ struct AtelierInspector: View {
             }
         }
         .accessibilityAction(named: "Flip card") { flip.flip() }
-        .onDisappear { gyro.stop() }
-        .onChange(of: gyroFlipEnabled) { _, on in
-            if on { gyro.start() } else { gyro.stop() }
-        }
+        .onDisappear { gyro.stop(); gyroListeningForQA = false }
+        .onChange(of: gyroFlipEnabled) { _, _ in syncGyro() }
         .onChange(of: scenePhase) { _, phase in
             gyro.sceneActive = phase == .active
             gyro.resetDetector()
@@ -765,6 +767,26 @@ struct AtelierInspector: View {
         }
         .onChange(of: pressing > 0 || axisLock != nil) { _, down in gyro.touching = down }
         .onChange(of: editing?.id) { _, id in gyro.covered = id != nil }
+    }
+
+    /// One place that applies the setting: listening exactly when Gyro Flip is On, nothing otherwise.
+    private func syncGyro() {
+        if gyroFlipEnabled { gyro.start() } else { gyro.stop() }
+        gyroListeningForQA = gyro.isListening
+    }
+
+    /// QA builds only, and only when a QA motion argument is present: a 1 pt invisible element that says whether
+    /// the motion subscription is live, so a Simulator flow can prove Off means "no subscription" rather than
+    /// infer it from a flip that may or may not have happened yet.
+    @ViewBuilder private var gyroQAMarker: some View {
+        if BuildChannel.allowsOwnerTools,
+           GyroQATrace.requested != nil || UserDefaults.standard.bool(forKey: "AroomaQAMotion") {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(gyroListeningForQA ? "Motion listening" : "Motion idle")
+                .accessibilityIdentifier(gyroListeningForQA ? "qa-gyro-listening" : "qa-gyro-idle")
+        }
     }
 
     /// The card's own colours, blurred into the room, so each collectible lights its inspector.

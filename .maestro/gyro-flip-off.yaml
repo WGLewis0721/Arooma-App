@@ -24,6 +24,10 @@ tags:
 - tapOn: "Name, house.*"
 - inputText: "Sauvage"
 - tapOn: ".*Sauvage Elixir.*"
+- assertVisible:
+    id: "qa-gyro-idle"
+- assertNotVisible:
+    id: "qa-gyro-listening"
 - extendedWaitUntil:
     visible: "REVERSE.*"
     timeout: 8000

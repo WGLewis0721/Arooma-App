@@ -9,9 +9,13 @@ tags:
 - tapOn: "Explore the Archive"
 - assertVisible: "Card 1 of .*"
 - swipe:
-    direction: LEFT
+    start: "75%, 50%"
+    end: "40%, 50%"
+    duration: 700
 - assertVisible: "Card 2 of .*"
 - swipe:
-    direction: RIGHT
+    start: "40%, 50%"
+    end: "75%, 50%"
+    duration: 700
 - assertVisible: "Card 1 of .*"
 - takeScreenshot: explore-counter-back-to-1

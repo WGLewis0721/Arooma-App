@@ -8,7 +8,9 @@ tags:
     clearState: true
 - tapOn: "Explore the Archive"
 - swipe:
-    direction: UP
+    start: "50%, 55%"
+    end: "50%, 28%"
+    duration: 600
 - assertVisible: "Close Insights"
 - assertVisible: "Compare fragrances"
 - takeScreenshot: explore-insights-peek

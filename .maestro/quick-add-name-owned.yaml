@@ -21,4 +21,5 @@ tags:
     id: "direct-done"
 - assertVisible: "Quick Test Owned"
 - launchApp
+- tapOn: "My Collection"
 - assertVisible: "Quick Test Owned"

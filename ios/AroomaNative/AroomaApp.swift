@@ -470,17 +470,21 @@ struct MyCollectionScreen: View {
         }
     }
 
-    /// Distinct labelled controls, low on the screen. Hidden while the deck is empty, where the empty state's
-    /// own button is the single Add.
+    /// Distinct labelled controls, low on the screen. Shelves and the Wear log stay reachable in the owned view
+    /// even before the first bottle, because shelves and history exist independently of any one bottle. Add is
+    /// hidden while the deck is empty: the empty state's own button (same identifier) is then the single Add.
     @ViewBuilder private var tools: some View {
-        if !archive.displayedCards.isEmpty {
+        let hasCards = !archive.displayedCards.isEmpty
+        if archive.mode == .mine || hasCards {
             GlassEffectContainer(spacing: 10) {
                 HStack(spacing: 10) {
                     if archive.mode == .mine {
                         toolButton("Shelves", symbol: "square.grid.2x2", id: "all-shelves", action: openShelves)
                         toolButton("Wear log", symbol: "clock.arrow.circlepath", id: "wear-log") { openWearLog(nil) }
                     }
-                    toolButton("Add", symbol: "plus", id: "quick-add-a-bottle", action: add)
+                    if hasCards {
+                        toolButton("Add", symbol: "plus", id: "quick-add-a-bottle", action: add)
+                    }
                 }
             }
             .padding(.horizontal, 20)

@@ -1,4 +1,5 @@
-# Search is the third tab. Its query, filters and sort survive opening a result's Inspector and closing it.
+# Search is the third tab. Its query survives opening a result's Inspector and closing it, and its scope
+# control (All, Collection, Wishlist, Catalog) responds.
 appId: com.graymatter.arooma
 tags:
   - v3
@@ -14,9 +15,8 @@ tags:
 - inputText: "Sauvage"
 - assertVisible: ".*Sauvage.*"
 - takeScreenshot: v3-search-01-query
-- tapOn: "Filters"
-- assertVisible: "Sort by"
-- tapOn: "Done"
+- tapOn: "Catalog"
+- assertVisible: "2 results"
 - tapOn: ".*Sauvage Elixir.*"
 - assertVisible: "FRONT.*TOP NOTES"
 - takeScreenshot: v3-search-02-inspector

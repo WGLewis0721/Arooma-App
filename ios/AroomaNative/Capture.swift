@@ -375,6 +375,15 @@ struct QuickAddSheet: View {
         }
     }
 
+    /// Seconds the one-step save waits for Undo before it commits and closes: 4 s.
+    /// QA only: Debug and TestFlight builds honour `-AroomaQAUndoWindow <seconds>`, because Maestro's iOS
+    /// driver needs 5 to 6 s between two taps on this animated screen. App Store builds ignore it.
+    private static var undoWindow: Double {
+        guard BuildChannel.allowsOwnerTools else { return 4 }
+        let override = UserDefaults.standard.double(forKey: "AroomaQAUndoWindow")
+        return override > 0 ? override : 4
+    }
+
     /// One-step save for a plain name. Undo restores the draft and the previous collection view.
     private func saveDirect(_ destination: ScanReview.Destination) {
         guard direct == nil, isSimpleName else { return }
@@ -390,7 +399,7 @@ struct QuickAddSheet: View {
         let token = UUID()
         directToken = token
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(4))
+            try? await Task.sleep(for: .seconds(Self.undoWindow))
             if direct != nil && directToken == token { finishDirect() }
         }
     }

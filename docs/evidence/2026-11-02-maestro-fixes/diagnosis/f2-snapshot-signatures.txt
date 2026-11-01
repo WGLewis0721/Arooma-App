@@ -1,0 +1,25 @@
+F2: what XCTest's in-app accessibility snapshot held after the long press, per snapshot.
+Source: device-simulator.log lines from the Arooma process ('X is not actually a child of Y' notes), one count per snapshot.
+View & Style (first sheet) shows as ScrollView + 'Switch Disabled' x2. The Tuning sheet (second) shows as CollectionView (+ Slider after expanding).
+A snapshot that has both means XCTest captured both sheets in the app; what Maestro prints is chosen later (runner side).
+
+source run 41332782764: tuning-presets (FAILED at 'Vivid Holo')
+  long press at 17:53:39.778; 43 snapshots after it
+    17:53:43.564  ScrollView=1 SwitchDisabled=2 CollectionView=1 Slider=0   (first snapshot with this signature)
+
+run 41336948314: tuning-presets (FAILED)
+  long press at 18:47:35.113; 43 snapshots after it
+    18:47:39.482  ScrollView=1 SwitchDisabled=2 CollectionView=1 Slider=0   (first snapshot with this signature)
+
+run 41336948314: zz-diag-tuning-late (PASSED: Vivid Holo seen 1.0 s after the press)
+  long press at 18:50:16.124; 2 snapshots after it
+    18:50:20.495  ScrollView=1 SwitchDisabled=2 CollectionView=1 Slider=0   (first snapshot with this signature)
+
+run 41336948314: zz-diag-tuning-expand (PASSED the probes, then dragged the sheet up)
+  long press at 18:53:56.103; 41 snapshots after it
+    18:54:00.960  ScrollView=1 SwitchDisabled=2 CollectionView=1 Slider=0   (first snapshot with this signature)
+    18:54:04.156  ScrollView=0 SwitchDisabled=0 CollectionView=0 Slider=0   (first snapshot with this signature)
+    18:54:07.808  ScrollView=1 SwitchDisabled=2 CollectionView=1 Slider=5   (first snapshot with this signature)
+
+Screen frames, run 41336948314: failing tuning-presets frame (after 18 s of polling) vs zz-diag-tuning-late frame (1 s after the press), status bar excluded:
+  difference bounding box: None   (None = pixel-identical)

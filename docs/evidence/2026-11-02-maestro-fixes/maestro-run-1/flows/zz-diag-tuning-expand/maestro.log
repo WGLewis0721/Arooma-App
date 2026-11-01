@@ -1,0 +1,84 @@
+18:53:14.589 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+18:53:14.590 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+18:53:14.591 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+18:53:14.591 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+18:53:14.591 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.graymatter.arooma" with clear state RUNNING
+18:53:14.592 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.graymatter.arooma
+18:53:24.701 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.graymatter.arooma
+18:53:24.701 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.graymatter.arooma app during launch
+18:53:26.645 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.graymatter.arooma" with clear state COMPLETED
+18:53:26.646 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Explore the Archive" RUNNING
+18:53:32.426 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Explore the Archive, title=, value=, text=, hintText=, resource-id=, bounds=[26,710][376,764], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=26, y=710, width=350, height=54))
+18:53:34.057 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:53:34.059 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 737) using hierarchy based logic for wait
+18:53:34.066 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:53:34.066 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:53:36.194 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:53:36.196 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Explore the Archive" COMPLETED
+18:53:36.350 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: view-and-style RUNNING
+18:53:37.790 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=View and style, title=, value=, text=, hintText=, resource-id=view-and-style, bounds=[333,79][377,123], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=333, y=79, width=44, height=44))
+18:53:38.452 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:53:38.462 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (355, 101) using hierarchy based logic for wait
+18:53:38.463 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:53:38.464 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:53:42.121 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:53:42.158 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: view-and-style COMPLETED
+18:53:42.159 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling DOWN until "Version.*" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+18:53:43.370 [ WARN] maestro.orchestra.Orchestra.scrollUntilVisible: Error: maestro.MaestroException$ElementNotFound: Element not found: Text matching regex: Version.*
+18:53:43.494 [ INFO] maestro.Maestro.swipeFromCenter: Swiping UP from center
+18:53:48.626 [ WARN] maestro.orchestra.Orchestra.scrollUntilVisible: Error: maestro.MaestroException$ElementNotFound: Element not found: Text matching regex: Version.*
+18:53:48.668 [ INFO] maestro.Maestro.swipeFromCenter: Swiping UP from center
+18:53:53.649 [ INFO] maestro.orchestra.Orchestra.scrollUntilVisible: Scrolling try count: 0, DeviceWidth: 402, DeviceWidth: 874
+18:53:53.651 [ INFO] maestro.orchestra.Orchestra.scrollUntilVisible: Element bounds: Bounds(x=35, y=780, width=45, height=15)
+18:53:53.651 [ INFO] maestro.orchestra.Orchestra.scrollUntilVisible: Visibility Percent: 1.0
+18:53:53.654 [ INFO] maestro.orchestra.Orchestra.scrollUntilVisible: Command centerElement: ScrollUntilVisibleCommand(selector=ElementSelector(textRegex=Version.*, idRegex=null, size=null, below=null, above=null, leftOf=null, rightOf=null, containsChild=null, containsDescendants=null, traits=null, index=null, enabled=null, optional=false, selected=null, checked=null, focused=null, childOf=null, css=null), direction=DOWN, scrollDuration=601, visibilityPercentage=100, timeout=20000, waitToSettleTimeoutMs=null, centerElement=false, originalSpeedValue=40, label=null, optional=false).centerElement
+18:53:53.654 [ INFO] maestro.orchestra.Orchestra.scrollUntilVisible: visibilityPercentageNormalized: 1.0
+18:53:53.654 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling DOWN until "Version.*" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled COMPLETED
+18:53:53.655 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Long press on "Version.*" RUNNING
+18:53:54.033 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Version, title=, value=, text=, hintText=, resource-id=, bounds=[35,780][80,795], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=35, y=780, width=45, height=15))
+18:53:54.530 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via stabilised hierarchy (null settle after a scroll)
+18:53:54.880 [ INFO] maestro.Maestro.refreshElementUntilStable-Hkttul8: Element is still moving (null -> Bounds(x=35, y=780, width=45, height=15)). Waiting for its position to settle.
+18:53:55.542 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (57, 787) using hierarchy based logic for wait
+18:53:55.543 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:53:55.543 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:00.271 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:54:00.280 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Long press on "Version.*" COMPLETED
+18:54:00.280 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot diag-expand-00-after-press RUNNING
+18:54:00.285 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:00.286 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:00.851 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot diag-expand-00-after-press COMPLETED
+18:54:00.893 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Tuning" is visible RUNNING
+18:54:01.675 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot diag-expand-01-sees-Tuning RUNNING
+18:54:01.676 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:01.678 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:02.025 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot diag-expand-01-sees-Tuning COMPLETED
+18:54:02.025 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Tuning" is visible COMPLETED
+18:54:02.025 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Vivid Holo" is visible RUNNING
+18:54:02.578 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot diag-expand-02-sees-VividHolo RUNNING
+18:54:02.579 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:02.579 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:03.224 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot diag-expand-02-sees-VividHolo COMPLETED
+18:54:03.224 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Vivid Holo" is visible COMPLETED
+18:54:03.315 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Swipe from (50%, 80%) to (50%, 25%) in 400 ms RUNNING
+18:54:07.412 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Swipe from (50%, 80%) to (50%, 25%) in 400 ms COMPLETED
+18:54:07.413 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot diag-expand-10-after-swipe RUNNING
+18:54:07.414 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:07.415 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:07.723 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot diag-expand-10-after-swipe COMPLETED
+18:54:07.724 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Tuning" is visible RUNNING
+18:54:08.297 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot diag-expand-11-sees-Tuning RUNNING
+18:54:08.298 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:08.299 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:08.752 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot diag-expand-11-sees-Tuning COMPLETED
+18:54:08.753 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Tuning" is visible COMPLETED
+18:54:08.753 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Vivid Holo" is visible RUNNING
+18:54:15.001 [ INFO] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandSkipped: null
+18:54:15.002 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Vivid Holo" is visible SKIPPED
+18:54:15.002 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Quick adjust" is visible RUNNING
+18:54:16.018 [ INFO] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandSkipped: null
+18:54:16.018 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Quick adjust" is visible SKIPPED
+18:54:16.018 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "zz-diag-force-hierarchy-dump" is visible RUNNING
+18:54:25.076 [ERROR] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandFailed: Assertion is false: "zz-diag-force-hierarchy-dump" is visible
+18:54:25.420 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+18:54:25.422 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:54:25.740 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "zz-diag-force-hierarchy-dump" is visible FAILED

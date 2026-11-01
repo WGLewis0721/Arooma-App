@@ -1,0 +1,72 @@
+18:52:20.228 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+18:52:20.228 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+18:52:20.232 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+18:52:20.232 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+18:52:20.235 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.graymatter.arooma" with clear state (launch arguments: {AroomaQAUndoWindow=30}) RUNNING
+18:52:20.237 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.graymatter.arooma
+18:52:27.571 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.graymatter.arooma
+18:52:27.571 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.graymatter.arooma app during launch
+18:52:29.047 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.graymatter.arooma" with clear state (launch arguments: {AroomaQAUndoWindow=30}) COMPLETED
+18:52:29.047 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Start My Collection" RUNNING
+18:52:33.717 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Start My Collection, title=, value=, text=, hintText=, resource-id=, bounds=[26,774][376,824], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=26, y=774, width=350, height=50))
+18:52:34.723 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:52:34.726 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 799) using hierarchy based logic for wait
+18:52:34.738 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:52:34.739 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:52:38.312 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:52:38.321 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Start My Collection" COMPLETED
+18:52:38.322 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Add a fragrance" RUNNING
+18:52:39.056 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Add a fragrance, title=, value=, text=, hintText=, resource-id=, bounds=[128,526][274,561], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=128, y=526, width=146, height=35))
+18:52:39.696 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:52:39.709 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 543) using hierarchy based logic for wait
+18:52:39.711 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:52:39.711 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:52:41.630 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:52:41.636 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Add a fragrance" COMPLETED
+18:52:41.637 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Fragrance name" RUNNING
+18:52:43.477 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=, title=, value=, text=, hintText=Fragrance name, resource-id=, bounds=[34,404][368,430], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=34, y=404, width=334, height=26))
+18:52:48.075 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+18:52:48.077 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 417) using hierarchy based logic for wait
+18:52:48.078 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:52:48.078 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:52:51.383 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:52:51.384 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Fragrance name" COMPLETED
+18:52:51.385 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Input text Undo Test Scent RUNNING
+18:52:51.385 [ INFO] maestro.Maestro.inputText: Inputting text: Undo Test Scent
+18:52:55.322 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Input text Undo Test Scent COMPLETED
+18:52:55.322 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: direct-collection RUNNING
+18:52:55.687 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Collection, title=, value=, text=, hintText=, resource-id=direct-collection, bounds=[206,477][382,531], enabled=true, focused=false, selected=false, checked=false}, children=[TreeNode(attributes={accessibilityText=Verified, title=, value=, text=, hintText=, resource-id=checkmark.seal, bounds=[240,494][259,514], enabled=true, focused=false, selected=true, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=true), TreeNode(attributes={accessibilityText=Collection, title=, value=, text=, hintText=, resource-id=, bounds=[206,477][382,531], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false)], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=206, y=477, width=176, height=54))
+18:52:56.231 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:52:56.236 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (294, 504) using hierarchy based logic for wait
+18:52:56.237 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:52:56.238 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:52:59.851 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:52:59.854 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: direct-collection COMPLETED
+18:52:59.854 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Added to your collection" is visible RUNNING
+18:53:00.272 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Added to your collection" is visible COMPLETED
+18:53:00.277 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: direct-undo RUNNING
+18:53:00.661 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Undo, title=, value=, text=, hintText=, resource-id=direct-undo, bounds=[285,800][323,818], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=285, y=800, width=38, height=18))
+18:53:01.141 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:53:01.145 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (304, 809) using hierarchy based logic for wait
+18:53:01.145 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:53:01.146 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:53:03.305 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:53:03.306 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: direct-undo COMPLETED
+18:53:03.309 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Added to your collection" is not visible RUNNING
+18:53:04.238 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Added to your collection" is not visible COMPLETED
+18:53:04.238 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Undo Test Scent" is visible RUNNING
+18:53:04.478 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Undo Test Scent" is visible COMPLETED
+18:53:04.478 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: direct-collection is visible RUNNING
+18:53:04.749 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: direct-collection is visible COMPLETED
+18:53:04.750 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Close" RUNNING
+18:53:05.109 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Close, title=, value=, text=, hintText=, resource-id=, bounds=[20,82][56,118], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=20, y=82, width=36, height=36))
+18:53:05.659 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+18:53:05.660 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (38, 100) using hierarchy based logic for wait
+18:53:05.660 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+18:53:05.660 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+18:53:07.828 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+18:53:07.828 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Close" COMPLETED
+18:53:07.828 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Add a fragrance" is visible RUNNING
+18:53:08.106 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Add a fragrance" is visible COMPLETED
+18:53:08.106 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Undo Test Scent" is not visible RUNNING
+18:53:08.843 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Undo Test Scent" is not visible COMPLETED

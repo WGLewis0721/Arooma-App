@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8" tests="12" failures="2" time="753.872" timestamp="2026-11-01T19:29:04">
+    <testcase id="quick-add-name-owned" name="quick-add-name-owned" classname="quick-add-name-owned" file=".maestro/quick-add-name-owned.yaml" time="80.767" timestamp="2026-11-01T19:29:04" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="48.326" timestamp="2026-11-01T19:30:24" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="search-direct-inspect" name="search-direct-inspect" classname="search-direct-inspect" file=".maestro/search-direct-inspect.yaml" time="58.95" timestamp="2026-11-01T19:31:13" status="SUCCESS">
+      <properties>
+        <property name="tags" value="search, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="79.29" timestamp="2026-11-01T19:32:12" status="ERROR">
+      <properties>
+        <property name="tags" value="owner-tools"/>
+      </properties>
+      <failure>Assertion is false: "Vivid Holo" is visible</failure>
+    </testcase>
+    <testcase id="zz-diag-tuning-miss-then-shot" name="zz-diag-tuning-miss-then-shot" classname="zz-diag-tuning-miss-then-shot" file=".maestro/zz-diag-tuning-miss-then-shot.yaml" time="75.82" timestamp="2026-11-01T19:33:31" status="SUCCESS">
+      <properties>
+        <property name="tags" value="diag"/>
+      </properties>
+    </testcase>
+    <testcase id="return-to-today" name="return-to-today" classname="return-to-today" file=".maestro/return-to-today.yaml" time="76.373" timestamp="2026-11-01T19:34:47" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="zz-diag-tuning-wait-animation" name="zz-diag-tuning-wait-animation" classname="zz-diag-tuning-wait-animation" file=".maestro/zz-diag-tuning-wait-animation.yaml" time="51.317" timestamp="2026-11-01T19:36:03" status="SUCCESS">
+      <properties>
+        <property name="tags" value="diag"/>
+      </properties>
+    </testcase>
+    <testcase id="shelves-unified" name="shelves-unified" classname="shelves-unified" file=".maestro/shelves-unified.yaml" time="58.447" timestamp="2026-11-01T19:36:55" status="SUCCESS">
+      <properties>
+        <property name="tags" value="shelves, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="style-sections" name="style-sections" classname="style-sections" file=".maestro/style-sections.yaml" time="50.713" timestamp="2026-11-01T19:37:53" status="SUCCESS">
+      <properties>
+        <property name="tags" value="style"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-undo" name="quick-add-undo" classname="quick-add-undo" file=".maestro/quick-add-undo.yaml" time="69.335" timestamp="2026-11-01T19:38:44" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="zz-diag-tuning-shot-repeat" name="zz-diag-tuning-shot-repeat" classname="zz-diag-tuning-shot-repeat" file=".maestro/zz-diag-tuning-shot-repeat.yaml" time="65.311" timestamp="2026-11-01T19:39:53" status="ERROR">
+      <properties>
+        <property name="tags" value="diag"/>
+      </properties>
+      <failure>Assertion is false: "zz-diag-force-hierarchy-dump" is visible</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="38.866" timestamp="2026-11-01T19:40:59" status="SUCCESS">
+      <properties>
+        <property name="tags" value="smoke"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

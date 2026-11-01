@@ -1,4 +1,7 @@
 # Quick Add opened from Today returns to Today, and the new bottle can be chosen there at once.
+# The save toast closes itself after 4 s and Maestro on iOS needs 5 to 6 s between two taps on this
+# animated screen, so tapping Done raced the timer. The QA launch argument (Debug and TestFlight only)
+# keeps the toast open until Done.
 appId: com.graymatter.arooma
 tags:
   - quick-add
@@ -6,6 +9,8 @@ tags:
 ---
 - launchApp:
     clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
 - tapOn: "Start My Collection"
 - tapOn: "Today"
 - assertVisible: "What are you wearing?"

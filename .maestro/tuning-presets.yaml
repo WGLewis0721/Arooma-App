@@ -1,4 +1,7 @@
 # Owner tools: long-press Version opens Tuning in Debug and TestFlight builds only.
+# KNOWN FAILING (backlog): after the long press, Maestro's iOS hierarchy does not show the Tuning sheet for
+# 18 s or more in the first flow of a simulator session, although the screen and the app's own accessibility
+# snapshot hold it. Steps are unchanged. See "tuning-presets" in docs/design/DECISIONS.md.
 appId: com.graymatter.arooma
 tags:
   - owner-tools

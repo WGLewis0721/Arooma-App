@@ -9,7 +9,7 @@ Summary: Three of nine Maestro flows fail on run `41332782764` (head `31ea0c1`).
 | Source run | [41332782764](https://github.com/WGLewis0721/Arooma-App/actions/runs/41332782764), Maestro iOS workflow, `macos-26`, Maestro CLI 2.12.0, iOS 26.4 simulator |
 | Passing | `smoke`, `quick-add-wishlist`, `quick-add-name-owned`, `search-direct-inspect`, `return-to-today`, `style-sections` |
 | Failing | `shelves-unified`, `tuning-presets`, `quick-add-undo` |
-| Status | Open. Fix branch must start from `main`. |
+| Status | Partly fixed (2026-11-02). F1 `shelves-unified` and F3 `quick-add-undo` fixed and passing on two consecutive CI runs; `quick-add-name-owned`, `quick-add-wishlist` and `return-to-today` hardened against the same 4 s toast race (one passing run). F2 `tuning-presets` still fails and is in the backlog. Suite is 8 of 9. Evidence: [2026-11-02 fixes](../../evidence/2026-11-02-maestro-fixes/README.md). |
 
 ## Failure register
 

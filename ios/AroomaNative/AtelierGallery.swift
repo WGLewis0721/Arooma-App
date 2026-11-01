@@ -41,6 +41,7 @@ struct AtelierGallery: View {
     @State private var insightStart: CGFloat = 0
     @State private var verticalDrag = false
     @State private var comparing: DisplayCard?
+    @State private var suggestedCompare: Fragrance?
     @AppStorage("arooma.deckTipV3") private var understoodDeck = false
 
     let transitionNamespace: Namespace.ID
@@ -135,7 +136,7 @@ struct AtelierGallery: View {
         }
         .onChange(of: archive.layout) { _, layout in motor.morph(to: layout.kind) }
         .sheet(item: $comparing) { card in
-            CompareSheet(primary: card).environmentObject(archive)
+            CompareSheet(primary: card, suggested: suggestedCompare).environmentObject(archive)
         }
         .onChange(of: reduceMotion) { _, value in motor.reduceMotion = value }
         .onChange(of: fingerDown) { _, down in
@@ -467,7 +468,10 @@ struct AtelierGallery: View {
                 let full = geo.size.height * 0.74
                 let height = insight <= 1 ? peek : peek + (full - peek) * min(1, insight - 1)
                 InsightPanel(card: card, expanded: insight > 1.3,
-                             compare: { comparing = card },
+                             compare: { suggested in
+                                 suggestedCompare = suggested
+                                 comparing = card
+                             },
                              close: { setInsight(0) })
                     .frame(height: height)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)

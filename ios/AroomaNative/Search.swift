@@ -219,6 +219,12 @@ struct AtelierSearch: View {
                 }
             }
             .toolbar {
+                // The living Arooma signature, upper left. Branding, not navigation: no action is attached,
+                // and the shared glass background is hidden so it is not drawn as a button.
+                ToolbarItem(placement: .topBarLeading) {
+                    AroomaBrandMark(height: 26)
+                }
+                .sharedBackgroundVisibility(.hidden)
                 // Sort lives in the Filters sheet (item 04): one place to refine results.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingFilters = true } label: {

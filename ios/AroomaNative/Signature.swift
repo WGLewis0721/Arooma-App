@@ -43,6 +43,9 @@ struct AroomaSignatureShimmer: View {
     var highlight: Color = .white
     /// Seconds per cycle; the highlight travels for 60% of it and rests for the remainder.
     var period: Double = 6.0
+    /// Optional cap on redraws (seconds between frames). Nil redraws every display frame. The always-on
+    /// header passes 1/30: a six-second sweep across a small wordmark looks the same and costs far less.
+    var minimumInterval: Double? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
 
@@ -54,7 +57,7 @@ struct AroomaSignatureShimmer: View {
                                      startPoint: .top, endPoint: .bottom))
                 .mask { SignatureMask() }
             if !reduceMotion {
-                TimelineView(.animation(minimumInterval: nil, paused: scenePhase != .active)) { clock in
+                TimelineView(.animation(minimumInterval: minimumInterval, paused: scenePhase != .active)) { clock in
                     let t = clock.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: period * 1000)
                     let phase = t.truncatingRemainder(dividingBy: period) / period
                     let travel = min(1, phase / 0.6)

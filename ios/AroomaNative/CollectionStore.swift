@@ -214,12 +214,15 @@ import SwiftUI
         HapticEngine.shared.play(.completed)
     }
 
-    func recordWear(bottleIDs: [UUID], note: String = "") {
+    /// Returns the new session's id (nil when no listed bottle is owned), so a caller that wants a scoped Undo
+    /// can reverse exactly this session with `deleteWearSession(_:)`.
+    @discardableResult
+    func recordWear(bottleIDs: [UUID], note: String = "") -> UUID? {
         var unique: [UUID] = []
         for id in bottleIDs where bottles.contains(where: { $0.id == id }) {
             if !unique.contains(id) { unique.append(id) }
         }
-        guard !unique.isEmpty else { return }
+        guard !unique.isEmpty else { return nil }
         let session = WearSession(bottleIDs: unique, note: note.trimmingCharacters(in: .whitespacesAndNewlines))
         for id in unique {
             guard let index = bottles.firstIndex(where: { $0.id == id }) else { continue }
@@ -228,6 +231,7 @@ import SwiftUI
         }
         wearSessions.insert(session, at: 0)
         HapticEngine.shared.play(.wear)
+        return session.id
     }
 
     func removeBottle(_ bottleID: UUID, from sessionID: UUID) {

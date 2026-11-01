@@ -38,6 +38,9 @@ final class MotionField {
     @ObservationIgnored private var pendingStop: Task<Void, Never>?
     @ObservationIgnored private var stoppedAt: Date?
     @ObservationIgnored private let interpolator = FrameDriver(label: "tilt")
+    /// The one subscriber to raw (unshaped) rotation-rate and user-acceleration samples: the open
+    /// Inspector's Gyro Flip. Nil means the sensor handler does no extra work at all.
+    @ObservationIgnored private var rawSink: ((GyroSample) -> Void)?
 
     private init() {
         let center = NotificationCenter.default
@@ -79,6 +82,17 @@ final class MotionField {
         }
     }
 
+    /// Registers (or, with nil, removes) the single raw-sample subscriber. There is only ever one stream:
+    /// this is the same CMMotionManager that drives the foil. Callers also hold `acquire()`/`release()`
+    /// so the sensor runs while they listen, and the Low Power, thermal and foreground rules apply.
+    func setRawSink(_ sink: ((GyroSample) -> Void)?) { rawSink = sink }
+
+    /// Whether this device can report motion at all. False on the iOS Simulator. QA builds can
+    /// pretend otherwise with `-AroomaQAMotion YES` so the settings row can be exercised in CI.
+    var isSensorAvailable: Bool {
+        manager.isDeviceMotionAvailable || (BuildChannel.allowsOwnerTools && UserDefaults.standard.bool(forKey: "AroomaQAMotion"))
+    }
+
     /// Makes the current physical angle the neutral one (gallery open, or the Recenter action).
     func recenter() {
         if let lastRaw { reference = lastRaw } else { reference = nil }
@@ -108,6 +122,12 @@ final class MotionField {
                 guard let motion else { return }
                 MainActor.assumeIsolated {
                     MotionField.shared.ingest(motion.attitude.quaternion, at: motion.timestamp)
+                    if let sink = MotionField.shared.rawSink {
+                        sink(GyroSample(
+                            timestamp: motion.timestamp,
+                            rotationRate: GyroVector(x: motion.rotationRate.x, y: motion.rotationRate.y, z: motion.rotationRate.z),
+                            userAcceleration: GyroVector(x: motion.userAcceleration.x, y: motion.userAcceleration.y, z: motion.userAcceleration.z)))
+                    }
                 }
             }
             isLive = true

@@ -775,6 +775,9 @@ struct AtelierStyle: View {
                         .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
                 }
                 .buttonStyle(.glass)
+                GyroFlipSettingRow()
+                    .padding(15)
+                    .atelierPlate(16)
                 // Shown in App Store builds only once a licensed card source exists (App Review 2.1:
                 // no permanently disabled placeholder features). TestFlight keeps it visible.
                 if StylizedCardSettings.licensedSourceAvailable || BuildChannel.allowsOwnerTools {
@@ -782,7 +785,7 @@ struct AtelierStyle: View {
                 }
                 AtelierEyebrow(text: "About", accent: archive.theme.palette.accent)
                 DisclosureGroup("About this archive") {
-                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it holds still with Reduce Motion and switches off in Low Power Mode.")
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone, and an open card can turn over with a wrist twist if you leave that on. Motion readings stay on your iPhone and are never stored or sent. Both hold still with Reduce Motion and switch off in Low Power Mode.")
                         .font(.footnote).foregroundStyle(.secondary)
                         .padding(.top, 6)
                 }

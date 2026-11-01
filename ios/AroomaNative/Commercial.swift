@@ -510,6 +510,7 @@ struct CardStudioScreen: View {
     @State private var finish: CardFinish = .obsidian
     @State private var photoFilter: StudioPhotoFilter = .original
     @State private var filteredPreview: UIImage?
+    @State private var thumbnailPhoto: Data?
     @State private var fragranceID: String?
     @State private var saving = false
 
@@ -526,7 +527,7 @@ struct CardStudioScreen: View {
                     PhotosPicker(selection: $photoItem, matching: .images) {
                         Label(photoData == nil ? "Choose bottle photo" : "Change bottle photo", systemImage: "photo.on.rectangle")
                     }.buttonStyle(.bordered)
-                    if let photoData {
+                    if let thumbnailPhoto {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("PHOTO FILTERS")
                                 .font(.caption2.weight(.semibold))
@@ -539,7 +540,7 @@ struct CardStudioScreen: View {
                                             withAnimation(.easeInOut(duration: 0.18)) { photoFilter = preset }
                                         } label: {
                                             VStack(spacing: 6) {
-                                                StudioFilterThumbnail(photo: photoData, preset: preset)
+                                                StudioFilterThumbnail(photo: thumbnailPhoto, preset: preset)
                                                     .overlay {
                                                         RoundedRectangle(cornerRadius: 10)
                                                             .strokeBorder(photoFilter == preset
@@ -639,8 +640,26 @@ struct CardStudioScreen: View {
                     usingCutout = false
                 }
             }
-            .onChange(of: photoData) { _, _ in renderFilterPreview() }
+            .onChange(of: photoData) { _, _ in
+                renderFilterPreview()
+                renderThumbnailPhoto()
+            }
             .onChange(of: photoFilter) { _, _ in renderFilterPreview() }
+        }
+    }
+
+    private func renderThumbnailPhoto() {
+        guard let bytes = photoData else {
+            thumbnailPhoto = nil
+            return
+        }
+        thumbnailPhoto = nil
+        Task {
+            let image = await Task.detached(priority: .utility) {
+                StudioPhotoFilters.render(data: bytes, preset: .original, maxDimension: 240)?.pngData()
+            }.value
+            guard photoData == bytes else { return }
+            thumbnailPhoto = image
         }
     }
 

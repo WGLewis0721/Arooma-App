@@ -109,6 +109,10 @@ struct AtelierRoot: View {
     }
 
     private var tabs: some View {
+        withTodayAccessory(tabBar)
+    }
+
+    private var tabBar: some View {
         TabView(selection: $tab) {
             Tab("Collection", systemImage: "rectangle.stack", value: AtelierTab.gallery) {
                 AtelierGallery(
@@ -144,10 +148,21 @@ struct AtelierRoot: View {
         }
         .legibleTint(archive.theme.palette.accent)
         .tabBarMinimizeBehavior(.onScrollDown)
-        // The accessory links to Today; it is hidden while Today is the selected tab so it never links to itself (item 08).
-        .tabViewBottomAccessory(isEnabled: tab != .journal) {
-            TodayAccessory(open: { tab = .journal })
-                .environmentObject(archive)
+    }
+
+    /// The accessory links to Today. It is hidden while Today is selected so it never links to itself (item 08).
+    /// `isEnabled` needs iOS 26.1; on iOS 26.0 the accessory is simply empty on Today.
+    @ViewBuilder private func withTodayAccessory<Content: View>(_ content: Content) -> some View {
+        if #available(iOS 26.1, *) {
+            content.tabViewBottomAccessory(isEnabled: tab != .journal) {
+                TodayAccessory(open: { tab = .journal }).environmentObject(archive)
+            }
+        } else {
+            content.tabViewBottomAccessory {
+                if tab != .journal {
+                    TodayAccessory(open: { tab = .journal }).environmentObject(archive)
+                }
+            }
         }
     }
 

@@ -1,13 +1,13 @@
 # Native Autumn live deck integration (2026-11-01)
 
-> Part of the [Arooma design map](../README.md). Implements the owner's request to put the 30 generated cards into the same live native deck as the original four, not a separate proof viewer.
+> Part of the [Arooma design map](../README.md). Implements the owner's request to put the 30 generated cards into the same live native deck as the original four, not a separate proof viewer, and then complete the back with sourced fragrance notes.
 
 ## Owner experience
 
 - Open **Collection → Demo**: original four editions plus 30 Autumn Archive editions, 34 total.
 - Or select **Cards → Autumn Archive · 30 live cards**: switch to the original Collection deck and focus the first new card.
 - Switch between **Cover Flow, Stack and Fan** without losing selection. The same `DeckMotor`, `FlipMotor`, `AtelierCardSurface`, `LiveFoil`, haptics and tap/drag behavior apply to all 34.
-- Tap one of the 30: the original `AtelierInspector` opens; horizontal drag flips a proper double-sided 3D card. The reverse uses three original editorial art-direction strips. It **does not** fabricate top/heart/base fragrance metadata.
+- Tap one of the 30: the original `AtelierInspector` opens; horizontal drag flips a proper double-sided 3D card. The reverse uses three real **Top / Heart / Base** note strips populated from the product's sourced pyramid, with consistent typography and real fragrance notes. Each card's catalog record contains the provenance URL. The images retain their original style and motion behavior.
 - Add an autumn fragrance as an actual owned bottle or wishlist entry through existing native actions, if desired; browsing never grants ownership or paid card entitlements.
 
 ## Existing data and visual assets
@@ -30,3 +30,11 @@
 ## Distribution limitation
 
 The proof artworks are not yet commercially cleared. The normal App Store release path does **not** package or unlock the unapproved image assets. This is an internal iPhone demonstration; product details and distribution rights need final review before public launch. Editing a bundled JPG still requires a new app build; it is not a remote hot-update.
+
+## 2026-11-01 follow-up: actual fragrance notes
+
+- All 30 `catalog.json` entries now contain `notePyramid.top`, `notePyramid.heart`, `notePyramid.base`, `sourceURL` and `sourceType` (maker/retailer or an editorial fragrance database). These notes are research-backed note descriptions, not a chemical analysis, and manufacturers or databases may publish different note pyramids.
+- `Fall2026Collection.fragrances` now passes notes to native catalog search, inspector and layering; no extra server, private account or migration is needed.
+- `Fall2026Reverse` shows real TOP NOTES / HEART NOTES / BASE NOTES in the existing three-strip treatment, while leaving the front images, foil, tilt, physics and card IDs unchanged.
+- `node scripts/check-fall-archive.mjs` verifies exactly 30 complete pyramids with provenance links; this separate factual metadata does **not** mark any of the unapproved brand-art/rights flags as accepted for public sale.
+- In the owner’s internal build, confirm long notes wrap gracefully on the smallest supported iPhone and use VoiceOver to read every stage. The master front image and 3D flip remain unchanged.

@@ -9,7 +9,7 @@ Summary: Arooma's SwiftUI app now has three bottom tabs in this order: Explore, 
 | Branch | `feat/arooma-v3`, from `origin/main` at `1a477c9` |
 | Scope | `ios/AroomaNative/`, `ios/Tests/GyroFlip/`, `.maestro/`, one step in `.github/workflows/native-ios.yml`, design docs |
 | Not in scope | Merge, TestFlight, deployment, signing, bundle ID, persisted record schema, the PWA, deleting any saved data |
-| Status | Implemented on branch. Simulator evidence from the GitHub macOS runner; physical-iPhone validation not run. Not merged. |
+| Status | Implemented and merged to `main` at the owner's request, **before any Maestro flow had run on the V3 build**. Verified: compiles, Gyro Flip detector unit tests pass (94 checks), flow syntax passes. NOT verified: every behaviour that needs a running app (the tab-bar hold above all). No physical-iPhone validation. See the evidence README. |
 
 ## What changed
 
@@ -28,7 +28,7 @@ Summary: Arooma's SwiftUI app now has three bottom tabs in this order: Explore, 
 
 ## Decisions and judgement calls (for owner review)
 
-- **The tab hold is a UIKit hook.** `TabView` gives a `Tab` no long-press, so a `UILongPressGestureRecognizer` is added to the system `UITabBar`. It begins only on the My Collection item, found by accessibility label with equal thirds as a fallback. The system tab bar is not rebuilt. `AtelierRoot` also reverts any tab change the hold itself causes. This was exercised on the iOS 26 Simulator only.
+- **The tab hold is a UIKit hook.** `TabView` gives a `Tab` no long-press, so a `UILongPressGestureRecognizer` is added to the system `UITabBar`. It begins only on the My Collection item, found by accessibility label with equal thirds as a fallback. The system tab bar is not rebuilt. `AtelierRoot` also reverts any tab change the hold itself causes. **Not yet run on any simulator or device**: it compiles, nothing more is established.
 - **Add is shown once in the lower area** of My Collection, as a labelled control, so users who never long-press can still add. The long-press Add is the shortcut to the same sheet. The old top-right + is gone. Reading "avoid duplicating the contextual Add shortcut" this way is a judgement call.
 - **Wear target.** The row names the bottle it will log. While My Collection's owned deck is on screen, the card in front is synced into `selectedMineID` (a first bottle has no stored selection until then). From Explore or Wishlist the last owned selection is used and named; a Wishlist or sample card is never inferred to be owned.
 - **Wear confirmation** lasts 6 s. QA builds can lengthen it with `-AroomaQAUndoWindow <seconds>`, the argument the Quick Add flows already use.

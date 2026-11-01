@@ -11,6 +11,8 @@ struct Fall2026Card: Decodable, Identifiable, Hashable {
     let house: String
     let name: String
     let variant: String
+    /// Editorial staging theme; never represented as verified top/heart/base ingredients.
+    let sceneBrief: String
     let status: String
     let referencePhotoApproved: Bool
     let productFactsVerified: Bool
@@ -253,13 +255,13 @@ struct AutumnArchiveDetail: View {
                         .font(.system(size: 11, design: .serif).italic())
                         .foregroundStyle(.white.opacity(0.82))
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("FRAGRANCE MAP")
+                    Text("COLLECTOR'S ART DIRECTION")
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(1.3)
                         .foregroundStyle(copper)
-                    noteRow("TOP", index: 0, width: w)
-                    noteRow("HEART", index: 1, width: w)
-                    noteRow("BASE", index: 2, width: w)
+                    noteRow("PALETTE", index: 0, width: w)
+                    noteRow("MATERIAL", index: 1, width: w)
+                    noteRow("ATMOSPHERE", index: 2, width: w)
                     Spacer(minLength: 0)
                     Rectangle().fill(copper.opacity(0.8)).frame(height: 1)
                     HStack(spacing: 0) {
@@ -281,7 +283,7 @@ struct AutumnArchiveDetail: View {
                 .padding(.vertical, 28)
             }
         }
-        .accessibilityLabel(card.house + " " + card.name + " reverse artwork proof; fragrance note information awaits verification.")
+        .accessibilityLabel(card.house + " " + card.name + " reverse artwork, featuring the design palette and inspiration, not verified fragrance notes.")
     }
 
     private func fact(_ value: String, _ label: String) -> some View {
@@ -293,7 +295,12 @@ struct AutumnArchiveDetail: View {
     }
 
     private func noteRow(_ stage: String, index: Int, width: CGFloat) -> some View {
-        HStack(spacing: 9) {
+        let sceneParts = card.sceneBrief
+            .replacingOccurrences(of: " and ", with: ",")
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+        let sceneDetail = index < sceneParts.count ? sceneParts[index] : "Seasonal luxury still life"
+        return HStack(spacing: 9) {
             if let image = Fall2026Collection.artwork(for: card) {
                 Image(uiImage: image)
                     .resizable()
@@ -305,8 +312,8 @@ struct AutumnArchiveDetail: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(stage).font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Color(hex: 0xC7A46C))
-                Text("Notes under verification")
-                    .font(.system(size: 9, design: .serif).italic())
+                Text(sceneDetail)
+                    .font(.system(size: 10, design: .serif).italic())
                     .foregroundStyle(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
             }

@@ -27,6 +27,16 @@ private struct Fall2026Manifest: Decodable {
 }
 
 enum Fall2026Collection {
+    // The temporary proof preview exists only in a separately flagged *internal TestFlight*
+    // build. A normal App Store build requires all 30 artwork/fact/rights approvals.
+    static let internalProofBuild: Bool = {
+        #if AROOMA_INTERNAL_PREVIEW
+        true
+        #else
+        false
+        #endif
+    }()
+
     static let cards: [Fall2026Card] = {
         guard let url = Bundle.main.url(forResource: "catalog", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -36,11 +46,10 @@ enum Fall2026Collection {
               Set(manifest.cards.map(\.id)).count == 30,
               Set(manifest.cards.map(\.rank)) == Set(1...30),
               manifest.cards.allSatisfy({
-                  $0.status == "approved" &&
-                  $0.referencePhotoApproved &&
-                  $0.productFactsVerified &&
-                  $0.artRightsCleared &&
-                  UIImage(named: $0.assetName) != nil
+                  UIImage(named: $0.assetName) != nil &&
+                  (internalProofBuild || ($0.status == "approved" &&
+                   $0.referencePhotoApproved && $0.productFactsVerified &&
+                   $0.artRightsCleared))
               }) else {
             return []
         }
@@ -70,13 +79,15 @@ struct AutumnArchiveScreen: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("FALL 2026")
+                    Text(Fall2026Collection.internalProofBuild ? "INTERNAL ARTWORK PROOFS · FALL 2026" : "FALL 2026")
                         .font(.caption2.weight(.semibold))
                         .tracking(3)
                         .foregroundStyle(.secondary)
                     Text("Autumn Archive")
                         .font(.system(.largeTitle, design: .serif))
-                    Text("30 fragrances, 30 illustrated collector cards. Browse the season without adding anything to your owned collection.")
+                    Text(Fall2026Collection.internalProofBuild
+                         ? "30 collectible artwork proofs for review. Product accuracy and commercial rights are not yet approved. Not for sale or sharing as official brand artwork."
+                         : "30 fragrances, 30 illustrated collector cards. Browse the season without adding anything to your owned collection.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -153,12 +164,18 @@ struct AutumnArchiveDetail: View {
                     }
                     .buttonStyle(.bordered)
 
-                    ShareLink(item: AutumnCardPNG(card: card),
-                              preview: SharePreview(card.name, image: Image(systemName: "rectangle.portrait"))) {
-                        Label("Share card", systemImage: "square.and.arrow.up")
+                    if !Fall2026Collection.internalProofBuild {
+                        ShareLink(item: AutumnCardPNG(card: card),
+                                  preview: SharePreview(card.name, image: Image(systemName: "rectangle.portrait"))) {
+                            Label("Share card", systemImage: "square.and.arrow.up")
+                        }
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Label("Internal proof · not approved for distribution", systemImage: "exclamationmark.shield")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.bottom, 12)
+                    Spacer(minLength: 12)
                 }
                 .padding(.top, 16)
             }

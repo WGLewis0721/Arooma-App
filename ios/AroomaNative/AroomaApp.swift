@@ -22,16 +22,20 @@ struct AroomaNativeApp: App {
 }
 
 private enum AtelierTab: Hashable {
-    case gallery, shelves, journal, cards, search
+    case gallery, journal, cards, search
 }
 
 struct AtelierRoot: View {
     @EnvironmentObject private var archive: CollectionStore
+    @EnvironmentObject private var commerce: CardCommerce
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var tab: AtelierTab = .gallery
     @State private var inspection: DisplayCard?
     @State private var adding = false
+    /// The tab that opened Quick Add. A normal save returns here (item 05).
+    @State private var addOrigin: AtelierTab = .gallery
     @State private var styling = false
+    @State private var showingShelves = false
     @State private var startingWearBottle: UUID?
     @Namespace private var cardSpace
 
@@ -76,10 +80,31 @@ struct AtelierRoot: View {
         .sheet(isPresented: $adding) {
             QuickAddSheet(onAdded: {
                 adding = false
-                tab = .gallery
+                // Return to the screen the user came from; never a forced detour (item 05).
+                tab = addOrigin
             })
             .environmentObject(archive)
             .presentationDetents([.large])
+        }
+        // The one editable shelf surface, one tap from Collection (item 03). Replaces the
+        // separate top-level Shelves tab, which was retired after this surface took over its actions.
+        .sheet(isPresented: $showingShelves) {
+            NavigationStack {
+                AtelierShelves(focus: { card in
+                    select(card)
+                    showingShelves = false
+                    tab = .gallery
+                }, add: { startAdd(from: .gallery) })
+                .navigationTitle("Shelves")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done", systemImage: "checkmark") { showingShelves = false }
+                    }
+                }
+            }
+            .environmentObject(archive)
+            .environmentObject(commerce)
         }
     }
 
@@ -89,20 +114,18 @@ struct AtelierRoot: View {
                 AtelierGallery(
                     transitionNamespace: cardSpace,
                     inspect: { card in inspection = card },
-                    add: { adding = true },
+                    add: { startAdd(from: .gallery) },
                     openStyle: { styling = true },
+                    openShelves: { showingShelves = true },
                     showToday: { bottleID in
                         startingWearBottle = bottleID
                         tab = .journal
                     }
                 )
             }
-            Tab("Shelves", systemImage: "books.vertical", value: AtelierTab.shelves) {
-                AtelierShelves(focus: focus, add: { adding = true })
-            }
             Tab("Today", systemImage: "drop", value: AtelierTab.journal) {
                 AtelierWearLog(startingBottleID: $startingWearBottle,
-                               add: { adding = true }, focus: focus)
+                               add: { startAdd(from: .journal) }, focus: focus)
             }
             Tab("Cards", systemImage: "rectangle.portrait.on.rectangle.portrait", value: AtelierTab.cards) {
                 MyCardsScreen(openLiveArchive: {
@@ -112,15 +135,25 @@ struct AtelierRoot: View {
                 })
             }
             Tab(value: AtelierTab.search, role: .search) {
-                AtelierSearch(focus: { card in focus(card) })
+                // A result opens its Inspector directly; Close returns to Search with query and filters kept (item 01).
+                AtelierSearch(focus: { card in
+                    select(card)
+                    inspection = card
+                })
             }
         }
         .legibleTint(archive.theme.palette.accent)
         .tabBarMinimizeBehavior(.onScrollDown)
-        .tabViewBottomAccessory {
+        // The accessory links to Today; it is hidden while Today is the selected tab so it never links to itself (item 08).
+        .tabViewBottomAccessory(isEnabled: tab != .journal) {
             TodayAccessory(open: { tab = .journal })
                 .environmentObject(archive)
         }
+    }
+
+    private func startAdd(from origin: AtelierTab) {
+        addOrigin = origin
+        adding = true
     }
 
     /// Launch arguments used only by the CI capture script to photograph specific screens
@@ -128,7 +161,7 @@ struct AtelierRoot: View {
     private func applyQALaunchArguments() {
         let defaults = UserDefaults.standard
         switch defaults.string(forKey: "AroomaQATab") {
-        case "shelves": tab = .shelves
+        case "shelves": showingShelves = true
         case "journal": tab = .journal
         default: break
         }
@@ -150,7 +183,14 @@ struct AtelierRoot: View {
 
     /// Brings a card to the front in the deck that holds it. Never changes ownership: a catalog
     /// fragrance you don't own opens in the sample archive instead of being added.
+    /// Brings a card to the front in the deck that holds it, and shows the Collection tab.
     private func focus(_ card: DisplayCard) {
+        select(card)
+        tab = .gallery
+    }
+
+    /// Selects a card in the right collection without changing tabs.
+    private func select(_ card: DisplayCard) {
         let f = card.fragrance.id
         let ownedID = card.bottleID ?? archive.bottles.first(where: { $0.fragranceID == f })?.id
         let wishID = card.wishID ?? archive.wishlist.first(where: { $0.fragranceID == f })?.id
@@ -167,7 +207,6 @@ struct AtelierRoot: View {
             archive.mode = .demo
             archive.selectedDemoID = f
         }
-        tab = .gallery
     }
 }
 

@@ -1,0 +1,18 @@
+# A one-step save can be undone; the bottle does not stay in the collection.
+appId: com.graymatter.arooma
+tags:
+  - quick-add
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Undo Test Scent"
+- tapOn:
+    id: "direct-collection"
+- assertVisible: "Added to your collection"
+- tapOn:
+    id: "direct-undo"
+- assertNotVisible: "Added to your collection"
+- assertVisible: "Undo Test Scent"

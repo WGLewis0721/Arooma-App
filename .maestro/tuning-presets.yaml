@@ -1,10 +1,16 @@
 # Owner tools: long-press Version opens Tuning in Debug and TestFlight builds only.
 appId: com.graymatter.arooma
+tags:
+  - owner-tools
 ---
 - launchApp:
     clearState: true
 - tapOn: "Explore the Archive"
-- tapOn: "View and style"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Version.*"
+    direction: DOWN
 - longPressOn: "Version.*"
 - assertVisible: "Vivid Holo"
 - assertVisible: "Quick adjust"

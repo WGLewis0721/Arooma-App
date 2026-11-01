@@ -124,8 +124,18 @@ struct QuickAddSheet: View {
     @State private var reading = false
     @State private var photoFailed = false
     @State private var reviewing = false
+    /// A one-step save in progress: the result, plus what Undo must restore.
+    @State private var direct: ScanReview.Commit?
+    @State private var directSnapshot = CaptureDraft()
+    @State private var directPrevious: CollectionMode = .mine
+    @State private var directToken = UUID()
     @FocusState private var typing: Bool
     let onAdded: () -> Void
+
+    /// A plain typed name: no photo and no label text to verify, so it can be saved in one step (item 02).
+    private var isSimpleName: Bool {
+        draft.photoFileName == nil && draft.recognized.isEmpty && !trimmed.isEmpty
+    }
 
     private var trimmed: String { draft.name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var pool: [Fragrance] { Fragrance.catalog + archive.customFragrances }
@@ -239,13 +249,35 @@ struct QuickAddSheet: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) {
-            Button(action: review) {
-                Label("Review", systemImage: "rectangle.portrait.and.arrow.right")
-                    .font(.headline).frame(maxWidth: .infinity, minHeight: 40)
+            Group {
+                if let direct {
+                    directConfirmation(direct)
+                } else if isSimpleName {
+                    HStack(spacing: 10) {
+                        Button { saveDirect(.wishlist) } label: {
+                            Label("Wishlist", systemImage: "heart").frame(maxWidth: .infinity, minHeight: 40)
+                        }
+                        .buttonStyle(.glass)
+                        .accessibilityIdentifier("direct-wishlist")
+                        Button { saveDirect(.collection) } label: {
+                            Label("Collection", systemImage: "checkmark.seal").font(.headline)
+                                .frame(maxWidth: .infinity, minHeight: 40)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .legibleTint(archive.theme.palette.accent)
+                        .accessibilityIdentifier("direct-collection")
+                    }
+                } else {
+                    Button(action: review) {
+                        Label("Review", systemImage: "rectangle.portrait.and.arrow.right")
+                            .font(.headline).frame(maxWidth: .infinity, minHeight: 40)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .legibleTint(archive.theme.palette.accent)
+                    .disabled(draft.isEmpty && draft.matchedID == nil)
+                    .accessibilityIdentifier("quick-add-review")
+                }
             }
-            .buttonStyle(.glassProminent)
-            .legibleTint(archive.theme.palette.accent)
-            .disabled(draft.isEmpty && draft.matchedID == nil)
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
         }
@@ -343,6 +375,63 @@ struct QuickAddSheet: View {
         }
     }
 
+    /// One-step save for a plain name. Undo restores the draft and the previous collection view.
+    private func saveDirect(_ destination: ScanReview.Destination) {
+        guard direct == nil, isSimpleName else { return }
+        typing = false
+        let snapshot = draft
+        let previous = archive.mode
+        guard let result = ScanCommit.perform(destination, draft: draft, matched: matched, archive: archive) else { return }
+        directSnapshot = snapshot
+        directPrevious = previous
+        direct = result
+        CaptureDraft.clear()
+        draft = CaptureDraft()
+        let token = UUID()
+        directToken = token
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(4))
+            if direct != nil && directToken == token { finishDirect() }
+        }
+    }
+
+    private func undoDirect() {
+        guard let result = direct else { return }
+        archive.undoCapture(bottleID: result.bottleID, wishID: result.wishID, createdFragranceID: result.createdFragranceID)
+        archive.mode = directPrevious
+        draft = directSnapshot
+        draft.save()
+        direct = nil
+    }
+
+    private func finishDirect() {
+        guard direct != nil else { return }
+        direct = nil
+        draft = CaptureDraft()
+        CaptureDraft.clear()
+        onAdded()
+        dismiss()
+    }
+
+    @ViewBuilder private func directConfirmation(_ result: ScanReview.Commit) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: result.destination == .collection ? "checkmark.seal.fill" : "heart.fill")
+                .foregroundStyle(archive.theme.palette.accent)
+            Text(result.alreadyThere ? "Already there — selected it"
+                 : (result.destination == .collection ? "Added to your collection" : "Saved to your Wishlist"))
+                .font(.subheadline.weight(.medium))
+            Spacer(minLength: 0)
+            Button("Undo", action: undoDirect)
+                .font(.subheadline.weight(.semibold))
+                .accessibilityIdentifier("direct-undo")
+            Button("Done", action: finishDirect)
+                .font(.subheadline)
+                .accessibilityIdentifier("direct-done")
+        }
+        .padding(12)
+        .glassEffect(.regular, in: Capsule())
+    }
+
     private func review() {
         guard !draft.isEmpty || draft.matchedID != nil else { return }
         typing = false
@@ -398,6 +487,40 @@ struct CapturePreviewCard: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityLabel("Preview of \(fragrance.name)")
+    }
+}
+
+// MARK: - Shared save path
+//
+// Both the review card and the one-step Quick Add save call this, so a destination means exactly
+// the same thing everywhere: same identity rules, notes, source, photo and Wishlist transfer.
+
+enum ScanCommit {
+    @MainActor
+    static func perform(_ destination: ScanReview.Destination, draft: CaptureDraft,
+                        matched: Fragrance?, archive: CollectionStore) -> ScanReview.Commit? {
+        var created: String?
+        let fragrance: Fragrance
+        if let matched {
+            fragrance = matched
+        } else if let f = archive.makePersonalFragrance(name: draft.name, house: draft.house, photoFileName: draft.photoFileName) {
+            fragrance = f
+            created = f.id
+        } else { return nil }
+        let photoForRecord = matched == nil ? nil : draft.photoFileName
+        switch destination {
+        case .collection:
+            let already = archive.isOwned(fragrance.id)
+            let id = archive.addOwned(fragrance, notes: draft.notes, source: draft.source, photoFileName: photoForRecord)
+            return ScanReview.Commit(destination: .collection, bottleID: already ? nil : id, wishID: nil,
+                                     createdFragranceID: created, alreadyThere: already)
+        case .wishlist:
+            let already = archive.isWishlisted(fragrance.id)
+            let entry = archive.addToWishlist(fragrance, source: draft.source, notes: draft.notes, photoFileName: photoForRecord)
+            archive.mode = .wishlist
+            return ScanReview.Commit(destination: .wishlist, bottleID: nil, wishID: already ? nil : entry.id,
+                                     createdFragranceID: created, alreadyThere: already)
+        }
     }
 }
 
@@ -466,10 +589,12 @@ struct ScanReview: View {
                     Button { commit(.wishlist) } label: {
                         Label("Wishlist", systemImage: "heart").frame(maxWidth: .infinity, minHeight: 36)
                     }
+                    .accessibilityIdentifier("scan-wishlist")
                     .buttonStyle(.glass)
                     Button { commit(.collection) } label: {
                         Label("Collection", systemImage: "checkmark.seal").frame(maxWidth: .infinity, minHeight: 36)
                     }
+                    .accessibilityIdentifier("scan-collection")
                     .buttonStyle(.glassProminent)
                     .legibleTint(accent)
                 }
@@ -586,7 +711,9 @@ struct ScanReview: View {
                 .font(.subheadline.weight(.medium))
             Spacer()
             Button("Undo") { undo(c) }.font(.subheadline.weight(.semibold))
-            Button("Done") { finish() }.font(.subheadline)
+            Button("Done") { finish() }
+                .font(.subheadline)
+                .accessibilityIdentifier("scan-done")
         }
         .padding(12)
         .glassEffect(.regular, in: Capsule())
@@ -598,28 +725,8 @@ struct ScanReview: View {
     private func commit(_ destination: Destination) {
         guard committed == nil else { return } // one commit per gesture or tap
         previousMode = archive.mode
-        var created: String?
-        let fragrance: Fragrance
-        if let matched {
-            fragrance = matched
-        } else if let f = archive.makePersonalFragrance(name: draft.name, house: draft.house, photoFileName: draft.photoFileName) {
-            fragrance = f
-            created = f.id
-        } else { return }
-        let photoForRecord = matched == nil ? nil : draft.photoFileName
-        switch destination {
-        case .collection:
-            let already = archive.isOwned(fragrance.id)
-            let id = archive.addOwned(fragrance, notes: draft.notes, source: draft.source, photoFileName: photoForRecord)
-            committed = Commit(destination: .collection, bottleID: already ? nil : id, wishID: nil,
-                               createdFragranceID: created, alreadyThere: already)
-        case .wishlist:
-            let already = archive.isWishlisted(fragrance.id)
-            let entry = archive.addToWishlist(fragrance, source: draft.source, notes: draft.notes, photoFileName: photoForRecord)
-            archive.mode = .wishlist
-            committed = Commit(destination: .wishlist, bottleID: nil, wishID: already ? nil : entry.id,
-                               createdFragranceID: created, alreadyThere: already)
-        }
+        guard let result = ScanCommit.perform(destination, draft: draft, matched: matched, archive: archive) else { return }
+        committed = result
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             offset = CGSize(width: destination == .collection ? 420 : -420, height: 0)
         }

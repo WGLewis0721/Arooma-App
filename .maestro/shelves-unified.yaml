@@ -1,0 +1,17 @@
+# One tap from Collection opens the editable shelf surface; rename can be cancelled and Done returns.
+appId: com.graymatter.arooma
+tags:
+  - shelves
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "all-shelves"
+- assertVisible: "The shelves"
+- tapOn: "Rename Autumn"
+- assertVisible: "Rename shelf"
+- tapOn: "Cancel"
+- tapOn: "Done"
+- assertVisible: "Add to my collection"

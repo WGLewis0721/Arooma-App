@@ -1,0 +1,19 @@
+# Clean install: a typed name saved to the Collection appears once and survives a relaunch.
+appId: com.graymatter.arooma
+tags:
+  - quick-add
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Quick Test Owned"
+- tapOn:
+    id: "direct-collection"
+- assertVisible: "Added to your collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible: "Quick Test Owned"
+- launchApp
+- assertVisible: "Quick Test Owned"

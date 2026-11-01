@@ -1,0 +1,19 @@
+# View & Style shows its grouped sections once, including a single About disclosure.
+appId: com.graymatter.arooma
+tags:
+  - style
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- assertVisible: "Arrangement"
+- assertVisible: "Atmosphere"
+- scrollUntilVisible:
+    element: "Card lighting"
+    direction: DOWN
+- scrollUntilVisible:
+    element: "About"
+    direction: DOWN
+- tapOn: "Done"

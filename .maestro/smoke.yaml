@@ -1,13 +1,17 @@
-# Smoke: a first-run user can enter the archive and reach every main tab.
+# Smoke: a first-run user enters the archive, opens the one shelf surface and reaches the other tabs.
 appId: com.graymatter.arooma
+tags:
+  - smoke
 ---
 - launchApp:
     clearState: true
 - assertVisible: "Explore the Archive"
 - tapOn: "Explore the Archive"
 - assertVisible: "Add to my collection"
-- tapOn: "Shelves"
+- tapOn:
+    id: "all-shelves"
 - assertVisible: "The shelves"
+- tapOn: "Done"
 - tapOn: "Today"
 - assertVisible: "What are you wearing?"
 - tapOn: "Cards"

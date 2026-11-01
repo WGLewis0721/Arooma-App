@@ -764,14 +764,7 @@ struct AtelierStyle: View {
                 }
                 .buttonStyle(.glass)
                 .accessibilityLabel("Show the Arooma signature")
-                DisclosureGroup("About this archive") {
-                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it switches off in Low Power Mode and with Reduce Motion.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                        .padding(.top, 6)
-                }
-                .font(.footnote)
-                .padding(15)
-                .atelierPlate(16)
+                // Grouped: Layout · Appearance & atmosphere · Card lighting · About (item 18).
                 AtelierEyebrow(text: "Card lighting", accent: archive.theme.palette.accent)
                 Button {
                     MotionField.shared.recenter()
@@ -787,6 +780,7 @@ struct AtelierStyle: View {
                 if StylizedCardSettings.licensedSourceAvailable || BuildChannel.allowsOwnerTools {
                     StylizedCardSettings()
                 }
+                AtelierEyebrow(text: "About", accent: archive.theme.palette.accent)
                 DisclosureGroup("About this archive") {
                     Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it holds still with Reduce Motion and switches off in Low Power Mode.")
                         .font(.footnote).foregroundStyle(.secondary)

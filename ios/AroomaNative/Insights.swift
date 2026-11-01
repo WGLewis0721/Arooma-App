@@ -294,6 +294,8 @@ struct InsightPanel: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     let card: DisplayCard
     let expanded: Bool
@@ -351,14 +353,29 @@ struct InsightPanel: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .foregroundStyle(ink)
         .background {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(LinearGradient(colors: [plate, surface, plate.opacity(0.96)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 28)
-                        .strokeBorder(.white.opacity(scheme == .dark ? 0.10 : 0.67), lineWidth: 1)
-                }
+            // Frosted: a native material shows the card behind the tray. Reduce Transparency and
+            // Increase Contrast get the opaque plate instead, so text never depends on blur.
+            let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
+            let gradient = LinearGradient(colors: [plate, surface, plate.opacity(0.96)],
+                                          startPoint: .topLeading, endPoint: .bottomTrailing)
+            if reduceTransparency || contrast == .increased {
+                shape.fill(gradient)
+            } else {
+                shape.fill(.regularMaterial)
+                    .overlay { shape.fill(gradient).opacity(0.78) }
+            }
         }
+        .overlay {
+            // Hairline rim with a light top edge, as on a glass lip.
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(colors: [.white.opacity(scheme == .dark ? 0.26 : 0.8),
+                                            .white.opacity(scheme == .dark ? 0.06 : 0.25)],
+                                   startPoint: .top, endPoint: .bottom),
+                    lineWidth: 0.8)
+                .allowsHitTesting(false)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .shadow(color: .black.opacity(scheme == .dark ? 0.3 : 0.13), radius: 18, y: -5)
     }
 

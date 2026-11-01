@@ -58,8 +58,7 @@ workflows:
         script: |
           set -euo pipefail
           cd "$CM_BUILD_DIR"
-          python3 -m pip install --quiet 'Pillow>=10,<13'
-          python3 scripts/stage_fall_candidates.py
+          # Proof JPEGs are stored in this repository. No runtime URL or model call.
           python3 scripts/prepare_fall_testflight.py
           python3 - <<'PY'
           from pathlib import Path

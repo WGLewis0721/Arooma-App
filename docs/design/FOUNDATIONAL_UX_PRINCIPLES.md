@@ -1,5 +1,7 @@
 # Arooma | Foundational UX and Web Design Principles
 
+> Summary: Arooma's seven fundamentals and ten UX laws translated into measurable, native iOS card and ownership interactions.
+
 > Part of the Arooma design brain. Start at [README.md](README.md) for the design router and authoritative task packs.
 
 **Status:** cross-product UX standard for the native SwiftUI iOS app. This guidance is not permission to alter approved collectible art, add features, revive the retired PWA, or change storage or release flows.

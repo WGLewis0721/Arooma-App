@@ -23,6 +23,7 @@ extension CardLayout {
 struct AtelierGallery: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var scheme
 
     @State private var motor = DeckMotor()
     @State private var tuning = Tuning.shared
@@ -50,6 +51,8 @@ struct AtelierGallery: View {
 
     private var cards: [DisplayCard] { archive.displayedCards }
     private var accent: Color { archive.theme.palette.accent }
+    /// The accent as readable ink (deepened in light mode) for text on the light field.
+    private var ink: Color { archive.theme.ink(scheme) }
     private var storedIndex: Int {
         cards.firstIndex(where: { $0.id == archive.selected?.id }) ?? 0
     }
@@ -81,7 +84,7 @@ struct AtelierGallery: View {
                         .offset(y: -18 * min(insight, 1))
                         .layoutPriority(1)
                     insightGrabber
-                    DeckScrubber(count: cards.count, position: motor.position, accent: accent) { index in
+                    DeckScrubber(count: cards.count, position: motor.position, accent: ink) { index in
                         understoodDeck = true
                         motor.glide(to: index)
                     }
@@ -154,8 +157,12 @@ struct AtelierGallery: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 0) {
-                AroomaSignatureMark(ink: accent)
-                    .frame(height: 30)
+                // Wordmark: deep theme ink in light mode, with a letterpress catch-light
+                // underneath so it reads as pressed into the paper rather than faded on it.
+                AroomaSignatureMark(ink: ink)
+                    .frame(height: 32)
+                    .shadow(color: scheme == .light ? .white.opacity(0.9) : .clear, radius: 0, x: 0, y: 1)
+                    .shadow(color: scheme == .light ? .black.opacity(0.12) : .clear, radius: 1.5, x: 0, y: -0.5)
                     .accessibilityElement()
                     .accessibilityLabel("Arooma")
                     .accessibilityAddTraits(.isHeader)
@@ -164,16 +171,22 @@ struct AtelierGallery: View {
                     Button("Wishlist", systemImage: "heart.text.square") { closeInsight(); archive.enter(.wishlist) }
                     Button("Explore sample cards", systemImage: "sparkles") { closeInsight(); archive.enter(.demo) }
                 } label: {
-                    HStack(spacing: 5) {
+                    // A real control: a small glass chip with full-contrast text and a theme dot.
+                    HStack(spacing: 6) {
+                        Circle().fill(ink).frame(width: 6, height: 6)
                         Text(modeTitle)
                         Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
                     }
-                    .font(.system(size: 10, weight: .semibold))
-                    .tracking(1.6)
-                    .foregroundStyle(.secondary)
-                    .frame(minHeight: 30)
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(1.4)
+                    .foregroundStyle(Color.primary.opacity(0.82))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .glassEffect(.regular, in: Capsule())
+                    .frame(minHeight: 34)
                     .contentShape(Rectangle())
                 }
+                .tint(.primary)
                 .accessibilityLabel("Showing \(modeTitle.lowercased())")
             }
             Spacer(minLength: 4)
@@ -498,8 +511,8 @@ struct AtelierGallery: View {
         return VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline) {
                 Text(card?.fragrance.house.uppercased() ?? "")
-                    .font(.system(size: 10, weight: .semibold)).tracking(2.1)
-                    .foregroundStyle(accent)
+                    .font(.system(size: 11, weight: scheme == .light ? .bold : .semibold)).tracking(2.1)
+                    .foregroundStyle(ink)
                     .lineLimit(1)
                 Spacer()
                 HStack(spacing: 2) {
@@ -546,7 +559,7 @@ struct AtelierGallery: View {
                             .frame(maxWidth: .infinity, minHeight: 34)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(accent)
+                    .legibleTint(accent)
                     Button { showToday(bottleID) } label: {
                         Label("Layer", systemImage: "square.stack.3d.up")
                             .font(.subheadline.weight(.semibold))
@@ -561,7 +574,7 @@ struct AtelierGallery: View {
                             .frame(maxWidth: .infinity, minHeight: 34)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(accent)
+                    .legibleTint(accent)
                 } else {
                     Button { archive.add(card.fragrance) } label: {
                         Label("Add to my collection", systemImage: "plus")
@@ -569,7 +582,7 @@ struct AtelierGallery: View {
                             .frame(maxWidth: .infinity, minHeight: 34)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(accent)
+                    .legibleTint(accent)
                 }
                 Button { inspect(card) } label: {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
@@ -915,7 +928,7 @@ struct AtelierInspector: View {
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     Text(row.0)
                         .font(.system(size: 9, weight: .bold)).tracking(1.4)
-                        .foregroundStyle(palette.accent)
+                        .legibleForeground(palette.accent)
                         .frame(width: 44, alignment: .leading)
                     Text(row.1.joined(separator: "  ·  "))
                         .font(.footnote)
@@ -981,7 +994,7 @@ struct AtelierInspector: View {
                         .frame(maxWidth: .infinity, minHeight: 36)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(palette.accent)
+                .legibleTint(palette.accent)
                 Button { editing = bottle } label: {
                     Label("Details", systemImage: "square.and.pencil")
                         .font(.subheadline.weight(.semibold))
@@ -1004,7 +1017,7 @@ struct AtelierInspector: View {
                         .frame(maxWidth: .infinity, minHeight: 36)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(palette.accent)
+                .legibleTint(palette.accent)
             }
             Button { flip.flip() } label: {
                 Image(systemName: "arrow.triangle.2.circlepath")

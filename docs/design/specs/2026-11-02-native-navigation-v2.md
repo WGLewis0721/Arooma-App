@@ -9,7 +9,7 @@ Summary: Arooma's SwiftUI app moves from four tabs (Collection, Today, Cards, Se
 | Branch | `feat/native-navigation-v2`, from `origin/main` at `4b9e75c` |
 | Scope | `ios/AroomaNative/` (navigation shell, deck, Today and Search entry), `.maestro/`, design docs |
 | Not in scope | Build-notes popup, bundle ID, Codemagic or TestFlight, signing, deployment, changes to persisted records, artwork or the PWA |
-| Status | Implemented; simulator evidence collected on the GitHub macOS runner. Not merged. |
+| Status | Implemented and merged (#39). **Superseded in part by [V3](2026-11-02-native-navigation-v3.md):** the tab set (Explore, My Collection, Search; no Today tab), Search as a tab, the Today accessory, My Cards and Card Studio as visible UI, the "no tab long-press" rule and the removal of the wordmark. V2's Explore declutter, frosted trays and preservation rules still apply. |
 
 ## Information architecture
 

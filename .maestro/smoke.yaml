@@ -1,0 +1,14 @@
+# Smoke: a first-run user can enter the archive and reach every main tab.
+appId: com.graymatter.arooma
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Explore the Archive"
+- tapOn: "Explore the Archive"
+- assertVisible: "Add to my collection"
+- tapOn: "Shelves"
+- assertVisible: "The shelves"
+- tapOn: "Today"
+- assertVisible: "What are you wearing?"
+- tapOn: "Cards"
+- assertVisible: "My Cards"

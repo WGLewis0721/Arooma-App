@@ -1,0 +1,27 @@
+# Before capture for Native Navigation V2 (runs on main, before the change). Screenshots only.
+appId: com.graymatter.arooma
+tags:
+  - before-capture
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- takeScreenshot: before-01-explore-deck
+- tapOn: "Showing sample archive"
+- takeScreenshot: before-02-square-mode-menu
+- tapOn: "Explore sample cards"
+- swipe:
+    direction: UP
+- takeScreenshot: before-03-insights-tray
+- swipe:
+    direction: DOWN
+- tapOn:
+    id: "all-shelves"
+- takeScreenshot: before-04-all-shelves
+- tapOn: "Done"
+- tapOn: "Today"
+- takeScreenshot: before-05-today
+- tapOn: "Cards"
+- takeScreenshot: before-06-cards
+- tapOn: "Search"
+- takeScreenshot: before-07-search

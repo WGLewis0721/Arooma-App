@@ -62,7 +62,7 @@ B00000000000000000000023 = {isa=PBXFileReference; lastKnownFileType=sourcecode.s
 B00000000000000000000024 = {isa=PBXFileReference; lastKnownFileType=sourcecode.swift; path=Commercial.swift; sourceTree="<group>"; };
 B00000000000000000000026 = {isa=PBXFileReference; lastKnownFileType=sourcecode.swift; path=StudioPhotoFilters.swift; sourceTree="<group>"; };
 B00000000000000000000027 = {isa=PBXFileReference; lastKnownFileType=sourcecode.swift; path=Fall2026.swift; sourceTree="<group>"; };
-B00000000000000000000028 = {isa=PBXFileReference; lastKnownFileType=text.json; name=Fall2026Catalog.json; path=../assets/collectibles/seasons/fall-2026/catalog.json; sourceTree=SOURCE_ROOT; };
+B00000000000000000000028 = {isa=PBXFileReference; lastKnownFileType=text.json; name=catalog.json; path=../assets/collectibles/seasons/fall-2026/catalog.json; sourceTree=SOURCE_ROOT; };
 B00000000000000000000025 = {isa=PBXFileReference; lastKnownFileType=text.xml; path=PrivacyInfo.xcprivacy; sourceTree="<group>"; };
 /* End PBXFileReference section */
 

@@ -24,6 +24,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Confirm Xcode
         run: xcodebuild -version
+      - name: Package the 30 fall image sets for private Debug QA
+        run: |
+          python3 scripts/prepare_fall_testflight.py
+          test "$(find ios/AroomaNative/Assets.xcassets -maxdepth 1 -name 'fall2026-*.imageset' | wc -l | tr -d ' ')" -eq 30
       - name: Compile native iOS simulator app (unsigned)
         run: |
           set -o pipefail
@@ -36,28 +40,23 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/AroomaBuild" \
             CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-build.log"
           test -d "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
-      - name: Verify 30 live card fronts are bundled in the normal native app
+      - name: Verify all 30 live cards are compiled into the private app's Asset Catalog
         run: |
           set -euo pipefail
           app="$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
           test -f "$app/catalog.json"
-          test -d "$app/proofs"
-          python3 - "$app" <<'PY'
+          test -f "$app/Assets.car"
+          xcrun --sdk iphonesimulator assetutil --info "$app/Assets.car" > "$RUNNER_TEMP/arooma-assets.json"
+          python3 - "$RUNNER_TEMP/arooma-assets.json" <<'PY'
           import json, pathlib, sys
-          bundle = pathlib.Path(sys.argv[1])
-          manifest = json.loads((bundle / "catalog.json").read_text())
-          cards = manifest["cards"]
-          assert len(cards) == 30, f"Expected 30 cards, got {len(cards)}"
-          for card in cards:
-              asset = bundle / "proofs" / (card["id"] + ".jpg")
-              assert asset.is_file() and asset.stat().st_size > 20000, f"Missing artwork {asset}"
-          print("All 30 uniquely named live cards and catalog are embedded.")
+          assets = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          names = {item.get("Name") for item in assets if isinstance(item, dict)}
+          manifest = json.loads(pathlib.Path("assets/collectibles/seasons/fall-2026/catalog.json").read_text())
+          expected = {"fall2026-" + item["id"] for item in manifest["cards"]}
+          missing = expected - names
+          assert len(expected) == 30 and not missing, f"Uncompiled fall card images: {sorted(missing)}"
+          print("Verified 30 of 30 uniquely named fall images inside the compiled native app.")
           PY
-      - name: Stage 30 offline proof images for internal-release compiler verification
-        if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
-        run: |
-          python3 scripts/prepare_fall_testflight.py
-          test "$(find ios/AroomaNative/Assets.xcassets -maxdepth 1 -name 'fall2026-*.imageset' | wc -l)" -eq 30
       - name: Compile internal TestFlight proof configuration (unsigned)
         if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
         run: |

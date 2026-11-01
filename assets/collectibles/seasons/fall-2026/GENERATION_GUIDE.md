@@ -2,6 +2,8 @@
 
 > Part of the [Arooma design map](../../../../docs/design/README.md). Applies to **new 59:86 card fronts** only. The owner-approved MYSLF card and locked [Archive Foil v3 direction](../../../../docs/design/brand/COLLECTIBLE_CARD_ART_DIRECTION.md) are quality references. Commercial rights review is mandatory.
 
+**Quantified finish criteria:** Read [QUALITY_STANDARD.md](QUALITY_STANDARD.md) before rendering, correction and acceptance. A generated candidate is not complete simply because it looks polished. The minimum is 90/100 from two separate reviewers, every scored-category minimum, exact product identity, correct text, a fully visible 59:86 canvas, and approved artwork provenance. `node scripts/check-fall-archive.mjs --release` enforces the recorded reviewer fields and image packaging.
+
 ## Required inputs
 
 Read the selected item in [catalog.json](catalog.json):

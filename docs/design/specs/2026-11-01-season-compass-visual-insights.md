@@ -1,5 +1,7 @@
 # Arooma: Season Compass visual Insights (owner-approved reference)
 
+> Part of the [Arooma design map](../README.md). Follow the existing native implementation and reference-coverage rules.
+
 > Owner picked the **Layton Season Compass phone mockup** shown on 2026-11-01 and instructed: "Make them all look like that." This is a native SwiftUI implementation specification for every fragrance's Insights sheet, not a request to rewrite collectible card fronts or backs. The image shared in chat is the visual authority; the native layout below should be compared to that screenshot on an iPhone before claiming a visually verified match.
 
 ## Reference coverage matrix

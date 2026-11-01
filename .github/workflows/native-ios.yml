@@ -36,9 +36,29 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/AroomaBuild" \
             CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-build.log"
           test -d "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
+      - name: Stage 30 offline proof images for internal-release compiler verification
+        if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
+        run: |
+          python3 scripts/prepare_fall_testflight.py
+          test "$(find ios/AroomaNative/Assets.xcassets -maxdepth 1 -name 'fall2026-*.imageset' | wc -l)" -eq 30
+      - name: Compile internal TestFlight proof configuration (unsigned)
+        if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/AroomaNative.xcodeproj \
+            -scheme AroomaNative \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/AroomaProofBuild" \
+            SWIFT_ACTIVE_COMPILATION_CONDITIONS=AROOMA_INTERNAL_PREVIEW \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-proof-build.log"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Arooma-native-compile-log
-          path: ${{ runner.temp }}/arooma-build.log
+          path: |
+            ${{ runner.temp }}/arooma-build.log
+            ${{ runner.temp }}/arooma-proof-build.log
           retention-days: 7

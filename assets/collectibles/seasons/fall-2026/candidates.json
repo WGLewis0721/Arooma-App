@@ -1,0 +1,314 @@
+{
+  "collectionID": "fall-2026-men",
+  "version": 1,
+  "note": "AI-generated concept art candidates only. Do not distribute as licensed finished brand cards; verify exact product packaging, spelling, rights and review score before release.",
+  "model": "gpt_image_2",
+  "generationSettings": {
+    "resolution": "2k",
+    "quality": "high",
+    "aspectRatio": "2:3"
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "id": "armani-swy-intensely",
+      "name": "Stronger With You Intensely",
+      "house": "Giorgio Armani",
+      "job_id": "33d3a2c9-c9f8-46cb-9d30-63d53973d0b9",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044140_33d3a2c9-c9f8-46cb-9d30-63d53973d0b9.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 2,
+      "id": "spicebomb-extreme",
+      "name": "Spicebomb Extreme",
+      "house": "Viktor&Rolf",
+      "job_id": "6dba2a6e-9c08-43ca-9009-66b2b3c31e95",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044141_6dba2a6e-9c08-43ca-9009-66b2b3c31e95.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 3,
+      "id": "azzaro-most-wanted-parfum",
+      "name": "The Most Wanted Parfum",
+      "house": "Azzaro",
+      "job_id": "b73204af-2fa8-411f-9963-8db9b4f0c679",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044141_b73204af-2fa8-411f-9963-8db9b4f0c679.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 4,
+      "id": "jpg-le-male-le-parfum",
+      "name": "Le Male Le Parfum",
+      "house": "Jean Paul Gaultier",
+      "job_id": "e95285f6-f9ba-4eb1-a597-d8823d300b83",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044424_e95285f6-f9ba-4eb1-a597-d8823d300b83.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 5,
+      "id": "dior-homme-intense",
+      "name": "Dior Homme Intense",
+      "house": "Dior",
+      "job_id": "f5bec980-6b92-4581-b426-b63720e50a7f",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044141_f5bec980-6b92-4581-b426-b63720e50a7f.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 6,
+      "id": "jpg-le-male-elixir",
+      "name": "Le Male Elixir",
+      "house": "Jean Paul Gaultier",
+      "job_id": "ff5599e8-9040-4ecb-a101-e2a772138e23",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044424_ff5599e8-9040-4ecb-a101-e2a772138e23.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 7,
+      "id": "dior-sauvage-elixir",
+      "name": "Sauvage Elixir",
+      "house": "Dior",
+      "job_id": "d05c1cf8-9c0c-46e3-88f6-4bcae04286de",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044424_d05c1cf8-9c0c-46e3-88f6-4bcae04286de.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 8,
+      "id": "kilian-angels-share",
+      "name": "Angels' Share",
+      "house": "Kilian",
+      "job_id": "3d1835e0-117c-46c2-aae1-d1cdafad2410",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044425_3d1835e0-117c-46c2-aae1-d1cdafad2410.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 9,
+      "id": "givenchy-reserve-privee",
+      "name": "Gentleman Réserve Privée",
+      "house": "Givenchy",
+      "job_id": "a483518e-2508-4dd6-b084-b273a9f75e42",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044609_a483518e-2508-4dd6-b084-b273a9f75e42.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 10,
+      "id": "tom-ford-tobacco-vanille",
+      "name": "Tobacco Vanille",
+      "house": "Tom Ford",
+      "job_id": "d61ad272-7f5e-41fe-a610-5caa5992c9da",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044610_d61ad272-7f5e-41fe-a610-5caa5992c9da.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 11,
+      "id": "replica-jazz-club",
+      "name": "REPLICA Jazz Club",
+      "house": "Maison Margiela",
+      "job_id": "94fd2a50-3d28-4c09-a417-d5a2c15e17aa",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044609_94fd2a50-3d28-4c09-a417-d5a2c15e17aa.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 12,
+      "id": "valentino-bir-intense",
+      "name": "Uomo Born in Roma Intense",
+      "house": "Valentino",
+      "job_id": "5e229f87-9041-45aa-84fe-3efef63af71e",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044610_5e229f87-9041-45aa-84fe-3efef63af71e.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 13,
+      "id": "tom-ford-noir-extreme",
+      "name": "Noir Extreme",
+      "house": "Tom Ford",
+      "job_id": "05dea3a2-5cc1-499d-8b0b-4f759d5f8caf",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044752_05dea3a2-5cc1-499d-8b0b-4f759d5f8caf.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 14,
+      "id": "pdm-herod",
+      "name": "Herod",
+      "house": "Parfums de Marly",
+      "job_id": "72a7bf12-9673-4583-9a19-5d0e0fcb606f",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044753_72a7bf12-9673-4583-9a19-5d0e0fcb606f.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 15,
+      "id": "ysl-la-nuit-de-lhomme",
+      "name": "La Nuit de L'Homme",
+      "house": "Yves Saint Laurent",
+      "job_id": "8b6fbde6-5ea5-428b-af56-ce0928c3d221",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044752_8b6fbde6-5ea5-428b-af56-ce0928c3d221.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 16,
+      "id": "pdm-layton",
+      "name": "Layton",
+      "house": "Parfums de Marly",
+      "job_id": "42dbe187-9906-4632-80b3-43dfaf45048e",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044752_42dbe187-9906-4632-80b3-43dfaf45048e.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 17,
+      "id": "tom-ford-ombre-leather",
+      "name": "Ombré Leather",
+      "house": "Tom Ford",
+      "job_id": "1965c39d-09bc-402b-82b7-8bf01d37c919",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044925_1965c39d-09bc-402b-82b7-8bf01d37c919.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 18,
+      "id": "armani-swy-absolutely",
+      "name": "Stronger With You Absolutely",
+      "house": "Giorgio Armani",
+      "job_id": "720a085d-5d08-4faa-89e0-48b262c53bfb",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_044925_720a085d-5d08-4faa-89e0-48b262c53bfb.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 19,
+      "id": "prada-luna-rossa-black",
+      "name": "Luna Rossa Black",
+      "house": "Prada",
+      "job_id": "e208d11b-2812-4657-89b7-22cddf27ddc4",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045902_e208d11b-2812-4657-89b7-22cddf27ddc4.png",
+      "status": "completed",
+      "review": "unreviewed_corrected_bottle_brief",
+      "replacedJobID": "d70e373b-a1b7-4b04-880d-c031d2389916"
+    },
+    {
+      "rank": 20,
+      "id": "xerjoff-naxos",
+      "name": "Naxos",
+      "house": "Xerjoff",
+      "job_id": "4c81b595-9f79-4fd6-b030-8fdb5c908d2e",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045001_4c81b595-9f79-4fd6-b030-8fdb5c908d2e.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 21,
+      "id": "pdm-althair",
+      "name": "Althaïr",
+      "house": "Parfums de Marly",
+      "job_id": "61800a84-7e19-439c-9653-269a2e6bb316",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045105_61800a84-7e19-439c-9653-269a2e6bb316.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 22,
+      "id": "mfk-grand-soir",
+      "name": "Grand Soir",
+      "house": "Maison Francis Kurkdjian",
+      "job_id": "85ac855c-15ee-4b47-8ff4-d1c583672625",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045149_85ac855c-15ee-4b47-8ff4-d1c583672625.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 23,
+      "id": "guerlain-lhomme-ideal-extreme",
+      "name": "L'Homme Idéal Extrême",
+      "house": "Guerlain",
+      "job_id": "8ece0104-023c-4803-a98f-c08189feebdb",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045149_8ece0104-023c-4803-a98f-c08189feebdb.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 24,
+      "id": "dg-the-one-edp",
+      "name": "The One for Men",
+      "house": "Dolce&Gabbana",
+      "job_id": "3be6fa81-b906-47b4-a332-a8d1f6de51dd",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045149_3be6fa81-b906-47b4-a332-a8d1f6de51dd.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 25,
+      "id": "replica-by-the-fireplace",
+      "name": "REPLICA By the Fireplace",
+      "house": "Maison Margiela",
+      "job_id": "1404bf01-5814-4100-8841-17a0cfcfa796",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045258_1404bf01-5814-4100-8841-17a0cfcfa796.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 26,
+      "id": "boss-bottled-elixir",
+      "name": "Bottled Elixir",
+      "house": "BOSS",
+      "job_id": "34180a6c-78a3-4b28-9ccf-ed89a18d04a8",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045332_34180a6c-78a3-4b28-9ccf-ed89a18d04a8.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 27,
+      "id": "lattafa-khamrah-qahwa",
+      "name": "Khamrah Qahwa",
+      "house": "Lattafa",
+      "job_id": "611ac4a4-b811-4c42-9efa-48073b4e622b",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045332_611ac4a4-b811-4c42-9efa-48073b4e622b.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 28,
+      "id": "mercedes-club-black",
+      "name": "Club Black",
+      "house": "Mercedes-Benz",
+      "job_id": "021a2c69-9820-46ef-94a1-1e2914365adc",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045332_021a2c69-9820-46ef-94a1-1e2914365adc.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 29,
+      "id": "cremo-spice-black-vanilla",
+      "name": "Spice & Black Vanilla",
+      "house": "Cremo",
+      "job_id": "7fbc571a-7179-4929-8756-94155e1bd4be",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045447_7fbc571a-7179-4929-8756-94155e1bd4be.png",
+      "status": "completed",
+      "review": "unreviewed"
+    },
+    {
+      "rank": 30,
+      "id": "creed-iris-debonair",
+      "name": "Iris Debonair",
+      "house": "Creed",
+      "job_id": "dc0f0327-d202-4d2a-9923-59849b117b6c",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045504_dc0f0327-d202-4d2a-9923-59849b117b6c.png",
+      "status": "completed",
+      "review": "unreviewed"
+    }
+  ]
+}

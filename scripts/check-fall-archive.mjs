@@ -82,6 +82,15 @@ for (const card of data.cards ?? []) {
   if (!/^[a-z0-9-]+$/.test(card.id ?? '')) fail('Unsafe ID: ' + card.id);
   if (card.frontMaster !== 'masters/' + card.id + '-front.png') fail(card.id + ': wrong master path');
   if (card.frontAppAsset !== 'approved/' + card.id + '-front.jpg') fail(card.id + ': wrong app-art path');
+  const editorial = card.reverseEditorial;
+  if (!editorial || !Number.isInteger(editorial.year) || editorial.year < 1980 ||
+      editorial.year > 2026 || !['Masculine', 'Feminine', 'Unisex'].includes(editorial.classification) ||
+      typeof editorial.description !== 'string' ||
+      editorial.description.trim().split(/\s+/).length < 12 ||
+      editorial.description.trim().split(/\s+/).length > 36 ||
+      editorial.imageSet !== 'fall-notes-' + card.id) {
+    fail(card.id + ': incomplete/invalid original editorial story and release facts');
+  }
   const pyramid = card.notePyramid;
   if (!pyramid || !['top', 'heart', 'base'].every(stage =>
       Array.isArray(pyramid[stage]) && pyramid[stage].length > 0 &&

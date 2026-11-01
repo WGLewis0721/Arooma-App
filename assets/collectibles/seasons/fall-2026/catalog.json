@@ -7,7 +7,7 @@
   "defaultAccess": "browse_only",
   "artDirection": "docs/design/brand/COLLECTIBLE_CARD_ART_DIRECTION.md",
   "publicVisibleOnlyWhenApproved": true,
-  "notes": "Production manifest. Names and creative scenes are drafts. No candidate is approved for redistribution, publishing or paid card sales. Top notes, concentration and bottle variants require primary-source checks. Use only assets with cleared rights.",
+  "notes": "Artwork rights and product approvals are distinct from researched note pyramids. 30 card notePyramid entries include a primary retailer/house or fragrance database source URL per exact variant; note structures may differ by publication. Artwork status remains unchanged.",
   "cards": [
     {
       "rank": 1,
@@ -21,7 +21,28 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/armani-swy-intensely-front.png",
-      "frontAppAsset": "approved/armani-swy-intensely-front.jpg"
+      "frontAppAsset": "approved/armani-swy-intensely-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Pink Pepper",
+          "Juniper",
+          "Violet"
+        ],
+        "heart": [
+          "Toffee",
+          "Cinnamon",
+          "Lavender",
+          "Sage"
+        ],
+        "base": [
+          "Vanilla",
+          "Amber",
+          "Tonka Bean",
+          "Suede"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Giorgio-Armani/Emporio-Armani-Stronger-With-You-Intensely-52802.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 2,
@@ -35,7 +56,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/spicebomb-extreme-front.png",
-      "frontAppAsset": "approved/spicebomb-extreme-front.jpg"
+      "frontAppAsset": "approved/spicebomb-extreme-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Black Pepper",
+          "Grapefruit",
+          "Pimento"
+        ],
+        "heart": [
+          "Saffron",
+          "Cinnamon",
+          "Cumin"
+        ],
+        "base": [
+          "Cistus",
+          "Tobacco",
+          "Woody Amber"
+        ],
+        "sourceURL": "https://us.viktor-rolf.com/spicebomb/spicebomb-extreme/spicebomb-extreme-VKR_034.html",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 3,
@@ -49,7 +89,20 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/azzaro-most-wanted-parfum-front.png",
-      "frontAppAsset": "approved/azzaro-most-wanted-parfum-front.jpg"
+      "frontAppAsset": "approved/azzaro-most-wanted-parfum-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Red Ginger"
+        ],
+        "heart": [
+          "Woody Accord"
+        ],
+        "base": [
+          "Bourbon Vanilla"
+        ],
+        "sourceURL": "https://www.nordstrom.com/s/azzaro-the-most-wanted-parfum/8335636",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 4,
@@ -63,7 +116,21 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/jpg-le-male-le-parfum-front.png",
-      "frontAppAsset": "approved/jpg-le-male-le-parfum-front.jpg"
+      "frontAppAsset": "approved/jpg-le-male-le-parfum-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cardamom"
+        ],
+        "heart": [
+          "Lavender",
+          "Iris"
+        ],
+        "base": [
+          "Vanilla"
+        ],
+        "sourceURL": "https://www.jeanpaulgaultier.com/us/en_US/p/range-le-male-le-parfum/le-male-le-parfum-eau-de-parfum-intense-000000000065241563",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 5,
@@ -77,7 +144,23 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/dior-homme-intense-front.png",
-      "frontAppAsset": "approved/dior-homme-intense-front.jpg"
+      "frontAppAsset": "approved/dior-homme-intense-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Lavender"
+        ],
+        "heart": [
+          "Iris",
+          "Ambrette",
+          "Pear"
+        ],
+        "base": [
+          "Virginia Cedar",
+          "Vetiver"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Dior/Dior-Homme-Intense-2011-13016.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 6,
@@ -91,7 +174,24 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/jpg-le-male-elixir-front.png",
-      "frontAppAsset": "approved/jpg-le-male-elixir-front.jpg"
+      "frontAppAsset": "approved/jpg-le-male-elixir-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Mint",
+          "Lavender"
+        ],
+        "heart": [
+          "Vanilla",
+          "Benzoin"
+        ],
+        "base": [
+          "Tonka Bean",
+          "Honey",
+          "Tobacco"
+        ],
+        "sourceURL": "https://www.fragrantica.com/news/Jean-Paul-Gaultier-Le-Male-Elixir-18235.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 7,
@@ -105,7 +205,27 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/dior-sauvage-elixir-front.png",
-      "frontAppAsset": "approved/dior-sauvage-elixir-front.jpg"
+      "frontAppAsset": "approved/dior-sauvage-elixir-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Grapefruit",
+          "Cinnamon",
+          "Nutmeg",
+          "Cardamom"
+        ],
+        "heart": [
+          "Lavender"
+        ],
+        "base": [
+          "Licorice",
+          "Sandalwood",
+          "Amber",
+          "Patchouli",
+          "Haitian Vetiver"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Dior/Sauvage-Elixir-68415.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 8,
@@ -119,7 +239,24 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/kilian-angels-share-front.png",
-      "frontAppAsset": "approved/kilian-angels-share-front.jpg"
+      "frontAppAsset": "approved/kilian-angels-share-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cognac"
+        ],
+        "heart": [
+          "Oak",
+          "Cinnamon",
+          "Tonka Bean"
+        ],
+        "base": [
+          "Sandalwood",
+          "Praline",
+          "Vanilla"
+        ],
+        "sourceURL": "https://www.costco.com/p/-/kilian-angels-share-eau-de-parfum-17-fl-oz/100982537",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 9,
@@ -133,7 +270,25 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/givenchy-reserve-privee-front.png",
-      "frontAppAsset": "approved/givenchy-reserve-privee-front.jpg"
+      "frontAppAsset": "approved/givenchy-reserve-privee-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Bergamot",
+          "Whisky"
+        ],
+        "heart": [
+          "Chestnut",
+          "Orris",
+          "Benzoin"
+        ],
+        "base": [
+          "Cedarwood",
+          "Vetiver",
+          "Patchouli"
+        ],
+        "sourceURL": "https://www.givenchybeauty.com/us/p/gentleman-reserve-privee-P000112.html",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 10,
@@ -147,7 +302,25 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/tom-ford-tobacco-vanille-front.png",
-      "frontAppAsset": "approved/tom-ford-tobacco-vanille-front.jpg"
+      "frontAppAsset": "approved/tom-ford-tobacco-vanille-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Tobacco Leaf",
+          "Spicy Notes"
+        ],
+        "heart": [
+          "Vanilla",
+          "Cacao",
+          "Tonka Bean",
+          "Tobacco Blossom"
+        ],
+        "base": [
+          "Dried Fruits",
+          "Woody Notes"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Tom-Ford/Tobacco-Vanille-1825.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 11,
@@ -161,7 +334,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/replica-jazz-club-front.png",
-      "frontAppAsset": "approved/replica-jazz-club-front.jpg"
+      "frontAppAsset": "approved/replica-jazz-club-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Pink Pepper",
+          "Lemon",
+          "Neroli"
+        ],
+        "heart": [
+          "Rum",
+          "Clary Sage",
+          "Java Vetiver"
+        ],
+        "base": [
+          "Tobacco Leaf",
+          "Vanilla Bean",
+          "Styrax"
+        ],
+        "sourceURL": "https://www.maisonmargiela-fragrances.us/en/product/484284/replica-jazz-club",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 12,
@@ -175,7 +367,20 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/valentino-bir-intense-front.png",
-      "frontAppAsset": "approved/valentino-bir-intense-front.jpg"
+      "frontAppAsset": "approved/valentino-bir-intense-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Vanilla"
+        ],
+        "heart": [
+          "Lavender"
+        ],
+        "base": [
+          "Vetiver"
+        ],
+        "sourceURL": "https://www.fragrantica.com/p/78740",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 13,
@@ -189,7 +394,31 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/tom-ford-noir-extreme-front.png",
-      "frontAppAsset": "approved/tom-ford-noir-extreme-front.jpg"
+      "frontAppAsset": "approved/tom-ford-noir-extreme-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cardamom",
+          "Nutmeg",
+          "Saffron",
+          "Mandarin",
+          "Neroli"
+        ],
+        "heart": [
+          "Kulfi",
+          "Rose",
+          "Mastic",
+          "Orange Blossom",
+          "Jasmine"
+        ],
+        "base": [
+          "Vanilla",
+          "Amber",
+          "Woody Notes",
+          "Sandalwood"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Tom-Ford/Noir-Extreme-29675.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 14,
@@ -203,7 +432,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/pdm-herod-front.png",
-      "frontAppAsset": "approved/pdm-herod-front.jpg"
+      "frontAppAsset": "approved/pdm-herod-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cinnamon",
+          "Pepper"
+        ],
+        "heart": [
+          "Tobacco Leaf",
+          "Incense",
+          "Cistus",
+          "Osmanthus"
+        ],
+        "base": [
+          "Vanilla",
+          "Musk",
+          "Cedarwood"
+        ],
+        "sourceURL": "https://us.parfums-de-marly.com/products/herod",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 15,
@@ -217,7 +465,23 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/ysl-la-nuit-de-lhomme-front.png",
-      "frontAppAsset": "approved/ysl-la-nuit-de-lhomme-front.jpg"
+      "frontAppAsset": "approved/ysl-la-nuit-de-lhomme-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cardamom"
+        ],
+        "heart": [
+          "Lavender",
+          "Virginia Cedar",
+          "Bergamot"
+        ],
+        "base": [
+          "Vetiver",
+          "Caraway"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Yves-Saint-Laurent/La-Nuit-de-l-Homme-5521.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 16,
@@ -231,7 +495,30 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/pdm-layton-front.png",
-      "frontAppAsset": "approved/pdm-layton-front.jpg"
+      "frontAppAsset": "approved/pdm-layton-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Apple",
+          "Lavender",
+          "Bergamot",
+          "Mandarin"
+        ],
+        "heart": [
+          "Geranium",
+          "Violet",
+          "Jasmine"
+        ],
+        "base": [
+          "Vanilla",
+          "Cardamom",
+          "Sandalwood",
+          "Pepper",
+          "Guaiac Wood",
+          "Patchouli"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Parfums-de-Marly/Layton-39314.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 17,
@@ -245,7 +532,23 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/tom-ford-ombre-leather-front.png",
-      "frontAppAsset": "approved/tom-ford-ombre-leather-front.jpg"
+      "frontAppAsset": "approved/tom-ford-ombre-leather-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cardamom"
+        ],
+        "heart": [
+          "Leather",
+          "Jasmine Sambac"
+        ],
+        "base": [
+          "Amber",
+          "Moss",
+          "Patchouli"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Tom-Ford/Ombre-Leather-2018-50239.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 18,
@@ -259,7 +562,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/armani-swy-absolutely-front.png",
-      "frontAppAsset": "approved/armani-swy-absolutely-front.jpg"
+      "frontAppAsset": "approved/armani-swy-absolutely-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Rum",
+          "Elemi",
+          "Bergamot"
+        ],
+        "heart": [
+          "Lavender",
+          "Davana"
+        ],
+        "base": [
+          "Madagascar Vanilla",
+          "Chestnut",
+          "Cedar",
+          "Patchouli"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Giorgio-Armani/Stronger-with-You-Absolutely-64501.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 19,
@@ -273,7 +595,23 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/prada-luna-rossa-black-front.png",
-      "frontAppAsset": "approved/prada-luna-rossa-black-front.jpg"
+      "frontAppAsset": "approved/prada-luna-rossa-black-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Bergamot"
+        ],
+        "heart": [
+          "Angelica",
+          "Patchouli"
+        ],
+        "base": [
+          "Coumarin",
+          "Amber",
+          "Musk"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Prada/Luna-Rossa-Black-48682.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 20,
@@ -287,7 +625,28 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/xerjoff-naxos-front.png",
-      "frontAppAsset": "approved/xerjoff-naxos-front.jpg"
+      "frontAppAsset": "approved/xerjoff-naxos-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Lemon",
+          "Bergamot",
+          "Lavender",
+          "Omani Incense"
+        ],
+        "heart": [
+          "Jasmine Sambac",
+          "Honey",
+          "Cinnamon",
+          "Cashmere"
+        ],
+        "base": [
+          "Vanilla",
+          "Tobacco Leaf",
+          "Tonka Bean"
+        ],
+        "sourceURL": "https://www.xerjoff.com/en-us/products/naxos-eau-de-parfum",
+        "sourceType": "brand-or-retailer"
+      }
     },
     {
       "rank": 21,
@@ -301,7 +660,29 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/pdm-althair-front.png",
-      "frontAppAsset": "approved/pdm-althair-front.jpg"
+      "frontAppAsset": "approved/pdm-althair-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cinnamon",
+          "Orange Blossom",
+          "Cardamom",
+          "Bergamot"
+        ],
+        "heart": [
+          "Bourbon Vanilla",
+          "Elemi"
+        ],
+        "base": [
+          "Praline",
+          "Musk",
+          "Ambroxan",
+          "Tonka Bean",
+          "Guaiac Wood",
+          "Candied Almond"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Parfums-de-Marly/Althair-84109.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 22,
@@ -315,7 +696,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/mfk-grand-soir-front.png",
-      "frontAppAsset": "approved/mfk-grand-soir-front.jpg"
+      "frontAppAsset": "approved/mfk-grand-soir-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Labdanum",
+          "Orange"
+        ],
+        "heart": [
+          "Benzoin",
+          "Lavender"
+        ],
+        "base": [
+          "Vanilla",
+          "Tonka Bean",
+          "Amber",
+          "Musk",
+          "Cedar"
+        ],
+        "sourceURL": "https://fragrancesdb.com/perfumes/maison-francis-kurkdjian-grand-soir-edp",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 23,
@@ -329,7 +729,27 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/guerlain-lhomme-ideal-extreme-front.png",
-      "frontAppAsset": "approved/guerlain-lhomme-ideal-extreme-front.jpg"
+      "frontAppAsset": "approved/guerlain-lhomme-ideal-extreme-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Almond",
+          "Pink Pepper",
+          "Bergamot"
+        ],
+        "heart": [
+          "Plum",
+          "Cinnamon",
+          "Heliotrope"
+        ],
+        "base": [
+          "Tobacco",
+          "Leather",
+          "Cedar",
+          "Patchouli"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Guerlain/L-Homme-Ideal-Extreme-60284.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 24,
@@ -343,7 +763,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/dg-the-one-edp-front.png",
-      "frontAppAsset": "approved/dg-the-one-edp-front.jpg"
+      "frontAppAsset": "approved/dg-the-one-edp-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Grapefruit",
+          "Coriander",
+          "Basil"
+        ],
+        "heart": [
+          "Cardamom",
+          "Ginger",
+          "Orange Blossom"
+        ],
+        "base": [
+          "Amber",
+          "Tobacco",
+          "Cedar"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Dolce-Gabbana/The-One-for-Men-Eau-de-Parfum-31909.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 25,
@@ -357,7 +796,26 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/replica-by-the-fireplace-front.png",
-      "frontAppAsset": "approved/replica-by-the-fireplace-front.jpg"
+      "frontAppAsset": "approved/replica-by-the-fireplace-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cloves",
+          "Pink Pepper",
+          "Orange Blossom"
+        ],
+        "heart": [
+          "Chestnut",
+          "Guaiac Wood",
+          "Juniper"
+        ],
+        "base": [
+          "Vanilla",
+          "Peru Balsam",
+          "Cashmeran"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Maison-Martin-Margiela/By-the-Fireplace-31623.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 26,
@@ -371,7 +829,23 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/boss-bottled-elixir-front.png",
-      "frontAppAsset": "approved/boss-bottled-elixir-front.jpg"
+      "frontAppAsset": "approved/boss-bottled-elixir-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Frankincense",
+          "Cardamom"
+        ],
+        "heart": [
+          "Patchouli",
+          "Vetiver"
+        ],
+        "base": [
+          "Labdanum",
+          "Cedar"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Hugo-Boss/Boss-Bottled-Elixir-84074.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 27,
@@ -385,7 +859,28 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/lattafa-khamrah-qahwa-front.png",
-      "frontAppAsset": "approved/lattafa-khamrah-qahwa-front.jpg"
+      "frontAppAsset": "approved/lattafa-khamrah-qahwa-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cinnamon",
+          "Cardamom",
+          "Ginger"
+        ],
+        "heart": [
+          "Praline",
+          "Candied Fruits",
+          "White Flowers"
+        ],
+        "base": [
+          "Vanilla",
+          "Coffee",
+          "Tonka Bean",
+          "Benzoin",
+          "Musk"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Lattafa-Perfumes/Khamrah-Qahwa-88175.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 28,
@@ -399,7 +894,24 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/mercedes-club-black-front.png",
-      "frontAppAsset": "approved/mercedes-club-black-front.jpg"
+      "frontAppAsset": "approved/mercedes-club-black-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Bergamot"
+        ],
+        "heart": [
+          "Incense",
+          "Jasmine"
+        ],
+        "base": [
+          "Vanilla",
+          "Benzoin",
+          "Woody Notes",
+          "Ambroxan"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Mercedes-Benz/Mercedes-Benz-Club-Black-46797.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 29,
@@ -413,7 +925,21 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/cremo-spice-black-vanilla-front.png",
-      "frontAppAsset": "approved/cremo-spice-black-vanilla-front.jpg"
+      "frontAppAsset": "approved/cremo-spice-black-vanilla-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Cardamom"
+        ],
+        "heart": [
+          "Cashmere Wood"
+        ],
+        "base": [
+          "Bourbon Vanilla",
+          "Vetiver"
+        ],
+        "sourceURL": "https://www.fragrantica.com/perfume/Cremo/Spice-Black-Vanilla-49040.html",
+        "sourceType": "editorial-database"
+      }
     },
     {
       "rank": 30,
@@ -427,7 +953,27 @@
       "productFactsVerified": false,
       "artRightsCleared": false,
       "frontMaster": "masters/creed-iris-debonair-front.png",
-      "frontAppAsset": "approved/creed-iris-debonair-front.jpg"
+      "frontAppAsset": "approved/creed-iris-debonair-front.jpg",
+      "notePyramid": {
+        "top": [
+          "Bergamot",
+          "Wormwood",
+          "Pink Pepper",
+          "Cardamom"
+        ],
+        "heart": [
+          "English Lavender",
+          "Violet Leaf",
+          "Fig"
+        ],
+        "base": [
+          "Iris Pallida",
+          "Ambrette",
+          "Amberwood"
+        ],
+        "sourceURL": "https://www.macys.com/shop/product/creed-iris-debonair-eau-de-parfum-3.3-oz.?ID=27574026",
+        "sourceType": "brand-or-retailer"
+      }
     }
   ]
 }

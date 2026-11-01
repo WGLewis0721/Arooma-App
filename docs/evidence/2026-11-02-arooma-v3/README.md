@@ -14,7 +14,7 @@
 | Native Debug build with the identity identifiers | **PASS** at `b58b92c` (the "Build Debug simulator app" step of both Maestro runs below) | runs [41358788686](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358788686) and [41358794490](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358794490) |
 | Maestro flow syntax, all 38 flows | **PASS** (the new selector forms `rightOf`, nested `below`, `checked`, `(?-i)`, `pressKey: home` and `launchApp stopApp: false` are valid) | step "Check flow syntax" of both runs |
 | `npm run docs:check`, `npm run test:docs` | **PASS** | run locally before merge |
-| `npm test` | Running when this was committed (120 passed, 0 failed so far); the final result is recorded in the PR description | run locally before merge |
+| `npm test` | **PASS: 221 checks, 0 failed, exit 0.** This is the self-contained PWA suite; V3 does not touch the PWA, so it shows only that nothing else regressed. | run locally before merge |
 
 ## Maestro: NOT RUN at merge time
 

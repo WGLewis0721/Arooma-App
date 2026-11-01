@@ -1,0 +1,21 @@
+# Card Studio and the My Cards entry are gone from the visible app. (Saved card records are not touched:
+# nothing here reads or deletes them.)
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - cards
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- assertVisible: "Owned"
+- assertNotVisible: "My Cards"
+- assertNotVisible:
+    id: "my-cards"
+- assertNotVisible: "Card Studio"
+- assertNotVisible: "Create card"
+- tapOn: "Explore"
+- assertNotVisible: "Card Studio"
+- tapOn: "Search"
+- assertNotVisible: "Card Studio"
+- takeScreenshot: v3-no-card-studio

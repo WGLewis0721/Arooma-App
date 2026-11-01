@@ -1,0 +1,57 @@
+# SIMULATOR ROUTING TEST, not a sensor test. The Simulator has no gyroscope, so a Debug-only bridge
+# (-AroomaQAGyroTrace) replays a synthetic trace through the same GyroFlipDetector, the same suppression rules
+# and the same FlipMotor.flip(direction:) that a real twist uses. A valid twist flips the card; a shake and a
+# plain tilt do not. Real thresholds and feel are NOT RUN here: they need a physical iPhone.
+# Maestro is slow (about 4 s per tap), so the twist has already fired by the time any "front" check could run;
+# the flow therefore asserts only what it can: the reverse appears, or it never does.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - gyro
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAMotion: "YES"
+      AroomaQAGyroTrace: "twist"
+- tapOn: "Explore the Archive"
+- tapOn: "Search"
+- tapOn: "Name, house.*"
+- inputText: "Sauvage"
+- tapOn: ".*Sauvage Elixir.*"
+- extendedWaitUntil:
+    visible: "REVERSE.*"
+    timeout: 10000
+- takeScreenshot: v3-gyro-04-flipped-by-synthetic-twist
+# Manual flipping is untouched: a tap turns it back.
+- tapOn: ".*, reverse.*"
+- assertVisible: "FRONT.*"
+# A shake must not flip it.
+- launchApp:
+    arguments:
+      AroomaQAMotion: "YES"
+      AroomaQAGyroTrace: "shake"
+- tapOn: "Search"
+- tapOn: "Name, house.*"
+- inputText: "Sauvage"
+- tapOn: ".*Sauvage Elixir.*"
+- extendedWaitUntil:
+    visible: "REVERSE.*"
+    timeout: 6000
+    optional: true
+- assertVisible: "FRONT.*"
+- takeScreenshot: v3-gyro-05-shake-did-not-flip
+# Nor a plain tilt about the wrong axis.
+- launchApp:
+    arguments:
+      AroomaQAMotion: "YES"
+      AroomaQAGyroTrace: "tilt"
+- tapOn: "Search"
+- tapOn: "Name, house.*"
+- inputText: "Sauvage"
+- tapOn: ".*Sauvage Elixir.*"
+- extendedWaitUntil:
+    visible: "REVERSE.*"
+    timeout: 6000
+    optional: true
+- assertVisible: "FRONT.*"

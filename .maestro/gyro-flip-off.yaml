@@ -1,0 +1,34 @@
+# With the switch Off, a synthetic twist does nothing (no subscription, no flip), and tapping the card still flips it.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - gyro
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAMotion: "YES"
+      AroomaQAGyroTrace: "twist"
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Flip cards with wrist twist"
+    direction: DOWN
+- tapOn: "Flip cards with wrist twist"
+- assertVisible:
+    text: "Flip cards with wrist twist"
+    checked: false
+- tapOn: "Done"
+- tapOn: "Search"
+- tapOn: "Name, house.*"
+- inputText: "Sauvage"
+- tapOn: ".*Sauvage Elixir.*"
+- extendedWaitUntil:
+    visible: "REVERSE.*"
+    timeout: 8000
+    optional: true
+- assertVisible: "FRONT.*"
+- takeScreenshot: v3-gyro-06-off-no-flip
+- tapOn: ".*, front"
+- assertVisible: "REVERSE.*"

@@ -1,0 +1,18 @@
+# With no motion sensor (the iOS Simulator has none) the settings row explains that, instead of showing a
+# switch that cannot work. Tap and drag still flip cards.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - gyro
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Wrist-twist flipping needs the motion sensor.*"
+    direction: DOWN
+- assertVisible: "Wrist-twist flipping needs the motion sensor.*"
+- assertNotVisible: "Flip cards with wrist twist"
+- takeScreenshot: v3-gyro-03-unavailable

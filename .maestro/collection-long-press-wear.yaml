@@ -1,0 +1,77 @@
+# Wear row: logs today's wear for the owner-selected OWNED bottle at once, with no navigation.
+# Exactly one session and one decrement per eligible press, none for a repeat press, and Undo reverses only
+# that session. Explore stays focused on a sample card throughout. Counts are read from Search, which shows
+# "N wears" and "P% left" for each bottle. The QA argument keeps the toasts open for Maestro's speed.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - quick-actions
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Sillage Alpha"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+# Alpha gets its own, earlier wear, so Undo below can be shown not to touch it.
+- tapOn:
+    id: "wear-today"
+- assertVisible: "Worn today · Undo"
+- tapOn:
+    id: "quick-add-a-bottle"
+- tapOn: "Fragrance name"
+- inputText: "Sillage Beta"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible: "Sillage Beta"
+# The owner's selection is Beta. Explore is focused on a different, sample card.
+- tapOn: "Explore"
+- assertVisible:
+    id: "explore-add-to-collection"
+- longPressOn: "My Collection"
+- assertVisible: "Sillage Beta"
+- takeScreenshot: v3-wear-01-row-names-the-bottle
+- tapOn:
+    id: "quick-action-wear"
+# No new screen, and no navigation: still on Explore.
+- assertNotVisible:
+    id: "collection-quick-actions"
+- assertNotVisible: "What are you wearing?"
+- assertNotVisible: "Wear log"
+- assertVisible:
+    id: "explore-add-to-collection"
+- assertVisible:
+    id: "wear-toast"
+- assertVisible: "Worn today · Sillage Beta"
+- takeScreenshot: v3-wear-02-confirmation
+# A repeat press cannot log a second wear.
+- longPressOn: "My Collection"
+- assertVisible: "Worn today"
+- tapOn:
+    id: "quick-action-wear"
+- tapOn:
+    point: "50%, 22%"
+- assertNotVisible:
+    id: "collection-quick-actions"
+# Exactly one wear and one decrement for Beta; Alpha's own wear is untouched.
+- tapOn: "Search"
+- tapOn: "Name, house.*"
+- inputText: "Sillage"
+- assertVisible: ".*Sillage Beta.*1 wears · 99% left.*"
+- assertVisible: ".*Sillage Alpha.*1 wears · 99% left.*"
+- takeScreenshot: v3-wear-03-counts-after-wear
+- hideKeyboard
+# Undo reverses only the session this press created.
+- tapOn:
+    id: "wear-toast-undo"
+- assertVisible: ".*Sillage Beta.*0 wears · 100% left.*"
+- assertVisible: ".*Sillage Alpha.*1 wears · 99% left.*"
+- takeScreenshot: v3-wear-04-counts-after-undo

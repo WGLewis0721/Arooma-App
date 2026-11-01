@@ -497,6 +497,7 @@ struct AtelierGallery: View {
                     .tracking(-0.6)
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .id(card?.id ?? "")
+                    .accessibilityIdentifier("identity-name")
                     .transition(reduceMotion ? .opacity : .push(from: edge))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -507,6 +508,7 @@ struct AtelierGallery: View {
                 .font(.footnote).foregroundStyle(.secondary)
                 .lineLimit(1)
                 .id("notes-\(card?.id ?? "")")
+                .accessibilityIdentifier("identity-notes")
                 .transition(.opacity)
             if let card {
                 contextActions(for: card)

@@ -6,6 +6,8 @@ tags:
 ---
 - launchApp:
     clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
 - tapOn: "Start My Collection"
 - tapOn: "Add a fragrance"
 - tapOn: "Fragrance name"

@@ -1,0 +1,46 @@
+# Tapping My Collection navigates normally. Pressing and holding it shows a column with exactly Wishlist,
+# Add and Wear, directly above the tab, without changing the screen. Tapping elsewhere dismisses it.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - quick-actions
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "explore-add-to-collection"
+- longPressOn: "My Collection"
+- assertVisible:
+    id: "collection-quick-actions"
+- assertVisible:
+    id: "quick-action-wishlist"
+- assertVisible:
+    id: "quick-action-add"
+- assertVisible:
+    id: "quick-action-wear"
+- assertVisible:
+    id: "quick-action-add"
+    below:
+      id: "quick-action-wishlist"
+- assertVisible:
+    id: "quick-action-wear"
+    below:
+      id: "quick-action-add"
+- assertVisible:
+    id: "collection-quick-actions"
+    above: "My Collection"
+- takeScreenshot: v3-hold-01-column-over-explore
+# The hold did not navigate: Explore's own controls are still there, and My Collection's are not.
+- assertVisible:
+    id: "explore-add-to-collection"
+- assertNotVisible: "Owned"
+- tapOn:
+    point: "50%, 22%"
+- assertNotVisible:
+    id: "collection-quick-actions"
+- assertVisible:
+    id: "explore-add-to-collection"
+# A normal tap still navigates.
+- tapOn: "My Collection"
+- assertVisible: "Owned"

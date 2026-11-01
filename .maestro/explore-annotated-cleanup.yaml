@@ -14,7 +14,8 @@ tags:
 - assertNotVisible: "Sample archive.*"
 - assertNotVisible: "Insights"
 - assertVisible: "Card 1 of .*"
-- assertVisible:
+# Search is the third tab now, so the old Explore search icon must be gone.
+- assertNotVisible:
     id: "search"
 - assertVisible:
     id: "view-and-style"

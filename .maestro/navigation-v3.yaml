@@ -1,0 +1,34 @@
+# Exactly three bottom tabs, in this order: Explore, My Collection, Search. No Today tab, no Cards tab,
+# and no Search icon on Explore (Search is a tab now).
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "explore-add-to-collection"
+- takeScreenshot: v3-nav-01-explore
+- assertVisible: "Explore"
+- assertVisible:
+    text: "My Collection"
+    rightOf: "Explore"
+- assertVisible:
+    text: "Search"
+    rightOf: "My Collection"
+- assertNotVisible: "Today"
+- assertNotVisible: "Cards"
+- assertNotVisible:
+    id: "search"
+- tapOn: "My Collection"
+- assertVisible: "Owned"
+- assertVisible: "Wishlist"
+- takeScreenshot: v3-nav-02-my-collection
+- tapOn: "Search"
+- assertVisible: "Name, house.*"
+- takeScreenshot: v3-nav-03-search
+- tapOn: "Explore"
+- assertVisible:
+    id: "explore-add-to-collection"

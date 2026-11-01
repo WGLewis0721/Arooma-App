@@ -1,0 +1,55 @@
+# Direct wear, a two-bottle layer, a saved combination, history and undo all work inside My Collection,
+# with no Today tab. The QA argument keeps the Quick Add and wear toasts open for Maestro's speed.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - wear
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Layer Alpha"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+- tapOn:
+    id: "quick-add-a-bottle"
+- tapOn: "Fragrance name"
+- inputText: "Layer Beta"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+# One-tap solo wear of the focused bottle.
+- tapOn:
+    id: "wear-today"
+- assertVisible: "Worn today · Undo"
+- tapOn:
+    id: "wear-log"
+- assertVisible: "What are you wearing?"
+- assertNotVisible: "Today"
+- takeScreenshot: v3-wear-layer-01-wear-log
+# A two-bottle layer, saved for later, then logged.
+- tapOn: "Layer Alpha"
+- tapOn: "Layer Beta"
+- assertVisible: "Log this layer"
+- tapOn: "Save this layer for later"
+- tapOn: "e.g. Workday layer"
+- inputText: "Evening set"
+- tapOn: "Save"
+- tapOn: "Log this layer"
+- assertVisible: "Layered · 2"
+- takeScreenshot: v3-wear-layer-02-layer-logged
+# History, and Undo inside My Collection.
+- tapOn: "All history"
+- assertVisible: "Today only"
+- tapOn: "Wear options"
+- tapOn: "Undo this wear"
+- assertNotVisible: "Layered · 2"
+- tapOn: "Done"
+- assertVisible: "Owned"

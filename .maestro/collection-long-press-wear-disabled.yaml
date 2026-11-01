@@ -1,0 +1,34 @@
+# With no owned bottle selected, Wear is disabled and says why. It never logs a sample card or a Wishlist item.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - quick-actions
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- longPressOn: "My Collection"
+- assertVisible:
+    id: "quick-action-wear"
+- assertVisible: "Select a bottle in My Collection"
+- takeScreenshot: v3-wear-disabled-01-empty
+- tapOn:
+    id: "quick-action-wear"
+- assertNotVisible:
+    id: "wear-toast"
+- assertVisible:
+    id: "collection-quick-actions"
+- tapOn:
+    point: "50%, 22%"
+- assertNotVisible:
+    id: "collection-quick-actions"
+# A Wishlist focus is not an owned bottle either.
+- tapOn:
+    id: "explore-wishlist-toggle"
+- tapOn: "My Collection"
+- tapOn: "Wishlist"
+- assertVisible:
+    id: "wishlist-move"
+- longPressOn: "My Collection"
+- assertVisible: "Select a bottle in My Collection"
+- takeScreenshot: v3-wear-disabled-02-wishlist-focus

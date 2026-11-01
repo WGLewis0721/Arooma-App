@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct AroomaNativeApp: App {
     @StateObject private var archive = CollectionStore()
+    @StateObject private var commerce = CardCommerce()
 
     init() {
         // Load and apply owner tuning before any view or motor reads a physics constant.
@@ -13,13 +14,15 @@ struct AroomaNativeApp: App {
         WindowGroup {
             AtelierRoot()
                 .environmentObject(archive)
+                .environmentObject(commerce)
+                .task { await commerce.start() }
                 .preferredColorScheme(archive.appearance.colorScheme)
         }
     }
 }
 
 private enum AtelierTab: Hashable {
-    case gallery, shelves, journal, search
+    case gallery, shelves, journal, cards, search
 }
 
 struct AtelierRoot: View {
@@ -100,6 +103,9 @@ struct AtelierRoot: View {
             Tab("Today", systemImage: "drop", value: AtelierTab.journal) {
                 AtelierWearLog(startingBottleID: $startingWearBottle,
                                add: { adding = true }, focus: focus)
+            }
+            Tab("Cards", systemImage: "rectangle.portrait.on.rectangle.portrait", value: AtelierTab.cards) {
+                MyCardsScreen()
             }
             Tab(value: AtelierTab.search, role: .search) {
                 AtelierSearch(focus: { card in focus(card) })

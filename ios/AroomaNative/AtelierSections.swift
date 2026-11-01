@@ -782,7 +782,11 @@ struct AtelierStyle: View {
                         .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
                 }
                 .buttonStyle(.glass)
-                StylizedCardSettings()
+                // Shown in App Store builds only once a licensed card source exists (App Review 2.1:
+                // no permanently disabled placeholder features). TestFlight keeps it visible.
+                if StylizedCardSettings.licensedSourceAvailable || BuildChannel.allowsOwnerTools {
+                    StylizedCardSettings()
+                }
                 DisclosureGroup("About this archive") {
                     Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone; it holds still with Reduce Motion and switches off in Low Power Mode.")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -803,6 +807,8 @@ struct AtelierStyle: View {
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())
                 .onLongPressGesture(minimumDuration: 0.9) {
+                    // Owner tools exist only in Debug and TestFlight builds (App Review 2.3.1).
+                    guard BuildChannel.allowsOwnerTools else { return }
                     HapticEngine.shared.play(.completed)
                     tuning = true
                 }
@@ -825,7 +831,7 @@ struct StylizedCardSettings: View {
     @AppStorage("arooma.cards.downloadWhenOnline") private var downloadWhenOnline = false
     @AppStorage("arooma.cards.wifiOnly") private var wifiOnly = true
     @State private var cacheBytes: Int64 = 0
-    private static let licensedSourceAvailable = false
+    static let licensedSourceAvailable = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

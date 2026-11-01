@@ -10,6 +10,20 @@ import Observation
 // The panel is hidden: long-press the Version row in View & Style. It opens on five presets
 // ("feels") and five quick-adjust sliders; every individual value is under Advanced.
 
+/// Where this build came from. Owner tools (the tuning panel, the frame-time readout) are for
+/// Debug and TestFlight only; an App Store build never exposes them (App Review 2.3.1: no
+/// hidden or undocumented features). Tuned values already saved still apply in every build.
+enum BuildChannel {
+    static let allowsOwnerTools: Bool = {
+        #if DEBUG
+        return true
+        #else
+        // TestFlight installs carry a sandbox receipt; App Store installs do not.
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }()
+}
+
 /// Tilt values read by MotionField / TiltLean.
 enum TiltTuning {
     static var rangeDegrees = 45.0     // soft limit of the effective rotation

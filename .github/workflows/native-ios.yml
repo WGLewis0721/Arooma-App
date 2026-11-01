@@ -58,7 +58,11 @@ jobs:
           back = {"fallnotes-"+item["id"]+"-"+stage for item in manifest["cards"] for stage in ("top","heart","base")}
           absent = back - names
           assert len(back) == 90 and not absent, f"Uncompiled reverse note photographs: {sorted(absent)}"
-          print("Verified 30 front images and 90 separate botanical photographs in compiled native app.")
+          original = json.loads(pathlib.Path("assets/insights/season-compass/atlas-source.json").read_text())
+          icons = {"insight-" + slug for slug in original["cells"]}
+          missing_icons = icons - names
+          assert len(icons) == 20 and not missing_icons, f"Uncompiled Season Compass ingredient illustrations: {sorted(missing_icons)}"
+          print("Verified 30 card fronts, 90 reverse photographs and 20 botanical Insights illustrations.")
           PY
       - name: Compile internal TestFlight proof configuration (unsigned)
         if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}

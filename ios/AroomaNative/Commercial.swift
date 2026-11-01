@@ -626,7 +626,7 @@ struct MyCardsScreen: View {
                 CreatedCardDetails(card: card)
                     .environmentObject(commerce)
             }
-            .fileExporter(isPresented: $exporting, document: $exportDocument,
+            .fileExporter(isPresented: $exporting, document: exportDocument,
                           contentType: .json, defaultFilename: "Arooma-My-Cards") { result in
                 if case .failure(let error) = result { commerce.status = error.localizedDescription }
             }

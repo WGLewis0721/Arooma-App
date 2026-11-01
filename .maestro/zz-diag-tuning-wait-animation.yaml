@@ -1,0 +1,19 @@
+# TEMPORARY diagnostic for F2. Not part of the fix; deleted before the final runs.
+# Question: does a different settle command (no screenshot request from the flow) also make it appear?
+appId: com.graymatter.arooma
+tags:
+  - diag
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Version.*"
+    direction: DOWN
+- longPressOn: "Version.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Vivid Holo"
+    timeout: 8000

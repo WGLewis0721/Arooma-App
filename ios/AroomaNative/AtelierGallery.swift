@@ -48,6 +48,8 @@ struct AtelierGallery: View {
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
     let openStyle: () -> Void
+    /// Opens the one editable shelf surface (rename, move, add, return to deck). One tap from here (item 03).
+    let openShelves: () -> Void
     let showToday: (UUID) -> Void
 
     private var cards: [DisplayCard] { archive.displayedCards }
@@ -193,7 +195,7 @@ struct AtelierGallery: View {
             Spacer(minLength: 4)
             GlassEffectContainer(spacing: 10) {
                 HStack(spacing: 10) {
-                    glassButton("square.grid.2x2", label: "All shelves") { openOverview() }
+                    glassButton("square.grid.2x2", label: "All shelves", action: openShelves)
                     glassButton("plus", label: "Quick add a bottle", action: add)
                     glassButton("slider.horizontal.3", label: "View and style", action: openStyle)
                 }
@@ -215,6 +217,7 @@ struct AtelierGallery: View {
                 .font(.system(size: 15, weight: .medium))
                 .frame(width: 30, height: 30)
         }
+        .accessibilityIdentifier(label.lowercased().replacingOccurrences(of: " ", with: "-"))
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
         .accessibilityLabel(label)
@@ -274,7 +277,7 @@ struct AtelierGallery: View {
                 }
             }
             .accessibilityAction { if let focusedCard { inspect(focusedCard) } }
-            .accessibilityAction(named: "Show every shelf") { openOverview() }
+            .accessibilityAction(named: "Show every shelf") { openShelves() }
             .accessibilityAction(named: "Show insights") { setInsight(insight >= 1 ? 2 : 1) }
         }
     }
@@ -495,10 +498,6 @@ struct AtelierGallery: View {
             .padding(.bottom, 4)
             .transition(.opacity)
         }
-    }
-
-    private func openOverview() {
-        withAnimation(reduceMotion ? nil : .spring(response: 0.46, dampingFraction: 0.86)) { overview = 1 }
     }
 
     private func focusFromOverview(_ card: DisplayCard) {

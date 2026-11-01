@@ -219,15 +219,7 @@ struct AtelierSearch: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Picker("Sort", selection: $sort) {
-                            ForEach(SearchSort.allCases) { Text($0.rawValue).tag($0) }
-                        }
-                    } label: {
-                        Label("Sort", systemImage: "arrow.up.arrow.down")
-                    }
-                }
+                // Sort lives in the Filters sheet (item 04): one place to refine results.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingFilters = true } label: {
                         Label(filters.activeCount > 0 ? "Filters (\(filters.activeCount))" : "Filters",
@@ -237,7 +229,7 @@ struct AtelierSearch: View {
                 }
             }
             .sheet(isPresented: $showingFilters) {
-                FilterSheet(filters: $filters, items: all)
+                FilterSheet(filters: $filters, sort: $sort, items: all)
                     .presentationDetents([.medium, .large])
             }
         }
@@ -303,11 +295,17 @@ struct AtelierSearch: View {
 struct FilterSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var filters: SearchFilters
+    @Binding var sort: SearchSort
     let items: [SearchItem]
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Sort") {
+                    Picker("Sort by", selection: $sort) {
+                        ForEach(SearchSort.allCases) { Text($0.rawValue).tag($0) }
+                    }
+                }
                 facet("House", values: Set(items.map(\.fragrance.house)), selection: $filters.houses)
                 facet("Notes", values: Set(items.flatMap(\.fragrance.notes)), selection: $filters.notes)
                 facet("Accords (derived from notes)", values: Set(items.flatMap(\.accords)), selection: $filters.accords)

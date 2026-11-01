@@ -1,6 +1,6 @@
 # Maestro reference
 
-Companion to [SKILL.md](SKILL.md). Commands marked *verified* come from Maestro's docs. Commands marked *check* were not confirmed in the docs; confirm them with `cheat_sheet` before relying on them.
+Companion to [SKILL.md](SKILL.md). Commands were checked against Maestro CLI 2.12.0 (`maestro --help`, `maestro test --help`, and the built-in cheat sheet). Re-check after upgrading.
 
 ## Install and start
 
@@ -51,7 +51,9 @@ Xcode must be installed with Command Line Tools selected and an iOS runtime inst
 | `back` | Press back. |
 | `runFlow` | Run another flow file, optionally with a `when` condition. |
 | `takeScreenshot: "name"` | Capture the screen as evidence. |
-| `longPressOn: "Text"` | Used by `tuning-presets.yaml` in this repo. **Check** with `cheat_sheet`. |
+| `longPressOn: "Text"` | Confirmed in the Maestro cheat sheet (2.12.0). Used by `tuning-presets.yaml`. |
+| `index: N` (inside a selector) | Picks the Nth match when several elements share a label. Confirmed in the cheat sheet. |
+| Regex in `text:` | Text selectors accept regular expressions. Confirmed in the cheat sheet. |
 
 Flow file format:
 
@@ -78,6 +80,21 @@ appId: com.graymatter.arooma
 | `open_maestro_viewer` | URL of the Maestro Viewer. | |
 
 The docs do not describe a tool that starts a simulator or emulator. Boot it yourself (see above).
+
+## CLI commands (verified against Maestro CLI 2.12.0)
+
+```bash
+maestro --version
+maestro check-syntax .maestro/smoke.yaml          # lint a flow, no device needed
+maestro list-devices                               # simulators and emulators available
+maestro start-device                               # start or create a simulator (see --help)
+maestro test --udid <UDID> .maestro/               # run a folder of flows
+maestro test --format JUNIT --output junit.xml --test-output-dir out/ .maestro/
+maestro test --include-tags smoke .maestro/        # or --exclude-tags
+maestro --udid <UDID> hierarchy                    # print the current view hierarchy
+```
+
+`maestro cloud` uploads the app and flows to Maestro Cloud. Avoid it for owner data.
 
 ## Troubleshooting
 

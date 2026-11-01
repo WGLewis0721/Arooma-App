@@ -747,7 +747,7 @@ struct MyCardsScreen: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("Card Studio", systemImage: "paintbrush.pointed") { studio = true }
+                        // Card Studio has one entry point here: the + in the header (item 07).
                         Button("Export My Cards", systemImage: "square.and.arrow.up") {
                             if let data = commerce.backupData() {
                                 exportDocument = StudioBackupDocument(data: data)

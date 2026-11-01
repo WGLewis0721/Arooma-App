@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8" tests="3" failures="2" time="250.711" timestamp="2026-11-01T17:22:06">
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="74.614" timestamp="2026-11-01T17:22:06" status="ERROR">
+      <failure>Assertion is false: "Saved to your Wishlist" is visible</failure>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="107.758" timestamp="2026-11-01T17:23:21" status="ERROR">
+      <failure>Element not found: Text matching regex: Version.*</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="68.235" timestamp="2026-11-01T17:25:09" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

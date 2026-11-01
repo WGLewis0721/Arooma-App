@@ -1,13 +1,17 @@
 # Capture a name in Quick Add, then save it to the Wishlist from the review card.
 appId: com.graymatter.arooma
+tags:
+  - quick-add
 ---
 - launchApp:
     clearState: true
 - tapOn: "Explore the Archive"
-- tapOn: "Quick add a bottle"
+- tapOn:
+    id: "quick-add-a-bottle"
 - tapOn: "Fragrance name"
 - inputText: "Maestro Test Scent"
-- tapOn: "Review"
-- assertVisible: "Where does it go?"
-- tapOn: "Wishlist"
+- tapOn:
+    id: "direct-wishlist"
 - assertVisible: "Saved to your Wishlist"
+- tapOn:
+    id: "direct-done"

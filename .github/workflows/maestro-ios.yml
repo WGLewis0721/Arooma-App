@@ -1,11 +1,22 @@
 name: Maestro iOS
-# Manual only. Runs UI flows against a Debug build on an iOS 26 simulator. Not a release gate.
+# Manual only. Runs Maestro UI flows against a Debug build on an iOS 26 simulator. Not a release gate.
+# Start it from the repo without a Mac: Actions → "Maestro iOS" → Run workflow (choose the branch).
+# Results and screenshots are downloaded from the run's Artifacts section.
 on:
   workflow_dispatch:
+    inputs:
+      include_tags:
+        description: 'Only run flows with these tags (comma-separated). Leave empty for all flows.'
+        required: false
+        default: ''
+      exclude_tags:
+        description: 'Skip flows with these tags (comma-separated). Optional.'
+        required: false
+        default: ''
 jobs:
   maestro:
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +29,12 @@ jobs:
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Check flow syntax (no device needed)
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH"
+          maestro --version
+          for f in .maestro/*.yaml; do maestro check-syntax "$f"; done
 
       - name: Build Debug simulator app
         run: |
@@ -40,13 +57,27 @@ jobs:
           xcrun simctl install "$DEVICE" "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
 
       - name: Run Maestro flows
-        run: maestro --version && maestro test .maestro/
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH" MAESTRO_CLI_NO_ANALYTICS=1
+          ARGS=(--udid "$DEVICE" --format JUNIT --output "$RUNNER_TEMP/maestro-results/junit.xml" --test-output-dir "$RUNNER_TEMP/maestro-results/run")
+          if [ -n "${{ inputs.include_tags }}" ]; then ARGS+=(--include-tags "${{ inputs.include_tags }}"); fi
+          if [ -n "${{ inputs.exclude_tags }}" ]; then ARGS+=(--exclude-tags "${{ inputs.exclude_tags }}"); fi
+          mkdir -p "$RUNNER_TEMP/maestro-results"
+          maestro test "${ARGS[@]}" .maestro/
 
-      - name: Upload Maestro results on failure
-        if: failure()
+      - name: Capture view hierarchy of the final screen
+        if: always()
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH" MAESTRO_CLI_NO_ANALYTICS=1
+          mkdir -p "$RUNNER_TEMP/maestro-results"
+          maestro --udid "$DEVICE" hierarchy > "$RUNNER_TEMP/maestro-results/final-hierarchy.txt" 2>&1 || true
+          xcrun simctl io "$DEVICE" screenshot "$RUNNER_TEMP/maestro-results/final-screen.png" || true
+
+      - name: Upload Maestro results and screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Maestro-results
-          path: ~/.maestro/tests/
-          if-no-files-found: ignore
-          retention-days: 7
+          path: ${{ runner.temp }}/maestro-results/
+          if-no-files-found: warn
+          retention-days: 14

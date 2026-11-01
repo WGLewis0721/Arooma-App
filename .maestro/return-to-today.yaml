@@ -1,0 +1,20 @@
+# Quick Add opened from Today returns to Today, and the new bottle can be chosen there at once.
+appId: com.graymatter.arooma
+tags:
+  - quick-add
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn: "Today"
+- assertVisible: "What are you wearing?"
+- tapOn: "Add a bottle"
+- tapOn: "Fragrance name"
+- inputText: "Return Test Scent"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible: "What are you wearing?"
+- assertVisible: "Return Test Scent"

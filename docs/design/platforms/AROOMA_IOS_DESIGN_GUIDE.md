@@ -1,5 +1,7 @@
 # Arooma | Native iOS Design Guide
 
+> Summary: Arooma's native SwiftUI implementation and validation rules, adapted from Spread's iOS reference set without inheriting Spread's web stack.
+
 > Part of the Arooma design brain. Start at [../README.md](../README.md) and [Apple design principles](APPLE_DESIGN_PRINCIPLES.md).
 
 **Scope:** native SwiftUI iOS 26+ Arooma experience, derived from the established Spread iOS research and adapted to a collectible fragrance archive. This is design guidance, not a claim that every listed device class is supported or verified.

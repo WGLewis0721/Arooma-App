@@ -194,10 +194,11 @@
       "id": "prada-luna-rossa-black",
       "name": "Luna Rossa Black",
       "house": "Prada",
-      "job_id": "d70e373b-a1b7-4b04-880d-c031d2389916",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045000_d70e373b-a1b7-4b04-880d-c031d2389916.png",
+      "job_id": "e208d11b-2812-4657-89b7-22cddf27ddc4",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261101_045902_e208d11b-2812-4657-89b7-22cddf27ddc4.png",
       "status": "completed",
-      "review": "unreviewed"
+      "review": "unreviewed_corrected_bottle_brief",
+      "replacedJobID": "d70e373b-a1b7-4b04-880d-c031d2389916"
     },
     {
       "rank": 20,

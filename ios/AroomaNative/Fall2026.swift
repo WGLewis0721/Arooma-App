@@ -2,9 +2,9 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-/// Browse-only editorial library. Publishing is all-or-nothing: missing images, incomplete
-/// rights reviews or unverified product identities keep the entire season unavailable.
-/// Loading this catalog never grants a card, records physical ownership or enables sales.
+/// Fragrance identities behind 30 editorial card fronts. The original native live deck
+/// presents them with its existing motor, foil, flip and ownership flows; public sales
+/// remain disabled pending the separate artwork rights/metadata review.
 struct Fall2026Card: Decodable, Identifiable, Hashable {
     let rank: Int
     let id: String
@@ -32,7 +32,7 @@ enum Fall2026Collection {
     // The temporary proof preview exists only in a separately flagged *internal TestFlight*
     // build. A normal App Store build requires all 30 artwork/fact/rights approvals.
     static let internalProofBuild: Bool = {
-        #if AROOMA_INTERNAL_PREVIEW
+        #if AROOMA_INTERNAL_PREVIEW || DEBUG
         true
         #else
         false
@@ -48,7 +48,7 @@ enum Fall2026Collection {
               Set(manifest.cards.map(\.id)).count == 30,
               Set(manifest.cards.map(\.rank)) == Set(1...30),
               manifest.cards.allSatisfy({
-                  UIImage(named: $0.assetName) != nil &&
+                  (frontURL(for: $0) != nil || UIImage(named: $0.assetName) != nil) &&
                   (internalProofBuild || ($0.status == "approved" &&
                    $0.referencePhotoApproved && $0.productFactsVerified &&
                    $0.artRightsCleared))
@@ -60,8 +60,29 @@ enum Fall2026Collection {
 
     static var available: Bool { cards.count == 30 }
 
+    /// The existing 30 JPGs are a referenced resource folder in the app bundle.
+    static func frontURL(for card: Fall2026Card) -> URL? {
+        Bundle.main.url(forResource: card.id, withExtension: "jpg", subdirectory: "proofs")
+    }
+
     static func artwork(for card: Fall2026Card) -> UIImage? {
-        UIImage(named: card.assetName)
+        if let file = frontURL(for: card) { return UIImage(contentsOfFile: file.path) }
+        return UIImage(named: card.assetName)
+    }
+
+    static func entry(for fragranceID: String) -> Fall2026Card? {
+        guard fragranceID.hasPrefix("fall2026-") else { return nil }
+        let id = String(fragranceID.dropFirst("fall2026-".count))
+        return cards.first { $0.id == id }
+    }
+
+    /// These are catalog entries, not fake ownership grants or paid entitlements.
+    static var fragrances: [Fragrance] {
+        cards.map { card in
+            Fragrance(id: card.assetName, house: card.house, name: card.name,
+                      concentration: card.variant, year: "",
+                      top: [], heart: [], base: [], shelf: .autumn, archival: false)
+        }
     }
 }
 

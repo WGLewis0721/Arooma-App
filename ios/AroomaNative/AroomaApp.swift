@@ -105,7 +105,11 @@ struct AtelierRoot: View {
                                add: { adding = true }, focus: focus)
             }
             Tab("Cards", systemImage: "rectangle.portrait.on.rectangle.portrait", value: AtelierTab.cards) {
-                MyCardsScreen()
+                MyCardsScreen(openLiveArchive: {
+                    archive.enter(.demo)
+                    archive.selectedDemoID = Fall2026Collection.fragrances.first?.id ?? "dior"
+                    tab = .gallery
+                })
             }
             Tab(value: AtelierTab.search, role: .search) {
                 AtelierSearch(focus: { card in focus(card) })

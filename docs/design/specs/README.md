@@ -10,6 +10,7 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
+| 2026-10-31 | [Autumn Archive: 30 fall cards, generation, storage and native release](2026-10-31-autumn-archive-30-card-release.md) | In review: 30 production briefs seeded; artwork and native implementation pending |
 | 2026-10-31 | [Native Card Studio offline photo filters](2026-10-31-native-card-studio-photo-filters.md) | Implemented; native CI and iPhone QA pending |
 | 2026-10-31 | [Gesture-first Wishlist, scan, shareable cards, insights and advanced search](2026-10-31-gesture-first-wishlist-discovery.md) | Owner-directed implementation spec; native code not yet updated |
 | 2026-10-31 | [Native premium motion, tactile card physics and integrated iOS interaction system](2026-10-31-native-premium-motion-interaction-system.md) | Implemented (section 12, simulator-verified); real-device validation pending |

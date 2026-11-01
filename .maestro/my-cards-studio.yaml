@@ -1,0 +1,16 @@
+# My Cards is one action from My Collection and reaches Card Studio. Photo capture needs a fixture, so it is not run here.
+appId: com.graymatter.arooma
+tags:
+  - cards
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn:
+    id: "my-cards"
+- assertVisible: "My Cards"
+- takeScreenshot: my-cards
+- tapOn: "Create card"
+- assertVisible: "Card Studio"
+- takeScreenshot: my-cards-studio

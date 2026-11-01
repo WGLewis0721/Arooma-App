@@ -1,0 +1,17 @@
+# The square mode menu and its long-press alternative are gone (annotation A1, plan section 2 rule 4).
+appId: com.graymatter.arooma
+tags:
+  - explore
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertNotVisible: "Showing sample archive"
+- assertNotVisible: "Explore sample cards"
+- longPressOn: "Explore"
+- assertNotVisible: "Explore sample cards"
+- assertNotVisible: "My collection"
+- assertVisible:
+    id: "explore-add-to-collection"
+- takeScreenshot: explore-no-mode-menu-after-long-press

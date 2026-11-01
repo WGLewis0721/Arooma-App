@@ -1,0 +1,25 @@
+# Wishlist is a view inside My Collection. Moving an item to owned happens once and empties the Wishlist view.
+appId: com.graymatter.arooma
+tags:
+  - wishlist
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "explore-wishlist-toggle"
+- assertVisible:
+    id: "explore-add-to-collection"
+- tapOn: "My Collection"
+- tapOn: "Wishlist"
+- assertVisible:
+    id: "wishlist-move"
+- takeScreenshot: wishlist-view
+- tapOn:
+    id: "wishlist-move"
+- assertVisible:
+    id: "wear-today"
+- takeScreenshot: wishlist-moved-to-owned
+- tapOn: "Wishlist"
+- assertVisible: "Nothing on your Wishlist yet."

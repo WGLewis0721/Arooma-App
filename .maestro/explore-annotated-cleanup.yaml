@@ -1,0 +1,30 @@
+# Annotation fixes A2 to A12 on the resting Explore deck: one counter, compact actions, no duplicate chrome.
+appId: com.graymatter.arooma
+tags:
+  - explore
+  - annotations
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertNotVisible:
+    id: "all-shelves"
+- assertNotVisible:
+    id: "quick-add-a-bottle"
+- assertNotVisible: "Sample archive.*"
+- assertNotVisible: "Insights"
+- assertVisible: "Card 1 of .*"
+- assertVisible:
+    id: "search"
+- assertVisible:
+    id: "view-and-style"
+- assertVisible:
+    id: "explore-add-to-collection"
+- assertVisible:
+    id: "explore-wishlist-toggle"
+- assertVisible: "Show insights"
+- takeScreenshot: explore-annotated-after
+- swipe:
+    direction: LEFT
+- assertVisible: "Card 2 of .*"
+- takeScreenshot: explore-after-swipe

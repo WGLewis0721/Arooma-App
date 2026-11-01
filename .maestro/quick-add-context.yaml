@@ -1,0 +1,24 @@
+# Quick Add returns to the tab that opened it. A save from My Collection stays in My Collection.
+appId: com.graymatter.arooma
+tags:
+  - quick-add
+  - navigation
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Context Test Scent"
+- tapOn:
+    id: "direct-collection"
+- assertVisible: "Added to your collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible: "Owned"
+- assertVisible: "Context Test Scent"
+- tapOn: "Explore"
+- assertVisible:
+    id: "explore-add-to-collection"
+- tapOn: "My Collection"
+- assertVisible: "Context Test Scent"

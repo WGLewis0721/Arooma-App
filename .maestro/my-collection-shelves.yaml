@@ -1,4 +1,4 @@
-# One tap from Collection opens the editable shelf surface; rename can be cancelled and Done returns.
+# One action from My Collection opens the editable shelves; rename can be cancelled and Done returns.
 appId: com.graymatter.arooma
 tags:
   - shelves
@@ -6,12 +6,11 @@ tags:
 ---
 - launchApp:
     clearState: true
-- tapOn: "Explore the Archive"
+- tapOn: "Start My Collection"
+- assertVisible: "Owned"
 - tapOn:
     id: "all-shelves"
 - assertVisible: "The shelves"
-# The shelf list is a LazyVStack: only Spring and Summer are in the accessibility tree
-# until Autumn is scrolled into view.
 - scrollUntilVisible:
     element: "Rename Autumn"
     direction: DOWN
@@ -19,4 +18,4 @@ tags:
 - assertVisible: "Rename shelf"
 - tapOn: "Cancel"
 - tapOn: "Done"
-- assertVisible: "Add to my collection"
+- assertVisible: "Owned"

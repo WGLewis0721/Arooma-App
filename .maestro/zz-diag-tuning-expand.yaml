@@ -1,0 +1,48 @@
+# TEMPORARY diagnostic for F2. Not part of the fix; deleted before the final runs.
+# Question: which strings does Maestro see right after the press, and does dragging the Tuning
+# sheet up to its large detent change that? Each probe saves a screenshot named for the outcome.
+appId: com.graymatter.arooma
+tags:
+  - diag
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Version.*"
+    direction: DOWN
+- longPressOn: "Version.*"
+- takeScreenshot: diag-expand-00-after-press
+- runFlow:
+    when:
+      visible: "Tuning"
+    commands:
+      - takeScreenshot: diag-expand-01-sees-Tuning
+- runFlow:
+    when:
+      visible: "Vivid Holo"
+    commands:
+      - takeScreenshot: diag-expand-02-sees-VividHolo
+- swipe:
+    start: 50%, 80%
+    end: 50%, 25%
+- takeScreenshot: diag-expand-10-after-swipe
+- runFlow:
+    when:
+      visible: "Tuning"
+    commands:
+      - takeScreenshot: diag-expand-11-sees-Tuning
+- runFlow:
+    when:
+      visible: "Vivid Holo"
+    commands:
+      - takeScreenshot: diag-expand-12-sees-VividHolo
+- runFlow:
+    when:
+      visible: "Quick adjust"
+    commands:
+      - takeScreenshot: diag-expand-13-sees-QuickAdjust
+# Always fails on purpose so Maestro writes the hierarchy and a screenshot for this moment.
+- assertVisible: "zz-diag-force-hierarchy-dump"

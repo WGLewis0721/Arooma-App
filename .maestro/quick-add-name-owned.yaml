@@ -1,10 +1,15 @@
 # Clean install: a typed name saved to the Collection appears once and survives a relaunch.
+# The save toast closes itself after 4 s and Maestro on iOS needs 5 to 6 s between two taps on this
+# animated screen, so tapping Done raced the timer. The QA launch argument (Debug and TestFlight only)
+# keeps the toast open until Done.
 appId: com.graymatter.arooma
 tags:
   - quick-add
 ---
 - launchApp:
     clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
 - tapOn: "Start My Collection"
 - tapOn: "Add a fragrance"
 - tapOn: "Fragrance name"

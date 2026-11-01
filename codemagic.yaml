@@ -54,6 +54,25 @@ workflows:
           test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/dior-sauvage-elixir-original-diptych.png"
           test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/rasasi-hawas-for-him-original-diptych.png"
           test -f "$CM_BUILD_DIR/assets/collectibles/masters/approved/ysl-myslf-edp-original-diptych.png"
+      - name: Bundle Autumn Archive proof art for internal TestFlight only
+        script: |
+          set -euo pipefail
+          cd "$CM_BUILD_DIR"
+          python3 -m pip install --quiet 'Pillow>=10,<13'
+          python3 scripts/stage_fall_candidates.py
+          python3 scripts/prepare_fall_testflight.py
+          python3 - <<'PY'
+          from pathlib import Path
+          project = Path('ios/AroomaNative.xcodeproj/project.pbxproj')
+          source = project.read_text()
+          anchor = 'SWIFT_COMPILATION_MODE=wholemodule; SWIFT_OPTIMIZATION_LEVEL="-O";'
+          if source.count(anchor) != 1:
+              raise SystemExit('Could not locate unique native Release Swift flags')
+          source = source.replace(anchor,
+              anchor + ' SWIFT_ACTIVE_COMPILATION_CONDITIONS=AROOMA_INTERNAL_PREVIEW;')
+          project.write_text(source)
+          print('Internal-only proof browsing enabled. Public builds remain approval-gated.')
+          PY
       - name: Apply Apple distribution signing profile
         script: xcode-project use-profiles
       - name: Assign unique TestFlight build version

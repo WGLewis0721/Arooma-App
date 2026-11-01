@@ -131,6 +131,7 @@ struct Fall2026Reverse: View {
         .aspectRatio(59.0 / 86.0, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Three illustrated note stages show the published scent pyramid, followed by release year, classification and concentration.")
     }
 
     private func reverseSurface(width: CGFloat) -> some View {

@@ -38,6 +38,17 @@ for (const card of data.cards ?? []) {
     } else if (fs.statSync(fullPath).size < 20_000) {
       fail(card.id + ": image suspiciously small");
     }
+    const imageSet = path.resolve("ios/AroomaNative/Assets.xcassets", "fall2026-" + card.id + ".imageset");
+    const contents = path.join(imageSet, "Contents.json");
+    const image = path.join(imageSet, "front.jpg");
+    if (!fs.existsSync(contents) || !fs.existsSync(image)) {
+      fail(card.id + ": image not packaged in native Xcode assets");
+    } else {
+      const meta = JSON.parse(fs.readFileSync(contents, "utf8"));
+      if (!(meta.images ?? []).some(x => x.filename === "front.jpg")) {
+        fail(card.id + ": asset set does not reference the card JPG");
+      }
+    }
   }
 }
 for (let i = 1; i <= 30; i++) if (!ranks.has(i)) fail("Missing rank " + i);

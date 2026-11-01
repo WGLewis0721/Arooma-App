@@ -111,73 +111,90 @@ struct Fall2026Reverse: View {
     private let ink = Color(hex: 0x0F1118)
 
 
+    private var accessibilitySummary: String {
+        let pyramid = card.notePyramid
+        return "\(card.house), \(card.name). Top: \(pyramid.top.joined(separator: ", ")). Heart: \(pyramid.heart.joined(separator: ", ")). Base: \(pyramid.base.joined(separator: ", "))."
+    }
+
     var body: some View {
-        GeometryReader { bounds in
-            let width = bounds.size.width
-            let scale = width / 340.0
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(ink)
-                RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(bronze.opacity(0.75), lineWidth: max(0.7, 1.1 * scale))
-                    .padding(9 * scale)
-                VStack(alignment: .leading, spacing: 9 * scale) {
-                    HStack(alignment: .top, spacing: 10) {
-                        VStack(alignment: .leading, spacing: 2 * scale) {
-                            Text(card.house.uppercased())
-                                .font(.system(size: 10 * scale, weight: .medium, design: .serif))
-                                .tracking(1.4 * scale)
-                                .lineLimit(1).minimumScaleFactor(0.7)
-                            Text(card.name.uppercased())
-                                .font(.system(size: 28 * scale, weight: .regular, design: .serif))
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.6)
-                        }
-                        Spacer(minLength: 2)
-                        Text(card.variant.uppercased())
-                            .font(.system(size: 8 * scale, weight: .medium))
-                            .multilineTextAlignment(.trailing)
-                            .frame(maxWidth: width * 0.27)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Rectangle().fill(bronze).frame(height: max(0.7, scale))
-                    Text("AUTUMN ARCHIVE  ·  2026")
-                        .font(.system(size: 10 * scale, weight: .semibold))
-                        .tracking(scale)
-                        .foregroundStyle(bronze)
-                    Text("A sourced olfactory map of the fragrance, from first impression to lasting trail.")
-                        .font(.system(size: 11 * scale, design: .serif).italic())
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(.white.opacity(0.80))
-                    ForEach(0..<3, id: \.self) { index in
-                        noteStrip(index: index, width: width, scale: scale)
-                    }
-                    Spacer(minLength: 0)
-                    Rectangle().fill(bronze.opacity(0.8)).frame(height: max(0.7, scale))
-                    HStack(spacing: 0) {
-                        footer(card.variant, label: "CONCENTRATION", scale: scale)
-                        footer("ARTIST SERIES", label: "COLLECTION", scale: scale)
-                        footer("FALL 2026", label: "EDITION", scale: scale)
-                    }
-                    HStack {
-                        Spacer(minLength: 0)
-                        Text("AROOMA  ·  SOURCED FRAGRANCE NOTES")
-                            .font(.system(size: 8 * scale))
-                            .tracking(1.2 * scale)
-                        Spacer(minLength: 0)
-                    }
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 24 * scale)
-                .padding(.vertical, 27 * scale)
-            }
+        GeometryReader { geometry in
+            reverseSurface(width: geometry.size.width)
         }
         .aspectRatio(59.0 / 86.0, contentMode: .fit)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(card.house + ", " + card.name + ", top notes: " +
-                            card.notePyramid.top.joined(separator: ", ") + "; heart notes: " +
-                            card.notePyramid.heart.joined(separator: ", ") + "; base notes: " +
-                            card.notePyramid.base.joined(separator: ", "))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+    }
+
+    private func reverseSurface(width: CGFloat) -> some View {
+        let scale = width / 340.0
+        return ZStack {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(ink)
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(bronze.opacity(0.75), lineWidth: max(0.7, 1.1 * scale))
+                .padding(9 * scale)
+            reverseContents(width: width, scale: scale)
+        }
+    }
+
+    private func reverseContents(width: CGFloat, scale: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 9 * scale) {
+            heading(width: width, scale: scale)
+            Rectangle().fill(bronze).frame(height: max(0.7, scale))
+            Text("AUTUMN ARCHIVE  ·  2026")
+                .font(.system(size: 10 * scale, weight: .semibold))
+                .tracking(scale)
+                .foregroundStyle(bronze)
+            Text("A sourced olfactory map of the fragrance, from first impression to lasting trail.")
+                .font(.system(size: 11 * scale, design: .serif).italic())
+                .fixedSize(horizontal: false, vertical: true)
+                .foregroundStyle(.white.opacity(0.80))
+            ForEach(0..<3, id: \.self) { index in
+                noteStrip(index: index, width: width, scale: scale)
+            }
+            Spacer(minLength: 0)
+            Rectangle().fill(bronze.opacity(0.8)).frame(height: max(0.7, scale))
+            editionFooter(scale: scale)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 24 * scale)
+        .padding(.vertical, 27 * scale)
+    }
+
+    private func heading(width: CGFloat, scale: CGFloat) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2 * scale) {
+                Text(card.house.uppercased())
+                    .font(.system(size: 10 * scale, weight: .medium, design: .serif))
+                    .tracking(1.4 * scale)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(card.name.uppercased())
+                    .font(.system(size: 28 * scale, weight: .regular, design: .serif))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+            }
+            Spacer(minLength: 2)
+            Text(card.variant.uppercased())
+                .font(.system(size: 8 * scale, weight: .medium))
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: width * 0.27)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func editionFooter(scale: CGFloat) -> some View {
+        VStack(spacing: 7 * scale) {
+            HStack(spacing: 0) {
+                footer(card.variant, label: "CONCENTRATION", scale: scale)
+                footer("ARTIST SERIES", label: "COLLECTION", scale: scale)
+                footer("FALL 2026", label: "EDITION", scale: scale)
+            }
+            Text("AROOMA  ·  SOURCED FRAGRANCE NOTES")
+                .font(.system(size: 8 * scale))
+                .tracking(1.2 * scale)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func noteStrip(index: Int, width: CGFloat, scale: CGFloat) -> some View {

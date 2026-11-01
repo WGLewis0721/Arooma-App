@@ -172,6 +172,23 @@ enum InsightEngine {
 // Every owned or sample fragrance gets the exact same visual grammar.
 
 private enum SeasonCompassArt {
+    /// Original isolated botanical miniatures from the owner-approved visual language.
+    /// Unmapped niche ingredients retain a truthful generic glyph.
+    static func imageName(for note: String) -> String? {
+        let n = note.lowercased()
+        let mapped: [(String, String)] = [
+            ("orange blossom", "orange-blossom"), ("pink pepper", "pink-pepper"),
+            ("sandalwood", "sandalwood"), ("cedar", "cedar"), ("cardamom", "cardamom"),
+            ("lavender", "lavender"), ("bergamot", "bergamot"), ("vanilla", "vanilla"),
+            ("patchouli", "patchouli"), ("cinnamon", "cinnamon"), ("tobacco", "tobacco"),
+            ("geranium", "geranium"), ("jasmine", "jasmine"), ("violet", "violet"),
+            ("iris", "iris"), ("rose", "rose"), ("lime", "lime"), ("lemon", "lemon"),
+            ("honey", "honey"), ("apple", "apple")
+        ]
+        guard let found = mapped.first(where: { n.contains($0.0) }) else { return nil }
+        return "insight-" + found.1
+    }
+
     static func glyph(for note: String) -> String {
         let n = note.lowercased()
         let illustrations: [(String, String)] = [
@@ -456,10 +473,22 @@ struct InsightPanel: View {
                     } else {
                         HStack(spacing: 0) {
                             ForEach(0..<min(3, notes.count), id: \.self) { index in
-                                Text(SeasonCompassArt.glyph(for: notes[index]))
-                                    .font(.system(size: typeSize.isAccessibilitySize ? 19 : 27))
-                                    .frame(maxWidth: .infinity)
-                                    .accessibilityHidden(true)
+                                Group {
+                                    if let name = SeasonCompassArt.imageName(for: notes[index]),
+                                       let art = UIImage(named: name) {
+                                        Image(uiImage: art)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 41, height: 38)
+                                            .clipShape(RoundedRectangle(cornerRadius: 9))
+                                    } else {
+                                        Text(SeasonCompassArt.glyph(for: notes[index]))
+                                            .font(.system(size: typeSize.isAccessibilitySize ? 19 : 27))
+                                            .frame(width: 41, height: 38)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .accessibilityHidden(true)
                             }
                             if notes.count > 3 {
                                 Text("+\(notes.count - 3)")

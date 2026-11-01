@@ -1,5 +1,7 @@
 # Arooma Native Card Studio — Offline Photo Filters
 
+> Part of the [Arooma design map](../README.md).
+
 **Shipped implementation:** `ios/AroomaNative/StudioPhotoFilters.swift` and `Commercial.swift`.
 
 ## Owner experience

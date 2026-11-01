@@ -30,6 +30,8 @@ jobs:
           cp index.html manifest.webmanifest sw.js dist/
           cp -r assets dist/assets
           if [ -d variants ]; then cp -r variants dist/variants; fi
+          # Public App Store Connect URLs: privacy policy and support pages.
+          if [ -d legal ]; then cp legal/*.html dist/; fi
           touch dist/.nojekyll
           # Fresh service worker cache per deploy
           sed -i "s/__BUILD__/${GITHUB_SHA::7}/g" dist/sw.js

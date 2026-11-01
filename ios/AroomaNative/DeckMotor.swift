@@ -306,7 +306,7 @@ final class FramePacingProbe {
     static let shared = FramePacingProbe()
     static let key = "AroomaFramePacing"
 
-    var enabled: Bool = UserDefaults.standard.bool(forKey: FramePacingProbe.key) {
+    var enabled: Bool = BuildChannel.allowsOwnerTools && UserDefaults.standard.bool(forKey: FramePacingProbe.key) {
         didSet {
             UserDefaults.standard.set(enabled, forKey: Self.key)
             enabled ? start() : stop()

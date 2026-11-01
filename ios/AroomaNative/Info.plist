@@ -6,5 +6,18 @@
 	     Merged with the generated Info.plist (GENERATE_INFOPLIST_FILE = YES). -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- Required: the share sheet's "Save Image" for shared card PNGs writes to Photos.
+	     Without this string iOS terminates the app when that action is tapped. -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save the collectible card images you choose to share to your photo library.</string>
+	<!-- Arooma uses only Apple's built-in HTTPS/StoreKit networking and no custom cryptography,
+	     so no export-compliance documentation is required for each TestFlight upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- The deck, inspector and capture flows are designed for portrait iPhone. -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 </dict>
 </plist>

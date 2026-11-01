@@ -43,6 +43,12 @@ enum CommercialRelease {
     static let paidCardsApproved = false
     static let paidBoostersApproved = false
     static let membershipApproved = false
+
+    /// App Review rejects visible purchase screens that cannot complete a purchase (2.1) and
+    /// subscription offers without full terms (3.1.2). Until at least one offer is approved
+    /// and registered, the storefront, Restore Purchases and App Store product lookups are not
+    /// shown at all; My Cards and Card Studio ship as complete free features.
+    static var storefrontVisible: Bool { paidCardsApproved || paidBoostersApproved || membershipApproved }
 }
 
 enum CardFinish: String, CaseIterable, Codable, Identifiable {
@@ -111,9 +117,9 @@ struct CommercialArchive: Codable {
     deinit { listener?.cancel() }
 
     func start() async {
-        guard listener == nil else { return }
+        guard listener == nil, CommercialRelease.storefrontVisible else { return }
         listener = Task { [weak self] in
-            for await update in Transaction.updates {
+            for await update in StoreKit.Transaction.updates {
                 guard let self else { break }
                 if case .verified(let transaction) = update {
                     await self.fulfill(transaction)
@@ -135,7 +141,7 @@ struct CommercialArchive: Codable {
     func refreshEntitlements() async {
         var purchased = Set<String>()
         var subscription = false
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             guard case .verified(let transaction) = result, transaction.revocationDate == nil else { continue }
             purchased.insert(transaction.productID)
             if transaction.productID == AroomaProducts.annual { subscription = true }
@@ -188,7 +194,7 @@ struct CommercialArchive: Codable {
         }
     }
 
-    private func fulfill(_ transaction: Transaction) async {
+    private func fulfill(_ transaction: StoreKit.Transaction) async {
         guard transaction.revocationDate == nil else {
             await refreshEntitlements()
             return
@@ -577,11 +583,13 @@ struct MyCardsScreen: View {
                             Image(systemName: "plus").frame(width: 44, height: 44)
                         }.buttonStyle(.glass).accessibilityLabel("Create card")
                     }
-                    Picker("Cards", selection: $section) {
-                        Text("My Cards").tag(0)
-                        Text("Discover").tag(1)
-                    }.pickerStyle(.segmented)
-                    if section == 0 { ownedSection } else { discoverSection }
+                    if CommercialRelease.storefrontVisible {
+                        Picker("Cards", selection: $section) {
+                            Text("My Cards").tag(0)
+                            Text("Discover").tag(1)
+                        }.pickerStyle(.segmented)
+                    }
+                    if section == 0 || !CommercialRelease.storefrontVisible { ownedSection } else { discoverSection }
                     if !commerce.status.isEmpty {
                         Text(commerce.status).font(.footnote).foregroundStyle(.secondary)
                     }
@@ -602,8 +610,10 @@ struct MyCardsScreen: View {
                         Button("Import My Cards", systemImage: "square.and.arrow.down") {
                             importing = true
                         }
-                        Button("Restore Purchases", systemImage: "arrow.clockwise") {
-                            Task { await commerce.restore() }
+                        if CommercialRelease.storefrontVisible {
+                            Button("Restore Purchases", systemImage: "arrow.clockwise") {
+                                Task { await commerce.restore() }
+                            }
                         }
                     } label: { Image(systemName: "ellipsis.circle") }
                         .accessibilityLabel("Card library actions")
@@ -638,7 +648,9 @@ struct MyCardsScreen: View {
         VStack(alignment: .leading, spacing: 18) {
             if commerce.created.isEmpty && !CardEdition.catalog.contains(where: commerce.hasLibraryAccess) {
                 ContentUnavailableView("No digital cards yet", systemImage: "rectangle.on.rectangle.angled",
-                    description: Text("Create your first personal card in Studio, or browse available editions."))
+                    description: Text(CommercialRelease.storefrontVisible
+                        ? "Create your first personal card in Studio, or browse available editions."
+                        : "Turn a photo of any bottle into your own collectible card in Card Studio."))
                 Button("Open Card Studio") { studio = true }.buttonStyle(.borderedProminent)
             }
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {

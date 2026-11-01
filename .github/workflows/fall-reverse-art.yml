@@ -57,5 +57,7 @@ jobs:
           git add assets/collectibles/seasons/fall-2026/reverse-art/
           if ! git diff --cached --quiet; then
             git commit -m "assets: add 90 source-specific TOP/HEART/BASE botanical image strips"
+            git fetch origin feat/fall-reverse-editorial-art
+            git rebase origin/feat/fall-reverse-editorial-art
             git push origin "HEAD:feat/fall-reverse-editorial-art"
           fi

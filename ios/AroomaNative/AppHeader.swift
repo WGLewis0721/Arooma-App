@@ -24,7 +24,7 @@ struct AroomaBrandMark: View {
         AroomaSignatureShimmer(ink: archive.theme.ink(scheme),
                                highlight: archive.theme.keyLight,
                                minimumInterval: 1.0 / 30.0)
-            .frame(height: height)
+            .frame(width: height * SignatureGeometry.logoAspect, height: height)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Arooma")
             .accessibilityAddTraits(.isHeader)

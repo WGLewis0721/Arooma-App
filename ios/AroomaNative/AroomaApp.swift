@@ -444,6 +444,13 @@ struct MyCollectionScreen: View {
     }
 
     var body: some View {
+        ZStack {
+            AtelierAtmosphere(theme: archive.theme).ignoresSafeArea()
+            content
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
                 AroomaBrandMark()

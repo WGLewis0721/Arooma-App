@@ -123,7 +123,11 @@ struct AtelierGallery: View {
                 .zIndex(10)
             }
         }
-        .background(AtelierAtmosphere(theme: archive.theme))
+        // Explore draws its own atmosphere. My Collection draws one full-bleed behind header, card and tools,
+        // so the gallery adds none there (two gradients would meet in a visible seam).
+        .background {
+            if context == .explore { AtelierAtmosphere(theme: archive.theme) }
+        }
         .onAppear {
             motor.reduceMotion = reduceMotion
             bindMotor()

@@ -136,6 +136,8 @@ struct AutumnArchiveDetail: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showsBack = false
+    @State private var gestureYaw: Double = 0
+    @State private var gesturePitch: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -144,23 +146,52 @@ struct AutumnArchiveDetail: View {
                     Group {
                         if showsBack {
                             back
+                                .modifier(LiveFoil(strength: 0.35, yaw: gestureYaw,
+                                                   radius: 16, tint: .white))
                         } else if let image = Fall2026Collection.artwork(for: card) {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFit()
-                                .modifier(LiveFoil(strength: 0.35, yaw: 0,
+                                .modifier(LiveFoil(strength: 0.35, yaw: gestureYaw,
                                                    radius: 16, tint: .white))
                         }
                     }
                     .aspectRatio(59.0 / 86.0, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal, 14)
-                    .onTapGesture { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { showsBack.toggle() } }
+                    .rotation3DEffect(.degrees(reduceMotion ? 0 : gestureYaw),
+                                      axis: (x: 0, y: 1, z: 0), perspective: 0.56)
+                    .rotation3DEffect(.degrees(reduceMotion ? 0 : gesturePitch),
+                                      axis: (x: 1, y: 0, z: 0), perspective: 0.56)
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 8)
+                            .onChanged { value in
+                                guard !reduceMotion else { return }
+                                // Keep fingers in charge: direct tilt while held, spring only on release.
+                                gestureYaw = max(-17, min(17, Double(value.translation.width) * 0.09))
+                                gesturePitch = max(-10, min(10, -Double(value.translation.height) * 0.045))
+                            }
+                            .onEnded { value in
+                                let horizontalSwipe = abs(value.predictedEndTranslation.width) > 150 &&
+                                    abs(value.translation.width) > abs(value.translation.height) * 1.35
+                                withAnimation(reduceMotion ? nil : .spring(response: 0.44, dampingFraction: 0.80)) {
+                                    gestureYaw = 0
+                                    gesturePitch = 0
+                                    if horizontalSwipe { showsBack.toggle() }
+                                }
+                            }
+                    )
+                    .onTapGesture { withAnimation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82)) { showsBack.toggle() } }
+                    .sensoryFeedback(.selection, trigger: showsBack)
                     .accessibilityAddTraits(.isButton)
                     .accessibilityLabel(showsBack ? "Card details. Tap to see artwork." : "Artwork. Tap to flip card.")
 
                     Button(showsBack ? "See artwork" : "Flip card", systemImage: "arrow.triangle.2.circlepath") {
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { showsBack.toggle() }
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82)) {
+                            gestureYaw = 0
+                            gesturePitch = 0
+                            showsBack.toggle()
+                        }
                     }
                     .buttonStyle(.bordered)
 

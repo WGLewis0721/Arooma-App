@@ -64,3 +64,9 @@ Score against the MYSLF visual standard and the exact product's approved packagi
 ## Limits of image-to-image scores
 
 **SSIM, pixel difference, color histograms and embedding similarity are supplemental.** A new fragrance should not be pixel-identical to MYSLF. Raw pixel matching would punish legitimately different color palettes, bottle shapes and ingredient scenes. Product fidelity still needs explicit comparison with the correct real-world container, and perceptual quality requires a calibrated human review. Do not invent a universal "95% similar" computer-vision score until a labeled set of accepted/rejected cards establishes its predictive value.
+
+## Full reverse visual acceptance (2026-11-01)
+
+The owner restated the MYSLF reverse as a **visual content** requirement. Every one of the 30 cards must include: (1) exact house/name/concentration masthead, (2) original 18–34 word editorial fragrance description, (3) FRAGRANCE MAP header, (4) three photographic Top/Heart/Base strips **with different stage-specific images**, (5) release year, marketed gender classification and concentration in a 3-column footer, (6) Arooma attribution, and (7) the same edge-to-edge etched foil border treatment as the front. The card must not use repeated crops of the front as fake ingredient photographs.
+
+Artwork for stages is in `reverse-art/<id>-<stage>.jpg`, 1000x390 per strip. There must be **90/90 unique files and 30/30 complete editorial records**. Only the private TestFlight and DEBUG builds package the generated art; no public-rights flag is changed. The actual note text stays as independent sourced SwiftUI typography and does not rely on AI image text rendering.

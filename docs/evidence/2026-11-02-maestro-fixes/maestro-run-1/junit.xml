@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8" tests="11" failures="3" time="746.432" timestamp="2026-11-01T18:42:38">
+    <testcase id="quick-add-name-owned" name="quick-add-name-owned" classname="quick-add-name-owned" file=".maestro/quick-add-name-owned.yaml" time="119.326" timestamp="2026-11-01T18:42:38" status="ERROR">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+      <failure>Assertion is false: "Quick Test Owned" is visible</failure>
+    </testcase>
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="63.408" timestamp="2026-11-01T18:44:37" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="search-direct-inspect" name="search-direct-inspect" classname="search-direct-inspect" file=".maestro/search-direct-inspect.yaml" time="66.811" timestamp="2026-11-01T18:45:41" status="SUCCESS">
+      <properties>
+        <property name="tags" value="search, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="77.515" timestamp="2026-11-01T18:46:48" status="ERROR">
+      <properties>
+        <property name="tags" value="owner-tools"/>
+      </properties>
+      <failure>Assertion is false: "Vivid Holo" is visible</failure>
+    </testcase>
+    <testcase id="return-to-today" name="return-to-today" classname="return-to-today" file=".maestro/return-to-today.yaml" time="80.359" timestamp="2026-11-01T18:48:05" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="zz-diag-tuning-late" name="zz-diag-tuning-late" classname="zz-diag-tuning-late" file=".maestro/zz-diag-tuning-late.yaml" time="60.374" timestamp="2026-11-01T18:49:26" status="SUCCESS">
+      <properties>
+        <property name="tags" value="diag"/>
+      </properties>
+    </testcase>
+    <testcase id="shelves-unified" name="shelves-unified" classname="shelves-unified" file=".maestro/shelves-unified.yaml" time="55.404" timestamp="2026-11-01T18:50:26" status="SUCCESS">
+      <properties>
+        <property name="tags" value="shelves, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="style-sections" name="style-sections" classname="style-sections" file=".maestro/style-sections.yaml" time="58.13" timestamp="2026-11-01T18:51:22" status="SUCCESS">
+      <properties>
+        <property name="tags" value="style"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-undo" name="quick-add-undo" classname="quick-add-undo" file=".maestro/quick-add-undo.yaml" time="54.316" timestamp="2026-11-01T18:52:20" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="zz-diag-tuning-expand" name="zz-diag-tuning-expand" classname="zz-diag-tuning-expand" file=".maestro/zz-diag-tuning-expand.yaml" time="74.927" timestamp="2026-11-01T18:53:14" status="ERROR">
+      <properties>
+        <property name="tags" value="diag"/>
+      </properties>
+      <failure>Assertion is false: "zz-diag-force-hierarchy-dump" is visible</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="35.345" timestamp="2026-11-01T18:54:29" status="SUCCESS">
+      <properties>
+        <property name="tags" value="smoke"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

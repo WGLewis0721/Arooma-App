@@ -1,0 +1,16 @@
+F3 and the other Quick Add flows: time from the save tap to the next tap (Done or Undo).
+The save toast closes itself after 4 s (QuickAddSheet.saveDirect). Source: runner log (device-xctest.log) of each run.
+Toast window is 4 s unless the flow passes -AroomaQAUndoWindow (runs after the fix: 30 s).
+
+source run 41332782764 (before)
+  quick-add-name-owned   save 17:51:09.154  next tap (351.0, 809.0) 17:51:13.600  interval 4.45 s
+  quick-add-wishlist     save 17:52:04.675  next tap (351.0, 811.0) 17:52:09.036  interval 4.36 s
+  return-to-today        save 17:56:16.917  next tap (351.0, 809.0) 17:56:20.188  interval 3.27 s
+  quick-add-undo         save 17:58:43.765  next tap (304.0, 809.0) 17:58:50.045  interval 6.28 s
+
+run 41336948314 (only quick-add-undo has the QA argument)
+  quick-add-name-owned   save 18:43:56.407  next tap (351.0, 809.0) 18:44:02.838  interval 6.43 s
+  quick-add-wishlist     save 18:45:26.080  next tap (351.0, 811.0) 18:45:31.127  interval 5.05 s
+  return-to-today        save 18:49:09.084  next tap (351.0, 809.0) 18:49:14.392  interval 5.31 s
+  quick-add-undo         save 18:52:56.671  next tap (304.0, 809.0) 18:53:01.517  interval 4.85 s
+

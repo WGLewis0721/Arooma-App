@@ -10,6 +10,8 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
+| 2026-11-02 | [Maestro flow failures after the UX consolidation](2026-11-02-maestro-failures-spec.md) | Open: three flows fail on run 41332782764; fix not started |
+| 2026-11-02 | [Handoff: fix the three failing Maestro flows](2026-11-02-maestro-failures-handoff.md) | Ready for a fix branch from main; includes the working prompt |
 | 2026-11-01 | [SwiftUI UX consolidation and frosted trays](2026-11-01-swiftui-ux-consolidation.md) | Implemented on branch; CI-run Maestro flows; device QA owed |
 | 2026-11-01 | [Season Compass: visual fragrance Insights](2026-11-01-season-compass-visual-insights.md) | Native implementation in PR; iPhone visual sign-off pending |
 | 2026-11-01 | [Native Autumn live-card deck integration](2026-11-01-autumn-live-deck-integration.md) | Implemented; iPhone and TestFlight QA pending |

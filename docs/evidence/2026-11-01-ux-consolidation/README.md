@@ -41,9 +41,9 @@
 | `search-direct-inspect` | PASS | Result opens the Inspector directly; Close returns to Search. |
 | `return-to-today` | PASS | Quick Add opened from Today returns to Today. |
 | `style-sections` | PASS | Arrangement, Atmosphere, Card lighting and About are present; About is reached by scrolling. |
-| `quick-add-undo` | FAIL | Fails at the last step, `assertVisible "Undo Test Scent"`, after Undo. The frame (`after/quick-add-undo-failed-step12.jpg`) shows the Cards tab, not Collection. The flow header says the bottle should not stay in the collection, which contradicts the final assertion. The cause is not established. |
-| `shelves-unified` | FAIL | Fails at step 7, `tapOn "Rename Autumn"`. The Autumn shelf is below the fold of the Shelves sheet and the flow has no scroll step. The All shelves tap and the "The shelves" header passed (`after/shelves-unified-failed-step7.jpg`). |
-| `tuning-presets` | FAIL | Fails at step 8, `assertVisible "Vivid Holo"`. The frame (`after/tuning-presets-failed-step8.jpg`) shows the Tuning sheet with "Vivid Holo" on screen, so the assertion fails for a reason the frame does not explain. Unverified hypothesis: the row's accessibility label combines the title and subtitle, so an exact-text match fails. Baseline failed earlier, at step 6 (Version row below the fold). The scroll step now works. |
+| `quick-add-undo` | FAIL | Fails at the last step, `assertVisible "Undo Test Scent"`, after Undo. The frame (`after/quick-add-undo-failed-step12.jpg`) and the hierarchy (`after/hierarchy/step-012-*.json`) show the Cards tab selected, not Collection. The flow header says the bottle should not stay in the collection, which contradicts the final assertion. The cause is not established. |
+| `shelves-unified` | FAIL | Fails at step 7, `tapOn "Rename Autumn"`. The Autumn shelf is below the fold of the Shelves sheet and the flow has no scroll step. The hierarchy at the failure lists Rename Spring and Rename Summer but no Autumn row (`after/hierarchy/step-007-*.json`). The All shelves tap and the "The shelves" header passed. |
+| `tuning-presets` | FAIL | Fails at step 8, `assertVisible "Vivid Holo"`. The frame (`after/tuning-presets-failed-step8.jpg`) shows the Tuning sheet with "Vivid Holo" on screen. The hierarchy captured at the same failure (`after/hierarchy/step-008-*.json`) shows the View & Style sheet and has no "Vivid Holo" node. The screenshot and the snapshot disagree. Open question: whether the Tuning sheet is missing from Maestro's accessibility snapshot, or appears after it. Baseline failed earlier, at step 6 (Version row below the fold). The scroll step now works. |
 
 Logs for every flow, with commands and manifests, are in `maestro-after/flows/`. The JUnit report is `maestro-after/junit.xml`. The final view hierarchy is `maestro-after/final-hierarchy.txt`.
 
@@ -86,4 +86,5 @@ BEFORE means the code before the consolidation batch, or the baseline run where 
 
 - `before/`: baseline frames, downscaled to 600 px wide JPEG.
 - `after/`: failing-step frames and the final screen, downscaled the same way.
+- `after/hierarchy/`: view hierarchies captured at the three failing steps.
 - `maestro-before/`, `maestro-after/`: JUnit reports, final view hierarchies and per-flow logs. The 36 MB zip is not committed; the Actions artifact above holds it until 2026-11-15.

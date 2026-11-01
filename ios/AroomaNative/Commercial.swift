@@ -72,6 +72,39 @@ struct CreatedCard: Codable, Identifiable, Hashable {
     var photoName: String
     var finish: CardFinish
     var created = Date()
+    /// Kept separate from photo pixels so grades can be changed without quality loss.
+    var photoFilter: StudioPhotoFilter = .original
+}
+
+// Backward-compatible decoder: personal cards saved before filters default to Original.
+extension CreatedCard {
+    enum CodingKeys: String, CodingKey {
+        case id, fragranceID, title, caption, photoName, finish, created, photoFilter
+    }
+
+    init(from decoder: Decoder) throws {
+        let fields = try decoder.container(keyedBy: CodingKeys.self)
+        id = try fields.decode(UUID.self, forKey: .id)
+        fragranceID = try fields.decodeIfPresent(String.self, forKey: .fragranceID)
+        title = try fields.decode(String.self, forKey: .title)
+        caption = try fields.decode(String.self, forKey: .caption)
+        photoName = try fields.decode(String.self, forKey: .photoName)
+        finish = try fields.decode(CardFinish.self, forKey: .finish)
+        created = try fields.decode(Date.self, forKey: .created)
+        photoFilter = try fields.decodeIfPresent(StudioPhotoFilter.self, forKey: .photoFilter) ?? .original
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var fields = encoder.container(keyedBy: CodingKeys.self)
+        try fields.encode(id, forKey: .id)
+        try fields.encodeIfPresent(fragranceID, forKey: .fragranceID)
+        try fields.encode(title, forKey: .title)
+        try fields.encode(caption, forKey: .caption)
+        try fields.encode(photoName, forKey: .photoName)
+        try fields.encode(finish, forKey: .finish)
+        try fields.encode(created, forKey: .created)
+        try fields.encode(photoFilter, forKey: .photoFilter)
+    }
 }
 
 struct AcquiredCard: Codable, Identifiable, Hashable {
@@ -99,6 +132,7 @@ struct CommercialArchive: Codable {
     private var fulfilledTransactions: Set<UInt64> = []
     private var earnedPackCards: [String] = []
     private var listener: Task<Void, Never>?
+    private let photoRenderCache = NSCache<NSString, UIImage>()
 
     private static var documentDirectory: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -281,11 +315,19 @@ struct CommercialArchive: Codable {
         return true
     }
     func photo(for card: CreatedCard) -> UIImage? {
-        UIImage(contentsOfFile: Self.documentDirectory.appendingPathComponent(card.photoName).path)
+        let key = NSString(string: card.id.uuidString + ":" + card.photoFilter.rawValue)
+        if let cached = photoRenderCache.object(forKey: key) { return cached }
+        guard let original = UIImage(contentsOfFile: Self.documentDirectory.appendingPathComponent(card.photoName).path) else {
+            return nil
+        }
+        let rendered = StudioPhotoFilters.render(image: original, preset: card.photoFilter,
+                                                 maxDimension: 1600) ?? original
+        photoRenderCache.setObject(rendered, forKey: key)
+        return rendered
     }
     @discardableResult
     func create(title: String, caption: String, photo: Data, finish: CardFinish, fragranceID: String?,
-                cutout: Bool = false) -> Bool {
+                cutout: Bool = false, filter: StudioPhotoFilter = .original) -> Bool {
         guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let raw = UIImage(data: photo),
               let imageBytes = cutout ? raw.pngData() : raw.jpegData(compressionQuality: 0.86) else {
@@ -297,7 +339,7 @@ struct CommercialArchive: Codable {
             try imageBytes.write(to: Self.documentDirectory.appendingPathComponent(filename), options: .atomic)
             created.insert(.init(fragranceID: fragranceID, title: String(title.prefix(80)),
                                  caption: String(caption.prefix(120)), photoName: filename,
-                                 finish: finish), at: 0)
+                                 finish: finish, photoFilter: filter), at: 0)
             save()
             return true
         } catch {
@@ -308,6 +350,7 @@ struct CommercialArchive: Codable {
     func deleteCreated(_ id: UUID) {
         guard let card = created.first(where: { $0.id == id }) else { return }
         created.removeAll { $0.id == id }
+        photoRenderCache.removeObject(forKey: NSString(string: id.uuidString + ":" + card.photoFilter.rawValue))
         save()
         // Delete photo only when it is no longer used by a design.
         if !created.contains(where: { $0.photoName == card.photoName }) {
@@ -465,6 +508,9 @@ struct CardStudioScreen: View {
     @State private var title = ""
     @State private var caption = ""
     @State private var finish: CardFinish = .obsidian
+    @State private var photoFilter: StudioPhotoFilter = .original
+    @State private var filteredPreview: UIImage?
+    @State private var thumbnailPhoto: Data?
     @State private var fragranceID: String?
     @State private var saving = false
 
@@ -473,13 +519,52 @@ struct CardStudioScreen: View {
             ScrollView {
                 VStack(spacing: 18) {
                     StudioCardFace(title: title.isEmpty ? "Your fragrance" : title,
-                                   caption: caption, image: photoData.flatMap(UIImage.init(data:)), finish: finish)
+                                   caption: caption, image: filteredPreview ?? photoData.flatMap(UIImage.init(data:)),
+                                   finish: finish)
                         .frame(width: 236, height: 344)
                         .shadow(radius: 16, y: 10)
                         .padding(.top, 16)
                     PhotosPicker(selection: $photoItem, matching: .images) {
                         Label(photoData == nil ? "Choose bottle photo" : "Change bottle photo", systemImage: "photo.on.rectangle")
                     }.buttonStyle(.bordered)
+                    if let thumbnailPhoto {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("PHOTO FILTERS")
+                                .font(.caption2.weight(.semibold))
+                                .tracking(1.8)
+                                .foregroundStyle(.secondary)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(alignment: .top, spacing: 12) {
+                                    ForEach(StudioPhotoFilter.allCases) { preset in
+                                        Button {
+                                            withAnimation(.easeInOut(duration: 0.18)) { photoFilter = preset }
+                                        } label: {
+                                            VStack(spacing: 6) {
+                                                StudioFilterThumbnail(photo: thumbnailPhoto, preset: preset)
+                                                    .overlay {
+                                                        RoundedRectangle(cornerRadius: 10)
+                                                            .strokeBorder(photoFilter == preset
+                                                                ? archive.theme.palette.accent : .clear, lineWidth: 2.5)
+                                                    }
+                                                Text(preset.rawValue)
+                                                    .font(.caption2.weight(photoFilter == preset ? .bold : .regular))
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.center)
+                                                    .frame(width: 76)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel(preset.rawValue + " photo filter")
+                                        .accessibilityAddTraits(photoFilter == preset ? [.isSelected] : [])
+                                    }
+                                }
+                                .padding(.vertical, 3)
+                            }
+                            Text(photoFilter.detail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                     if sourcePhoto != nil {
                         Button {
                             if usingCutout {
@@ -520,13 +605,14 @@ struct CardStudioScreen: View {
                             }
                         }
                     }
-                    Text("The editable source photo, card title, finish and bottle link remain private on this iPhone. Share only when you choose.")
+                    Text("Filters change the look, not the container shape. The selected photo and filter choice are saved separately on this iPhone. Share only when you choose.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Button {
                         guard let data = photoData else { return }
                         saving = true
                         if commerce.create(title: title, caption: caption, photo: data,
-                                           finish: finish, fragranceID: fragranceID, cutout: usingCutout) {
+                                           finish: finish, fragranceID: fragranceID,
+                                           cutout: usingCutout, filter: photoFilter) {
                             dismiss()
                         }
                         saving = false
@@ -554,6 +640,42 @@ struct CardStudioScreen: View {
                     usingCutout = false
                 }
             }
+            .onChange(of: photoData) { _, _ in
+                renderFilterPreview()
+                renderThumbnailPhoto()
+            }
+            .onChange(of: photoFilter) { _, _ in renderFilterPreview() }
+        }
+    }
+
+    private func renderThumbnailPhoto() {
+        guard let bytes = photoData else {
+            thumbnailPhoto = nil
+            return
+        }
+        thumbnailPhoto = nil
+        Task {
+            let image = await Task.detached(priority: .utility) {
+                StudioPhotoFilters.render(data: bytes, preset: .original, maxDimension: 240)?.pngData()
+            }.value
+            guard photoData == bytes else { return }
+            thumbnailPhoto = image
+        }
+    }
+
+    private func renderFilterPreview() {
+        guard let bytes = photoData else {
+            filteredPreview = nil
+            return
+        }
+        filteredPreview = nil
+        let selected = photoFilter
+        Task {
+            let image = await Task.detached(priority: .userInitiated) {
+                StudioPhotoFilters.render(data: bytes, preset: selected, maxDimension: 1100)
+            }.value
+            guard photoData == bytes && photoFilter == selected else { return }
+            filteredPreview = image
         }
     }
 }
@@ -750,6 +872,8 @@ struct CreatedCardDetails: View {
                               preview: SharePreview(card.title, image: Image(systemName: "rectangle.portrait"))) {
                         Label("Share Card Image", systemImage: "square.and.arrow.up")
                     }.buttonStyle(.borderedProminent)
+                    Text("Filter: \(card.photoFilter.rawValue)")
+                        .font(.caption).foregroundStyle(.secondary)
                     Text("Created \(card.created.formatted(date: .abbreviated, time: .omitted))")
                         .font(.caption).foregroundStyle(.secondary)
                     Button("Delete Personal Card", role: .destructive) { confirmDelete = true }

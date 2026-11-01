@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 58FBEAC1-8EC6-4E83-B597-D6801A423A50" tests="9" failures="3" time="585.781" timestamp="2026-11-01T17:50:19">
+    <testcase id="quick-add-name-owned" name="quick-add-name-owned" classname="quick-add-name-owned" file=".maestro/quick-add-name-owned.yaml" time="72.09" timestamp="2026-11-01T17:50:19" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="46.926" timestamp="2026-11-01T17:51:31" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="search-direct-inspect" name="search-direct-inspect" classname="search-direct-inspect" file=".maestro/search-direct-inspect.yaml" time="50.455" timestamp="2026-11-01T17:52:18" status="SUCCESS">
+      <properties>
+        <property name="tags" value="search, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="123.531" timestamp="2026-11-01T17:53:09" status="ERROR">
+      <properties>
+        <property name="tags" value="owner-tools"/>
+      </properties>
+      <failure>Assertion is false: "Vivid Holo" is visible</failure>
+    </testcase>
+    <testcase id="return-to-today" name="return-to-today" classname="return-to-today" file=".maestro/return-to-today.yaml" time="71.344" timestamp="2026-11-01T17:55:15" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="shelves-unified" name="shelves-unified" classname="shelves-unified" file=".maestro/shelves-unified.yaml" time="44.405" timestamp="2026-11-01T17:56:26" status="ERROR">
+      <properties>
+        <property name="tags" value="shelves, navigation"/>
+      </properties>
+      <failure>Element not found: Text matching regex: Rename Autumn</failure>
+    </testcase>
+    <testcase id="style-sections" name="style-sections" classname="style-sections" file=".maestro/style-sections.yaml" time="47.537" timestamp="2026-11-01T17:57:11" status="SUCCESS">
+      <properties>
+        <property name="tags" value="style"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-undo" name="quick-add-undo" classname="quick-add-undo" file=".maestro/quick-add-undo.yaml" time="77.074" timestamp="2026-11-01T17:57:58" status="ERROR">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+      <failure>Assertion is false: "Undo Test Scent" is visible</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="49.413" timestamp="2026-11-01T17:59:15" status="SUCCESS">
+      <properties>
+        <property name="tags" value="smoke"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

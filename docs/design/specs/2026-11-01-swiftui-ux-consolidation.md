@@ -49,3 +49,5 @@
 ## Maestro flows
 
 Flows are in `.maestro/`, run by the manual *Maestro iOS* workflow on a macOS runner. Selectors use stable accessibility identifiers (`all-shelves`, `direct-collection`, `direct-done`, `scan-*`, `quick-add-review`, `view-and-style`) where visible text would be ambiguous.
+
+**Latest result (run 41332782764, head `31ea0c1`):** 6 of 9 flows pass (`smoke`, `quick-add-wishlist`, `quick-add-name-owned`, `search-direct-inspect`, `return-to-today`, `style-sections`). Three fail: `quick-add-undo` (final assertion after Undo), `shelves-unified` (Rename Autumn below the fold, no scroll step) and `tuning-presets` (`Vivid Holo` assertion while the Tuning sheet is on screen). Flows were not edited after this run. Full evidence, the per-ID matrix and the gate status are in [the evidence README](../../evidence/2026-11-01-ux-consolidation/README.md).

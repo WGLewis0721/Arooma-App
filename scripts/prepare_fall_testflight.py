@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Package already-downloaded Autumn Archive *proofs* into a transient TestFlight checkout.
+"""Package reviewed-file-layout (but unapproved-art) Autumn Archive *proofs* into a transient TestFlight checkout.
 
 Never run as part of public App Store packaging. This script does not set artRightsCleared
 or override approved images; it merely enables *internal* visual QA on a user's iPhone.
 """
 from pathlib import Path
 import json, shutil
-src = Path("_build/fall-candidates")
+src = Path("assets/collectibles/seasons/fall-2026/proofs")
+if not src.exists():
+    src = Path("_build/fall-candidates")
 dst = Path("ios/AroomaNative/Assets.xcassets")
 manifest = json.loads(Path("assets/collectibles/seasons/fall-2026/candidates.json").read_text())
 cards = manifest["candidates"]

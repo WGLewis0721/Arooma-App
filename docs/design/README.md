@@ -1,26 +1,26 @@
 # Arooma design brain
 
-The one place to start for how Arooma looks, feels or adapts to a device. This map tells you what to read for your task, and what not to.
+Start here for Arooma's design rules and task-specific references.
 
 **Audience:** developers and coding agents. Keep design guidance here.
 
-**Product model:** a personal cabinet of fragrance objects. Shelf, then Bottle, then Ownership record. Arooma's active delivery is a native SwiftUI iOS 26+ app in `ios/AroomaNative`; the earlier web prototype is historical. Older decision and design docs may still discuss the PWA.
+**Product:** Shelf → Bottle → Ownership. Native SwiftUI iOS 26+ in `ios/AroomaNative`; old PWA docs are historical.
 
-**Origin:** structure and checks came from Spread (`WGLewis0721/spread-app`, `4c23d25`); its iOS reference remains in [../reference/spread/](../reference/spread/README.md).
+**Origin:** design framework from Spread; [archived iOS references](../reference/spread/README.md).
 
 ---
 
 ## 1. Load only what you need
 
-Stop at the first tier that answers your question.
+Stop at the first sufficient tier.
 
 | Tier | What | Size budget | When |
 | --- | --- | --- | --- |
-| 0 | The rules card, already copied into `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and `.github/copilot-instructions.md` ([source](RULES_CARD.md)) | 3 KB | Always loaded. Small tweaks stop here |
+| 0 | Generated [rules card](RULES_CARD.md) in agent instructions | 3 KB | Always loaded. Small tweaks stop here |
 | 1 | This map | 9 KB | To pick a pack |
-| 2 | A task pack in [packs/](packs/): a digest of the rules, facts and checklist for one kind of task, with pointers to exact sections | 6.5 KB each | Almost every task |
-| 3 | The long documents, read **by section** using the pointers in the pack | n/a | Only when the pack says the detail matters |
-| Data | [tokens.json](tokens.json): every design token, generated from the `:root` block in `index.html` | 4 KB | Instead of reading CSS or prose for token values |
+| 2 | Task pack in [packs/](packs/), with focused rules and section pointers | 6.5 KB each | Almost every task |
+| 3 | Long references, read by section | n/a | Only when the pack says the detail matters |
+| Data | [tokens.json](tokens.json): web-prototype tokens (historical) | 4 KB | For historic web prototype only |
 
 Open decisions: [DECISIONS.md](DECISIONS.md).
 
@@ -32,11 +32,11 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 
 | If you are doing... | Read | Then, only if needed |
 | --- | --- | --- |
-| Foundational UX laws, decision hierarchy, cognitive load or touch-target review | [FOUNDATIONAL_UX_PRINCIPLES.md](FOUNDATIONAL_UX_PRINCIPLES.md) | Follow the task's product-specific pack below; principles do not override the native brand and asset rules |
-| SwiftUI iOS design, navigation, safe areas, native motion or accessibility | [platforms/AROOMA_IOS_DESIGN_GUIDE.md](platforms/AROOMA_IOS_DESIGN_GUIDE.md) | [platforms/APPLE_DESIGN_PRINCIPLES.md](platforms/APPLE_DESIGN_PRINCIPLES.md) and [Spread reference guides](../reference/spread/README.md) for research only |
-| Native gesture-first cards, Wishlist, scan destination choices, image sharing, quick fragrance insights or advanced search | [specs/2026-10-31-gesture-first-wishlist-discovery.md](specs/2026-10-31-gesture-first-wishlist-discovery.md) | [Opus implementation prompt](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md) and [native motion spec](specs/2026-10-31-native-premium-motion-interaction-system.md); do not assume a verified catalog or media license |
-| Real fragrance catalog, brand-photo use, independent-app disclosure, image rights, ads or optional IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [brand/THIRD_PARTY_CONTENT_POLICY.md](brand/THIRD_PARTY_CONTENT_POLICY.md). Strategy only; do not import or publish third-party media based on these docs | 
-| Generate a standalone holographic/overframe fragrance collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) sections 1-6 and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); this is **not** the normal cabinet card style |
+| UX laws, hierarchy or reachability | [FOUNDATIONAL_UX_PRINCIPLES.md](FOUNDATIONAL_UX_PRINCIPLES.md) | Then consult the surface-specific pack |
+| Native SwiftUI design or accessibility | [platforms/AROOMA_IOS_DESIGN_GUIDE.md](platforms/AROOMA_IOS_DESIGN_GUIDE.md) | [Apple principles](platforms/APPLE_DESIGN_PRINCIPLES.md), [Spread references](../reference/spread/README.md) |
+| Native cards, Wishlist, scans, sharing or discovery | [specs/2026-10-31-gesture-first-wishlist-discovery.md](specs/2026-10-31-gesture-first-wishlist-discovery.md) | [Opus prompt](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md), [motion spec](specs/2026-10-31-native-premium-motion-interaction-system.md); no unlicensed catalog |
+| Catalog, image rights, ads or IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [Rights policy](brand/THIRD_PARTY_CONTENT_POLICY.md); strategy is not a publishing license | 
+| Generate an overframe collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); separate from cabinet cards |
 | A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
 | The shelf, cards, bottle art, layouts, Daily Pick, low stock, ownership record, test timer, share image | [packs/shelf-change.md](packs/shelf-change.md) | [brand/BRAND_BOARD.md](brand/BRAND_BOARD.md) sections named in the pack |
 | Layout for iPhone or iPad, safe areas, Home Screen install, status bar, App Store screenshots | [packs/device-layout.md](packs/device-layout.md) | The Spread device guides named in the pack |
@@ -57,20 +57,20 @@ All paths are under `docs/design/`.
 
 | Path | Governs | Status and authority |
 | --- | --- | --- |
-| FOUNDATIONAL_UX_PRINCIPLES.md | Cross-product design principles and UX-law acceptance criteria | Foundational guidance subordinate to native product authority |
-| platforms/AROOMA_IOS_DESIGN_GUIDE.md | Native SwiftUI design and accessibility checks adapted from Spread's iOS research | Native app guidance; references existing unchanged Spread copies in `docs/reference/spread` |
-| RULES_CARD.md | The hard rules, in brief | Source of the generated card in agent files. Summarizes the rows below; they win if they differ |
+| FOUNDATIONAL_UX_PRINCIPLES.md | Foundational laws and checks | Native product authority wins |
+| platforms/AROOMA_IOS_DESIGN_GUIDE.md | Arooma-specific native iOS guidelines | References preserved Spread guides |
+| RULES_CARD.md | The hard rules, in brief | Source of agent rule cards; governs conflicts |
 | DECISIONS.md | Open decisions and the decision log | Current |
 | PLAN_SPEC_PROTOCOL.md, specs/TEMPLATE.md | How every plan and spec is made and shaped | Process authority; never overrides a design rule |
 | AI_TOOL_SETUP.md | How AI tools reach these documents | Advisory. Vendor file conventions not re-verified |
 | specs/ (README.md is the index) | One spec per request | Plans, not approval |
 | packs/ | One digest per kind of task | Derived. The long documents win if they differ |
 | packs/collectible-image-generation.md | Task instructions for AI-generated collectible art, not production cabinet cards | Task pack, derived from the collectible guide |
-| brand/THIRD_PARTY_CONTENT_POLICY.md | Unofficial real-fragrance companion positioning, asset provenance, fair-use review gates, takedown and Apple review preparation | Policy for third-party content planning; not a publication license |
+| brand/THIRD_PARTY_CONTENT_POLICY.md | Asset provenance, licensing and review | Policy for third-party content planning; not a publication license |
 | specs/2026-10-30-unofficial-companion-strategy.md | Product/business strategy and staged real-catalog rollout | Chosen direction; implementation and image rights gated |
-| brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Owner-locked Dior **Archive Foil v3** composition, front top notes, no separate rarity label and a three-horizontal-strip reverse | Highest for optional collectible art only; does not override cabinet UI |
+| brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Locked Dior Archive Foil v3 artwork | Highest for optional collectible art only; does not override cabinet UI |
 | brand/COLLECTIBLE_CARD_PRODUCTION.md | Human+AI production workflow, copy manifests, prompts and editable layered delivery requirements | Operational for collectible art only |
-| assets/collectibles/templates/archive-foil-v3-{front,back}.svg | Matching editable v3 composition artboards (outside design docs) | Current collectible templates |
+| assets/collectibles/templates/archive-foil-v3-{front,back}.svg | Editable artboards outside docs | Current collectible templates |
 | tokens.json | Design tokens | Generated from `index.html` |
 | brand/BRAND_BOARD.md | Palette, type, materials, motion, icon, share image, low stock, daily pick | Highest for visual and motion decisions |
 | brand/ICON_HANDOFF.md | Icon files, generation and placement | Highest for icon files |
@@ -82,20 +82,20 @@ All paths are under `docs/design/`.
 
 ## 4. Code locations
 
-Current native app: ios/AroomaNative. Original cards: assets/collectibles/masters/approved. Historic index.html is not the native source. See [native motion](specs/2026-10-31-native-premium-motion-interaction-system.md) and [gesture-first discovery](specs/2026-10-31-gesture-first-wishlist-discovery.md).
+Native: ios/AroomaNative. Approved cards: assets/collectibles/masters/approved. Web index.html is historical. See [native motion](specs/2026-10-31-native-premium-motion-interaction-system.md) and [gesture-first discovery](specs/2026-10-31-gesture-first-wishlist-discovery.md).
 
 ---
 
 ## 5. Spread reference material
 
-[../reference/spread/README.md](../reference/spread/README.md) holds Spread's iPhone, iPad and iPhone Duo build guides, its widget and Live Activity spec, and its iOS release runbooks, unchanged. They describe a different product. Use them for Apple facts, checklists and process, never as Arooma rules.
+[../reference/spread/README.md](../reference/spread/README.md) holds Spread's iPhone, iPad and iPhone Duo build guides, its widget and Live Activity spec, and its iOS release runbooks, unchanged. Use for research, not Arooma implementation rules.
 
 ---
 
 ## 6. Keeping the brain healthy
 
-- New design information goes in the document whose scope it matches. If none fits, add one in the right subfolder and a row to the router and the table. Each document links back to this file near the top. Specs go in `specs/`.
-- One home per fact: link instead of copying. The only deliberate copies are the generated card blocks. No design rules in `README.md` outside the generated block.
-- After editing the `:root` tokens in `index.html` run `npm run docs:tokens`. After editing the rules card run `npm run docs:sync`. `npm run docs:check` (also in CI) fails when either is stale, when a link or pack pointer breaks, or when a tier passes its budget.
-- A document over 6 KB opens with a `> Summary:` line under its breadcrumb. Keep section headings short and stable, because packs point at them.
+- Put new guidance in the relevant doc; add missing topics to this router. Link back here. Specs belong in `specs/`.
+- One home per fact: link instead of copy. Keep agent files thin.
+- For historical web token changes use `npm run docs:tokens`. For rule-card changes run `npm run docs:sync`. `npm run docs:check` validates links, indices and budgets.
+- Docs over 6 KB need a `> Summary:` near the top. Keep pack-targeted headings stable.
 - Record a decision in the document it changes and in [DECISIONS.md](DECISIONS.md). When a document is superseded, say so at its top and name its replacement. Do not delete history.

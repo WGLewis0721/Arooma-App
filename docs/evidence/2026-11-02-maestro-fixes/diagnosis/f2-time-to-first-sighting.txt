@@ -1,0 +1,22 @@
+F2: time from the end of the long press until Maestro first saw "Vivid Holo" (the Tuning sheet's Vivid Holo preset row).
+Source: commands.json of each flow (command timestamps and durations). Press = longPressOn "Version.*" (the runner holds it 3.0 s; the app opens Tuning at 0.9 s).
+"never" = the check polled until its timeout and failed; the number after it is how long it polled. Flow # is the position in that run's junit order.
+
+run 41336948314 (11 flows)
+  flow  #4  tuning-presets                  assertVisible              never (polled 18.3 s)
+  flow  #6  zz-diag-tuning-late             takeScreenshot, extendedWaitUntil 45 s     1.4 s
+  flow #10  zz-diag-tuning-expand           takeScreenshot, runFlow when visible       2.9 s
+
+run 41341165470 (12 flows)
+  flow  #4  tuning-presets                  takeScreenshot, assertVisible              never (polled 17.8 s)   <- the screenshot did not help
+  flow  #5  zz-diag-tuning-miss-then-shot   extendedWaitUntil 4 s (missed at 4.8 s), takeScreenshot, extendedWaitUntil 10 s     9.9 s
+  flow  #7  zz-diag-tuning-wait-animation   waitForAnimationToEnd, extendedWaitUntil 8 s     2.3 s
+  flow #11  zz-diag-tuning-shot-repeat      takeScreenshot, extendedWaitUntil 8 s      0.8 s
+
+source run 41332782764 (9 flows)
+  flow  #4  tuning-presets                  assertVisible              never (polled 18.4 s)
+
+Reading: in every run the first flow to open Tuning (tuning-presets, flow #4) never saw it within about 18 s. Every later opening in the
+same simulator session saw it within 0.8 s to 9.9 s, whatever the check command was. The sheet was on screen and in the app's own
+accessibility snapshot throughout (see f2-snapshot-signatures.txt). Not yet tested: a longer wait on the first opening, or running
+tuning-presets as the only flow (include_tags owner-tools), to see whether it is the first opening, the position, or chance.

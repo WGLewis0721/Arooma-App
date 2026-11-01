@@ -1,4 +1,7 @@
 # Arooma — Native Navigation & Deck Cleanup V2
+
+> **SUPERSEDED FOR NAVIGATION (2026-11-01):** New owner decisions are in [`AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md`](AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md): bottom tabs **Explore / My Collection / Search**, Today integrated into My Collection, Card Studio removed from the visible UI, and a **My Collection long-press action column (Wishlist / Add / Wear)**. The V2 rules about Explore decluttering, native materials, safety and nonconflicting earlier UX fixes remain relevant. Where these plans differ, V3 wins.
+
 > **Authoritative owner-approved plan • 2026-11-01 • SWIFTUI ONLY**
 >
 > This **replaces** `AROOMA_SWIFTUI_UX_CONSOLIDATION_PLAN.md` as the implementation roadmap. That document remains historical background for the earlier 18 before/after concepts and Refero research, **not** an alternative navigation spec. This plan includes the owner's annotated in-app screenshot, the explicit resolution of the redundant long-press menu, and the unimplemented parts of the prior audit. **No production code was changed by this planning commit.**

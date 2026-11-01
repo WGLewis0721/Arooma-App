@@ -82,6 +82,20 @@ for (const card of data.cards ?? []) {
   if (!/^[a-z0-9-]+$/.test(card.id ?? '')) fail('Unsafe ID: ' + card.id);
   if (card.frontMaster !== 'masters/' + card.id + '-front.png') fail(card.id + ': wrong master path');
   if (card.frontAppAsset !== 'approved/' + card.id + '-front.jpg') fail(card.id + ': wrong app-art path');
+  const pyramid = card.notePyramid;
+  if (!pyramid || !['top', 'heart', 'base'].every(stage =>
+      Array.isArray(pyramid[stage]) && pyramid[stage].length > 0 &&
+      pyramid[stage].every(note => typeof note === 'string' && note.trim().length > 0))) {
+    fail(card.id + ': Top, Heart and Base must all contain researched fragrance notes');
+  }
+  try {
+    if (new URL(pyramid?.sourceURL).protocol !== 'https:') throw Error('non-HTTPS');
+    if (!['brand-or-retailer', 'editorial-database'].includes(pyramid.sourceType)) {
+      fail(card.id + ': unknown note source type');
+    }
+  } catch {
+    fail(card.id + ': missing valid research source URL');
+  }
   if (release) {
     if (card.status !== 'approved' || card.artRightsCleared !== true ||
         card.productFactsVerified !== true || card.referencePhotoApproved !== true) {

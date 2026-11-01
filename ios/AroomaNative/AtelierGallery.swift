@@ -733,7 +733,7 @@ struct AtelierInspector: View {
                     flippingCard(width: cardW)
                     Spacer(minLength: 6)
                     Text(Fall2026Collection.entry(for: card.fragrance.id) != nil
-                         ? (flip.showsBack ? "REVERSE  ·  ART DIRECTION" : "FRONT  ·  AUTUMN ARCHIVE")
+                         ? (flip.showsBack ? "REVERSE  ·  FRAGRANCE NOTE MAP" : "FRONT  ·  AUTUMN ARCHIVE")
                          : (flip.showsBack ? "REVERSE  ·  NOTE MAP" : "FRONT  ·  TOP NOTES"))
                         .font(.system(.caption2, weight: .semibold))
                         .tracking(1.8)
@@ -884,7 +884,7 @@ struct AtelierInspector: View {
                 }
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(card.fragrance.name), \(back ? (Fall2026Collection.entry(for: card.fragrance.id) == nil ? "reverse with fragrance map" : "reverse with artistic materials") : "front")")
+        .accessibilityLabel("\(card.fragrance.name), \(back ? (Fall2026Collection.entry(for: card.fragrance.id) == nil ? "reverse with fragrance map" : "reverse with top, heart and base fragrance notes") : "front")")
         .accessibilityHint("Double tap to flip")
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { flip.flip() }
@@ -930,7 +930,7 @@ struct AtelierInspector: View {
                 .font(.subheadline).foregroundStyle(.secondary)
             if rows.isEmpty {
                 Text(Fall2026Collection.entry(for: f.id) != nil
-                     ? "Autumn collector edition · scent notes not yet verified."
+                     ? "Autumn collector edition · top, heart and base notes sourced in catalog."
                      : (f.archival ? "Historical edition. Notes are not verified." : "Notes not yet recorded."))
                     .font(.footnote).foregroundStyle(.secondary)
             }

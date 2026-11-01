@@ -6,7 +6,7 @@
 
 | Property | Measured value | Notes |
 | --- | --- | --- |
-| Source file | 736 × 1073 pixels, 337 KB approximate | JPEG from owner's conversation |
+| Source file | 736 × 1073 pixels, 337 KB approximate | JPEG from owner's conversation; SHA-256 `5b491b9ace639a340bfdeaa056f7838e53b54482dd331dc30c509d47d051e3cc` |
 | Artwork aspect | 736 / 1073 = 0.685927 | Within 0.00012 of the requested 59/86 ratio |
 | Foreground card bounds | x=0..735, y≈46..1026 | Top/bottom **white margin ≈46 px each** in the reference. Not part of artwork to replicate. |
 | Image dark fraction | 57.3% of interior content pixels have linear-weighted 8-bit luminance below 50 | Measured inside x0..735 and y65..1009. Lighting guidance only, not a universal filter. |
@@ -18,6 +18,8 @@
 | Material signature | narrow etched, iridescent, fully closed outer edge; matte-black imagery; directional specular highlights | Qualitative behavior, not identifiable by one pixel statistic |
 
 **Important:** the supplied image has a white outside margin and a rounded card inside it. Ship a deliberate 59:86 asset that renders neatly in the native gallery; do not mechanically reproduce the white screenshot padding. The source's 57.3% darkness is a *reference*, not a mandate to darken every bottle or obscure key label detail.
+
+**Reference custody:** The numeric measurements and image hash are in this document; the actual MYSLF photo has **not** been uploaded to the public GitHub repository. For reproducible side-by-side review, the owner must place the exact source file in an access-controlled approved asset location and verify its hash. The hash alone cannot reconstruct the image.
 
 ## Hard rejection gates (100% must pass)
 

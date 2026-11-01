@@ -273,8 +273,12 @@ struct CardFace: View, Equatable {
             } else if let fragrance, fragrance.id.hasPrefix("personal-") {
                 if side == .front { PersonalCardArt(fragrance: fragrance) }
                 else { PersonalReverse(fragrance: fragrance) }
+            } else if side == .back, let autumn = Fall2026Collection.entry(for: fragranceID) {
+                // Same FlipMotor/Metal light as the four originals, with a true
+                // fragrance-specific reverse that never fabricates scent notes.
+                Fall2026Reverse(card: autumn)
             } else {
-                // Original photographic card master; the optical layer never changes it.
+                // Photo art is immutable; the live card physics and foil stay native.
                 CollectibleCard(id: fragranceID, side: side, cornerRadius: radius)
             }
         }

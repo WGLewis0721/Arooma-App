@@ -6,7 +6,12 @@ enum CardSide: String { case front, back }
 /// No generated artwork and no image rewriting.
 /// Loads the exact committed masters from the native app bundle and crops their known two-up midpoint.
 enum ApprovedArtwork {
-    private static var cache = NSCache<NSString, UIImage>()
+    private static let cache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        // 34 cards can otherwise retain hundreds of megabytes of decoded RGBA.
+        cache.totalCostLimit = 96 * 1024 * 1024
+        return cache
+    }()
     private static let originals: [String:(name:String,folder:String)] = [
         "dior": ("dior-sauvage-elixir-original-diptych", "approved"),
         "hawas": ("rasasi-hawas-for-him-original-diptych", "approved"),
@@ -16,6 +21,15 @@ enum ApprovedArtwork {
     static func image(for id: String, side: CardSide) -> UIImage? {
         let key = "\(id)-\(side.rawValue)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
+        if id.hasPrefix("fall2026-") {
+            guard side == .front,
+                  let card = Fall2026Collection.entry(for: id),
+                  let original = Fall2026Collection.artwork(for: card) else { return nil }
+            let decoded = original.preparingForDisplay() ?? original
+            let cost = (decoded.cgImage?.bytesPerRow ?? 0) * (decoded.cgImage?.height ?? 0)
+            cache.setObject(decoded, forKey: key, cost: cost)
+            return decoded
+        }
         guard let source = originals[id],
               let url = Bundle.main.url(forResource: source.name, withExtension: "png", subdirectory: source.folder),
               let bitmap = UIImage(contentsOfFile: url.path)?.cgImage else { return nil }
@@ -27,7 +41,7 @@ enum ApprovedArtwork {
         // PNG inflation. Pixels are unchanged.
         let raw = UIImage(cgImage: cropped, scale: 1, orientation: .up)
         let image = raw.preparingForDisplay() ?? raw
-        cache.setObject(image, forKey: key)
+        cache.setObject(image, forKey: key, cost: cropped.bytesPerRow * cropped.height)
         return image
     }
 }

@@ -732,7 +732,9 @@ struct AtelierInspector: View {
                     Spacer(minLength: 6)
                     flippingCard(width: cardW)
                     Spacer(minLength: 6)
-                    Text(flip.showsBack ? "REVERSE  ·  NOTE MAP" : "FRONT  ·  TOP NOTES")
+                    Text(Fall2026Collection.entry(for: card.fragrance.id) != nil
+                         ? (flip.showsBack ? "REVERSE  ·  ART DIRECTION" : "FRONT  ·  AUTUMN ARCHIVE")
+                         : (flip.showsBack ? "REVERSE  ·  NOTE MAP" : "FRONT  ·  TOP NOTES"))
                         .font(.system(.caption2, weight: .semibold))
                         .tracking(1.8)
                         .foregroundStyle(.secondary)
@@ -797,7 +799,13 @@ struct AtelierInspector: View {
             .buttonBorderShape(.circle)
             .accessibilityLabel("Close")
             Spacer()
-            CardShareButton(card: card)
+            if let fall = Fall2026Collection.entry(for: card.fragrance.id) {
+                if fall.status == "approved" && fall.artRightsCleared && fall.referencePhotoApproved {
+                    CardShareButton(card: card)
+                }
+            } else {
+                CardShareButton(card: card)
+            }
             if let bottle {
                 Button {
                     var updated = bottle
@@ -876,7 +884,7 @@ struct AtelierInspector: View {
                 }
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(card.fragrance.name), \(back ? "reverse with fragrance map" : "front")")
+        .accessibilityLabel("\(card.fragrance.name), \(back ? (Fall2026Collection.entry(for: card.fragrance.id) == nil ? "reverse with fragrance map" : "reverse with artistic materials") : "front")")
         .accessibilityHint("Double tap to flip")
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { flip.flip() }
@@ -921,7 +929,9 @@ struct AtelierInspector: View {
             Text([f.concentration, f.year].filter { !$0.isEmpty }.joined(separator: " · "))
                 .font(.subheadline).foregroundStyle(.secondary)
             if rows.isEmpty {
-                Text(f.archival ? "Historical edition. Notes are not verified." : "Notes not yet recorded.")
+                Text(Fall2026Collection.entry(for: f.id) != nil
+                     ? "Autumn collector edition · scent notes not yet verified."
+                     : (f.archival ? "Historical edition. Notes are not verified." : "Notes not yet recorded."))
                     .font(.footnote).foregroundStyle(.secondary)
             }
             ForEach(Array(rows.enumerated()), id: \.offset) { i, row in

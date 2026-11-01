@@ -682,10 +682,10 @@ struct CardStudioScreen: View {
 
 // MARK: - Two independent collections: physical bottles and digital cards
 struct MyCardsScreen: View {
+    let openLiveArchive: () -> Void
     @EnvironmentObject private var archive: CollectionStore
     @EnvironmentObject private var commerce: CardCommerce
     @State private var studio = false
-    @State private var autumnArchive = false
     @State private var selectedCard: CreatedCard?
     @State private var section = 0
     @State private var exporting = false
@@ -707,17 +707,16 @@ struct MyCardsScreen: View {
                         }.buttonStyle(.glass).accessibilityLabel("Create card")
                     }
                     if Fall2026Collection.available {
-                        Button {
-                            autumnArchive = true
-                        } label: {
+                        Button(action: openLiveArchive) {
+                            
                             HStack(spacing: 12) {
                                 Image(systemName: "leaf")
                                     .font(.title2)
                                     .foregroundStyle(archive.theme.palette.accent)
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(Fall2026Collection.internalProofBuild ? "Autumn Archive · Internal proofs" : "Autumn Archive · 2026")
+                                    Text("Autumn Archive · 30 live cards")
                                         .font(.system(.title3, design: .serif))
-                                    Text(Fall2026Collection.internalProofBuild ? "Review 30 unapproved card designs offline" : "Explore 30 finished fall fragrance cards")
+                                    Text("Explore in Cover Flow, Stack and Fan · flip and tilt to inspect")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
@@ -729,7 +728,7 @@ struct MyCardsScreen: View {
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14))
                         }
                         .buttonStyle(.plain)
-                        .accessibilityHint("Browse the curated fall fragrance artwork")
+                        .accessibilityHint("Opens the original interactive card deck at the first autumn fragrance")
                     }
                     if CommercialRelease.storefrontVisible {
                         Picker("Cards", selection: $section) {
@@ -770,10 +769,7 @@ struct MyCardsScreen: View {
             .sheet(isPresented: $studio) {
                 CardStudioScreen().environmentObject(archive).environmentObject(commerce)
             }
-            .sheet(isPresented: $autumnArchive) {
-                AutumnArchiveScreen()
-            }
-            .sheet(item: $selectedCard) { card in
+             .sheet(item: $selectedCard) { card in
                 CreatedCardDetails(card: card)
                     .environmentObject(commerce)
             }

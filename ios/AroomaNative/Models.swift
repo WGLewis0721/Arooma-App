@@ -87,7 +87,7 @@ struct Fragrance: Identifiable, Hashable, Codable {
         Fragrance(id: "prodigy", house: "MIND GAMES", name: "Prodigy", concentration: "Extrait de Parfum",
                   year: "", top: [], heart: [], base: [],
                   shelf: .winter, archival: true)
-    ]
+    ] + Fall2026Collection.fragrances
     static func find(_ id: String) -> Fragrance? { catalog.first { $0.id == id } }
 }
 struct WearEvent: Codable, Identifiable, Hashable {

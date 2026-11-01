@@ -59,7 +59,11 @@ struct AtelierRoot: View {
             }
         }
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
-        .onAppear(perform: applyQALaunchArguments)
+        .onAppear {
+            // A returning user may have last used My Collection. Explore must still open the sample deck.
+            alignMode(with: tab)
+            applyQALaunchArguments()
+        }
         .fullScreenCover(item: $inspection) { card in
             AtelierInspector(card: card, close: { inspection = nil })
                 .environmentObject(archive)

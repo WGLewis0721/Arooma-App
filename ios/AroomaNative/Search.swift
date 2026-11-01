@@ -191,7 +191,7 @@ struct AtelierSearch: View {
                     if results.isEmpty {
                         ContentUnavailableView.search(text: query)
                         if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Text("Not in Arooma yet? Use Quick Add (+) to capture it for your Collection or Wishlist.")
+                            Text("Not in Arooma yet? Use + in My Collection to capture it for your Collection or Wishlist.")
                                 .font(.footnote).foregroundStyle(.secondary)
                         }
                     }

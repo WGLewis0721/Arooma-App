@@ -1,0 +1,18 @@
+# Swipe up on the focused card opens the Insights tray; the deck stays selectable and Close collapses it.
+appId: com.graymatter.arooma
+tags:
+  - explore
+  - insights
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- swipe:
+    direction: UP
+- assertVisible: "Close Insights"
+- assertVisible: "Compare fragrances"
+- takeScreenshot: explore-insights-peek
+- tapOn: "Close Insights"
+- assertNotVisible: "Compare fragrances"
+- assertVisible:
+    id: "explore-add-to-collection"

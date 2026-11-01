@@ -175,6 +175,17 @@ import SwiftUI
         mode = .mine
         HapticEngine.shared.play(.completed)
     }
+    /// Adds an owned bottle without switching the active deck or mode. Explore's compact + uses
+    /// this so the sample deck stays on screen. Returns the existing or the new bottle id.
+    @discardableResult
+    func addWithoutSwitching(_ fragrance: Fragrance) -> UUID {
+        if let existing = bottles.first(where: { $0.fragranceID == fragrance.id }) { return existing.id }
+        let added = BottleRecord(fragranceID: fragrance.id, shelf: fragrance.shelf)
+        bottles.append(added)
+        HapticEngine.shared.play(.completed)
+        return added.id
+    }
+
     func shelfName(_ shelf: FragranceShelf) -> String {
         shelfNames[shelf.rawValue] ?? shelf.rawValue
     }

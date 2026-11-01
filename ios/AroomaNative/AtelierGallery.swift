@@ -13,6 +13,10 @@ extension CardLayout {
     }
 }
 
+/// Where the deck lives. Explore shows the sample deck with its own search and style entries.
+/// My Collection shows owned bottles or the Wishlist; its header is drawn by MyCollectionScreen.
+enum DeckContext: Hashable { case explore, collection }
+
 // MARK: - Collection gallery
 //
 // Every card pose on this screen is a pure function of DeckMotor's continuous position, press
@@ -44,12 +48,13 @@ struct AtelierGallery: View {
     @State private var suggestedCompare: Fragrance?
     @AppStorage("arooma.deckTipV3") private var understoodDeck = false
 
+    let context: DeckContext
     let transitionNamespace: Namespace.ID
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
+    /// Search is a function inside Explore, not a bottom tab (A10).
+    let openSearch: () -> Void
     let openStyle: () -> Void
-    /// Opens the one editable shelf surface (rename, move, add, return to deck). One tap from here (item 03).
-    let openShelves: () -> Void
     let showToday: (UUID) -> Void
 
     private var cards: [DisplayCard] { archive.displayedCards }
@@ -66,9 +71,11 @@ struct AtelierGallery: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                header
-                    .padding(.horizontal, 20)
-                    .padding(.top, 6)
+                if context == .explore {
+                    exploreHeader
+                        .padding(.horizontal, 20)
+                        .padding(.top, 6)
+                }
                 if cards.isEmpty {
                     Spacer()
                     AtelierEmptyState(
@@ -87,19 +94,15 @@ struct AtelierGallery: View {
                         .offset(y: -18 * min(insight, 1))
                         .layoutPriority(1)
                     insightGrabber
-                    DeckScrubber(count: cards.count, position: motor.position, accent: ink) { index in
-                        understoodDeck = true
-                        motor.glide(to: index)
-                    }
-                    .padding(.horizontal, 28)
-                    .padding(.top, 2)
                     identity
                         .padding(.horizontal, 24)
                         .padding(.top, 10)
-                    actions
-                        .padding(.horizontal, 20)
-                        .padding(.top, 14)
-                        .padding(.bottom, 12)
+                    if context == .collection {
+                        actions
+                            .padding(.horizontal, 20)
+                            .padding(.top, 14)
+                            .padding(.bottom, 12)
+                    }
                 }
             }
             .scaleEffect(1 - 0.1 * overview)
@@ -157,57 +160,23 @@ struct AtelierGallery: View {
 
     // MARK: Header
 
-    private var header: some View {
+    /// Explore's only chrome: a quiet label, Search (a function inside Explore, not a tab) and one
+    /// discreet View & Style utility. The wordmark, the square mode menu, Shelves and Quick Add were
+    /// removed here (annotations A1 to A3); their destinations now live in the tabs.
+    private var exploreHeader: some View {
         HStack(alignment: .center, spacing: 10) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Wordmark: deep theme ink in light mode, with a letterpress catch-light
-                // underneath so it reads as pressed into the paper rather than faded on it.
-                AroomaSignatureMark(ink: ink)
-                    .frame(height: 32)
-                    .shadow(color: scheme == .light ? .white.opacity(0.9) : .clear, radius: 0, x: 0, y: 1)
-                    .shadow(color: scheme == .light ? .black.opacity(0.12) : .clear, radius: 1.5, x: 0, y: -0.5)
-                    .accessibilityElement()
-                    .accessibilityLabel("Arooma")
-                    .accessibilityAddTraits(.isHeader)
-                Menu {
-                    Button("My collection", systemImage: "square.stack") { closeInsight(); archive.enter(.mine) }
-                    Button("Wishlist", systemImage: "heart.text.square") { closeInsight(); archive.enter(.wishlist) }
-                    Button("Explore sample cards", systemImage: "sparkles") { closeInsight(); archive.enter(.demo) }
-                } label: {
-                    // A real control: a small glass chip with full-contrast text and a theme dot.
-                    HStack(spacing: 6) {
-                        Circle().fill(ink).frame(width: 6, height: 6)
-                        Text(modeTitle)
-                        Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
-                    }
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.4)
-                    .foregroundStyle(Color.primary.opacity(0.82))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .glassEffect(.regular, in: Capsule())
-                    .frame(minHeight: 34)
-                    .contentShape(Rectangle())
-                }
-                .tint(.primary)
-                .accessibilityLabel("Showing \(modeTitle.lowercased())")
-            }
+            Text("EXPLORE")
+                .font(.system(size: 10, weight: .bold))
+                .tracking(1.6)
+                .foregroundStyle(ink)
+                .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 4)
             GlassEffectContainer(spacing: 10) {
                 HStack(spacing: 10) {
-                    glassButton("square.grid.2x2", label: "All shelves", action: openShelves)
-                    glassButton("plus", label: "Quick add a bottle", action: add)
+                    glassButton("magnifyingglass", label: "Search", action: openSearch)
                     glassButton("slider.horizontal.3", label: "View and style", action: openStyle)
                 }
             }
-        }
-    }
-
-    private var modeTitle: String {
-        switch archive.mode {
-        case .mine: "MY COLLECTION"
-        case .wishlist: "WISHLIST"
-        case .demo: "SAMPLE ARCHIVE"
         }
     }
 
@@ -277,7 +246,6 @@ struct AtelierGallery: View {
                 }
             }
             .accessibilityAction { if let focusedCard { inspect(focusedCard) } }
-            .accessibilityAction(named: "Show every shelf") { openShelves() }
             .accessibilityAction(named: "Show insights") { setInsight(insight >= 1 ? 2 : 1) }
         }
     }
@@ -336,7 +304,7 @@ struct AtelierGallery: View {
             Button("Move to my collection", systemImage: "checkmark.circle") { archive.moveToCollection(wishID: wishID) }
             Button("Remove from Wishlist", systemImage: "heart.slash", role: .destructive) { archive.removeFromWishlist(wishID) }
         } else {
-            Button("Add to my collection", systemImage: "plus") { archive.add(card.fragrance) }
+            Button("Add to my collection", systemImage: "plus") { archive.addWithoutSwitching(card.fragrance) }
             if !archive.isWishlisted(card.fragrance.id) {
                 Button("Add to Wishlist", systemImage: "heart") { archive.addToWishlist(card.fragrance) }
             }
@@ -446,16 +414,16 @@ struct AtelierGallery: View {
 
     private func closeInsight() { if insight > 0 { setInsight(0) } }
 
-    /// A small labelled grabber under the card: visible signifier and tap alternative.
+    /// A quiet grabber under the card: the visible signifier and tap alternative to the upward swipe (A4).
+    /// The labelled Insights strip is gone; VoiceOver keeps "Show insights".
     @ViewBuilder private var insightGrabber: some View {
         if insight < 0.05, focusedCard != nil {
             Button { setInsight(1) } label: {
-                VStack(spacing: 3) {
-                    Capsule().fill(.secondary.opacity(0.45)).frame(width: 30, height: 4)
-                    Text("Insights").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
-                }
-                .frame(width: 88, height: 30)
-                .contentShape(Rectangle())
+                Capsule()
+                    .fill(.secondary.opacity(0.5))
+                    .frame(width: 36, height: 4)
+                    .frame(width: 88, height: 26)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Show insights")
@@ -518,6 +486,7 @@ struct AtelierGallery: View {
                     .foregroundStyle(ink)
                     .lineLimit(1)
                 Spacer()
+                // The one position counter (A5, A6). VoiceOver reads it as "Card n of N".
                 HStack(spacing: 2) {
                     Text(String(format: "%02d", motor.focusedIndex + 1))
                         .contentTransition(.numericText(value: Double(motor.focusedIndex)))
@@ -525,6 +494,8 @@ struct AtelierGallery: View {
                 }
                 .font(.system(.caption, design: .rounded).monospacedDigit())
                 .foregroundStyle(.secondary)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Card \(motor.focusedIndex + 1) of \(cards.count)")
             }
             ZStack(alignment: .leading) {
                 Text(card?.fragrance.name ?? "")
@@ -536,6 +507,10 @@ struct AtelierGallery: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .clipped()
+            if let card {
+                contextActions(for: card)
+                    .padding(.top, 6)
+            }
             Text(([card?.fragrance.concentration ?? ""] + notes).filter { !$0.isEmpty }.joined(separator: "  ·  "))
                 .font(.footnote).foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -543,58 +518,89 @@ struct AtelierGallery: View {
                 .transition(.opacity)
         }
         .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: card?.id)
-        .accessibilityElement(children: .combine)
     }
 
-    @ViewBuilder private var actions: some View {
-        if let card = focusedCard {
-            HStack(spacing: 10) {
-                if let bottleID = card.bottleID {
-                    let worn = archive.bottles.first(where: { $0.id == bottleID })?.wornToday ?? false
-                    Button {
-                        if worn { archive.undoTodayWear(bottleID: bottleID) }
-                        else { archive.recordWear(bottleIDs: [bottleID]) }
-                    } label: {
-                        Label(worn ? "Worn today · Undo" : "Wear today",
-                              systemImage: worn ? "checkmark.circle.fill" : "drop")
-                            .contentTransition(.symbolEffect(.replace))
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 34)
+    /// Compact, context-dependent actions beside the name (A7). They replace the large gold CTA (A8).
+    /// The underlying records and rules are the store's: add, move, wishlist, undo and duplicate checks.
+    @ViewBuilder private func contextActions(for card: DisplayCard) -> some View {
+        if context == .explore {
+            if archive.isOwned(card.fragrance.id) {
+                Label("In your collection", systemImage: "checkmark.seal")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("explore-owned-state")
+            } else {
+                let wish = archive.wishlist.first(where: { $0.fragranceID == card.fragrance.id })
+                HStack(spacing: 10) {
+                    compactAction(wish == nil ? "plus" : "plus.circle.fill",
+                                  label: wish == nil ? "Add to My Collection" : "Move to My Collection",
+                                  id: "explore-add-to-collection", selected: false) {
+                        if let wish { archive.moveToCollection(wishID: wish.id) }
+                        else { archive.addWithoutSwitching(card.fragrance) }
                     }
-                    .buttonStyle(.glassProminent)
-                    .legibleTint(accent)
-                    Button { showToday(bottleID) } label: {
-                        Label("Layer", systemImage: "square.stack.3d.up")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(minHeight: 34)
+                    compactAction(wish == nil ? "heart" : "heart.fill",
+                                  label: wish == nil ? "Add to Wishlist" : "Remove from Wishlist",
+                                  id: "explore-wishlist-toggle", selected: wish != nil) {
+                        if let wish { archive.removeFromWishlist(wish.id) }
+                        else { archive.addToWishlist(card.fragrance) }
                     }
-                    .buttonStyle(.glass)
-                    .accessibilityHint("Combine with other bottles in Today")
-                } else if let wishID = card.wishID {
-                    Button { archive.moveToCollection(wishID: wishID) } label: {
-                        Label("Move to my collection", systemImage: "checkmark.circle")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 34)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .legibleTint(accent)
-                } else {
-                    Button { archive.add(card.fragrance) } label: {
-                        Label("Add to my collection", systemImage: "plus")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 34)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .legibleTint(accent)
                 }
-                Button { inspect(card) } label: {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.system(size: 15, weight: .medium))
-                        .frame(width: 34, height: 34)
+            }
+        } else if let wishID = card.wishID {
+            HStack(spacing: 10) {
+                compactAction("plus.circle.fill", label: "Move to My Collection", id: "wishlist-move", selected: false) {
+                    archive.moveToCollection(wishID: wishID)
+                }
+                compactAction("heart.slash", label: "Remove from Wishlist", id: "wishlist-remove", selected: false) {
+                    archive.removeFromWishlist(wishID)
+                }
+            }
+        }
+    }
+
+    /// A 44-point circular control with a glyph, a VoiceOver label and a stable identifier for flows.
+    private func compactAction(_ symbol: String, label: String, id: String, selected: Bool,
+                               action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(selected ? accent : Color.primary)
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .accessibilityLabel(label)
+        .accessibilityIdentifier(id)
+    }
+
+    /// My Collection, owned bottles only: Wear today and Layer, the composition path into Today (A11
+    /// removed the duplicate inspect icon because a tap on the focused card already inspects).
+    @ViewBuilder private var actions: some View {
+        if let card = focusedCard, let bottleID = card.bottleID {
+            let worn = archive.bottles.first(where: { $0.id == bottleID })?.wornToday ?? false
+            HStack(spacing: 10) {
+                Button {
+                    if worn { archive.undoTodayWear(bottleID: bottleID) }
+                    else { archive.recordWear(bottleIDs: [bottleID]) }
+                } label: {
+                    Label(worn ? "Worn today · Undo" : "Wear today",
+                          systemImage: worn ? "checkmark.circle.fill" : "drop")
+                        .contentTransition(.symbolEffect(.replace))
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 34)
+                }
+                .buttonStyle(.glassProminent)
+                .legibleTint(accent)
+                .accessibilityIdentifier("wear-today")
+                Button { showToday(bottleID) } label: {
+                    Label("Layer", systemImage: "square.stack.3d.up")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minHeight: 34)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("Inspect \(card.fragrance.name)")
+                .accessibilityHint("Combine with other bottles in Today")
+                .accessibilityIdentifier("layer")
             }
             .animation(reduceMotion ? nil : .snappy, value: card.id)
         }
@@ -659,45 +665,6 @@ struct AtelierGallery: View {
             try? await Task.sleep(for: .seconds(1.0))
         }
         if let card = focusedCard { inspect(card) }
-    }
-}
-
-// MARK: - Scrubber
-
-/// One tick per card. The active tick stretches continuously with the deck position, and
-/// dragging along the row glides the deck: fast travel through a dense collection.
-struct DeckScrubber: View {
-    let count: Int
-    let position: Double
-    let accent: Color
-    let select: (Int) -> Void
-    @State private var lastSent = -1
-
-    var body: some View {
-        GeometryReader { geo in
-            let slot = min(22, geo.size.width / CGFloat(max(1, count)))
-            let total = slot * CGFloat(count)
-            HStack(spacing: 0) {
-                ForEach(0..<count, id: \.self) { i in
-                    let near = max(0, 1 - abs(Double(i) - position))
-                    Capsule()
-                        .fill(near > 0.5 ? accent : Color.primary.opacity(0.22 + 0.4 * near))
-                        .frame(width: max(3, min(slot - 3, 4 + CGFloat(near) * 14)), height: 4)
-                        .frame(width: slot)
-                }
-            }
-            .frame(width: total, height: 30)
-            .contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance: 0).onChanged { value in
-                let i = Int((value.location.x / max(1, slot)).rounded(.down))
-                let clamped = max(0, min(count - 1, i))
-                if clamped != lastSent { lastSent = clamped; select(clamped) }
-            }.onEnded { _ in lastSent = -1 })
-            .frame(maxWidth: .infinity)
-        }
-        .frame(height: 30)
-        .opacity(count > 1 ? 1 : 0)
-        .accessibilityHidden(true)
     }
 }
 
@@ -1017,7 +984,7 @@ struct AtelierInspector: View {
             } else {
                 Button {
                     if let wishID = card.wishID { archive.moveToCollection(wishID: wishID) }
-                    else { archive.add(card.fragrance) }
+                    else { archive.addWithoutSwitching(card.fragrance) }
                     stamp += 1
                     Task { @MainActor in
                         try? await Task.sleep(for: .milliseconds(420))

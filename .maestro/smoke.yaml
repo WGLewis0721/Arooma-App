@@ -1,18 +1,24 @@
-# Smoke: a first-run user enters the archive, opens the one shelf surface and reaches the other tabs.
+# Smoke: the three tabs open their primary screens, and Search, Shelves and Today respond.
 appId: com.graymatter.arooma
 tags:
   - smoke
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Explore the Archive"
 - tapOn: "Explore the Archive"
-- assertVisible: "Add to my collection"
+- assertVisible:
+    id: "explore-add-to-collection"
+- tapOn:
+    id: "search"
+- tapOn: "Name, house.*"
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 92%"
+- tapOn: "Today"
+- assertVisible: "What are you wearing?"
+- tapOn: "My Collection"
+- assertVisible: "Owned"
 - tapOn:
     id: "all-shelves"
 - assertVisible: "The shelves"
 - tapOn: "Done"
-- tapOn: "Today"
-- assertVisible: "What are you wearing?"
-- tapOn: "Cards"
-- assertVisible: "My Cards"

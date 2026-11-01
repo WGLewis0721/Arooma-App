@@ -11,6 +11,7 @@ tags:
     arguments:
       AroomaQAUndoWindow: 30
 - tapOn: "Explore the Archive"
+- tapOn: "My Collection"
 - tapOn:
     id: "quick-add-a-bottle"
 - tapOn: "Fragrance name"

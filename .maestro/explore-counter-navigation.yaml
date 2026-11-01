@@ -1,0 +1,17 @@
+# The numeric counter tracks the deck through swipes in both directions; there are no dots.
+appId: com.graymatter.arooma
+tags:
+  - explore
+  - counter
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible: "Card 1 of .*"
+- swipe:
+    direction: LEFT
+- assertVisible: "Card 2 of .*"
+- swipe:
+    direction: RIGHT
+- assertVisible: "Card 1 of .*"
+- takeScreenshot: explore-counter-back-to-1

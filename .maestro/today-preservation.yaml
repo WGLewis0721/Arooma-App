@@ -1,0 +1,27 @@
+# Wear, undo and the Today log keep working after the tab changes.
+appId: com.graymatter.arooma
+tags:
+  - today
+---
+- launchApp:
+    clearState: true
+- tapOn: "Start My Collection"
+- tapOn: "Add a fragrance"
+- tapOn: "Fragrance name"
+- inputText: "Today Test Scent"
+- tapOn:
+    id: "direct-collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible:
+    id: "wear-today"
+- tapOn:
+    id: "wear-today"
+- assertVisible: "Worn today · Undo"
+- takeScreenshot: today-after-wear
+- tapOn: "Today"
+- assertVisible: "What are you wearing?"
+- tapOn: "My Collection"
+- assertVisible: "Worn today · Undo"
+- tapOn: "Worn today · Undo"
+- assertVisible: "Wear today"

@@ -8,6 +8,8 @@ Read [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and [docs/
 
 For Codex, Cursor, Grok Build and any other tool that reads `AGENTS.md`.
 
+**Mobile UI testing and user-flow audits:** use Maestro (maestro.dev). Read the procedure in [.claude/skills/maestro-ui-testing/SKILL.md](.claude/skills/maestro-ui-testing/SKILL.md) and its [command reference](.claude/skills/maestro-ui-testing/reference.md). Flows live in `.maestro/`. Test the native app on an iOS Simulator with a Debug build; never claim a device result that did not run.
+
 All design guidance lives in one place: **[docs/design/README.md](docs/design/README.md)**.
 
 <!-- design-rules-card:start -->

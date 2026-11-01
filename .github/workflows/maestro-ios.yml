@@ -1,0 +1,52 @@
+name: Maestro iOS
+# Manual only. Runs UI flows against a Debug build on an iOS 26 simulator. Not a release gate.
+on:
+  workflow_dispatch:
+jobs:
+  maestro:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Build Debug simulator app
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/AroomaNative.xcodeproj -scheme AroomaNative -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/AroomaBuild" CODE_SIGNING_ALLOWED=NO build
+
+      - name: Boot iOS 26 iPhone simulator and install the app
+        run: |
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c '
+          import sys, json
+          d = json.load(sys.stdin)["devices"]
+          ids = [v["udid"] for k, vs in d.items() for v in vs if "iPhone" in v["name"] and "26" in k]
+          print(ids[0] if ids else "")')
+          test -n "$DEVICE"
+          echo "DEVICE=$DEVICE" >> "$GITHUB_ENV"
+          xcrun simctl boot "$DEVICE" || true
+          perl -e 'alarm 720; exec @ARGV' xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl install "$DEVICE" "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
+
+      - name: Run Maestro flows
+        run: maestro --version && maestro test .maestro/
+
+      - name: Upload Maestro results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maestro-results
+          path: ~/.maestro/tests/
+          if-no-files-found: ignore
+          retention-days: 7

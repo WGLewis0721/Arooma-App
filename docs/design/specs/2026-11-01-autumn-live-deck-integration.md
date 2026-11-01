@@ -38,3 +38,13 @@ The proof artworks are not yet commercially cleared. The normal App Store releas
 - `Fall2026Reverse` shows real TOP NOTES / HEART NOTES / BASE NOTES in the existing three-strip treatment, while leaving the front images, foil, tilt, physics and card IDs unchanged.
 - `node scripts/check-fall-archive.mjs` verifies exactly 30 complete pyramids with provenance links; this separate factual metadata does **not** mark any of the unapproved brand-art/rights flags as accepted for public sale.
 - In the owner’s internal build, confirm long notes wrap gracefully on the smallest supported iPhone and use VoiceOver to read every stage. The master front image and 3D flip remain unchanged.
+
+## 2026-11-01: owner-locked full reverse restored
+
+**Correction to an incomplete earlier implementation:** Three text-only note strips and three identical crops of the front photograph were insufficient. [The Archive Foil v3 art standard](../brand/COLLECTIBLE_CARD_ART_DIRECTION.md) mandates a complete mirrored visual reverse. The owner supplied the MYSLF reverse again to restate this standard.
+
+Every one of the 30 Fall editions now has its own editorial story, release year, marketing classification, concentration and three complete sourced note lists. All three note rows use **different photographic ingredient art**, generated as independent images, never cropped from the product front. The original front card's etched holographic perimeter is reused via a border mask so front and reverse match exactly. The 3:2 source triptych of each fragrance is cut into three 1000 x 390 botanical panels and provided only in the signed internal build's compiled asset catalog as `fallnotes-<id>-top`, `fallnotes-<id>-heart`, `fallnotes-<id>-base`.
+
+The production build `prepare_fall_testflight.py` fails if any of the 90 photo assets is missing. Native CI inspects `Assets.car` and verifies all 90 by name in addition to the 30 card fronts. Public commercial bundles do not include the unapproved artwork, as before.
+
+**Acceptance on a physical iPhone:** all four edges of the holographic border; full house and variant; original 18–34 word italic description; Top/Heart/Base photo strips with visually distinct ingredients and correctly typeset actual notes; no clipped notes; release year, masculine/unisex classification, concentration and Arooma footer. Inspect the shortest and longest fragrance names and 6-note bases. Flip/motion/ownership behavior remains unchanged. The source note pyramids and source URLs remain intact, and edited descriptions do not imply maker endorsement.

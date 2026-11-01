@@ -190,36 +190,103 @@ struct AutumnArchiveDetail: View {
     }
 
     private var back: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 16).fill(Color(hex: 0x171922))
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(.white.opacity(0.35), lineWidth: 1)
-                .padding(10)
-            VStack(spacing: 19) {
-                Text("AROOMA")
-                    .font(.caption2.weight(.medium)).tracking(4)
-                Spacer(minLength: 0)
-                Text(card.house.uppercased())
-                    .font(.caption).tracking(1.4)
-                Text(card.name)
-                    .font(.system(size: 33, design: .serif))
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.center)
-                Text(card.variant.uppercased())
-                    .font(.caption2).tracking(1.7)
-                Spacer(minLength: 0)
-                Text("AUTUMN ARCHIVE · 2026")
-                    .font(.caption2).tracking(1.3)
-                Text("An independent Arooma collector edition. Not affiliated with or endorsed by the fragrance maker.")
-                    .font(.caption2)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.white.opacity(0.75))
+        GeometryReader { geometry in
+            let w = geometry.size.width
+            let ink = Color(hex: 0x0E1015)
+            let copper = Color(hex: 0xC7A46C)
+            ZStack {
+                RoundedRectangle(cornerRadius: 16).fill(ink)
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(copper.opacity(0.70), lineWidth: 1.3)
+                    .padding(8)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(card.house.uppercased())
+                                .font(.system(size: 10, weight: .medium, design: .serif))
+                                .tracking(1.7)
+                            Text(card.name.uppercased())
+                                .font(.system(size: 29, weight: .regular, design: .serif))
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 0)
+                        Text(card.variant.uppercased())
+                            .font(.system(size: 8, weight: .medium))
+                            .tracking(0.8)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: w * 0.28)
+                    }
+                    Rectangle().fill(copper.opacity(0.9)).frame(height: 1)
+                    Text("An independently illustrated fragrance collectible from Arooma's Autumn Archive.")
+                        .font(.system(size: 11, design: .serif).italic())
+                        .foregroundStyle(.white.opacity(0.82))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("FRAGRANCE MAP")
+                        .font(.system(size: 10, weight: .semibold))
+                        .tracking(1.3)
+                        .foregroundStyle(copper)
+                    noteRow("TOP", index: 0, width: w)
+                    noteRow("HEART", index: 1, width: w)
+                    noteRow("BASE", index: 2, width: w)
+                    Spacer(minLength: 0)
+                    Rectangle().fill(copper.opacity(0.8)).frame(height: 1)
+                    HStack(spacing: 0) {
+                        fact(card.variant.uppercased(), "CONCENTRATION")
+                        fact("INDEPENDENT", "COLLECTION")
+                        fact("FALL 2026", "EDITION")
+                    }
+                    .frame(height: 34)
+                    HStack {
+                        Spacer()
+                        Text("AROOMA  ·  FRAGRANCE COLLECTION")
+                            .font(.system(size: 8))
+                            .tracking(1.4)
+                        Spacer()
+                    }
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 28)
             }
-            .foregroundStyle(.white)
-            .padding(30)
+        }
+        .accessibilityLabel(card.house + " " + card.name + " reverse artwork proof; fragrance note information awaits verification.")
+    }
+
+    private func fact(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 3) {
+            Text(value).font(.system(size: 9, weight: .medium)).lineLimit(1).minimumScaleFactor(0.6)
+            Text(label).font(.system(size: 7)).tracking(0.7).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func noteRow(_ stage: String, index: Int, width: CGFloat) -> some View {
+        HStack(spacing: 9) {
+            if let image = Fall2026Collection.artwork(for: card) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width * 0.51, height: 65)
+                    .clipped()
+                    .overlay(Color.black.opacity(index == 0 ? 0.06 : index == 1 ? 0.22 : 0.35))
+            }
+            VStack(alignment: .leading, spacing: 5) {
+                Text(stage).font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color(hex: 0xC7A46C))
+                Text("Notes under verification")
+                    .font(.system(size: 9, design: .serif).italic())
+                    .foregroundStyle(.white.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(height: 65)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Color(hex: 0xC7A46C).opacity(0.5)).frame(height: 0.65)
         }
     }
+
 }
 
 struct AutumnCardPNG: Transferable {

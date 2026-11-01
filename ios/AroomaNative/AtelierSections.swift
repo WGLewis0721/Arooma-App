@@ -20,6 +20,7 @@ struct PressableCardStyle: ButtonStyle {
 struct AtelierWelcome: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var scheme
     @State private var settled = false
     @State private var dealt = false
     @State private var handle: CGSize = .zero
@@ -42,7 +43,7 @@ struct AtelierWelcome: View {
                     // The exact master signature (assets/brand), fully legible from the first frame,
                     // with a slow metallic highlight. Buttons below act immediately; nothing waits
                     // for the loop.
-                    AroomaSignatureShimmer(ink: accent, highlight: archive.theme.keyLight)
+                    AroomaSignatureShimmer(ink: accent.legible(in: scheme), highlight: archive.theme.keyLight)
                         .frame(width: min(geo.size.width * 0.8, 330),
                                height: min(geo.size.width * 0.8, 330) / SignatureGeometry.logoAspect)
                         .accessibilityElement()
@@ -67,7 +68,7 @@ struct AtelierWelcome: View {
                                 .frame(maxWidth: .infinity, minHeight: 40)
                         }
                         .buttonStyle(.glassProminent)
-                        .tint(accent)
+                        .legibleTint(accent)
                         Button(action: openMine) {
                             Text("Start My Collection")
                                 .font(.subheadline.weight(.semibold))
@@ -256,7 +257,7 @@ struct ShelfLedge: View {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Image(systemName: shelf.icon)
                     .font(.system(.subheadline, weight: .light))
-                    .foregroundStyle(accent)
+                    .legibleForeground(accent)
                 AtelierDisplay(title: archive.shelfName(shelf), size: 27)
                 Spacer()
                 Text("\(cards.count, format: .number.precision(.integerLength(2)))")
@@ -394,7 +395,7 @@ struct ShelfOverview: View {
                         let cards = archive.cardsOnShelf(shelf)
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
-                                Image(systemName: shelf.icon).foregroundStyle(archive.theme.palette.accent)
+                                Image(systemName: shelf.icon).legibleForeground(archive.theme.palette.accent)
                                 Text(archive.shelfName(shelf)).font(.system(.title3, design: .serif))
                                 Spacer()
                                 Text("\(cards.count)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
@@ -488,7 +489,7 @@ struct AtelierOwnership: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "sparkle")
-                                    .foregroundStyle(archive.theme.palette.accent)
+                                    .legibleForeground(archive.theme.palette.accent)
                                 VStack(alignment: .leading, spacing: 3) {
                                     AtelierEyebrow(text: "Today's pick", accent: archive.theme.palette.accent)
                                     Text(pick.fragrance.name)
@@ -596,7 +597,7 @@ struct AtelierOwnership: View {
                 .frame(maxWidth: .infinity, minHeight: 52)
         }
         .buttonStyle(.borderedProminent)
-        .tint(archive.theme.palette.accent)
+        .legibleTint(archive.theme.palette.accent)
     }
 
     private func secondary(record: BottleRecord) -> some View {
@@ -625,7 +626,7 @@ struct AtelierOwnership: View {
             HStack {
                 Image(systemName: systemImage)
                     .frame(width: 24)
-                    .foregroundStyle(archive.theme.palette.accent)
+                    .legibleForeground(archive.theme.palette.accent)
                 Text(title)
                     .font(.subheadline)
                 Spacer()
@@ -665,7 +666,7 @@ struct AtelierOwnership: View {
                             Spacer()
                             if record.id == current?.id {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(archive.theme.palette.accent)
+                                    .legibleForeground(archive.theme.palette.accent)
                             }
                         }
                         .frame(minHeight: 70)
@@ -685,6 +686,7 @@ struct AtelierOwnership: View {
 struct AtelierStyle: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var scheme
     @State private var replayingIntro = false
     @State private var tuning = false
     private static var versionString: String {
@@ -752,7 +754,7 @@ struct AtelierStyle: View {
                 AtelierEyebrow(text: "Signature", accent: archive.theme.palette.accent)
                 Button { replayingIntro = true } label: {
                     HStack(spacing: 14) {
-                        AroomaSignatureMark(ink: archive.theme.palette.accent)
+                        AroomaSignatureMark(ink: archive.theme.ink(scheme))
                             .frame(height: 30)
                         Spacer(minLength: 8)
                         Label("Show signature", systemImage: "sparkles")
@@ -1051,7 +1053,7 @@ struct AtelierWearLog: View {
                 Spacer(minLength: 0)
                 Image(systemName: "arrow.clockwise.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(accent)
+                    .legibleForeground(accent)
             }
             .padding(12)
             .atelierPlate(18)
@@ -1209,7 +1211,7 @@ struct AtelierWearLog: View {
                         .frame(maxWidth: .infinity, minHeight: 36)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(accent)
+                .legibleTint(accent)
                 Button {
                     withAnimation(.snappy) { addingNote.toggle() }
                 } label: {

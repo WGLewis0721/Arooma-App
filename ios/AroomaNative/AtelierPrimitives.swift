@@ -47,14 +47,67 @@ struct AtelierAtmosphere: View {
     }
 }
 
+// MARK: - Legible accents
+//
+// The themes' metals (lilac, pale gold, champagne) are beautiful on navy/plum but too faint as
+// text on bone/cream. In light appearances, any accent used for text or a filled control is
+// deepened toward a warm ink until it reaches ~5:1 contrast on the light field, keeping its hue,
+// so it still reads as that theme's metal. Dark appearances are unchanged.
+
+extension Color {
+    func legible(in scheme: ColorScheme) -> Color {
+        guard scheme == .light else { return self }
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a) else { return self }
+        func linear(_ c: CGFloat) -> CGFloat { c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4) }
+        func luminance(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) -> CGFloat {
+            0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+        }
+        let ink: (CGFloat, CGFloat, CGFloat) = (0.16, 0.12, 0.15)
+        var t: CGFloat = 0
+        var (rr, gg, bb) = (r, g, b)
+        // Target luminance ≈ 0.11 → about 5:1 against a bone field (luminance ≈ 0.80).
+        while luminance(rr, gg, bb) > 0.11 && t < 0.9 {
+            t += 0.04
+            rr = r + (ink.0 - r) * t
+            gg = g + (ink.1 - g) * t
+            bb = b + (ink.2 - b) * t
+        }
+        return Color(.sRGB, red: Double(rr), green: Double(gg), blue: Double(bb), opacity: Double(a))
+    }
+}
+
+extension FragranceTheme {
+    /// The theme's metal as a readable ink for the current appearance.
+    func ink(_ scheme: ColorScheme) -> Color { palette.accent.legible(in: scheme) }
+}
+
+/// Tints controls with the theme metal, deepened in light mode so filled buttons keep contrast.
+struct LegibleTint: ViewModifier {
+    let color: Color
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View { content.tint(color.legible(in: scheme)) }
+}
+/// Foreground in the theme metal, deepened in light mode so it reads on bone/cream.
+struct LegibleForeground: ViewModifier {
+    let color: Color
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View { content.foregroundStyle(color.legible(in: scheme)) }
+}
+extension View {
+    func legibleTint(_ color: Color) -> some View { modifier(LegibleTint(color: color)) }
+    func legibleForeground(_ color: Color) -> some View { modifier(LegibleForeground(color: color)) }
+}
+
 struct AtelierEyebrow: View {
     let text: String
     let accent: Color
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
         Text(text.uppercased())
-            .font(.system(.caption2, design: .default, weight: .semibold))
+            .font(.system(.caption2, design: .default, weight: scheme == .light ? .bold : .semibold))
             .tracking(2.1)
-            .foregroundStyle(accent)
+            .foregroundStyle(accent.legible(in: scheme))
             .lineLimit(1)
             .minimumScaleFactor(0.75)
             .accessibilityAddTraits(.isHeader)
@@ -402,7 +455,7 @@ struct AtelierEmptyState: View {
         VStack(spacing: 19) {
             Image(systemName: "rectangle.stack.badge.plus")
                 .font(.system(size: 40, weight: .ultraLight))
-                .foregroundStyle(accent)
+                .legibleForeground(accent)
             AtelierDisplay(title: title, size: 30)
                 .multilineTextAlignment(.center)
             Text(detail)
@@ -412,7 +465,7 @@ struct AtelierEmptyState: View {
                 .padding(.horizontal, 10)
             Button(action, action: callback)
                 .buttonStyle(.borderedProminent)
-                .tint(accent)
+                .legibleTint(accent)
                 .frame(minHeight: 48)
         }
         .padding(26)

@@ -99,7 +99,11 @@ import SwiftUI
     var cards: [DisplayCard] {
         switch mode {
         case .demo:
-            return Fragrance.catalog.map { DisplayCard(id: $0.id, fragrance: $0, bottleID: nil) }
+            // Keep saved identities resolvable, but only show the seasonal demo
+            // when its complete approved/private image bundle is actually present.
+            return Fragrance.catalog
+                .filter { !$0.id.hasPrefix("fall2026-") || Fall2026Collection.available }
+                .map { DisplayCard(id: $0.id, fragrance: $0, bottleID: nil) }
         case .mine:
             return bottles.compactMap { b in
                 guard let f = fragrance(id: b.fragranceID) else { return nil }

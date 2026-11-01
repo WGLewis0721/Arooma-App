@@ -42,8 +42,17 @@ jobs:
           app="$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
           test -f "$app/catalog.json"
           test -d "$app/proofs"
-          test "$(find "$app/proofs" -type f -name '*.jpg' | wc -l | tr -d ' ')" -eq 30
-          echo "Verified catalog and all 30 JPEGs embedded for the live demo deck."
+          python3 - "$app" <<'PY'
+          import json, pathlib, sys
+          bundle = pathlib.Path(sys.argv[1])
+          manifest = json.loads((bundle / "catalog.json").read_text())
+          cards = manifest["cards"]
+          assert len(cards) == 30, f"Expected 30 cards, got {len(cards)}"
+          for card in cards:
+              asset = bundle / "proofs" / (card["id"] + ".jpg")
+              assert asset.is_file() and asset.stat().st_size > 20000, f"Missing artwork {asset}"
+          print("All 30 uniquely named live cards and catalog are embedded.")
+          PY
       - name: Stage 30 offline proof images for internal-release compiler verification
         if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
         run: |

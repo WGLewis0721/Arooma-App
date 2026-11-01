@@ -36,6 +36,14 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/AroomaBuild" \
             CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/arooma-build.log"
           test -d "$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
+      - name: Verify 30 live card fronts are bundled in the normal native app
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
+          test -f "$app/catalog.json"
+          test -d "$app/proofs"
+          test "$(find "$app/proofs" -type f -name '*.jpg' | wc -l | tr -d ' ')" -eq 30
+          echo "Verified catalog and all 30 JPEGs embedded for the live demo deck."
       - name: Stage 30 offline proof images for internal-release compiler verification
         if: ${{ hashFiles('assets/collectibles/seasons/fall-2026/proofs/*.jpg') != '' }}
         run: |

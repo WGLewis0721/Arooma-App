@@ -11,6 +11,8 @@ struct Fall2026Card: Decodable, Identifiable, Hashable {
     let house: String
     let name: String
     let variant: String
+    /// Editorial staging theme; never represented as verified top/heart/base ingredients.
+    let sceneBrief: String
     let status: String
     let referencePhotoApproved: Bool
     let productFactsVerified: Bool
@@ -136,6 +138,8 @@ struct AutumnArchiveDetail: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showsBack = false
+    @State private var gestureYaw: Double = 0
+    @State private var gesturePitch: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -144,23 +148,52 @@ struct AutumnArchiveDetail: View {
                     Group {
                         if showsBack {
                             back
+                                .modifier(LiveFoil(strength: 0.35, yaw: gestureYaw,
+                                                   radius: 16, tint: .white))
                         } else if let image = Fall2026Collection.artwork(for: card) {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFit()
-                                .modifier(LiveFoil(strength: 0.35, yaw: 0,
+                                .modifier(LiveFoil(strength: 0.35, yaw: gestureYaw,
                                                    radius: 16, tint: .white))
                         }
                     }
                     .aspectRatio(59.0 / 86.0, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal, 14)
-                    .onTapGesture { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { showsBack.toggle() } }
+                    .rotation3DEffect(.degrees(reduceMotion ? 0 : gestureYaw),
+                                      axis: (x: 0, y: 1, z: 0), perspective: 0.56)
+                    .rotation3DEffect(.degrees(reduceMotion ? 0 : gesturePitch),
+                                      axis: (x: 1, y: 0, z: 0), perspective: 0.56)
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 8)
+                            .onChanged { value in
+                                guard !reduceMotion else { return }
+                                // Keep fingers in charge: direct tilt while held, spring only on release.
+                                gestureYaw = max(-17, min(17, Double(value.translation.width) * 0.09))
+                                gesturePitch = max(-10, min(10, -Double(value.translation.height) * 0.045))
+                            }
+                            .onEnded { value in
+                                let horizontalSwipe = abs(value.predictedEndTranslation.width) > 150 &&
+                                    abs(value.translation.width) > abs(value.translation.height) * 1.35
+                                withAnimation(reduceMotion ? nil : .spring(response: 0.44, dampingFraction: 0.80)) {
+                                    gestureYaw = 0
+                                    gesturePitch = 0
+                                    if horizontalSwipe { showsBack.toggle() }
+                                }
+                            }
+                    )
+                    .onTapGesture { withAnimation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82)) { showsBack.toggle() } }
+                    .sensoryFeedback(.selection, trigger: showsBack)
                     .accessibilityAddTraits(.isButton)
                     .accessibilityLabel(showsBack ? "Card details. Tap to see artwork." : "Artwork. Tap to flip card.")
 
                     Button(showsBack ? "See artwork" : "Flip card", systemImage: "arrow.triangle.2.circlepath") {
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) { showsBack.toggle() }
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82)) {
+                            gestureYaw = 0
+                            gesturePitch = 0
+                            showsBack.toggle()
+                        }
                     }
                     .buttonStyle(.bordered)
 
@@ -222,13 +255,13 @@ struct AutumnArchiveDetail: View {
                         .font(.system(size: 11, design: .serif).italic())
                         .foregroundStyle(.white.opacity(0.82))
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("FRAGRANCE MAP")
+                    Text("COLLECTOR'S ART DIRECTION")
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(1.3)
                         .foregroundStyle(copper)
-                    noteRow("TOP", index: 0, width: w)
-                    noteRow("HEART", index: 1, width: w)
-                    noteRow("BASE", index: 2, width: w)
+                    noteRow("PALETTE", index: 0, width: w)
+                    noteRow("MATERIAL", index: 1, width: w)
+                    noteRow("ATMOSPHERE", index: 2, width: w)
                     Spacer(minLength: 0)
                     Rectangle().fill(copper.opacity(0.8)).frame(height: 1)
                     HStack(spacing: 0) {
@@ -250,7 +283,7 @@ struct AutumnArchiveDetail: View {
                 .padding(.vertical, 28)
             }
         }
-        .accessibilityLabel(card.house + " " + card.name + " reverse artwork proof; fragrance note information awaits verification.")
+        .accessibilityLabel(card.house + " " + card.name + " reverse artwork, featuring the design palette and inspiration, not verified fragrance notes.")
     }
 
     private func fact(_ value: String, _ label: String) -> some View {
@@ -262,7 +295,12 @@ struct AutumnArchiveDetail: View {
     }
 
     private func noteRow(_ stage: String, index: Int, width: CGFloat) -> some View {
-        HStack(spacing: 9) {
+        let sceneParts = card.sceneBrief
+            .replacingOccurrences(of: " and ", with: ",")
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+        let sceneDetail = index < sceneParts.count ? sceneParts[index] : "Seasonal luxury still life"
+        return HStack(spacing: 9) {
             if let image = Fall2026Collection.artwork(for: card) {
                 Image(uiImage: image)
                     .resizable()
@@ -274,8 +312,8 @@ struct AutumnArchiveDetail: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(stage).font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Color(hex: 0xC7A46C))
-                Text("Notes under verification")
-                    .font(.system(size: 9, design: .serif).italic())
+                Text(sceneDetail)
+                    .font(.system(size: 10, design: .serif).italic())
                     .foregroundStyle(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
             }

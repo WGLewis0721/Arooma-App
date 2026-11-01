@@ -58,7 +58,9 @@ jobs:
 
       - name: Run Maestro flows
         run: |
-          export PATH="$HOME/.maestro/bin:$PATH" MAESTRO_CLI_NO_ANALYTICS=1
+          # The iOS driver can take well over the default 120 s to come up on a freshly booted runner simulator
+          # ("iOS driver not ready in time"); give it five minutes instead of failing the whole run.
+          export PATH="$HOME/.maestro/bin:$PATH" MAESTRO_CLI_NO_ANALYTICS=1 MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
           ARGS=(--udid "$DEVICE" --format JUNIT --output "$RUNNER_TEMP/maestro-results/junit.xml" --test-output-dir "$RUNNER_TEMP/maestro-results/run")
           if [ -n "${{ inputs.include_tags }}" ]; then ARGS+=(--include-tags "${{ inputs.include_tags }}"); fi
           if [ -n "${{ inputs.exclude_tags }}" ]; then ARGS+=(--exclude-tags "${{ inputs.exclude_tags }}"); fi

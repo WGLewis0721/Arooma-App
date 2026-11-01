@@ -12,7 +12,7 @@
 | Thin editorial header "SEASON COMPASS" | `compassHeading` | Visible for every selected fragrance |
 | Large fragrance name, small house and concentration | `identityAndCompass` | Dynamic, truncation-safe, no Layton hardcoding |
 | Two jewel-ring medallions for season and occasion | `SeasonCompassDial` | Derived from `InsightEngine.season/occasion`; unknown stays unknown |
-| Three elegant rounded note rows | `ingredientRow` | Top, Heart, Base dynamic, three illustrated glyphs plus +N; tap expands exact written names; VoiceOver lists all |
+| Three elegant rounded note rows | `ingredientRow` | Top, Heart, Base dynamic, three locally bundled photographic botanical miniatures plus +N; accurate fallback glyph for unillustrated notes; tap expands exact written names; VoiceOver lists all |
 | Five short accord chips | Horizontal `accords` carousel | Actual derived accords only, any number (not an invented fixed five); detail is labelled *derived* |
 | Closest owned fragrance mini-card | `recommendation` | Only shown when a real owned comparison passes the current similarity rule; tap opens preselected Compare |
 | Possible layer mini-card | `recommendation` | Existing recorded layer takes precedence; otherwise a labelled compatible-accord suggestion; tap opens preselected Compare |
@@ -25,7 +25,7 @@
 
 - Compare on a 390pt iPhone against the supplied mockup and do not confuse CI compile success with actual visual fidelity.
 - Hierarchy: card deck remains visible behind sheet; cream parchment/muted copper for light mode; rich plum/bronze in dark mode; one consistent radius, hairline separators, measured 8pt rhythm.
-- Notes show isolated illustration-like ingredient symbols (from a local deterministic ingredient dictionary, with non-fabricated fallback), never arbitrary copied photographs or made-up notes. Text remains available on tap and in VoiceOver.
+- Notes show original photographed cutout-style ingredient miniatures from 20 bundled native assets, selected by a deterministic ingredient dictionary with a truthful glyph fallback; original artwork is not fetched at runtime, and scent-note text is never fabricated. Text remains available on tap and in VoiceOver.
 - Never display literal names, suggestion scores, product art, seasons or closest matches hardcoded from the Layton screenshot.
 - Respect Reduce Motion, Dynamic Type, safe areas and VoiceOver. Expanded panel scroll must remain responsive with a one-finger gesture.
 - No new backend, AI subscription, APIs, tracking, photo permissions, purchases, or user-data migrations.
@@ -33,7 +33,7 @@
 
 ### Release gate
 
-- [ ] Xcode native Debug and internal unsigned Release CI compile
+- [ ] Xcode native Debug and internal unsigned Release CI compile, with 20/20 photographic ingredient miniatures verified inside compiled Assets.car
 - [ ] Docs checks pass
 - [ ] Run with sample Layton: season suggestion and actual notes, not hardcoded screenshot content
 - [ ] Run with missing notes: shows "Notes not recorded", no fake season or similarity

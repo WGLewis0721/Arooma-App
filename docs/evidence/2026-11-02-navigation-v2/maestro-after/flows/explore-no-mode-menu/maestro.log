@@ -1,0 +1,36 @@
+20:27:14.542 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+20:27:14.542 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+20:27:14.543 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+20:27:14.543 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+20:27:14.543 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.graymatter.arooma" with clear state RUNNING
+20:27:14.544 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.graymatter.arooma
+20:27:25.431 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.graymatter.arooma
+20:27:25.448 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.graymatter.arooma app during launch
+20:27:28.225 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.graymatter.arooma" with clear state COMPLETED
+20:27:28.226 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Explore the Archive" RUNNING
+20:27:34.120 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Explore the Archive, title=, value=, text=, hintText=, resource-id=, bounds=[26,710][376,764], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=26, y=710, width=350, height=54))
+20:27:35.649 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:27:35.651 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 737) using hierarchy based logic for wait
+20:27:35.653 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:27:35.653 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:37.101 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:27:37.103 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Explore the Archive" COMPLETED
+20:27:37.104 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Showing sample archive" is not visible RUNNING
+20:27:38.230 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Showing sample archive" is not visible COMPLETED
+20:27:38.233 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Explore sample cards" is not visible RUNNING
+20:27:38.940 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Explore sample cards" is not visible COMPLETED
+20:27:38.940 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Long press on "Explore" RUNNING
+20:27:39.100 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=EXPLORE, title=, value=, text=, hintText=, resource-id=, bounds=[20,84][79,96], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=20, y=84, width=59, height=12))
+20:27:39.562 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:27:39.564 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (49, 90) using hierarchy based logic for wait
+20:27:39.565 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:27:39.565 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:43.645 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:27:43.646 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Long press on "Explore" COMPLETED
+20:27:43.646 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Explore sample cards" is not visible RUNNING
+20:27:44.382 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Explore sample cards" is not visible COMPLETED
+20:27:44.383 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "My collection" is not visible RUNNING
+20:28:00.842 [ERROR] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandFailed: Assertion is false: "My collection" is not visible
+20:28:01.044 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:28:01.045 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:28:01.361 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "My collection" is not visible FAILED

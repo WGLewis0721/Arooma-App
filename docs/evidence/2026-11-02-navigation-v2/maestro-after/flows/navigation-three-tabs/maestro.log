@@ -1,0 +1,71 @@
+20:19:40.052 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+20:19:40.052 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+20:19:40.053 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+20:19:40.053 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+20:19:40.053 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.graymatter.arooma" with clear state RUNNING
+20:19:40.054 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.graymatter.arooma
+20:19:49.075 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.graymatter.arooma
+20:19:49.104 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.graymatter.arooma app during launch
+20:19:51.594 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.graymatter.arooma" with clear state COMPLETED
+20:19:51.646 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Explore the Archive" RUNNING
+20:19:56.428 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Explore the Archive, title=, value=, text=, hintText=, resource-id=, bounds=[26,710][376,764], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=26, y=710, width=350, height=54))
+20:19:57.762 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:19:57.764 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 737) using hierarchy based logic for wait
+20:19:57.771 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:19:57.771 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:19:59.372 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:19:59.453 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Explore the Archive" COMPLETED
+20:19:59.454 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: explore-add-to-collection is visible RUNNING
+20:20:00.264 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: explore-add-to-collection is visible COMPLETED
+20:20:00.274 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot nav-01-explore-first-launch RUNNING
+20:20:00.359 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:20:00.363 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:00.697 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot nav-01-explore-first-launch COMPLETED
+20:20:00.697 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Today" is visible RUNNING
+20:20:00.983 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Today" is visible COMPLETED
+20:20:00.983 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "My Collection" is visible RUNNING
+20:20:01.157 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "My Collection" is visible COMPLETED
+20:20:01.157 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Cards" is not visible RUNNING
+20:20:01.830 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Cards" is not visible COMPLETED
+20:20:01.830 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Collection" is not visible RUNNING
+20:20:02.501 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Collection" is not visible COMPLETED
+20:20:02.501 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Today" RUNNING
+20:20:02.666 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Today, title=, value=, text=, hintText=, resource-id=drop, bounds=[147,795][255,849], enabled=true, focused=false, selected=false, checked=false}, children=[TreeNode(attributes={accessibilityText=Water drop, title=, value=, text=, hintText=, resource-id=drop.fill, bounds=[191,801][211,828], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false)], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=147, y=795, width=108, height=54))
+20:20:03.185 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:20:03.186 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 822) using hierarchy based logic for wait
+20:20:03.187 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:20:03.197 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:05.204 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:20:05.204 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Today" COMPLETED
+20:20:05.204 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "What are you wearing?" is visible RUNNING
+20:20:05.393 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "What are you wearing?" is visible COMPLETED
+20:20:05.393 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot nav-02-today RUNNING
+20:20:05.394 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:20:05.395 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:05.616 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot nav-02-today COMPLETED
+20:20:05.616 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "My Collection" RUNNING
+20:20:05.779 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=My Collection, title=, value=, text=, hintText=, resource-id=rectangle.stack, bounds=[247,795][355,849], enabled=true, focused=false, selected=false, checked=false}, children=[TreeNode(attributes={accessibilityText=Album, title=, value=, text=, hintText=, resource-id=rectangle.stack.fill, bounds=[286,800][316,831], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false)], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=247, y=795, width=108, height=54))
+20:20:06.199 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:20:06.199 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (301, 822) using hierarchy based logic for wait
+20:20:06.200 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:20:06.200 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:09.020 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:20:09.020 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "My Collection" COMPLETED
+20:20:09.020 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Owned" is visible RUNNING
+20:20:09.193 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Owned" is visible COMPLETED
+20:20:09.195 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Wishlist" is visible RUNNING
+20:20:09.349 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Wishlist" is visible COMPLETED
+20:20:09.350 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot nav-03-my-collection RUNNING
+20:20:09.352 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:20:09.353 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:09.562 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot nav-03-my-collection COMPLETED
+20:20:09.562 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Explore" RUNNING
+20:20:09.748 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Explore, title=, value=, text=, hintText=, resource-id=sparkles, bounds=[25,795][147,849], enabled=true, focused=false, selected=false, checked=false}, children=[TreeNode(attributes={accessibilityText=sparkle, title=, value=, text=, hintText=, resource-id=sparkles, bounds=[73,799][99,829], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false)], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=25, y=795, width=122, height=54))
+20:20:10.149 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:20:10.150 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (86, 822) using hierarchy based logic for wait
+20:20:10.151 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:20:10.151 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:20:12.918 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:20:12.925 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Explore" COMPLETED
+20:20:12.925 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: explore-add-to-collection is visible RUNNING
+20:20:13.088 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: explore-add-to-collection is visible COMPLETED

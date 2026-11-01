@@ -1,0 +1,45 @@
+20:26:48.411 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+20:26:48.412 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+20:26:48.414 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+20:26:48.414 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+20:26:48.414 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.graymatter.arooma" with clear state RUNNING
+20:26:48.415 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.graymatter.arooma
+20:26:55.377 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.graymatter.arooma
+20:26:55.405 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.graymatter.arooma app during launch
+20:26:57.153 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.graymatter.arooma" with clear state COMPLETED
+20:26:57.161 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Start My Collection" RUNNING
+20:27:00.966 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Start My Collection, title=, value=, text=, hintText=, resource-id=, bounds=[26,774][376,824], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=26, y=774, width=350, height=50))
+20:27:03.588 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:27:03.595 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 799) using hierarchy based logic for wait
+20:27:03.597 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:27:03.600 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:06.498 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:27:06.499 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Start My Collection" COMPLETED
+20:27:06.499 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: my-cards RUNNING
+20:27:06.707 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=My Cards, title=, value=, text=, hintText=, resource-id=my-cards, bounds=[269,68][313,112], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=269, y=68, width=44, height=44))
+20:27:07.097 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:27:07.098 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (291, 90) using hierarchy based logic for wait
+20:27:07.098 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:27:07.099 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:09.010 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:27:09.010 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: my-cards COMPLETED
+20:27:09.010 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "My Cards" is visible RUNNING
+20:27:09.226 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "My Cards" is visible COMPLETED
+20:27:09.227 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot my-cards RUNNING
+20:27:09.228 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:27:09.229 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:09.356 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot my-cards COMPLETED
+20:27:09.356 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Create card" RUNNING
+20:27:09.532 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Create card, title=, value=, text=, hintText=, resource-id=plus, bounds=[314,152][382,210], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=314, y=152, width=68, height=58))
+20:27:09.794 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+20:27:09.795 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (348, 181) using hierarchy based logic for wait
+20:27:09.796 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+20:27:09.796 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:11.968 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+20:27:11.969 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Create card" COMPLETED
+20:27:11.969 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Card Studio" is visible RUNNING
+20:27:12.246 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Card Studio" is visible COMPLETED
+20:27:12.246 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot my-cards-studio RUNNING
+20:27:12.246 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+20:27:12.247 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+20:27:12.428 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot my-cards-studio COMPLETED

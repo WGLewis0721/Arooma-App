@@ -85,7 +85,15 @@ Flows are in `.maestro/` and run in the manual *Maestro iOS* workflow on a macOS
 
 ## Results
 
-Results are recorded in the evidence README from the CI run named there. This section is filled from that run and nothing else.
+Run [41345230832](https://github.com/WGLewis0721/Arooma-App/actions/runs/41345230832) on `41a0abc` (macOS runner, iOS 26 simulator, Maestro 2.12.0): 12 of 19 flows pass, 7 fail. The failures are:
+
+- Flow errors, to fix in the flows: `explore-annotated-cleanup` and `explore-counter-navigation` (one swipe moved two cards); `explore-no-mode-menu` (case-insensitive match on the tab label).
+- Decision needed: `wishlist-in-my-collection` (the app stays on the empty Wishlist after a move).
+- Not resolved: `explore-insights-frosted` (the upward swipe did not open the tray; the same happened on `main`).
+- Possible app defect, verify first: `explore-search-inspector` (Filters not reachable from the search sheet after closing an Inspector).
+- Pre-existing: `tuning-presets` (backlog, unchanged).
+
+The frosted-tray checklist (10 of 10) was not run. Full detail, frames and gate status: [the evidence README](../../evidence/2026-11-02-navigation-v2/README.md).
 
 ## Not verified
 

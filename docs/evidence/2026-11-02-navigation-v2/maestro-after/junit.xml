@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 58FBEAC1-8EC6-4E83-B597-D6801A423A50" tests="19" failures="7" time="1081.777" timestamp="2026-11-01T20:13:07">
+    <testcase id="my-collection-shelves" name="my-collection-shelves" classname="my-collection-shelves" file=".maestro/my-collection-shelves.yaml" time="201.708" timestamp="2026-11-01T20:13:07" status="SUCCESS">
+      <properties>
+        <property name="tags" value="shelves, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-name-owned" name="quick-add-name-owned" classname="quick-add-name-owned" file=".maestro/quick-add-name-owned.yaml" time="74.932" timestamp="2026-11-01T20:16:29" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="53.953" timestamp="2026-11-01T20:17:44" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-annotated-cleanup" name="explore-annotated-cleanup" classname="explore-annotated-cleanup" file=".maestro/explore-annotated-cleanup.yaml" time="61.367" timestamp="2026-11-01T20:18:38" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, annotations"/>
+      </properties>
+      <failure>Assertion is false: "Card 2 of .*" is visible</failure>
+    </testcase>
+    <testcase id="navigation-three-tabs" name="navigation-three-tabs" classname="navigation-three-tabs" file=".maestro/navigation-three-tabs.yaml" time="36.831" timestamp="2026-11-01T20:19:40" status="SUCCESS">
+      <properties>
+        <property name="tags" value="navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-search-inspector" name="explore-search-inspector" classname="explore-search-inspector" file=".maestro/explore-search-inspector.yaml" time="61.681" timestamp="2026-11-01T20:20:16" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, search"/>
+      </properties>
+      <failure>Element not found: Text matching regex: Filters</failure>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="56.778" timestamp="2026-11-01T20:21:18" status="ERROR">
+      <properties>
+        <property name="tags" value="owner-tools"/>
+      </properties>
+      <failure>Assertion is false: "Quick adjust" is visible</failure>
+    </testcase>
+    <testcase id="return-to-today" name="return-to-today" classname="return-to-today" file=".maestro/return-to-today.yaml" time="45.048" timestamp="2026-11-01T20:22:15" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="appearance-studio-regression" name="appearance-studio-regression" classname="appearance-studio-regression" file=".maestro/appearance-studio-regression.yaml" time="38.011" timestamp="2026-11-01T20:23:00" status="SUCCESS">
+      <properties>
+        <property name="tags" value="appearance"/>
+      </properties>
+    </testcase>
+    <testcase id="today-preservation" name="today-preservation" classname="today-preservation" file=".maestro/today-preservation.yaml" time="52.101" timestamp="2026-11-01T20:23:38" status="SUCCESS">
+      <properties>
+        <property name="tags" value="today"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-insights-frosted" name="explore-insights-frosted" classname="explore-insights-frosted" file=".maestro/explore-insights-frosted.yaml" time="47.645" timestamp="2026-11-01T20:24:30" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, insights"/>
+      </properties>
+      <failure>Assertion is false: "Close Insights" is visible</failure>
+    </testcase>
+    <testcase id="style-sections" name="style-sections" classname="style-sections" file=".maestro/style-sections.yaml" time="34.431" timestamp="2026-11-01T20:25:18" status="SUCCESS">
+      <properties>
+        <property name="tags" value="style"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-context" name="quick-add-context" classname="quick-add-context" file=".maestro/quick-add-context.yaml" time="55.606" timestamp="2026-11-01T20:25:52" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="my-cards-studio" name="my-cards-studio" classname="my-cards-studio" file=".maestro/my-cards-studio.yaml" time="26.167" timestamp="2026-11-01T20:26:48" status="SUCCESS">
+      <properties>
+        <property name="tags" value="cards, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-no-mode-menu" name="explore-no-mode-menu" classname="explore-no-mode-menu" file=".maestro/explore-no-mode-menu.yaml" time="50.348" timestamp="2026-11-01T20:27:14" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, navigation"/>
+      </properties>
+      <failure>Assertion is false: "My collection" is not visible</failure>
+    </testcase>
+    <testcase id="wishlist-in-my-collection" name="wishlist-in-my-collection" classname="wishlist-in-my-collection" file=".maestro/wishlist-in-my-collection.yaml" time="52.806" timestamp="2026-11-01T20:28:04" status="ERROR">
+      <properties>
+        <property name="tags" value="wishlist, navigation"/>
+      </properties>
+      <failure>Assertion is false: id: wear-today is visible</failure>
+    </testcase>
+    <testcase id="quick-add-undo" name="quick-add-undo" classname="quick-add-undo" file=".maestro/quick-add-undo.yaml" time="43.197" timestamp="2026-11-01T20:28:57" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-counter-navigation" name="explore-counter-navigation" classname="explore-counter-navigation" file=".maestro/explore-counter-navigation.yaml" time="44.759" timestamp="2026-11-01T20:29:40" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, counter"/>
+      </properties>
+      <failure>Assertion is false: "Card 2 of .*" is visible</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="44.002" timestamp="2026-11-01T20:30:25" status="SUCCESS">
+      <properties>
+        <property name="tags" value="smoke"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

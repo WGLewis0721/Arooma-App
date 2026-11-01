@@ -148,14 +148,17 @@ Native iOS 26 only. Support 375/390/430pt phone widths; 59:86 card aspect and fi
 
 ## 10. Rollout, rollback and release
 
-1. Plan + seed manifest on a dedicated branch, unmerged until approved artwork and app integration exist.
-2. Produce and review six prototypes, then remaining 24 using the locked production criteria.
-3. Run `node scripts/package-fall-archive.mjs` and then `node scripts/check-fall-archive.mjs --release` after all images and rights are approved. Complete the note-map card back.
-4. Run all checks. Do not merge while any of the 30 images are missing or rights status is unresolved.
-5. Merge to `main` only after criteria pass, then run existing manual Codemagic `arooma-testflight` for bundle `com.graymatter.arooma`. Verify in internal TestFlight.
-6. Rollback by reverting the catalog feature and asset bundle commits; leave existing created-card and owned-bottle persistence untouched.
+**Internal proof build (implemented):**
+1. All 30 original candidate card fronts were generated separately at 2k/high and staged through the artwork-review workflow. The Prada Luna Rossa Black proof was regenerated to correct a wrong red-plaque design.
+2. The 30 optimized 1180 × 1720 JPEGs and review contact sheet live under `assets/collectibles/seasons/fall-2026/proofs/`. They are development proofs, not rights-approved commercial artwork or purchasable content.
+3. `scripts/prepare_fall_testflight.py` copies the 30 proofs into the native Xcode asset catalog in the **transient signed TestFlight build checkout** only.
+4. The `arooma-testflight` Codemagic workflow adds `AROOMA_INTERNAL_PREVIEW` to the Release Swift compilation conditions. `Fall2026Collection` can then display exactly 30 card proofs offline in the Cards tab, clearly labeled as internal, with sharing disabled.
+5. Normal App Store builds **do not** set that compilation condition. Until 30 real fact/image/rights review gates pass, Autumn Archive remains hidden in public builds. No StoreKit paid-card/booster gates are enabled.
+6. The internal TestFlight build remains a manually triggered, signed Codemagic upload. Source merge does not itself upload an IPA. If proof packaging or signing fails, the build fails rather than silently showing a partial season.
 
-**Current status:** The manifest and gallery integration are ready as a draft branch. **Zero of these new 30 designs has been generated, QA-reviewed, licensed or shipped.** The Autumn Archive screen stays hidden until 30 approved images are bundled. Existing Dior art is separate and requires its own rights review. The next TestFlight build cannot truthfully contain 30 finished cards until the remaining art, note-map and QA work is completed.
+**Public commercial release still blocked:** Verify bottle/brand text on each front, implement actual verified TOP/HEART/BASE information on the backs, record independent scores from two reviewers, clear each asset's media/trademark use, run `node scripts/package-fall-archive.mjs` and `node scripts/check-fall-archive.mjs --release`, and complete iPhone QA before turning the public release gate on.
+
+**Current status:** 30/30 individually generated proof fronts are in the feature branch and the 30-up artwork QA ZIP/contact sheet is available. The native Cards tab gallery, flip, draft three-strip reverse and internal-only packaging are coded. Commercial clearance and the required two-person 90/100 scoring have **not** been done. No signed TestFlight upload is reported here; do not call this a public production launch.
 
 ## 11. Decision record
 

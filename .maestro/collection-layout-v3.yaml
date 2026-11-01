@@ -1,0 +1,40 @@
+# Owned card: the fragrance name, then its concentration and scent notes immediately beneath, then the actions.
+# No giant action bar between title and notes, no "What are you wearing today?" banner, no My Cards button,
+# and one compact Arooma signature at the upper left.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - layout
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "identity-name"
+- assertVisible:
+    id: "explore-add-to-collection"
+    below:
+      id: "identity-notes"
+- tapOn:
+    id: "explore-add-to-collection"
+- tapOn: "My Collection"
+- assertVisible:
+    id: "wear-today"
+- assertVisible:
+    id: "identity-notes"
+    below:
+      id: "identity-name"
+- assertVisible:
+    id: "wear-today"
+    below:
+      id: "identity-notes"
+- assertVisible:
+    id: "arooma-brand-header"
+- assertVisible: "Shelves"
+- assertVisible: "Wear log"
+- assertVisible: "Add"
+- assertNotVisible: "What are you wearing today?"
+- assertNotVisible: "My Cards"
+- assertNotVisible:
+    id: "my-cards"
+- takeScreenshot: v3-layout-01-my-collection

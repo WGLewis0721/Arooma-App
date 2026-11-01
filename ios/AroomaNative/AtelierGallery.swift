@@ -52,10 +52,12 @@ struct AtelierGallery: View {
     let transitionNamespace: Namespace.ID
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
-    /// Search is a function inside Explore, not a bottom tab (A10).
-    let openSearch: () -> Void
     let openStyle: () -> Void
+    /// Opens the Wear sheet, optionally with one bottle already chosen (Layer). Wear, layering and history
+    /// live inside My Collection; there is no Today tab.
     let showToday: (UUID) -> Void
+    /// My Collection only: the VoiceOver alternative to pressing and holding the My Collection tab.
+    var quickActions: (() -> Void)? = nil
 
     private var cards: [DisplayCard] { archive.displayedCards }
     private var accent: Color { archive.theme.palette.accent }
@@ -160,23 +162,14 @@ struct AtelierGallery: View {
 
     // MARK: Header
 
-    /// Explore's only chrome: a quiet label, Search (a function inside Explore, not a tab) and one
-    /// discreet View & Style utility. The wordmark, the square mode menu, Shelves and Quick Add were
-    /// removed here (annotations A1 to A3); their destinations now live in the tabs.
+    /// Explore's only chrome (Native Navigation V3): the living Arooma signature at the upper left, and one
+    /// discreet View & Style utility. There is no "EXPLORE" label (the tab already says it) and no Search
+    /// icon (Search is the third tab). The signature is branding, not navigation: nothing is attached to it.
     private var exploreHeader: some View {
         HStack(alignment: .center, spacing: 10) {
-            Text("EXPLORE")
-                .font(.system(size: 10, weight: .bold))
-                .tracking(1.6)
-                .foregroundStyle(ink)
-                .accessibilityAddTraits(.isHeader)
+            AroomaBrandMark()
             Spacer(minLength: 4)
-            GlassEffectContainer(spacing: 10) {
-                HStack(spacing: 10) {
-                    glassButton("magnifyingglass", label: "Search", action: openSearch)
-                    glassButton("slider.horizontal.3", label: "View and style", action: openStyle)
-                }
-            }
+            glassButton("slider.horizontal.3", label: "View and style", action: openStyle)
         }
     }
 
@@ -247,6 +240,7 @@ struct AtelierGallery: View {
             }
             .accessibilityAction { if let focusedCard { inspect(focusedCard) } }
             .accessibilityAction(named: "Show insights") { setInsight(insight >= 1 ? 2 : 1) }
+            .accessibilityAction(named: "Collection quick actions") { quickActions?() }
         }
     }
 
@@ -503,19 +497,23 @@ struct AtelierGallery: View {
                     .tracking(-0.6)
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .id(card?.id ?? "")
+                    .accessibilityIdentifier("identity-name")
                     .transition(reduceMotion ? .opacity : .push(from: edge))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .clipped()
-            if let card {
-                contextActions(for: card)
-                    .padding(.top, 6)
-            }
+            // The existing concentration and scent-note summary sits immediately beneath the name. No
+            // action buttons come between the title and its notes (V3 section 1).
             Text(([card?.fragrance.concentration ?? ""] + notes).filter { !$0.isEmpty }.joined(separator: "  ·  "))
                 .font(.footnote).foregroundStyle(.secondary)
                 .lineLimit(1)
                 .id("notes-\(card?.id ?? "")")
+                .accessibilityIdentifier("identity-notes")
                 .transition(.opacity)
+            if let card {
+                contextActions(for: card)
+                    .padding(.top, 8)
+            }
         }
         .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: card?.id)
     }
@@ -676,7 +674,12 @@ struct AtelierGallery: View {
 struct AtelierInspector: View {
     @EnvironmentObject private var archive: CollectionStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @State private var flip = FlipMotor()
+    /// Gyro Flip (Native Navigation V3, section 1B): an optional wrist twist flips the card through the
+    /// same FlipMotor. Off means no motion subscription at all. Tap, drag and VoiceOver always flip.
+    @AppStorage(GyroFlipSettings.enabledKey) private var gyroFlipEnabled = true
+    @State private var gyro = GyroFlipController()
     @State private var axisLock: Axis?
     @State private var pull: CGSize = .zero
     @State private var pressUV = CGPoint(x: 0.5, y: 0.5)
@@ -730,6 +733,16 @@ struct AtelierInspector: View {
         .onAppear {
             flip.reduceMotion = reduceMotion
             flip.onEdge = { HapticEngine.shared.play(.flipEdge) }
+            gyro.attach(flip)
+            gyro.reduceMotion = reduceMotion
+            gyro.sceneActive = scenePhase == .active
+            if gyroFlipEnabled { gyro.start() }
+            if let trace = GyroQATrace.requested {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
+                    gyro.runQATrace(trace)
+                }
+            }
             withAnimation(reduceMotion ? nil : .spring(response: 0.6, dampingFraction: 0.86).delay(0.12)) {
                 appeared = true
             }
@@ -738,6 +751,20 @@ struct AtelierInspector: View {
             }
         }
         .accessibilityAction(named: "Flip card") { flip.flip() }
+        .onDisappear { gyro.stop() }
+        .onChange(of: gyroFlipEnabled) { _, on in
+            if on { gyro.start() } else { gyro.stop() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            gyro.sceneActive = phase == .active
+            gyro.resetDetector()
+        }
+        .onChange(of: reduceMotion) { _, value in
+            flip.reduceMotion = value
+            gyro.reduceMotion = value
+        }
+        .onChange(of: pressing > 0 || axisLock != nil) { _, down in gyro.touching = down }
+        .onChange(of: editing?.id) { _, id in gyro.covered = id != nil }
     }
 
     /// The card's own colours, blurred into the room, so each collectible lights its inspector.

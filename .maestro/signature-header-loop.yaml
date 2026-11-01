@@ -1,0 +1,73 @@
+# The living Arooma signature sits at the upper left of Explore, My Collection and Search. The old "EXPLORE"
+# label is gone and there is no mode menu. Eight frames about 1.6 s apart (more than a six-second sheen cycle)
+# are saved so the highlight can be seen to move and rest; the frames are compared outside Maestro.
+# Maestro screenshots cannot prove smoothness, energy cost or the Reduce Motion fallback: those are reported NOT RUN.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - branding
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "arooma-brand-header"
+- assertNotVisible: "(?-i)EXPLORE"
+- assertNotVisible: "Explore sample cards"
+- takeScreenshot: v3-sig-explore-t00
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t01
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t02
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t03
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t04
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t05
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t06
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t07
+- extendedWaitUntil:
+    visible: "zz-sheen-wait"
+    timeout: 1600
+    optional: true
+- takeScreenshot: v3-sig-explore-t08
+- tapOn: "My Collection"
+- assertVisible:
+    id: "arooma-brand-header"
+- takeScreenshot: v3-sig-my-collection
+- tapOn: "Search"
+- assertVisible:
+    id: "arooma-brand-header"
+- takeScreenshot: v3-sig-search
+# Background, then foreground: the header comes back and the app is intact.
+- tapOn: "Explore"
+- pressKey: home
+- launchApp:
+    stopApp: false
+- assertVisible:
+    id: "arooma-brand-header"
+- takeScreenshot: v3-sig-after-foreground

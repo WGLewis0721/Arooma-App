@@ -1,0 +1,25 @@
+# Search is the third tab. Its query, filters and sort survive opening a result's Inspector and closing it.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - search
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn: "Search"
+- assertVisible:
+    id: "arooma-brand-header"
+- tapOn: "Name, house.*"
+- inputText: "Sauvage"
+- assertVisible: ".*Sauvage.*"
+- takeScreenshot: v3-search-01-query
+- tapOn: "Filters"
+- assertVisible: "Sort by"
+- tapOn: "Done"
+- tapOn: ".*Sauvage Elixir.*"
+- assertVisible: "FRONT.*TOP NOTES"
+- takeScreenshot: v3-search-02-inspector
+- tapOn: "Close"
+- assertVisible: ".*Sauvage.*"
+- takeScreenshot: v3-search-03-after-close

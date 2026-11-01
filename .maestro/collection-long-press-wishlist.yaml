@@ -1,0 +1,23 @@
+# Wishlist row: straight to My Collection's Wishlist view. No intermediate menu, and Owned is one tap back.
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - quick-actions
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "explore-wishlist-toggle"
+- longPressOn: "My Collection"
+- tapOn:
+    id: "quick-action-wishlist"
+- assertNotVisible:
+    id: "collection-quick-actions"
+- assertVisible:
+    id: "wishlist-move"
+- assertVisible: "Owned"
+- assertVisible: "Wishlist"
+- takeScreenshot: v3-hold-02-wishlist-view
+- tapOn: "Owned"
+- assertVisible: "A collection starts with one bottle."

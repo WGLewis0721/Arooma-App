@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 58FBEAC1-8EC6-4E83-B597-D6801A423A50" tests="3" failures="1" time="308.044" timestamp="2026-11-01T22:35:57">
+    <testcase id="before-v3-explore" name="before-v3-explore" classname="before-v3-explore" file=".maestro/before-v3-explore.yaml" time="108.928" timestamp="2026-11-01T22:35:58" status="SUCCESS">
+      <properties>
+        <property name="tags" value="capture-before"/>
+      </properties>
+    </testcase>
+    <testcase id="before-v3-inspector" name="before-v3-inspector" classname="before-v3-inspector" file=".maestro/before-v3-inspector.yaml" time="143.276" timestamp="2026-11-01T22:37:47" status="ERROR">
+      <properties>
+        <property name="tags" value="capture-before"/>
+      </properties>
+      <failure>Element not found: Text matching regex: Inspect .*</failure>
+    </testcase>
+    <testcase id="before-v3-collection" name="before-v3-collection" classname="before-v3-collection" file=".maestro/before-v3-collection.yaml" time="55.723" timestamp="2026-11-01T22:40:10" status="SUCCESS">
+      <properties>
+        <property name="tags" value="capture-before"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

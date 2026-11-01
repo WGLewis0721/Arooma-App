@@ -1,0 +1,30 @@
+# Add row: the existing Quick Add sheet in My Collection's context. A direct name save returns to My Collection.
+# No Card Studio, no Search. The QA argument keeps the save toast open so Done can be tapped (see quick-add-undo.yaml).
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - quick-actions
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAUndoWindow: 30
+- tapOn: "Explore the Archive"
+- longPressOn: "My Collection"
+- tapOn:
+    id: "quick-action-add"
+- assertVisible: "Quick Add"
+- assertNotVisible: "Card Studio"
+- assertNotVisible: "Create card"
+- tapOn: "Fragrance name"
+- inputText: "Hold Add Scent"
+- tapOn:
+    id: "direct-collection"
+- assertVisible: "Added to your collection"
+- tapOn:
+    id: "direct-done"
+- assertVisible: "Owned"
+- assertVisible:
+    id: "identity-name"
+- assertVisible: "Hold Add Scent"
+- takeScreenshot: v3-hold-03-after-add

@@ -1,0 +1,44 @@
+# View & Style, Card lighting: a native "Flip cards with wrist twist" switch, On by default, that persists
+# across a relaunch. (-AroomaQAMotion YES makes QA builds report a motion sensor, which the Simulator lacks.)
+appId: com.graymatter.arooma
+tags:
+  - v3
+  - gyro
+---
+- launchApp:
+    clearState: true
+    arguments:
+      AroomaQAMotion: "YES"
+- tapOn: "Explore the Archive"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Flip cards with wrist twist"
+    direction: DOWN
+- assertVisible:
+    text: "Flip cards with wrist twist"
+    checked: true
+- assertVisible: "Motion readings stay on this iPhone.*"
+- takeScreenshot: v3-gyro-01-setting-on
+- tapOn: "Flip cards with wrist twist"
+- assertVisible:
+    text: "Flip cards with wrist twist"
+    checked: false
+- takeScreenshot: v3-gyro-02-setting-off
+- tapOn: "Done"
+# Persists across a relaunch.
+- launchApp:
+    arguments:
+      AroomaQAMotion: "YES"
+- tapOn:
+    id: "view-and-style"
+- scrollUntilVisible:
+    element: "Flip cards with wrist twist"
+    direction: DOWN
+- assertVisible:
+    text: "Flip cards with wrist twist"
+    checked: false
+- tapOn: "Flip cards with wrist twist"
+- assertVisible:
+    text: "Flip cards with wrist twist"
+    checked: true

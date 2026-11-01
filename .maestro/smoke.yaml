@@ -1,4 +1,4 @@
-# Smoke: the three tabs open their primary screens, and Search, Shelves and Today respond.
+# Smoke: the three tabs open their primary screens, and Search, Shelves and the Wear log respond.
 appId: com.graymatter.arooma
 tags:
   - smoke
@@ -8,17 +8,24 @@ tags:
 - tapOn: "Explore the Archive"
 - assertVisible:
     id: "explore-add-to-collection"
-- tapOn:
-    id: "search"
+- tapOn: "Search"
 - tapOn: "Name, house.*"
 - swipe:
     start: "50%, 20%"
     end: "50%, 92%"
-- tapOn: "Today"
-- assertVisible: "What are you wearing?"
 - tapOn: "My Collection"
 - assertVisible: "Owned"
+- tapOn: "Explore"
+- tapOn:
+    id: "explore-add-to-collection"
+- tapOn: "My Collection"
+- assertVisible:
+    id: "wear-today"
 - tapOn:
     id: "all-shelves"
 - assertVisible: "The shelves"
+- tapOn: "Done"
+- tapOn:
+    id: "wear-log"
+- assertVisible: "What are you wearing?"
 - tapOn: "Done"

@@ -21,33 +21,42 @@ struct AroomaNativeApp: App {
     }
 }
 
-/// The three bottom tabs (Native Navigation V2). Explore is the sample deck with its search. Today is
-/// the wear log. My Collection holds owned bottles, the Wishlist view, Shelves and My Cards.
+/// The three bottom tabs (Native Navigation V3), in this order. Explore is the sample deck. My Collection
+/// holds owned bottles, the Wishlist view, Shelves and the Wear log (wear, layering, history). Search is the
+/// existing scoped catalog search. There is no Today tab and no Cards tab.
 private enum AtelierTab: Hashable {
-    case explore, today, myCollection
+    case explore, myCollection, search
 }
 
 struct AtelierRoot: View {
     @EnvironmentObject private var archive: CollectionStore
     @EnvironmentObject private var commerce: CardCommerce
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @State private var tab: AtelierTab = .explore
     @State private var inspection: DisplayCard?
     @State private var adding = false
     /// The tab that opened Quick Add. A normal save returns here (item 05).
     @State private var addOrigin: AtelierTab = .explore
     @State private var styling = false
-    @State private var searching = false
     @State private var showingShelves = false
-    @State private var showingMyCards = false
+    @State private var showingWearLog = false
     @State private var startingWearBottle: UUID?
+    // My Collection quick actions (press and hold the tab).
+    @State private var quickActionsShown = false
+    @State private var quickActionsAnchor: CGRect?
+    /// While a hold is in progress, the tab that was selected when it began. A hold must never select
+    /// My Collection as a side effect, so any change it causes is reverted.
+    @State private var holdTabSnapshot: AtelierTab?
+    @State private var holdGuardUntil = Date.distantPast
+    @State private var wearToast: WearToastModel?
     @Namespace private var cardSpace
 
     var body: some View {
         ZStack {
             AtelierAtmosphere(theme: archive.theme)
             if archive.onboarded {
-                tabs
+                tabBar
                     .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 1.04)),
                                             removal: .opacity))
             } else {
@@ -59,10 +68,15 @@ struct AtelierRoot: View {
             }
         }
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
+        .overlay(alignment: .bottom) { wearToastLayer }
+        .overlay { quickActionsLayer }
         .onAppear {
             // A returning user may have last used My Collection. Explore must still open the sample deck.
             alignMode(with: tab)
             applyQALaunchArguments()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { dismissQuickActions() }
         }
         .fullScreenCover(item: $inspection) { card in
             AtelierInspector(card: card, close: { inspection = nil })
@@ -84,13 +98,6 @@ struct AtelierRoot: View {
             // Half height, gallery still live behind it: switching layouts visibly morphs the deck.
             .presentationDetents([.medium, .large])
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-        }
-        .sheet(isPresented: $searching) {
-            // Search belongs to Explore, not to a tab. A result opens its Inspector from inside this sheet,
-            // so closing the Inspector returns to the same query, scopes, filters and sort.
-            ExploreSearchSheet()
-                .environmentObject(archive)
-                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $adding) {
             QuickAddSheet(onAdded: {
@@ -120,17 +127,25 @@ struct AtelierRoot: View {
             .environmentObject(archive)
             .environmentObject(commerce)
         }
-        // Digital cards and Card Studio: a secondary destination of My Collection, not a tab.
-        .sheet(isPresented: $showingMyCards) {
-            MyCardsScreen(openLiveArchive: openLiveArchive)
-                .environmentObject(archive)
-                .environmentObject(commerce)
+        // Wear, layering, saved combinations and history: the existing wear log, now a part of My Collection.
+        .sheet(isPresented: $showingWearLog) {
+            NavigationStack {
+                AtelierWearLog(startingBottleID: $startingWearBottle,
+                               add: closeWearLogThenAdd,
+                               focus: focus)
+                    .navigationTitle("Wear log")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done", systemImage: "checkmark") { showingWearLog = false }
+                        }
+                    }
+            }
+            .environmentObject(archive)
         }
     }
 
-    private var tabs: some View {
-        withTodayAccessory(tabBar)
-    }
+    // MARK: Tabs
 
     private var tabBar: some View {
         TabView(selection: $tab) {
@@ -140,14 +155,9 @@ struct AtelierRoot: View {
                     transitionNamespace: cardSpace,
                     inspect: { card in inspection = card },
                     add: { startAdd(from: .explore) },
-                    openSearch: { searching = true },
                     openStyle: { styling = true },
-                    showToday: openToday
+                    showToday: { openWearLog($0) }
                 )
-            }
-            Tab("Today", systemImage: "drop", value: AtelierTab.today) {
-                AtelierWearLog(startingBottleID: $startingWearBottle,
-                               add: { startAdd(from: .today) }, focus: focus)
             }
             Tab("My Collection", systemImage: "rectangle.stack", value: AtelierTab.myCollection) {
                 MyCollectionScreen(
@@ -155,35 +165,35 @@ struct AtelierRoot: View {
                     inspect: { card in inspection = card },
                     add: { startAdd(from: .myCollection) },
                     openShelves: { showingShelves = true },
-                    openMyCards: { showingMyCards = true },
-                    showToday: openToday
+                    openWearLog: { openWearLog($0) },
+                    quickActions: { presentQuickActions(anchor: nil) }
                 )
+            }
+            Tab("Search", systemImage: "magnifyingglass", value: AtelierTab.search) {
+                SearchTabScreen()
             }
         }
         .legibleTint(archive.theme.palette.accent)
         .tabBarMinimizeBehavior(.onScrollDown)
-        .onChange(of: tab) { _, selected in alignMode(with: selected) }
+        // Press and hold the real My Collection tab item (a UIKit hook; the system tab bar is not replaced).
+        .background {
+            TabBarHoldRecognizer(tabTitle: "My Collection", tabCount: 3, tabIndex: 1,
+                                 began: { beginHold($0) }, ended: { endHold() })
+        }
+        .onChange(of: tab) { _, selected in tabChanged(to: selected) }
     }
 
-    /// The Today shortcut appears only in My Collection's owned view. It is hidden on Explore, where the
-    /// sample deck never logs wears (annotation A9), and on Today itself (item 08).
-    @ViewBuilder private func withTodayAccessory<Content: View>(_ content: Content) -> some View {
-        let visible = tab == .myCollection && archive.mode == .mine
-        if #available(iOS 26.1, *) {
-            content.tabViewBottomAccessory(isEnabled: visible) {
-                TodayAccessory(open: { tab = .today }).environmentObject(archive)
-            }
-        } else {
-            content.tabViewBottomAccessory {
-                if visible {
-                    TodayAccessory(open: { tab = .today }).environmentObject(archive)
-                }
-            }
+    private func tabChanged(to selected: AtelierTab) {
+        // A press and hold on My Collection must not select it as a side effect.
+        if Date() < holdGuardUntil, let snapshot = holdTabSnapshot, selected != snapshot {
+            tab = snapshot
+            return
         }
+        alignMode(with: selected)
     }
 
     /// Each tab owns its data context. Explore is always the sample deck. My Collection shows owned or
-    /// Wishlist records and keeps the view last chosen there. Today reads owned records only.
+    /// Wishlist records and keeps the view last chosen there. Search reads every record and changes none.
     /// Switching tabs never edits saved records.
     private func alignMode(with selected: AtelierTab) {
         switch selected {
@@ -191,39 +201,164 @@ struct AtelierRoot: View {
             if archive.mode != .demo { archive.enter(.demo) }
         case .myCollection:
             if archive.mode == .demo { archive.enter(.mine) }
-        case .today:
+            archive.syncOwnedFocus()
+        case .search:
             break
         }
     }
+
+    // MARK: Quick actions
+
+    private func beginHold(_ itemFrame: CGRect) {
+        holdTabSnapshot = tab
+        holdGuardUntil = .distantFuture
+        presentQuickActions(anchor: itemFrame)
+    }
+
+    private func endHold() {
+        // Keep the guard a moment after the finger lifts, in case the system selects the tab on touch-up.
+        holdGuardUntil = Date().addingTimeInterval(0.8)
+    }
+
+    private func presentQuickActions(anchor: CGRect?) {
+        quickActionsAnchor = anchor
+        withAnimation(reduceMotion ? .easeInOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)) {
+            quickActionsShown = true
+        }
+        HapticEngine.shared.play(.selection)
+    }
+
+    private func dismissQuickActions() {
+        guard quickActionsShown else { return }
+        holdGuardUntil = .distantPast
+        withAnimation(reduceMotion ? .easeInOut(duration: 0.12) : .spring(response: 0.3, dampingFraction: 0.9)) {
+            quickActionsShown = false
+        }
+    }
+
+    @ViewBuilder private var quickActionsLayer: some View {
+        if quickActionsShown {
+            GeometryReader { geo in
+                let origin = geo.frame(in: .global)
+                let width = QuickActionsColumn.width
+                let height = QuickActionsColumn.height
+                let centerX = quickActionsAnchor.map { $0.midX - origin.minX } ?? geo.size.width / 2
+                let x = min(max(centerX, 12 + width / 2), geo.size.width - 12 - width / 2)
+                let bottom = quickActionsAnchor.map { $0.minY - origin.minY - 14 } ?? geo.size.height - 130
+                ZStack {
+                    Color.black.opacity(0.14)
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture { dismissQuickActions() }
+                        .accessibilityHidden(true)
+                    QuickActionsColumn(
+                        wear: archive.quickWearAvailability,
+                        wishlist: quickWishlist,
+                        add: quickAdd,
+                        wearNow: quickWear,
+                        dismiss: dismissQuickActions
+                    )
+                    .position(x: x, y: bottom - height / 2)
+                    .transition(.scale(scale: 0.92, anchor: .bottom).combined(with: .opacity))
+                }
+            }
+            .transition(.opacity)
+        }
+    }
+
+    /// Wishlist: straight to My Collection's Wishlist view. No intermediate menu, no demo-mode switch.
+    private func quickWishlist() {
+        dismissQuickActions()
+        archive.enter(.wishlist)
+        tab = .myCollection
+    }
+
+    /// Add: the existing Quick Add sheet, in My Collection's context. Saving or closing returns to My Collection.
+    private func quickAdd() {
+        dismissQuickActions()
+        tab = .myCollection
+        startAdd(from: .myCollection)
+    }
+
+    /// Wear: logs today's wear for the owner-selected OWNED bottle at once. No navigation, no sheet, no
+    /// selection step. Availability is resolved again here, at the moment of the tap, so a repeated press
+    /// finds the bottle already worn and cannot create a second session.
+    private func quickWear() {
+        dismissQuickActions()
+        guard case .ready(let bottleID, let name) = archive.quickWearAvailability,
+              let session = archive.recordWear(bottleIDs: [bottleID]) else { return }
+        withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.85)) {
+            wearToast = WearToastModel(sessionID: session, name: name)
+        }
+        AccessibilityNotification.Announcement("Worn today. \(name)").post()
+    }
+
+    @ViewBuilder private var wearToastLayer: some View {
+        if let toast = wearToast {
+            WearToastView(model: toast) { undoWear(toast) }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 88)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .task(id: toast.id) {
+                    try? await Task.sleep(for: .seconds(Self.wearToastSeconds))
+                    guard !Task.isCancelled, wearToast?.id == toast.id else { return }
+                    withAnimation { wearToast = nil }
+                }
+        }
+    }
+
+    /// How long the confirmation stays: 6 s. QA builds can lengthen it with the same
+    /// `-AroomaQAUndoWindow <seconds>` launch argument the Quick Add flows use (Debug and TestFlight only).
+    private static var wearToastSeconds: Double {
+        guard BuildChannel.allowsOwnerTools else { return 6 }
+        let override = UserDefaults.standard.double(forKey: "AroomaQAUndoWindow")
+        return override > 0 ? override : 6
+    }
+
+    /// Undo reverses ONLY the session this press created, never another bottle's wear or a layered session.
+    private func undoWear(_ toast: WearToastModel) {
+        archive.deleteWearSession(toast.sessionID)
+        withAnimation(reduceMotion ? nil : .snappy) { wearToast = nil }
+    }
+
+    // MARK: Routes
 
     private func startAdd(from origin: AtelierTab) {
         addOrigin = origin
         adding = true
     }
 
-    /// Opens Today, optionally with one bottle already selected (from Layer in My Collection).
-    private func openToday(_ bottleID: UUID) {
+    /// Opens the Wear log sheet, optionally with one bottle already chosen (Layer on a focused card).
+    private func openWearLog(_ bottleID: UUID?) {
         startingWearBottle = bottleID
-        tab = .today
+        showingWearLog = true
     }
 
-    /// My Cards' Autumn entry opens the sample deck at its first autumn fragrance in Explore.
-    private func openLiveArchive() {
-        showingMyCards = false
-        archive.enter(.demo)
-        archive.selectedDemoID = Fall2026Collection.fragrances.first?.id ?? "dior"
-        tab = .explore
+    /// The wear log's "Add a bottle": close it first, then open Quick Add (one sheet at a time).
+    private func closeWearLogThenAdd() {
+        showingWearLog = false
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(450))
+            startAdd(from: .myCollection)
+        }
     }
 
     /// Launch arguments used only by the CI capture script to photograph specific screens
-    /// (`-AroomaQATab shelves|journal|collection|search`, `-AroomaQAInspect YES`). Inert in normal use.
+    /// (`-AroomaQATab shelves|wear|collection|search|quickactions`, `-AroomaQAInspect YES`). Inert in normal use.
+    /// `quickactions` shows the column directly (it does NOT exercise the tab-bar hold).
     private func applyQALaunchArguments() {
         let defaults = UserDefaults.standard
         switch defaults.string(forKey: "AroomaQATab") {
         case "shelves": showingShelves = true
-        case "journal", "today": tab = .today
+        case "journal", "today", "wear": showingWearLog = true
         case "collection": tab = .myCollection
-        case "search": searching = true
+        case "search": tab = .search
+        case "quickactions":
+            tab = .myCollection
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1.0))
+                presentQuickActions(anchor: nil)
+            }
         default: break
         }
         if defaults.bool(forKey: "AroomaQAInspect"), archive.onboarded, let card = archive.selected {
@@ -244,10 +379,11 @@ struct AtelierRoot: View {
         HapticEngine.shared.play(.completed)
     }
 
-    /// Brings a card to the front in its deck and shows My Collection (Today's session links).
+    /// Brings a card to the front in its deck and shows My Collection (the wear log's session links).
     /// Never changes ownership: a catalog fragrance you don't own stays in the sample archive.
     private func focus(_ card: DisplayCard) {
         select(card)
+        showingWearLog = false
         tab = .myCollection
     }
 
@@ -272,9 +408,9 @@ struct AtelierRoot: View {
     }
 }
 
-/// Search, presented from Explore (plan section 2). Results open the Inspector from inside this sheet,
-/// so closing the Inspector returns to the same Search state.
-struct ExploreSearchSheet: View {
+/// Search, the third tab. A result opens its Inspector from inside this screen, so closing the Inspector
+/// returns to the same query, scopes, filters and sort. It changes no selection and no saved record.
+struct SearchTabScreen: View {
     @EnvironmentObject private var archive: CollectionStore
     @State private var inspection: DisplayCard?
 
@@ -287,16 +423,17 @@ struct ExploreSearchSheet: View {
     }
 }
 
-/// My Collection (Native Navigation V2). Owned bottles are the default view; the Wishlist is a view
-/// inside this tab, not a tab. Shelves, My Cards and Quick Add are one action each.
+/// My Collection (Native Navigation V3). Owned bottles are the default view; the Wishlist is a view inside
+/// this tab, not a tab. The signature sits at the upper left beside the Owned/Wishlist control. Shelves, the
+/// Wear log and Add are labelled controls in the lower area, below the card and its notes.
 struct MyCollectionScreen: View {
     @EnvironmentObject private var archive: CollectionStore
     let transitionNamespace: Namespace.ID
     let inspect: (DisplayCard) -> Void
     let add: () -> Void
     let openShelves: () -> Void
-    let openMyCards: () -> Void
-    let showToday: (UUID) -> Void
+    let openWearLog: (UUID?) -> Void
+    let quickActions: () -> Void
 
     /// 0 = owned, 1 = Wishlist. Changing it changes the data context, never the saved records.
     private var viewChoice: Binding<Int> {
@@ -309,20 +446,14 @@ struct MyCollectionScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
+                AroomaBrandMark()
+                Spacer(minLength: 8)
                 Picker("Collection view", selection: viewChoice) {
                     Text("Owned").tag(0)
                     Text("Wishlist").tag(1)
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 230)
-                Spacer(minLength: 4)
-                GlassEffectContainer(spacing: 10) {
-                    HStack(spacing: 10) {
-                        headerButton("square.grid.2x2", label: "All shelves", action: openShelves)
-                        headerButton("rectangle.portrait.on.rectangle.portrait", label: "My Cards", action: openMyCards)
-                        headerButton("plus", label: "Quick add a bottle", action: add)
-                    }
-                }
+                .frame(maxWidth: 190)
             }
             .padding(.horizontal, 20)
             .padding(.top, 6)
@@ -331,56 +462,39 @@ struct MyCollectionScreen: View {
                 transitionNamespace: transitionNamespace,
                 inspect: inspect,
                 add: add,
-                openSearch: {},
                 openStyle: {},
-                showToday: showToday
+                showToday: { openWearLog($0) },
+                quickActions: quickActions
             )
+            tools
         }
     }
 
-    private func headerButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 30, height: 30)
-        }
-        .accessibilityIdentifier(label.lowercased().replacingOccurrences(of: " ", with: "-"))
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .accessibilityLabel(label)
-    }
-}
-
-/// iOS 26 tab bar accessory: today's ritual is one tap away from My Collection's owned view.
-struct TodayAccessory: View {
-    @EnvironmentObject private var archive: CollectionStore
-    let open: () -> Void
-    private var todays: [Fragrance] {
-        guard let session = archive.wearSessions.first(where: { Calendar.current.isDateInToday($0.date) }) else { return [] }
-        return session.bottleIDs.compactMap { id in
-            archive.bottles.first(where: { $0.id == id }).flatMap { archive.fragrance(id: $0.fragranceID) }
-        }
-    }
-    var body: some View {
-        Button(action: open) {
-            HStack(spacing: 10) {
-                Image(systemName: todays.isEmpty ? "drop" : "checkmark.seal.fill")
-                    .legibleForeground(archive.theme.palette.accent)
-                    .contentTransition(.symbolEffect(.replace))
-                if todays.isEmpty {
-                    Text("What are you wearing today?")
-                } else {
-                    Text("Wearing \(todays.map(\.name).joined(separator: " + "))")
+    /// Distinct labelled controls, low on the screen. Hidden while the deck is empty, where the empty state's
+    /// own button is the single Add.
+    @ViewBuilder private var tools: some View {
+        if !archive.displayedCards.isEmpty {
+            GlassEffectContainer(spacing: 10) {
+                HStack(spacing: 10) {
+                    if archive.mode == .mine {
+                        toolButton("Shelves", symbol: "square.grid.2x2", id: "all-shelves", action: openShelves)
+                        toolButton("Wear log", symbol: "clock.arrow.circlepath", id: "wear-log") { openWearLog(nil) }
+                    }
+                    toolButton("Add", symbol: "plus", id: "quick-add-a-bottle", action: add)
                 }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
-            .font(.footnote.weight(.medium))
-            .lineLimit(1)
-            .padding(.horizontal, 16)
-            .contentShape(Rectangle())
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
         }
-        .buttonStyle(.plain)
-        .accessibilityHint("Opens Today")
+    }
+
+    private func toolButton(_ title: String, symbol: String, id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.footnote.weight(.semibold))
+                .frame(maxWidth: .infinity, minHeight: 34)
+        }
+        .buttonStyle(.glass)
+        .accessibilityIdentifier(id)
     }
 }

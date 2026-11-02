@@ -1,8 +1,15 @@
 name: Maestro iOS
-# Manual only. Runs Maestro UI flows against a Debug build on an iOS 26 simulator. Not a release gate.
+# Manual release check plus a branch-scoped UX audit run; not a release gate.
 # Start it from the repo without a Mac: Actions → "Maestro iOS" → Run workflow (choose the branch).
 # Results and screenshots are downloaded from the run's Artifacts section.
 on:
+  push:
+    branches:
+      - audit/ux-laws-maestro-20261102
+    paths:
+      - '.maestro/**'
+      - '.github/workflows/maestro-ios.yml'
+      - 'ios/**'
   workflow_dispatch:
     inputs:
       include_tags:
@@ -62,7 +69,11 @@ jobs:
           # ("iOS driver not ready in time"); give it five minutes instead of failing the whole run.
           export PATH="$HOME/.maestro/bin:$PATH" MAESTRO_CLI_NO_ANALYTICS=1 MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
           ARGS=(--udid "$DEVICE" --format JUNIT --output "$RUNNER_TEMP/maestro-results/junit.xml" --test-output-dir "$RUNNER_TEMP/maestro-results/run")
-          if [ -n "${{ inputs.include_tags }}" ]; then ARGS+=(--include-tags "${{ inputs.include_tags }}"); fi
+          if [ "${{ github.event_name }}" = "push" ]; then
+            ARGS+=(--include-tags ux-audit)
+          elif [ -n "${{ inputs.include_tags }}" ]; then
+            ARGS+=(--include-tags "${{ inputs.include_tags }}")
+          fi
           if [ -n "${{ inputs.exclude_tags }}" ]; then ARGS+=(--exclude-tags "${{ inputs.exclude_tags }}"); fi
           mkdir -p "$RUNNER_TEMP/maestro-results"
           maestro test "${ARGS[@]}" .maestro/

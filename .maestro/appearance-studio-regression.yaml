@@ -1,6 +1,7 @@
 # View & Style stays reachable from Explore, with its sections, after the navigation change.
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - appearance
 ---
 - launchApp:

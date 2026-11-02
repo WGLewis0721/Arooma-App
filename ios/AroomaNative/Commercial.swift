@@ -192,7 +192,8 @@ struct CommercialArchive: Codable {
             await refreshEntitlements()
             status = "Available purchases have been refreshed."
         } catch {
-            status = "Could not restore purchases: \(error.localizedDescription)"
+            NSLog("Arooma could not restore purchases: %@", error.localizedDescription)
+            status = "Could not restore purchases. Check your connection and try again."
         }
     }
 
@@ -224,7 +225,8 @@ struct CommercialArchive: Codable {
                 status = "The purchase could not be completed."
             }
         } catch {
-            status = error.localizedDescription
+            NSLog("Arooma StoreKit purchase failed: %@", error.localizedDescription)
+            status = "The purchase could not be completed. Please try again." 
         }
     }
 
@@ -343,7 +345,8 @@ struct CommercialArchive: Codable {
             save()
             return true
         } catch {
-            status = "Could not save the card photo: \(error.localizedDescription)"
+            NSLog("Arooma could not save card photo: %@", error.localizedDescription)
+            status = "Could not save the photo. Check available storage and try again."
             return false
         }
     }
@@ -364,7 +367,8 @@ struct CommercialArchive: Codable {
         do {
             try JSONEncoder().encode(record).write(to: Self.recordURL, options: .atomic)
         } catch {
-            status = "Card library could not be saved: \(error.localizedDescription)"
+            NSLog("Arooma card library save failed: %@", error.localizedDescription)
+            status = "Could not save your card library. Check storage and try again."
         }
     }
 }
@@ -775,7 +779,10 @@ struct MyCardsScreen: View {
             }
             .fileExporter(isPresented: $exporting, document: exportDocument,
                           contentType: .json, defaultFilename: "Arooma-My-Cards") { result in
-                if case .failure(let error) = result { commerce.status = error.localizedDescription }
+                if case .failure(let error) = result {
+                    NSLog("Arooma card library export failed: %@", error.localizedDescription)
+                    commerce.status = "Could not export the card library. Please try again."
+                }
             }
             .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
                 switch result {
@@ -785,7 +792,8 @@ struct MyCardsScreen: View {
                     if let data = try? Data(contentsOf: url) { _ = commerce.importBackup(data) }
                     else { commerce.status = "Could not read the chosen backup file." }
                 case .failure(let error):
-                    commerce.status = error.localizedDescription
+                    NSLog("Arooma card library import failed: %@", error.localizedDescription)
+                    commerce.status = "Could not import the selected backup. Please try another file."
                 }
             }
         }

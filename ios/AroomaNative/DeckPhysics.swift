@@ -316,7 +316,7 @@ enum DeckLayoutEngine {
     /// finger travel into deck units so the card under the finger tracks it one-to-one.
     static func stride(for layout: DeckLayoutKind, cardWidth w: Double) -> Double {
         switch layout {
-        case .coverFlow: return w * 0.60
+        case .coverFlow: return w * 0.73
         case .stack: return w * 1.04
         // Arc length per card at the card centre: pivot 1.85 card heights below, 11.5° apart.
         // Matching it keeps the fanned card exactly under the finger.
@@ -340,7 +340,7 @@ enum DeckLayoutEngine {
             // Cinematic: neighbours hinge away and tuck behind the hero; distant cards compress.
             let s = DeckMath.clamp(d, -1, 1)
             let rest = d - s
-            p.x = w * (0.60 * s + 0.24 * rest)
+            p.x = w * (0.73 * s + 0.28 * rest)
             p.yaw = -s * LayoutTuning.coverFlowYaw
             p.scale = max(0.5, 1 - LayoutTuning.coverFlowScaleFalloff * abs(s) - 0.045 * abs(rest))
             p.y = 0

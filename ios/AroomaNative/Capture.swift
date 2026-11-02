@@ -216,13 +216,13 @@ struct QuickAddSheet: View {
                         typing = false
                         cameraOpen = true
                     } label: {
-                        Label("Take Photo", systemImage: "camera").frame(maxWidth: .infinity, minHeight: 36)
+                        Label("Take Photo", systemImage: "camera").frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.glass)
                     .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
                     PhotosPicker(selection: $libraryItem, matching: .images) {
                         Label(draft.photoFileName == nil ? "Choose Photo" : "Change Photo", systemImage: "photo")
-                            .frame(maxWidth: .infinity, minHeight: 36)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.glass)
                 }
@@ -596,23 +596,23 @@ struct ScanReview: View {
             if committed == nil {
                 HStack(spacing: 10) {
                     Button { commit(.wishlist) } label: {
-                        Label("Wishlist", systemImage: "heart").frame(maxWidth: .infinity, minHeight: 36)
+                        Label("Wishlist", systemImage: "heart").frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .accessibilityIdentifier("scan-wishlist")
                     .buttonStyle(.glass)
                     Button { commit(.collection) } label: {
-                        Label("Collection", systemImage: "checkmark.seal").frame(maxWidth: .infinity, minHeight: 36)
+                        Label("Collection", systemImage: "checkmark.seal").frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .accessibilityIdentifier("scan-collection")
                     .buttonStyle(.glassProminent)
                     .legibleTint(accent)
                 }
                 HStack(spacing: 10) {
-                    Button(action: back) { Label("Back", systemImage: "chevron.down").frame(maxWidth: .infinity, minHeight: 32) }
+                    Button(action: back) { Label("Back", systemImage: "chevron.down").frame(maxWidth: .infinity, minHeight: 44) }
                         .buttonStyle(.glass)
                     Button { withAnimation(.snappy) { showFacts.toggle() } } label: {
                         Label(showFacts ? "Hide facts" : "Facts", systemImage: "text.magnifyingglass")
-                            .frame(maxWidth: .infinity, minHeight: 32)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.glass)
                 }

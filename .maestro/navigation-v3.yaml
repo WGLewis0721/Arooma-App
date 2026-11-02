@@ -2,6 +2,7 @@
 # and no Search icon on Explore (Search is a tab now).
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - v3
   - navigation
 ---

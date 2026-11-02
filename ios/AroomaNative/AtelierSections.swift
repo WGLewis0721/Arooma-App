@@ -65,14 +65,14 @@ struct AtelierWelcome: View {
                         Button(action: openDemo) {
                             Text("Explore the Archive")
                                 .font(.headline)
-                                .frame(maxWidth: .infinity, minHeight: 40)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.glassProminent)
                         .legibleTint(accent)
                         Button(action: openMine) {
                             Text("Start My Collection")
                                 .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity, minHeight: 36)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.glass)
                     }
@@ -265,7 +265,7 @@ struct ShelfLedge: View {
                     .foregroundStyle(.secondary)
                     .contentTransition(.numericText(value: Double(cards.count)))
                 Button(action: rename) {
-                    Image(systemName: "pencil").frame(width: 30, height: 30)
+                    Image(systemName: "pencil").frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -376,7 +376,7 @@ struct ShelfOverview: View {
                 Button {
                     withAnimation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.88)) { progress = 0 }
                 } label: {
-                    Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).frame(width: 30, height: 30)
+                    Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -698,41 +698,6 @@ struct AtelierStyle: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                AtelierEyebrow(text: "Arrangement", accent: archive.theme.palette.accent)
-                HStack(spacing: 10) {
-                    ForEach(CardLayout.allCases) { layout in
-                        Button {
-                            withAnimation(reduceMotion ? nil : .snappy) { archive.layout = layout }
-                        } label: {
-                            VStack(spacing: 8) {
-                                LayoutThumbnail(layout: layout, selected: archive.layout == layout,
-                                                accent: archive.theme.palette.accent)
-                                    .frame(height: 74)
-                                Text(layout.rawValue)
-                                    .font(.system(.caption, weight: archive.layout == layout ? .semibold : .regular))
-                                    .foregroundStyle(archive.layout == layout ? archive.theme.palette.accent : .primary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .atelierPlate(16)
-                            .overlay {
-                                if archive.layout == layout {
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .strokeBorder(archive.theme.palette.accent.opacity(0.8), lineWidth: 1.2)
-                                }
-                            }
-                        }
-                        .buttonStyle(PressableCardStyle())
-                        .accessibilityLabel(layout.rawValue)
-                        .accessibilityAddTraits(archive.layout == layout ? .isSelected : [])
-                    }
-                }
-                Text(archive.layout.choreography)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .contentTransition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: archive.layout)
-
                 AtelierEyebrow(text: "Atmosphere", accent: archive.theme.palette.accent)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                     ForEach(FragranceTheme.allCases) { theme in
@@ -760,7 +725,7 @@ struct AtelierStyle: View {
                         Label("Show signature", systemImage: "sparkles")
                             .font(.subheadline.weight(.medium))
                     }
-                    .frame(maxWidth: .infinity, minHeight: 40)
+                    .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.glass)
                 .accessibilityLabel("Show the Arooma signature")
@@ -1190,7 +1155,7 @@ struct AtelierWearLog: View {
                 }
                 Spacer(minLength: 0)
                 Button { selected.removeAll(); impression = "" } label: {
-                    Image(systemName: "xmark").font(.caption.weight(.bold)).frame(width: 26, height: 26)
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -1207,7 +1172,7 @@ struct AtelierWearLog: View {
                 Button(action: log) {
                     Label(ids.count > 1 ? "Log this layer" : "Log this wear", systemImage: "checkmark")
                         .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.glassProminent)
                 .legibleTint(accent)
@@ -1215,14 +1180,14 @@ struct AtelierWearLog: View {
                     withAnimation(.snappy) { addingNote.toggle() }
                 } label: {
                     Image(systemName: addingNote ? "text.badge.checkmark" : "text.bubble")
-                        .frame(width: 36, height: 36)
+                        .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
                 .accessibilityLabel("Add an impression")
                 if ids.count > 1 {
                     Button { newLayerName = ""; namingLayer = true } label: {
-                        Image(systemName: "bookmark").frame(width: 36, height: 36)
+                        Image(systemName: "bookmark").frame(width: 44, height: 44)
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)

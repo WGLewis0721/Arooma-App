@@ -2,6 +2,7 @@
 # control (All, Collection, Wishlist, Catalog) responds.
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - v3
   - search
 ---

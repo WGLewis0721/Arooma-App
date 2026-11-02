@@ -4,6 +4,7 @@
 # launch argument that only Debug and TestFlight builds read (QuickAddSheet.undoWindow in Capture.swift).
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - quick-add
 ---
 - launchApp:

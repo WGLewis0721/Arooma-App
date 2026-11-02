@@ -70,7 +70,7 @@ Every target below requires a physical iPhone with Low Power Mode off, and none 
 Use an owner-tools build (Debug or internal TestFlight). Use a phone with Low Power Mode off, and hold it the way you normally do.
 
 1. In View & Style, keep **Flip cards with wrist twist** on, and turn on **Show motion readout** and **Record a motion trace for the next open card**. Open a card in the Inspector. Recording needs the motion sensor running, so it does nothing while the flip is off.
-2. Make 40 deliberate flicks, 20 each direction, about 1 second apart. Vary grip and starting posture a little. Close the Inspector. A file `gyro-trace-…jsonl` is written to the app's Documents folder, and the readout names it.
+2. Make 40 deliberate flicks, 20 each direction, about 1 second apart. Vary grip and starting posture a little. Close the Inspector. A file `gyro-trace-…jsonl` is written on the iPhone, and the readout names it. In View & Style, **Share last motion trace** sends it to your Mac (AirDrop or Files). The file is not otherwise visible outside the app.
 3. Make the ordinary-movement trials in a separate session: browsing with taps and drags, lifting and placing the phone, walking, slow and quick tilts, a shake. Then leave one session for 15 minutes of browsing. Record each as its own trace.
 4. Replay each file on a Mac: `swiftc -O ios/AroomaNative/GyroFlipDetector.swift ios/AroomaNative/GyroPulseDetector.swift ios/AroomaNative/GyroTrace.swift ios/Tests/GyroFlip/Corpus.swift ios/Tests/GyroFlip/Report.swift ios/Tests/GyroFlip/main.swift -o gyro-tests` and `./gyro-tests --replay <file>`. The output shows each recognizer's flips beside the flips the app produced.
 5. Count misses, wrong directions, double flips and accidental flips for each trial set. Compare them with the thresholds above.
@@ -79,7 +79,7 @@ Use an owner-tools build (Debug or internal TestFlight). Use a phone with Low Po
 
 ## Privacy
 
-Motion readings are still processed on this iPhone and used only for the foil and, if on, card flips. Owner-tools recording writes the raw readings for one session to the Documents folder, only after the owner switches it on, and only in an owner-tools build. Nothing is uploaded. The user-facing copy in View & Style is unchanged for normal builds.
+Motion readings are still processed on this iPhone and used only for the foil and, if on, card flips. Owner-tools recording writes the raw readings for one session to a file in the app's own storage, only after the owner switches it on, and only in an owner-tools build. The file leaves the phone only when the owner chooses Share. Nothing is uploaded automatically. The user-facing copy in View & Style is unchanged for normal builds.
 
 ## Limitations
 

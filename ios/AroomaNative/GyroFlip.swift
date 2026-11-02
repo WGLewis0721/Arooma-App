@@ -82,6 +82,17 @@ struct GyroDiagnostics {
 enum GyroTraceSettings {
     /// `@AppStorage` key for the owner-tools trace switch in View & Style. Default Off.
     static let enabledKey = "arooma.gyroTraceRecording"
+    /// The file name of the last trace written, so View & Style can offer to share it.
+    static let lastFileKey = "arooma.gyroLastTraceFile"
+
+    /// The last trace file on this iPhone, if it still exists. Owner tools only.
+    static var lastFileURL: URL? {
+        guard BuildChannel.allowsOwnerTools,
+              let name = UserDefaults.standard.string(forKey: lastFileKey), !name.isEmpty,
+              let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
+        let url = folder.appendingPathComponent("GyroTraces", isDirectory: true).appendingPathComponent(name)
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
 }
 
 /// Owner tools only: records the samples the recognizer consumed, plus the live flip events, for one open card, and
@@ -130,6 +141,7 @@ final class GyroTraceRecorder {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             try GyroTraceCodec.encode(file).write(to: directory.appendingPathComponent(name), atomically: true, encoding: .utf8)
+            UserDefaults.standard.set(name, forKey: GyroTraceSettings.lastFileKey)
             return name
         } catch {
             NSLog("Arooma could not write the gyro trace: %@", error.localizedDescription)
@@ -428,9 +440,16 @@ struct GyroFlipSettingRow: View {
                 Toggle("Record a motion trace for the next open card (owner tools)", isOn: $recordTrace)
                     .font(.footnote)
                     .accessibilityIdentifier("gyro-trace-toggle")
-                Text("Writes the raw motion readings from that session to this iPhone's Documents folder as a file for offline replay. Nothing is uploaded.")
+                Text("Writes the raw motion readings from that session to a file on this iPhone, for offline replay. Nothing is uploaded.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                if let url = GyroTraceSettings.lastFileURL {
+                    ShareLink(item: url) {
+                        Label("Share last motion trace", systemImage: "square.and.arrow.up")
+                            .font(.footnote)
+                    }
+                    .accessibilityIdentifier("gyro-trace-share")
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name.NSProcessInfoPowerStateDidChange)) { _ in

@@ -134,6 +134,8 @@ struct GyroFlipDetector {
         var duration: Double
         var acceleration: Double
         var axis: String
+        /// Seconds from the peak to the flip, for flips recorded by the pulse recognizer. Nil otherwise.
+        var latency: Double? = nil
     }
 
     var configuration: GyroFlipConfiguration

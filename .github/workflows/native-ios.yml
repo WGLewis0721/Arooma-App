@@ -24,10 +24,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Confirm Xcode
         run: xcodebuild -version
-      - name: Gyro Flip detector unit tests (pure Swift, no XCTest)
+      - name: Wrist-flick detector tests and A/B replay report (pure Swift, no XCTest)
         run: |
           set -o pipefail
-          swiftc -O ios/AroomaNative/GyroFlipDetector.swift ios/Tests/GyroFlip/main.swift -o "$RUNNER_TEMP/gyro-tests"
+          swiftc -O ios/AroomaNative/GyroFlipDetector.swift ios/AroomaNative/GyroPulseDetector.swift \
+            ios/AroomaNative/GyroTrace.swift ios/Tests/GyroFlip/Corpus.swift ios/Tests/GyroFlip/Report.swift \
+            ios/Tests/GyroFlip/main.swift -o "$RUNNER_TEMP/gyro-tests"
           "$RUNNER_TEMP/gyro-tests" | tee "$RUNNER_TEMP/gyro-tests.log"
       - name: Package the 30 fall image sets for private Debug QA
         run: |

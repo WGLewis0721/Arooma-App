@@ -253,7 +253,7 @@ struct AtelierRoot: View {
                         .onTapGesture { dismissQuickActions() }
                         .accessibilityHidden(true)
                     QuickActionsColumn(
-                        wear: archive.quickWearAvailability,
+                        owned: quickOwned,
                         wishlist: quickWishlist,
                         add: quickAdd,
                         wearNow: quickWear,
@@ -265,6 +265,13 @@ struct AtelierRoot: View {
             }
             .transition(.opacity)
         }
+    }
+
+    /// Owned: return directly to the owned deck from the tab's hold menu.
+    private func quickOwned() {
+        dismissQuickActions()
+        archive.enter(.mine)
+        tab = .myCollection
     }
 
     /// Wishlist: straight to My Collection's Wishlist view. No intermediate menu, no demo-mode switch.
@@ -436,14 +443,6 @@ struct MyCollectionScreen: View {
     let openWearLog: (UUID?) -> Void
     let quickActions: () -> Void
 
-    /// 0 = owned, 1 = Wishlist. Changing it changes the data context, never the saved records.
-    private var viewChoice: Binding<Int> {
-        Binding(
-            get: { archive.mode == .wishlist ? 1 : 0 },
-            set: { archive.enter($0 == 1 ? .wishlist : .mine) }
-        )
-    }
-
     var body: some View {
         ZStack {
             AtelierAtmosphere(theme: archive.theme).ignoresSafeArea()
@@ -456,12 +455,6 @@ struct MyCollectionScreen: View {
             HStack(spacing: 10) {
                 AroomaBrandMark()
                 Spacer(minLength: 8)
-                Picker("Collection view", selection: viewChoice) {
-                    Text("Owned").tag(0)
-                    Text("Wishlist").tag(1)
-                }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 190)
                 collectionMenu
             }
             .padding(.horizontal, 20)

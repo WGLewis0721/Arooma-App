@@ -72,6 +72,11 @@ struct Fragrance: Identifiable, Hashable, Codable {
     // Source identity is tied to assets/collectibles/production/manifest.json.
     // Original artwork is bundled byte-for-byte from masters/approved (and archival).
     static let catalog: [Fragrance] = [
+        Fragrance(id: "imagination", house: "Louis Vuitton", name: "Imagination", concentration: "Eau de Parfum",
+                  year: "2021", top: ["Citron", "Calabrian Bergamot", "Sicilian Orange"],
+                  heart: ["Tunisian Neroli", "Ginger", "Ceylon Cinnamon"],
+                  base: ["Chinese Black Tea", "Ambrox", "Guaiac Wood", "Olibanum"],
+                  shelf: .summer, archival: false),
         Fragrance(id: "aventus", house: "Creed", name: "Aventus", concentration: "Eau de Parfum",
                   year: "2010", top: ["Calabrian Bergamot", "Sicilian Lemon", "Blackcurrant Leaf"],
                   heart: ["Pineapple", "Pink Pepper", "Jasmine"],

@@ -16,6 +16,18 @@
       "fps": 24,
       "playback": "muted, looping, focused front face only, Respect Reduce Motion",
       "status": "pending ingestion; external fallback supported"
+    },
+    {
+      "id": "imagination",
+      "fragrance": "Louis Vuitton Imagination",
+      "front": "ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-front.png",
+      "reverse": "ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png",
+      "source_front": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_053057_1d4a8e07-c404-4982-8556-e43a6aae6778.png",
+      "source_reverse": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_053218_5302e9bb-0112-4117-b2ec-4cd42753209a.png",
+      "sha256_front": "945d7bccf785774e349d3218fb5d3cc4c75493eb54ed8ee95f851651dbee8b34",
+      "sha256_reverse": "8193dc33b2408ff7368af64126ac08c1621037771c415d70ee373777650764d6",
+      "art_type": "static generated two-sided Scent World with native card-foil treatment",
+      "animated": false
     }
   ]
 }

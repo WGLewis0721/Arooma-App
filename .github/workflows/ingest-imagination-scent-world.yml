@@ -1,0 +1,41 @@
+name: Ingest Imagination Scent World artwork
+on:
+  push:
+    branches:
+      - feature/imagination-scent-world-cards-20261102
+    paths:
+      - .github/workflows/ingest-imagination-scent-world.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download and verify the two approved card faces
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ios/AroomaNative/Resources
+          curl --fail --location --retry 4 --connect-timeout 20 'https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_053057_1d4a8e07-c404-4982-8556-e43a6aae6778.png' -o ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-front.png
+          curl --fail --location --retry 4 --connect-timeout 20 'https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_053218_5302e9bb-0112-4117-b2ec-4cd42753209a.png' -o ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png
+          echo '945d7bccf785774e349d3218fb5d3cc4c75493eb54ed8ee95f851651dbee8b34  ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-front.png' | sha256sum --check --status
+          echo '8193dc33b2408ff7368af64126ac08c1621037771c415d70ee373777650764d6  ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png' | sha256sum --check --status
+          test -s ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-front.png
+          test -s ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png
+      - name: Commit the approved master images to this branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-front.png ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'assets: bundle Imagination Scent World front and reverse'
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi

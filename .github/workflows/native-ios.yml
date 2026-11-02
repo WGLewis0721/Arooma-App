@@ -57,6 +57,9 @@ jobs:
           # Compilation alone does not prove offline Scent World playback is possible.
           test -s "$app/creed-aventus-live-card.mp4"
           test -s "$app/creed-aventus-live-card-poster.jpg"
+          # Generated Imagination front and reverse must be in the installed app.
+          test -s "$app/louis-vuitton-imagination-scent-world-front.png"
+          test -s "$app/louis-vuitton-imagination-scent-world-reverse.png"
           xcrun --sdk iphonesimulator assetutil --info "$app/Assets.car" > "$RUNNER_TEMP/arooma-assets.json"
           python3 - "$RUNNER_TEMP/arooma-assets.json" <<'PY'
           import json, pathlib, sys

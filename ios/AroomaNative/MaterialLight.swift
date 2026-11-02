@@ -38,6 +38,9 @@ final class MotionField {
     @ObservationIgnored private var pendingStop: Task<Void, Never>?
     @ObservationIgnored private var stoppedAt: Date?
     @ObservationIgnored private let interpolator = FrameDriver(label: "tilt")
+    // Owner-only diagnostics. Primitive values are never stored or transmitted.
+    @ObservationIgnored private var lastSampleUptime: TimeInterval = 0
+    @ObservationIgnored private var lastGyroRate = SIMD3<Double>(repeating: 0)
     /// The one subscriber to raw (unshaped) rotation-rate and user-acceleration samples: the open
     /// Inspector's Gyro Flip. Nil means the sensor handler does no extra work at all.
     @ObservationIgnored private var rawSink: ((GyroSample) -> Void)?
@@ -102,13 +105,17 @@ final class MotionField {
     /// Called by the tuning panel when any tilt value changes.
     func tuningChanged() {
         if manager.isDeviceMotionActive {
-            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, TiltTuning.sampleRateHz))
+            let rate = RenderQuality.allowsLiveMaterial ? TiltTuning.sampleRateHz : 30
+            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, rate))
         }
         recompute()
     }
 
+    // Sensor availability is independent of the GPU foil-quality policy. Previously this
+    // depended on allowsLiveMaterial: Low Power Mode/thermal pressure stopped ALL samples,
+    // disabling both the foil's physical input and wrist-flip detection.
     private var shouldRun: Bool {
-        users > 0 && foreground && manager.isDeviceMotionAvailable && RenderQuality.allowsLiveMaterial
+        users > 0 && foreground && manager.isDeviceMotionAvailable
     }
 
     private func reconcile() {
@@ -117,10 +124,14 @@ final class MotionField {
             if let stoppedAt, Date().timeIntervalSince(stoppedAt) > 3 { reference = nil }
             stoppedAt = nil
             lastSampleTime = 0
-            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, TiltTuning.sampleRateHz))
+            // Lower sample load while saving power; the wrist detector uses actual timestamps.
+            let rate = RenderQuality.allowsLiveMaterial ? TiltTuning.sampleRateHz : 30
+            manager.deviceMotionUpdateInterval = 1.0 / max(30, min(120, rate))
             manager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: .main) { motion, _ in
                 guard let motion else { return }
                 MainActor.assumeIsolated {
+                    MotionField.shared.lastSampleUptime = ProcessInfo.processInfo.systemUptime
+                    MotionField.shared.lastGyroRate = SIMD3(motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z)
                     MotionField.shared.ingest(motion.attitude.quaternion, at: motion.timestamp)
                     if let sink = MotionField.shared.rawSink {
                         sink(GyroSample(
@@ -140,6 +151,23 @@ final class MotionField {
             target = relative
             tilt = .zero
         }
+    }
+
+    // Polled only while the owner opens View & Style > Motion diagnostics in TestFlight/Debug.
+    var debugLines: [String] {
+        let power = ProcessInfo.processInfo.isLowPowerModeEnabled ? "ON" : "off"
+        let thermal = ProcessInfo.processInfo.thermalState.rawValue
+        let age = lastSampleUptime == 0 ? "none" : String(format: "%.2f s", max(0, ProcessInfo.processInfo.systemUptime - lastSampleUptime))
+        return [
+            "Sensor available: \(manager.isDeviceMotionAvailable)",
+            "Sensor running: \(manager.isDeviceMotionActive) (consumers: \(users))",
+            "Most recent sample: \(age) ago",
+            String(format: "Gyro x %.2f, y %.2f, z %.2f rad/s", lastGyroRate.x, lastGyroRate.y, lastGyroRate.z),
+            String(format: "Motion angle %.1f° · tilt x %.2f, y %.2f", relative.angle * 180 / .pi, Double(tilt.x), Double(tilt.y)),
+            "Low Power Mode: \(power) · thermal level: \(thermal)",
+            "GPU live foil allowed: \(RenderQuality.allowsLiveMaterial)",
+            "Gyro Flip sample listener: \(rawSink != nil)"
+        ]
     }
 
     private func ingest(_ q: CMQuaternion, at time: TimeInterval) {
@@ -312,7 +340,8 @@ struct LiveFoil: ViewModifier {
     }
 
     private func foil(_ content: Content, idle: CGPoint) -> some View {
-        let live = strength > 0.01 && !reduceTransparency && !RenderQuality.foilDisabledForQA
+        // Low-power/thermal policy applies only to the costly shader, NOT the shared motion sensor.
+        let live = strength > 0.01 && !reduceTransparency && !RenderQuality.foilDisabledForQA && RenderQuality.allowsLiveMaterial
         let level = Float(strength)
         let tintColor = tint
         // Reduce Motion: the light holds still (no tilt-driven change); touch still answers.
@@ -383,5 +412,36 @@ enum OwnerPhotoCache {
         let image = UIImage(cgImage: cg)
         cache.setObject(image, forKey: key)
         return image
+    }
+}
+
+// MARK: - Owner-only sensor diagnostics
+
+/// Isolate a stopped Core Motion feed from a shader/rendering problem on a real iPhone.
+/// This panel deliberately polls while visible; it never writes motion data or runs a new sensor.
+struct MotionDiagnosticView: View {
+    @State private var motion = MotionField.shared
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.4)) { _ in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Rotate the phone slowly: gyro rates and tilt must change while samples stay fresh.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    ForEach(motion.debugLines, id: \.self) { line in
+                        Text(line)
+                            .font(.system(.footnote, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    Text("If samples remain fresh but the card is visually static, inspect the LiveFoil shader and view invalidation. If samples stop, inspect sensor lifecycle, Low Power Mode and app background state.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(20)
+            }
+        }
+        .navigationTitle("Motion diagnostics")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

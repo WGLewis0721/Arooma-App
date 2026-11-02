@@ -1,0 +1,26 @@
+# UX anti-patterns #3, #6, #10, #11 and principles: Jakob, Fitts, hierarchy, scale.
+# Capture visual evidence while the keyboard is UP, not merely after it is dismissed.
+appId: com.graymatter.arooma
+tags:
+  - ux-audit
+  - keyboard
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Explore the Archive"
+- takeScreenshot: ux-audit-01-fresh-install
+- tapOn: "Explore the Archive"
+- assertVisible:
+    id: "explore-add-to-collection"
+- takeScreenshot: ux-audit-02-first-use
+- tapOn: "Search"
+- assertVisible: "Name, house.*"
+- tapOn: "Name, house.*"
+- inputText: "Dior"
+- assertVisible: ".*Dior.*"
+- takeScreenshot: ux-audit-03-search-keyboard-visible
+- pressKey: Enter
+- takeScreenshot: ux-audit-04-search-keyboard-dismissed
+- tapOn: "My Collection"
+- assertVisible: "Owned"
+- takeScreenshot: ux-audit-05-empty-collection

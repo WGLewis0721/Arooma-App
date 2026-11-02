@@ -46,6 +46,10 @@ jobs:
           maestro --version
           for f in .maestro/*.yaml; do maestro check-syntax "$f"; done
 
+      - name: Audit 15 screenshot anti-patterns and Foundational UX law coverage
+        run: |
+          python3 scripts/audit_arooma_ux.py --out "$RUNNER_TEMP/maestro-results/ux-audit.json"
+
       - name: Build Debug simulator app
         run: |
           set -o pipefail

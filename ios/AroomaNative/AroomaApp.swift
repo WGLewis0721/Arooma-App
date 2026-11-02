@@ -504,7 +504,7 @@ struct MyCollectionScreen: View {
         Button(action: action) {
             Label(title, systemImage: symbol)
                 .font(.footnote.weight(.semibold))
-                .frame(maxWidth: .infinity, minHeight: 34)
+                .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.glass)
         .accessibilityIdentifier(id)

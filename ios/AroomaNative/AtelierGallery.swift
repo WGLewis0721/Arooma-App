@@ -100,9 +100,11 @@ struct AtelierGallery: View {
                     identity
                         .padding(.horizontal, 24)
                         .padding(.top, 10)
-                    actions
-                        .padding(.horizontal, 20)
-                        .frame(height: 76)
+                    if context == .collection {
+                        actions
+                            .padding(.horizontal, 20)
+                            .frame(height: 76)
+                    }
 
                 }
             }
@@ -508,10 +510,11 @@ struct AtelierGallery: View {
                 .id("notes-\(card?.id ?? "")")
                 .accessibilityIdentifier("identity-notes")
                 .transition(.opacity)
-            if let card {
-                contextActions(for: card)
-                    .padding(.top, 8)
+            Group {
+                if let card { contextActions(for: card) }
             }
+            .frame(height: 52, alignment: .topLeading)
+            .padding(.top, 8)
         }
         .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: card?.id)
     }

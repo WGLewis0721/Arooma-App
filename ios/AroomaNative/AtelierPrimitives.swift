@@ -162,6 +162,8 @@ struct AtelierCardSurface: View {
     var side: CardSide = .front
     var radius: CGFloat = 14
     var selected = false
+    /// Only the focused front-face Scent World is allowed to decode/play video.
+    var videoActive = false
     /// Rotation about the vertical axis the card is drawn at (degrees), for lighting only.
     var yaw: Double = 0
     /// 0 resting on the table ... 1 lifted under the finger.
@@ -184,7 +186,7 @@ struct AtelierCardSurface: View {
         let theme = archive.theme
         let facing = cos(yaw * .pi / 180)
         let lambert = min(0.62, shade + (1 - max(0, facing)) * 0.5)
-        CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo, side: side, radius: radius)
+        CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo, side: side, radius: radius, videoActive: videoActive)
             .equatable()
             .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw, radius: radius, tint: theme.keyLight,
                                 touch: touch, pressure: pressure))
@@ -240,6 +242,7 @@ struct CardFace: View, Equatable {
     let photoURL: URL?
     let side: CardSide
     let radius: CGFloat
+    let videoActive: Bool
 
     var body: some View {
         Group {
@@ -273,6 +276,8 @@ struct CardFace: View, Equatable {
             } else if let fragrance, fragrance.id.hasPrefix("personal-") {
                 if side == .front { PersonalCardArt(fragrance: fragrance) }
                 else { PersonalReverse(fragrance: fragrance) }
+            } else if fragranceID == "aventus" && side == .front {
+                LiveAventusScentWorldCard(isPlaying: videoActive)
             } else if side == .back, let autumn = Fall2026Collection.entry(for: fragranceID) {
                 // Same FlipMotor/Metal light as the four originals, with a true
                 // fragrance-specific reverse that never fabricates scent notes.

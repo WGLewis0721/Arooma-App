@@ -269,6 +269,7 @@ struct AtelierGallery: View {
             yaw: pose.yaw,
             lift: lift,
             shade: pose.shade,
+            videoActive: abs(d) < 0.15,
             foil: abs(d) < 1.15 ? .live : .sheen,
             foilStrength: max(0, 1 - abs(d) * 1.8), // shader off beyond ~half a slot
             lean: nearness * nearness,
@@ -870,6 +871,7 @@ struct AtelierInspector: View {
         let facing = abs(cos(angle * .pi / 180))
         return ZStack {
             AtelierCardSurface(fragranceID: card.fragrance.id, side: .front, radius: 16,
+                               videoActive: !back,
                                yaw: frontYaw, lift: 0.6, foil: .live, lean: 0.7,
                                touch: pressUV, pressure: pressing, shadowed: false)
                 .opacity(back ? 0 : 1)

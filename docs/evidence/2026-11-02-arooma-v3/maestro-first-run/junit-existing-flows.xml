@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8" tests="14" failures="10" time="911.993" timestamp="2026-11-01T22:53:17">
+    <testcase id="my-collection-shelves" name="my-collection-shelves" classname="my-collection-shelves" file=".maestro/my-collection-shelves.yaml" time="41.055" timestamp="2026-11-01T22:53:17" status="ERROR">
+      <properties>
+        <property name="tags" value="shelves, navigation"/>
+      </properties>
+      <failure>Element not found: Id matching regex: all-shelves</failure>
+    </testcase>
+    <testcase id="quick-add-name-owned" name="quick-add-name-owned" classname="quick-add-name-owned" file=".maestro/quick-add-name-owned.yaml" time="136.222" timestamp="2026-11-01T22:53:58" status="ERROR">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+      <failure>Assertion is false: "Quick Test Owned" is visible</failure>
+    </testcase>
+    <testcase id="quick-add-wishlist" name="quick-add-wishlist" classname="quick-add-wishlist" file=".maestro/quick-add-wishlist.yaml" time="53.82" timestamp="2026-11-01T22:56:14" status="ERROR">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+      <failure>Element not found: Id matching regex: quick-add-a-bottle</failure>
+    </testcase>
+    <testcase id="explore-annotated-cleanup" name="explore-annotated-cleanup" classname="explore-annotated-cleanup" file=".maestro/explore-annotated-cleanup.yaml" time="56.186" timestamp="2026-11-01T22:57:08" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, annotations"/>
+      </properties>
+      <failure>Assertion is false: "Card 2 of .*" is visible</failure>
+    </testcase>
+    <testcase id="tuning-presets" name="tuning-presets" classname="tuning-presets" file=".maestro/tuning-presets.yaml" time="68.676" timestamp="2026-11-01T22:58:04" status="ERROR">
+      <properties>
+        <property name="tags" value="owner-tools"/>
+      </properties>
+      <failure>Assertion is false: "Quick adjust" is visible</failure>
+    </testcase>
+    <testcase id="appearance-studio-regression" name="appearance-studio-regression" classname="appearance-studio-regression" file=".maestro/appearance-studio-regression.yaml" time="51.339" timestamp="2026-11-01T22:59:13" status="SUCCESS">
+      <properties>
+        <property name="tags" value="appearance"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-insights-frosted" name="explore-insights-frosted" classname="explore-insights-frosted" file=".maestro/explore-insights-frosted.yaml" time="48.561" timestamp="2026-11-01T23:00:05" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, insights"/>
+      </properties>
+      <failure>Assertion is false: "Close Insights" is visible</failure>
+    </testcase>
+    <testcase id="style-sections" name="style-sections" classname="style-sections" file=".maestro/style-sections.yaml" time="58.341" timestamp="2026-11-01T23:00:53" status="SUCCESS">
+      <properties>
+        <property name="tags" value="style"/>
+      </properties>
+    </testcase>
+    <testcase id="quick-add-context" name="quick-add-context" classname="quick-add-context" file=".maestro/quick-add-context.yaml" time="66.792" timestamp="2026-11-01T23:01:52" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add, navigation"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-no-mode-menu" name="explore-no-mode-menu" classname="explore-no-mode-menu" file=".maestro/explore-no-mode-menu.yaml" time="73.666" timestamp="2026-11-01T23:02:58" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, navigation"/>
+      </properties>
+      <failure>Assertion is false: "My collection" is not visible</failure>
+    </testcase>
+    <testcase id="wishlist-in-my-collection" name="wishlist-in-my-collection" classname="wishlist-in-my-collection" file=".maestro/wishlist-in-my-collection.yaml" time="74.53" timestamp="2026-11-01T23:04:12" status="ERROR">
+      <properties>
+        <property name="tags" value="wishlist, navigation"/>
+      </properties>
+      <failure>Assertion is false: id: wear-today is visible</failure>
+    </testcase>
+    <testcase id="quick-add-undo" name="quick-add-undo" classname="quick-add-undo" file=".maestro/quick-add-undo.yaml" time="60.536" timestamp="2026-11-01T23:05:27" status="SUCCESS">
+      <properties>
+        <property name="tags" value="quick-add"/>
+      </properties>
+    </testcase>
+    <testcase id="explore-counter-navigation" name="explore-counter-navigation" classname="explore-counter-navigation" file=".maestro/explore-counter-navigation.yaml" time="46.154" timestamp="2026-11-01T23:06:27" status="ERROR">
+      <properties>
+        <property name="tags" value="explore, counter"/>
+      </properties>
+      <failure>Assertion is false: "Card 2 of .*" is visible</failure>
+    </testcase>
+    <testcase id="smoke" name="smoke" classname="smoke" file=".maestro/smoke.yaml" time="75.525" timestamp="2026-11-01T23:07:13" status="ERROR">
+      <properties>
+        <property name="tags" value="smoke"/>
+      </properties>
+      <failure>Assertion is false: "Owned" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

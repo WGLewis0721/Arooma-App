@@ -18,8 +18,8 @@ tags:
 - takeScreenshot: wishlist-view
 - tapOn:
     id: "wishlist-move"
+- assertVisible: "Nothing on your Wishlist yet."
+- tapOn: "Owned"
 - assertVisible:
     id: "wear-today"
 - takeScreenshot: wishlist-moved-to-owned
-- tapOn: "Wishlist"
-- assertVisible: "Nothing on your Wishlist yet."

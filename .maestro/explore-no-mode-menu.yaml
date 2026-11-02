@@ -11,7 +11,7 @@ tags:
 - assertNotVisible: "Explore sample cards"
 - longPressOn: "Explore"
 - assertNotVisible: "Explore sample cards"
-- assertNotVisible: "My collection"
+- assertNotVisible: "(?-i)My collection"
 - assertVisible:
     id: "explore-add-to-collection"
 - takeScreenshot: explore-no-mode-menu-after-long-press

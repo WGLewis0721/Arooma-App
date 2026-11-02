@@ -10,7 +10,7 @@ A spec is a plan, not approval. When its decisions land, update the governing do
 
 | Date | Spec | Status |
 | --- | --- | --- |
-| 2026-11-02 | [Native navigation V3: quick actions, signature header and Gyro Flip](2026-11-02-native-navigation-v3.md) | Merged to main before any Maestro flow ran on it; compile and detector unit tests pass; tab-bar hold and all on-screen behaviour NOT RUN; physical-iPhone validation not run |
+| 2026-11-02 | [Native navigation V3: quick actions, signature header and Gyro Flip](2026-11-02-native-navigation-v3.md) | Merged to main; first Maestro run on the Simulator: 12 of 15 new flows and 4 of 14 existing flows pass, hold passes; fixes in a follow-up PR; Off switch flow unexplained; physical-iPhone validation not run |
 | 2026-11-02 | [Native navigation V2: three tabs and annotated Explore cleanup](2026-11-02-native-navigation-v2.md) | Merged (#39); tab set, Today, Search and Card Studio superseded by V3 |
 | 2026-11-02 | [Maestro flow failures after the UX consolidation](2026-11-02-maestro-failures-spec.md) | Partly fixed: F1 and F3 pass on two runs, three Quick Add flows hardened; F2 `tuning-presets` open in the backlog; 8 of 9 |
 | 2026-11-02 | [Handoff: fix the three failing Maestro flows](2026-11-02-maestro-failures-handoff.md) | Used for the fix branch; superseded by the evidence in `docs/evidence/2026-11-02-maestro-fixes/` |

@@ -455,6 +455,9 @@ struct AtelierEmptyState: View {
     let action: String
     let callback: () -> Void
     let accent: Color
+    /// Stable handle for UI flows and assistive tooling. The empty state's button is the single Add control
+    /// while there is nothing else on screen (V3 hides the lower tools row's own Add).
+    var actionIdentifier: String? = nil
     var body: some View {
         VStack(spacing: 19) {
             Image(systemName: "rectangle.stack.badge.plus")
@@ -471,6 +474,7 @@ struct AtelierEmptyState: View {
                 .buttonStyle(.borderedProminent)
                 .legibleTint(accent)
                 .frame(minHeight: 48)
+                .accessibilityIdentifier(actionIdentifier ?? "empty-state-action")
         }
         .padding(26)
     }

@@ -602,6 +602,9 @@ struct AtelierGallery: View {
 
     private func configure() {
         motor.reduceMotion = reduceMotion
+        // A late data/selection refresh must not re-place the deck while a finger
+        // owns its position. That would make the first swipe visibly jump.
+        guard !touching && !motor.isInteracting else { return }
         motor.configure(count: cards.count, index: storedIndex, layout: archive.layout.kind)
     }
 

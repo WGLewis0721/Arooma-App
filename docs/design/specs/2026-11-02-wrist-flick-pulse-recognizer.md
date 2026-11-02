@@ -36,9 +36,11 @@ What changed from PR #43, and why:
 - The **direction** comes from the dominant device axis at the peak, not from a canonical projection (measured above).
 - The **decision** is made once, at the end of the pulse, not in the middle of it. This costs latency (about 175 ms median from peak on synthetic traces) and removed PR #43's "reversed" rejection, which rejected a flick whose return stroke began before it had finished.
 - The **duration floor** (0.12 s) and the **end-of-pulse dominance check** were removed. An ablation showed neither changed recognition or accidental flips on the corpus. The start-of-pulse dominance check stays: it is what rejects pitches.
-- The **turn default** moved from 0.55 rad (the plan's value) to 0.35 rad. The ablation put the turn requirement at the centre of the misses. The turn sweep below shows where small quick wiggles start to flip and where recognition falls away. The default is the setting with no accidental flips on either seed range. 0.30 rad is the alternative the calibration can weigh.
+- The **turn default** moved from 0.55 rad (the plan's value) to 0.30 rad. The ablation put the turn requirement at the centre of the misses. The turn sweep below shows where small quick wiggles start to flip and where recognition falls away. 0.30 rad is the lowest turn that kept ordinary movement at or below 1 accidental flip per 100 on the development seeds (0.56 per 100), and it recognizes 97 to 98% of synthetic flicks. The earlier 0.35 rad default recognized 86 to 88% with zero accidental flips in the same runs.
 
 Owner tuning (View & Style, Wrist flip) keeps its labels and ranges. "Turn needed" is `minTurn`; "Peak rate needed" is `peakRate`; "Start rate", "Axis share needed", "Longest twist", "Shake limit" and "Pause after a flip" map as before.
+
+**Wrist-twist feels.** A separate "Wrist twist" section in the tuning panel offers three starting points that change only the wrist twist, not the holographic feel: Standard (0.30 rad, the default), Sensitive (0.25 rad: flips on gentler twists, more accidental flips, 3.4 per 100 ordinary movements on the synthetic corpus) and Firm (0.40 rad: fewer accidental flips, more missed twists). Choosing a feel clears the individual wrist-twist edits and keeps the holographic ones. The synthetic numbers for each feel come from the same gyro-tests run that CI reports.
 
 ## Synthetic measurements
 
@@ -59,8 +61,8 @@ Turn sweep (pulse, peak 2.2 rad/s; ordinary per 100 means per 100 ordinary trial
 | Minimum turn (rad) | Recognized, dev | Recognized, held-out | Wrong face (dev / held-out) | Accidental per 100, dev | Accidental per 100, held-out |
 | --- | --- | --- | --- | --- | --- |
 | 0.25 | 98% | 98% | 0 / 0 | 3.44 | 3.44 |
-| 0.30 | 97% | 98% | 0 / 0 | 0.56 | 0.33 |
-| **0.35 (default)** | **86%** | **88%** | **0 / 0** | **0.00** | **0.00** |
+| **0.30 (default)** | **97%** | **98%** | **0 / 0** | **0.56** | **0.33** |
+| 0.35 | 86% | 88% | 0 / 0 | 0.00 | 0.00 |
 | 0.40 | 76% | 75% | 0 / 0 | 0.00 | 0.00 |
 | 0.45 | 67% | 63% | 0 / 0 | 0.00 | 0.00 |
 | 0.50 | 53% | 57% | 0 / 0 | 0.00 | 0.00 |
@@ -100,7 +102,8 @@ Motion readings are still processed on this iPhone and used only for the foil an
 ## Limitations
 
 - No physical measurement exists. Every physical target is NOT RUN. The synthetic results are a regression harness and a comparison, not accuracy on a phone.
-- The default turn (0.35 rad) is the synthetic knee, not a measured value. The calibration sets it. Recognition below about 0.35 rad is unavailable at the default, by design, until a recording shows that smaller flicks should count.
+- The default turn (0.30 rad) is a synthetic choice, not a measured value. The calibration sets it. Gentler twists than about 0.30 rad are missed at the default. The Sensitive feel accepts them at the cost of more accidental flips.
+- Users cannot see when the twist is armed, so a twist will not always trigger when they expect it. Tap and drag remain the reliable way to flip. No in-app cue exists yet.
 - Latency is higher than PR #43's (p95 about 220 ms against 165 ms), because the decision waits for the end of the pulse. It is inside the 250 ms target on synthetic traces.
 - The synthetic corpus cannot reproduce the sensor's real sample timing, its noise, or the way a phone sits in a hand. The calibration sessions are the only test of those.
 - A twist that is mostly about the screen normal flips only when it dominates; its direction follows the screen-normal sense.

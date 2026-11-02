@@ -299,5 +299,205 @@ do {
           "the initial configuration is the one in the plan")
 }
 
+// MARK: 8. Adjustable twist axis, and the outcome the owner-tools readout shows
+
+do {
+    // A twist about an axis halfway between the long axis and the screen normal (45 degrees in the y-z plane).
+    let diagonal: RateFn = { t in
+        let r = minJerk(t - 0.5, duration: 0.35, angle: 0.8)
+        return GyroVector(x: 0, y: r * cos(Double.pi / 4), z: r * sin(Double.pi / 4))
+    }
+    let trace = makeTrace(seconds: 3, rate: diagonal)
+    check(run(trace).isEmpty, "a twist 45 degrees off the long axis is rejected by the plan's dominance")
+    var tilted = GyroFlipDetector()
+    tilted.configuration.axisTilt = Double.pi / 4
+    check(run(trace, detector: tilted).count == 1, "with the axis tilted to match, the same twist flips exactly once")
+    var tiltedX = GyroFlipDetector()
+    tiltedX.configuration.axisTilt = Double.pi / 4
+    check(run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 0)), detector: tiltedX).isEmpty,
+          "tilting the axis does not make an x-axis tilt flip")
+    check(GyroFlipConfiguration.initial.axisTilt == 0, "the shipped axis tilt is 0")
+
+    var valid = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8)) { valid.ingest(s) }
+    check(valid.lastOutcome == .flipped, "a valid twist records .flipped")
+    var slow = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8)) { slow.ingest(s) }
+    let slowRejected: Bool = { if case .rejected = slow.lastOutcome { return true } else { return false } }()
+    check(slowRejected, "a slow turn records a rejection reason")
+    var other = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2)) { other.ingest(s) }
+    check(other.lastOutcome == .none, "a rotation that never starts a candidate records nothing")
+}
+
+// MARK: 9. The shipped configuration: long axis or screen normal, and a 1.5 g shake limit
+//
+// The first physical-iPhone report said a flick did not flip the card. Two assumptions in the plan were the
+// likely cause: a single twist axis, and a 0.8 g shake limit that a vigorous flick exceeds on its own.
+
+func shipped() -> GyroFlipDetector { GyroFlipDetector(configuration: .shipped, twistAxis: .yz) }
+
+do {
+    let plan = GyroFlipConfiguration.initial, now = GyroFlipConfiguration.shipped
+    check(now.maxUserAcceleration == 1.5 && now.peakRate == plan.peakRate && now.minAngle == plan.minAngle
+          && now.minDominance == plan.minDominance && now.startRate == plan.startRate
+          && now.maxDuration == plan.maxDuration && now.cooldown == plan.cooldown,
+          "the shipped configuration differs from the plan only in the shake limit")
+
+    for (name, axis) in [("long axis", 1), ("screen normal", 2)] {
+        let plus = run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: axis)), detector: shipped())
+        let minus = run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: -0.8, axis: axis)), detector: shipped())
+        check(plus.count == 1 && plus.first?.direction == .positive, "\(name) twist, positive: one positive flip (got \(plus.count))")
+        check(minus.count == 1 && minus.first?.direction == .negative, "\(name) twist, negative: one negative flip (got \(minus.count))")
+    }
+
+    // A twist about an axis between the long axis and the screen normal, at 20, 45 and 70 degrees.
+    for degrees in [20.0, 45.0, 70.0] {
+        let a = degrees * Double.pi / 180
+        func diagonal(_ sign: Double) -> RateFn {
+            return { t in
+                let r = sign * minJerk(t - 0.5, duration: 0.35, angle: 0.8)
+                return GyroVector(x: 0, y: r * cos(a), z: r * sin(a))
+            }
+        }
+        let plus = run(makeTrace(seconds: 3, rate: diagonal(1)), detector: shipped())
+        let minus = run(makeTrace(seconds: 3, rate: diagonal(-1)), detector: shipped())
+        check(plus.count == 1 && plus.first?.direction == .positive, "a twist \(Int(degrees)) degrees toward the screen flips positive (got \(plus.count))")
+        check(minus.count == 1 && minus.first?.direction == .negative, "the opposite twist flips negative (got \(minus.count))")
+    }
+
+    // Lifting or lowering the phone (about x) never counts, alone or with a small twist.
+    check(run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 0)), detector: shipped()).isEmpty,
+          "an x-axis tilt does not flip")
+    check(run(makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 1),
+                                                twist(at: 0.5, duration: 0.35, angle: 1.6, axis: 0)])), detector: shipped()).isEmpty,
+          "a twist mixed with a larger x tilt does not flip")
+    check(run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8, axis: 2)), detector: shipped()).isEmpty,
+          "a slow turn about the screen normal does not flip")
+    check(run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 0.25, axis: 2)), detector: shipped()).isEmpty,
+          "a tiny wiggle about the screen normal does not flip")
+
+    // The reason for the change: a vigorous flick carries about 1.2 g of linear acceleration by itself.
+    let flickAccel: AccelFn = { t in (t > 0.45 && t < 0.75) ? GyroVector(x: 1.2, y: 0, z: 0) : GyroVector.zero }
+    let flick = makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 1.2), accel: flickAccel)
+    check(run(flick, detector: shipped()).count == 1, "a vigorous flick with 1.2 g flips with the shipped configuration")
+    check(run(flick).isEmpty, "the plan's 0.8 g limit rejected the same flick")
+
+    // Shakes still do not flip: rotation with 1.6 g of acceleration, about the long axis and the screen normal.
+    for axis in [1, 2] {
+        let rate: RateFn = { t in
+            let r = (t > 0.2 && t < 1.0) ? 8.0 * sin(2 * .pi * 4 * t) : 0
+            return axis == 1 ? GyroVector(x: 0, y: r, z: 0) : GyroVector(x: 0, y: 0, z: r)
+        }
+        let acc: AccelFn = { t in (t > 0.2 && t < 1.0) ? GyroVector(x: 1.6 * sin(2 * .pi * 4 * t + 1), y: 0, z: 0) : GyroVector.zero }
+        check(run(makeTrace(seconds: 2, rate: rate, accel: acc), detector: shipped()).isEmpty, "a 4 Hz shake (axis \(axis)) does not flip")
+        check(run(makeTrace(seconds: 2, rate: rate), detector: shipped()).isEmpty, "a 4 Hz rotation-only oscillation (axis \(axis)) does not flip")
+    }
+
+    // One event per twist, cooldown and the rebound, on the screen-normal axis.
+    let rebound = run(makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                                         twist(at: 0.9, duration: 0.35, angle: -0.8, axis: 2)])), detector: shipped())
+    check(rebound.count == 1 && rebound.first?.direction == .positive, "a twist and its immediate return flip once, in the first direction")
+    let spaced = run(makeTrace(seconds: 5, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                                        twist(at: 2.6, duration: 0.35, angle: 0.8, axis: 2)])), detector: shipped())
+    check(spaced.count == 2, "two twists 2 s apart flip twice (got \(spaced.count))")
+    let tooSoon = run(makeTrace(seconds: 4, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                                         twist(at: 1.3, duration: 0.35, angle: 0.8, axis: 2)])), detector: shipped())
+    check(tooSoon.count == 1, "a second twist 0.8 s later is inside the cooldown")
+
+    // The toggle and suppression still hold.
+    let valid = makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2))
+    check(run(valid, enabled: false, detector: shipped()).isEmpty, "Off flips nothing")
+    check(run(valid, suppress: { _ in true }, detector: shipped()).isEmpty, "a suppressed twist flips nothing")
+}
+
+do {
+    var rng = LCG(state: 20261102)
+    var falseFlips = 0
+    // 100 trials of 8 s: slow, mixed-axis rotation with every axis under 1.5 rad/s and acceleration under 0.7 g.
+    for _ in 0..<100 {
+        var axes: [[(amp: Double, freq: Double, phase: Double)]] = []
+        for _ in 0..<3 { axes.append((0..<3).map { _ in (rng.range(0, 0.5), rng.range(0.4, 3.0), rng.range(0, 6.28)) }) }
+        var accel: [(amp: Double, freq: Double, phase: Double)] = []
+        for _ in 0..<3 { accel.append((rng.range(0, 0.23), rng.range(0.4, 3.0), rng.range(0, 6.28))) }
+        let rate: RateFn = { t in
+            func axis(_ i: Int) -> Double { axes[i].reduce(0) { $0 + $1.amp * sin(2 * .pi * $1.freq * t + $1.phase) } }
+            return GyroVector(x: axis(0), y: axis(1), z: axis(2))
+        }
+        let acc: AccelFn = { t in
+            func a(_ i: Int) -> Double { accel[i].amp * sin(2 * .pi * accel[i].freq * t + accel[i].phase) }
+            return GyroVector(x: a(0), y: a(1), z: a(2))
+        }
+        falseFlips += run(makeTrace(seconds: 8, rate: rate, accel: acc), detector: shipped()).count
+    }
+    check(falseFlips == 0, "100 incidental-motion traces (shipped): \(falseFlips) false flips")
+
+    // 100 violent shakes: up to 12 rad/s about any axis, with acceleration always at least 1.0 g and up to 2.5 g.
+    falseFlips = 0
+    for _ in 0..<100 {
+        let f = rng.range(2, 6), ph = rng.range(0, 6.28)
+        let dirx = rng.range(-1, 1), diry = rng.range(-1, 1), dirz = rng.range(-1, 1)
+        let amp = rng.range(4, 12)
+        let rate: RateFn = { t in
+            let s = amp * sin(2 * .pi * f * t + ph)
+            return GyroVector(x: dirx * s, y: diry * s, z: dirz * s)
+        }
+        let acc: AccelFn = { t in GyroVector(x: 1.0 + abs(sin(2 * .pi * f * t)) * 1.5, y: 0, z: 0) }
+        falseFlips += run(makeTrace(seconds: 6, rate: rate, accel: acc), detector: shipped()).count
+    }
+    check(falseFlips == 0, "100 violent shakes (shipped): \(falseFlips) false flips")
+
+    // 100 large lifts and lowerings: mostly about x, with only a small part about the long axis or screen normal.
+    falseFlips = 0
+    for _ in 0..<100 {
+        let phi = rng.range(0, 6.28)
+        let start = rng.range(0.4, 1.5), dur = rng.range(0.2, 0.5), ang = rng.range(0.8, 2.0)
+        let rate: RateFn = { t in
+            let r = minJerk(t - start, duration: dur, angle: ang)
+            return GyroVector(x: 0.95 * r, y: 0.3 * r * cos(phi), z: 0.3 * r * sin(phi))
+        }
+        falseFlips += run(makeTrace(seconds: 3, rate: rate), detector: shipped()).count
+    }
+    check(falseFlips == 0, "100 x-dominant lifts (shipped): \(falseFlips) false flips")
+}
+
+// MARK: 10. The gesture log the owner-tools readout shows
+
+do {
+    var d = shipped()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2)) { d.ingest(s) }
+    let flip = d.history.last
+    check(flip?.outcome == "FLIP +", "a flip is logged as FLIP + and the tail of the same twist adds no entry (got \(flip?.outcome ?? "nil"))")
+    check(d.history.count == 1, "one twist makes one log entry (got \(d.history.count))")
+    check((flip?.peak ?? 0) >= 2.2 && (flip?.angle ?? 0) >= 0.55 && (flip?.duration ?? 0) >= 0.12,
+          "the log carries the measured peak, angle and duration")
+    check(flip?.axis == "y0.00 z1.00", "a twist about the screen normal is logged with its axis (got \(flip?.axis ?? "nil"))")
+
+    var slow = shipped()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8, axis: 2)) { slow.ingest(s) }
+    check(slow.history.contains { $0.outcome.hasPrefix("rejected") }, "a slow turn is logged as rejected, with a reason")
+    check(!slow.history.contains { $0.outcome.hasPrefix("FLIP") }, "...and not as a flip")
+
+    var again = shipped()
+    for s in makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                               twist(at: 0.9, duration: 0.35, angle: -0.8, axis: 2)])) { again.ingest(s) }
+    check(again.history.contains { $0.outcome == "missed: cooldown" }, "the return twist inside the cooldown is logged as missed")
+
+    // A twist-like motion with too much acceleration is logged, not silently ignored.
+    var hard = shipped()
+    let heavy: AccelFn = { t in (t > 0.45 && t < 0.75) ? GyroVector(x: 2.0, y: 0, z: 0) : GyroVector.zero }
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 1.2), accel: heavy) { hard.ingest(s) }
+    check(hard.history.contains { $0.outcome.hasPrefix("missed: shake") }, "a flick above the shake limit is logged as a shake")
+    check(!hard.history.contains { $0.outcome.hasPrefix("FLIP") }, "...and does not flip")
+
+    // The log never grows past its limit, however long the shaking.
+    var shaken = shipped()
+    let shakeRate: RateFn = { t in GyroVector(x: 0, y: 9.0 * sin(2 * .pi * 2.5 * t), z: 0) }
+    let shakeAcc: AccelFn = { t in GyroVector(x: 1.0 + abs(sin(2 * .pi * 2.5 * t)) * 1.5, y: 0, z: 0) }
+    for s in makeTrace(seconds: 20, rate: shakeRate, accel: shakeAcc) { shaken.ingest(s) }
+    check(shaken.history.count <= GyroFlipDetector.historyLimit, "the gesture log is capped at \(GyroFlipDetector.historyLimit)")
+    check(!shaken.history.contains { $0.outcome.hasPrefix("FLIP") }, "20 s of violent shaking never flips")
+}
+
 print("Gyro flip: \(passes) checks passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

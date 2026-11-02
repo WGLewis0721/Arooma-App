@@ -10,9 +10,10 @@ tags:
     id: "explore-add-to-collection"
 - tapOn: "Search"
 - tapOn: "Name, house.*"
-- swipe:
-    start: "50%, 20%"
-    end: "50%, 92%"
+# The search key puts the keyboard away without scrolling. (Dragging the results also works, but a scroll
+# minimizes the tab bar into a small bubble, which has no "My Collection" label to tap.)
+- inputText: "Dior"
+- pressKey: Enter
 - tapOn: "My Collection"
 - assertVisible: "Owned"
 - tapOn: "Explore"

@@ -93,6 +93,36 @@ final class MotionField {
         manager.isDeviceMotionAvailable || (BuildChannel.allowsOwnerTools && UserDefaults.standard.bool(forKey: "AroomaQAMotion"))
     }
 
+    /// Owner-tools readout: is the sensor running, who holds it, and which gate is closed if it is not.
+    /// Read-only; it changes nothing.
+    struct Diagnostics {
+        var sensorAvailable: Bool
+        var running: Bool
+        var users: Int
+        var foreground: Bool
+        var lowPower: Bool
+        var thermal: String
+        /// Seconds since the last sample, or nil if none has arrived since the sensor started.
+        var sampleAge: Double?
+        var tilt: CGPoint
+    }
+
+    func diagnostics() -> Diagnostics {
+        let thermal: String
+        switch ProcessInfo.processInfo.thermalState {
+        case .nominal: thermal = "nominal"
+        case .fair: thermal = "fair"
+        case .serious: thermal = "SERIOUS"
+        case .critical: thermal = "CRITICAL"
+        @unknown default: thermal = "?"
+        }
+        let running = manager.isDeviceMotionActive
+        let age: Double? = (running && lastSampleTime > 0) ? ProcessInfo.processInfo.systemUptime - lastSampleTime : nil
+        return Diagnostics(sensorAvailable: manager.isDeviceMotionAvailable, running: running, users: users,
+                           foreground: foreground, lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled,
+                           thermal: thermal, sampleAge: age, tilt: tilt)
+    }
+
     /// Makes the current physical angle the neutral one (gallery open, or the Recenter action).
     func recenter() {
         if let lastRaw { reference = lastRaw } else { reference = nil }

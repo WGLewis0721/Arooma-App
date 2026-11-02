@@ -37,6 +37,11 @@ struct GyroSample: Equatable {
 /// (the device's vertical axis). A landscape build would pass `.x`.
 enum GyroTwistAxis: Equatable {
     case x, y, z
+    /// Rotation about the long axis, the screen normal, or any axis between them. A natural wrist twist is
+    /// rarely about one device axis: with the forearm pointing at the screen it is mostly about `z`. The twist
+    /// axis is fixed from the first moments of each twist, so a twist about a steady axis counts and a
+    /// wobble does not. Rotation about `x` (lifting or lowering the phone) never counts.
+    case yz
 }
 
 enum GyroFlipDirection: Equatable {
@@ -77,8 +82,23 @@ struct GyroFlipConfiguration: Equatable {
     /// After a rejected candidate, or after a reset: the phone must be calm this long (s) first.
     var calmRate = 0.35
     var calmTime = 0.15
+    /// Turns the twist axis within the device's y-z plane (radians). 0 is the long axis; a positive value
+    /// leans it toward the screen normal. Only applies when the twist axis is `.y`. A real wrist twist is
+    /// not guaranteed to be about the long axis, so this exists to be measured and set on a physical iPhone.
+    var axisTilt = 0.0
 
+    /// The plan's initial values (AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md section 1B). The unit tests pin these.
     static let initial = GyroFlipConfiguration()
+
+    /// What the app ships after the first physical-iPhone report that a flick did not flip the card. Only the
+    /// shake limit differs: the accelerometer sits about 10 cm from the wrist's axis, so a vigorous flick alone
+    /// produces roughly 1 g of linear acceleration, and the plan's 0.8 g rejected it as a shake. Large shakes
+    /// are still rejected: above 1.5 g, and by the peak, angle, duration and direction rules.
+    static let shipped: GyroFlipConfiguration = {
+        var c = GyroFlipConfiguration()
+        c.maxUserAcceleration = 1.5
+        return c
+    }()
 }
 
 struct GyroFlipDetector {
@@ -94,11 +114,44 @@ struct GyroFlipDetector {
         case cooldown
     }
 
+    /// Why the last candidate ended, for the owner-tools readout only. It never influences a decision.
+    enum Outcome: Equatable {
+        case none
+        case flipped
+        case rejected(String)
+    }
+
+    /// One finished gesture, for the owner-tools log: what it measured and why it did or did not flip. Never
+    /// influences a decision.
+    struct GestureRecord: Equatable {
+        /// "FLIP +", "FLIP -", "rejected: ..." (a twist that began and failed) or "missed: ..." (a twist-like
+        /// motion while the detector was not armed).
+        var outcome: String
+        /// Fastest twist rate (rad/s), total turn (rad), time from start to end (s), strongest linear
+        /// acceleration (g) and the twist axis, all as measured over the gesture.
+        var peak: Double
+        var angle: Double
+        var duration: Double
+        var acceleration: Double
+        var axis: String
+    }
+
     var configuration: GyroFlipConfiguration
     var twistAxis: GyroTwistAxis
     /// Off means no processing at all: samples are ignored and state is cleared.
     var isEnabled = true
     private(set) var phase: Phase = .needsCalm
+    private(set) var lastOutcome: Outcome = .none
+    /// The last few gestures, oldest first. At most `historyLimit`.
+    private(set) var history: [GestureRecord] = []
+    static let historyLimit = 6
+
+    /// Read-only live values for the owner-tools readout.
+    var filteredRate: GyroVector { filtered }
+    var candidateAngle: Double { angle }
+    var candidatePeak: Double { peak }
+    var currentTwistRate: Double { twist(of: filtered) }
+    var currentDominance: Double { abs(twist(of: filtered)) / max(0.001, filtered.magnitude) }
 
     private var hasLast = false
     private var lastTimestamp: TimeInterval = 0
@@ -109,6 +162,14 @@ struct GyroFlipDetector {
     private var sign = 0.0
     private var triggerTime: TimeInterval = 0
     private var calm = 0.0
+    /// For `.yz`: the unit twist direction in the y-z plane, fixed when a candidate starts.
+    private var planeY = 0.0
+    private var planeZ = 0.0
+    private var candidateAcceleration = 0.0
+    private var lastMissedTime = -10.0
+    /// True once the phone has been below the start rate since the last flip or rejection, so the tail of the
+    /// same twist is never logged as a separate missed one.
+    private var sawQuiet = false
 
     init(configuration: GyroFlipConfiguration = .initial, twistAxis: GyroTwistAxis = .y) {
         self.configuration = configuration
@@ -128,9 +189,39 @@ struct GyroFlipDetector {
         sign = 0
         triggerTime = 0
         calm = 0
+        planeY = 0
+        planeZ = 0
+        candidateAcceleration = 0
+        sawQuiet = false
+    }
+
+    private func axisDescription() -> String {
+        switch twistAxis {
+        case .x: return "x"
+        case .y: return "y"
+        case .z: return "z"
+        case .yz: return "y\(String(format: "%.2f", planeY)) z\(String(format: "%.2f", planeZ))"
+        }
+    }
+
+    /// Logs the candidate that is ending, before `abandon` clears its numbers.
+    private mutating func recordCandidate(_ outcome: String, duration: Double) {
+        history.append(GestureRecord(outcome: outcome, peak: peak, angle: abs(angle), duration: max(0, duration),
+                                     acceleration: candidateAcceleration, axis: axisDescription()))
+        if history.count > Self.historyLimit { history.removeFirst(history.count - Self.historyLimit) }
+    }
+
+    /// Logs a twist-like motion that arrived while the detector was not armed. At most one per half second.
+    private mutating func recordMissed(_ why: String, at time: TimeInterval, rate: Double, acceleration: Double) {
+        guard time - lastMissedTime > 0.5 else { return }
+        lastMissedTime = time
+        history.append(GestureRecord(outcome: "missed: \(why)", peak: abs(rate), angle: 0, duration: 0,
+                                     acceleration: acceleration, axis: axisDescription()))
+        if history.count > Self.historyLimit { history.removeFirst(history.count - Self.historyLimit) }
     }
 
     private mutating func abandon(to next: Phase) {
+        sawQuiet = false
         phase = next
         angle = 0
         peak = 0
@@ -141,8 +232,15 @@ struct GyroFlipDetector {
     private func twist(of v: GyroVector) -> Double {
         switch twistAxis {
         case .x: return v.x
-        case .y: return v.y
+        case .y:
+            let t = configuration.axisTilt
+            return t == 0 ? v.y : v.y * cos(t) + v.z * sin(t)
         case .z: return v.z
+        case .yz:
+            // Armed: how fast the phone turns in the y-z plane. Measuring: the signed rate along the twist
+            // direction fixed at the start of this candidate.
+            if phase == .candidate { return v.y * planeY + v.z * planeZ }
+            return (v.y * v.y + v.z * v.z).squareRoot()
         }
     }
 
@@ -169,7 +267,11 @@ struct GyroFlipDetector {
             filtered = sample.rotationRate
             hasLast = true
             lastTimestamp = sample.timestamp
-            if phase == .candidate { abandon(to: .needsCalm) }
+            if phase == .candidate {
+                lastOutcome = .rejected("dropout")
+                recordCandidate("rejected: dropout", duration: lastTimestamp - startTime)
+                abandon(to: .needsCalm)
+            }
             step = 0
         } else {
             step = min(max(gap, 0), c.maxStep)
@@ -186,6 +288,11 @@ struct GyroFlipDetector {
 
         switch phase {
         case .cooldown:
+            if abs(rate) < c.startRate {
+                sawQuiet = true
+            } else if sawQuiet && dominance >= c.minDominance {
+                recordMissed("cooldown", at: sample.timestamp, rate: rate, acceleration: acceleration)
+            }
             calm = abs(rate) < c.rearmRate ? calm + step : 0
             if sample.timestamp - triggerTime >= c.cooldown && calm >= c.rearmCalm {
                 abandon(to: .idle)
@@ -193,31 +300,66 @@ struct GyroFlipDetector {
             return nil
 
         case .needsCalm:
+            if abs(rate) < c.startRate {
+                sawQuiet = true
+            } else if sawQuiet && dominance >= c.minDominance {
+                recordMissed("waiting for calm", at: sample.timestamp, rate: rate, acceleration: acceleration)
+            }
             calm = abs(rate) < c.calmRate ? calm + step : 0
             if calm >= c.calmTime { abandon(to: .idle) }
             return nil
 
         case .idle:
-            if suppressed { return nil }
+            if suppressed {
+                if abs(rate) > c.startRate && dominance >= c.minDominance {
+                    recordMissed("blocked (touch, sheet or flipping)", at: sample.timestamp, rate: rate, acceleration: acceleration)
+                }
+                return nil
+            }
+            if abs(rate) > c.startRate && dominance >= c.minDominance && acceleration >= c.maxUserAcceleration {
+                recordMissed("shake, \(String(format: "%.1f", acceleration)) g", at: sample.timestamp, rate: rate, acceleration: acceleration)
+            }
             if abs(rate) > c.startRate && dominance >= c.minDominance && acceleration < c.maxUserAcceleration {
                 phase = .candidate
                 startTime = sample.timestamp
                 angle = 0
+                candidateAcceleration = acceleration
                 peak = abs(rate)
-                sign = rate > 0 ? 1 : -1
+                if twistAxis == .yz {
+                    // `rate` is the in-plane magnitude here. Fix the direction, with its larger component
+                    // positive, so a left twist and a right twist come out with opposite signs.
+                    let r = max(rate, 0.001)
+                    var uy = filtered.y / r
+                    var uz = filtered.z / r
+                    let flip = abs(uy) >= abs(uz) ? (uy < 0) : (uz < 0)
+                    if flip { uy = -uy; uz = -uz }
+                    planeY = uy
+                    planeZ = uz
+                    sign = (filtered.y * uy + filtered.z * uz) > 0 ? 1 : -1
+                } else {
+                    sign = rate > 0 ? 1 : -1
+                }
             }
             return nil
 
         case .candidate:
+            let age = sample.timestamp - startTime
+            candidateAcceleration = max(candidateAcceleration, acceleration)
             if suppressed || acceleration >= c.maxUserAcceleration {
+                lastOutcome = .rejected(suppressed ? "touch or sheet" : "shake")
+                recordCandidate(suppressed ? "rejected: touch or sheet" : "rejected: shake \(String(format: "%.1f", acceleration)) g", duration: age)
                 abandon(to: .needsCalm)
                 return nil
             }
             if abs(rate) > c.startRate && dominance < c.minDominance {
+                lastOutcome = .rejected("other axis \(String(format: "%.2f", dominance))")
+                recordCandidate("rejected: wrong axis (share \(String(format: "%.2f", dominance)))", duration: age)
                 abandon(to: .needsCalm)
                 return nil
             }
             if rate * sign < 0 {
+                lastOutcome = .rejected("reversed")
+                recordCandidate("rejected: reversed", duration: age)
                 abandon(to: .needsCalm)
                 return nil
             }
@@ -227,6 +369,9 @@ struct GyroFlipDetector {
             if peak >= c.peakRate && abs(angle) >= c.minAngle
                 && duration >= c.minDuration && duration <= c.maxDuration {
                 let direction: GyroFlipDirection = angle > 0 ? .positive : .negative
+                lastOutcome = .flipped
+                recordCandidate(direction == .positive ? "FLIP +" : "FLIP -", duration: duration)
+                sawQuiet = false
                 phase = .cooldown
                 triggerTime = sample.timestamp
                 angle = 0
@@ -236,6 +381,16 @@ struct GyroFlipDetector {
                 return direction
             }
             if duration > c.maxDuration || abs(rate) < c.endRate {
+                let why: String
+                if duration > c.maxDuration {
+                    why = "too long"
+                } else if peak < c.peakRate {
+                    why = "too weak, peak \(String(format: "%.1f", peak))"
+                } else {
+                    why = "too small, angle \(String(format: "%.2f", abs(angle)))"
+                }
+                lastOutcome = .rejected(why)
+                recordCandidate("rejected: \(why)", duration: duration)
                 abandon(to: .needsCalm)
             }
             return nil

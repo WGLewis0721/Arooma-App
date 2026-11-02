@@ -155,7 +155,7 @@ private struct AventusLoopingVideo: UIViewRepresentable {
 }
 
 private final class AventusVideoLayerView: UIView {
-    override static var layerClass: AnyClass { AVPlayerLayer.self }
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
     private var queue: AVQueuePlayer?
     private var looper: AVPlayerLooper?
 

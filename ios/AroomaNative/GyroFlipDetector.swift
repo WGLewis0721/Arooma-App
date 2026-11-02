@@ -37,6 +37,11 @@ struct GyroSample: Equatable {
 /// (the device's vertical axis). A landscape build would pass `.x`.
 enum GyroTwistAxis: Equatable {
     case x, y, z
+    /// Rotation about the long axis, the screen normal, or any axis between them. A natural wrist twist is
+    /// rarely about one device axis: with the forearm pointing at the screen it is mostly about `z`. The twist
+    /// axis is fixed from the first moments of each twist, so a twist about a steady axis counts and a
+    /// wobble does not. Rotation about `x` (lifting or lowering the phone) never counts.
+    case yz
 }
 
 enum GyroFlipDirection: Equatable {
@@ -82,7 +87,18 @@ struct GyroFlipConfiguration: Equatable {
     /// not guaranteed to be about the long axis, so this exists to be measured and set on a physical iPhone.
     var axisTilt = 0.0
 
+    /// The plan's initial values (AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md section 1B). The unit tests pin these.
     static let initial = GyroFlipConfiguration()
+
+    /// What the app ships after the first physical-iPhone report that a flick did not flip the card. Only the
+    /// shake limit differs: the accelerometer sits about 10 cm from the wrist's axis, so a vigorous flick alone
+    /// produces roughly 1 g of linear acceleration, and the plan's 0.8 g rejected it as a shake. Large shakes
+    /// are still rejected: above 1.5 g, and by the peak, angle, duration and direction rules.
+    static let shipped: GyroFlipConfiguration = {
+        var c = GyroFlipConfiguration()
+        c.maxUserAcceleration = 1.5
+        return c
+    }()
 }
 
 struct GyroFlipDetector {
@@ -128,6 +144,9 @@ struct GyroFlipDetector {
     private var sign = 0.0
     private var triggerTime: TimeInterval = 0
     private var calm = 0.0
+    /// For `.yz`: the unit twist direction in the y-z plane, fixed when a candidate starts.
+    private var planeY = 0.0
+    private var planeZ = 0.0
 
     init(configuration: GyroFlipConfiguration = .initial, twistAxis: GyroTwistAxis = .y) {
         self.configuration = configuration
@@ -147,6 +166,8 @@ struct GyroFlipDetector {
         sign = 0
         triggerTime = 0
         calm = 0
+        planeY = 0
+        planeZ = 0
     }
 
     private mutating func abandon(to next: Phase) {
@@ -164,6 +185,11 @@ struct GyroFlipDetector {
             let t = configuration.axisTilt
             return t == 0 ? v.y : v.y * cos(t) + v.z * sin(t)
         case .z: return v.z
+        case .yz:
+            // Armed: how fast the phone turns in the y-z plane. Measuring: the signed rate along the twist
+            // direction fixed at the start of this candidate.
+            if phase == .candidate { return v.y * planeY + v.z * planeZ }
+            return (v.y * v.y + v.z * v.z).squareRoot()
         }
     }
 
@@ -225,7 +251,20 @@ struct GyroFlipDetector {
                 startTime = sample.timestamp
                 angle = 0
                 peak = abs(rate)
-                sign = rate > 0 ? 1 : -1
+                if twistAxis == .yz {
+                    // `rate` is the in-plane magnitude here. Fix the direction, with its larger component
+                    // positive, so a left twist and a right twist come out with opposite signs.
+                    let r = max(rate, 0.001)
+                    var uy = filtered.y / r
+                    var uz = filtered.z / r
+                    let flip = abs(uy) >= abs(uz) ? (uy < 0) : (uz < 0)
+                    if flip { uy = -uy; uz = -uz }
+                    planeY = uy
+                    planeZ = uz
+                    sign = (filtered.y * uy + filtered.z * uz) > 0 ? 1 : -1
+                } else {
+                    sign = rate > 0 ? 1 : -1
+                }
             }
             return nil
 

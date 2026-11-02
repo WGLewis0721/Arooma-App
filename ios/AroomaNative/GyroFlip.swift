@@ -22,12 +22,12 @@ enum GyroFlipSettings {
     }
 }
 
-/// Wrist-flip values the owner can change live (Tuning panel, group "Wrist flip"). Every default is the
-/// plan's initial value, so an untouched build behaves exactly as before. They exist because the thresholds
-/// and the twist axis were hypotheses, never measured on a physical iPhone.
+/// Wrist-flip values the owner can change live (Tuning panel, group "Wrist flip"). The defaults are the plan's
+/// values except the twist axis (long axis or screen normal) and the shake limit (1.5 g), changed after the
+/// first physical-iPhone report. They exist because the thresholds and the axis were hypotheses.
 enum GyroTuning {
-    /// 0 = x, 1 = y (the long axis), 2 = z (the screen normal).
-    static var axis = 1.0
+    /// 0 = x, 1 = y (the long axis), 2 = z (the screen normal), 3 = the long axis or the screen normal.
+    static var axis = 3.0
     /// Leans the long axis toward the screen normal, in degrees (a twist is rarely exactly about one axis).
     static var axisTiltDegrees = 0.0
     static var startRate = GyroFlipConfiguration.initial.startRate
@@ -35,10 +35,10 @@ enum GyroTuning {
     static var minDominance = GyroFlipConfiguration.initial.minDominance
     static var minAngle = GyroFlipConfiguration.initial.minAngle
     static var maxDuration = GyroFlipConfiguration.initial.maxDuration
-    static var maxAcceleration = GyroFlipConfiguration.initial.maxUserAcceleration
+    static var maxAcceleration = GyroFlipConfiguration.shipped.maxUserAcceleration
 
     static var configuration: GyroFlipConfiguration {
-        var c = GyroFlipConfiguration.initial
+        var c = GyroFlipConfiguration.shipped
         c.startRate = startRate
         // The candidate is abandoned below half the start rate (the plan's 1.0 and 0.5).
         c.endRate = startRate * 0.5
@@ -51,7 +51,9 @@ enum GyroTuning {
         return c
     }
 
-    static var twistAxis: GyroTwistAxis { axis < 0.5 ? .x : (axis < 1.5 ? .y : .z) }
+    static var twistAxis: GyroTwistAxis {
+        axis < 0.5 ? .x : (axis < 1.5 ? .y : (axis < 2.5 ? .z : .yz))
+    }
 }
 
 /// Owner-tools readout of what the detector sees. Plain values, never stored or sent.

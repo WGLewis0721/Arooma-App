@@ -411,8 +411,8 @@ final class Tuning {
                        range: 0...12, step: 0.5, defaultValue: 4, digits: 1) { TiltTuning.leanMaxDegrees = $0 },
 
             // Wrist flip (Gyro Flip). Defaults are the plan's initial values; see GyroTuning.
-            TuningSpec(id: "gyro.axis", group: "Wrist flip", label: "Twist axis (0 x, 1 long, 2 screen)",
-                       range: 0...2, step: 1, defaultValue: 1, digits: 0) { GyroTuning.axis = $0 },
+            TuningSpec(id: "gyro.axis", group: "Wrist flip", label: "Twist axis (0 x, 1 long, 2 screen, 3 long or screen)",
+                       range: 0...3, step: 1, defaultValue: 3, digits: 0) { GyroTuning.axis = $0 },
             TuningSpec(id: "gyro.axisTilt", group: "Wrist flip", label: "Long axis leans toward screen (°)",
                        range: -90...90, step: 5, defaultValue: 0, digits: 0) { GyroTuning.axisTiltDegrees = $0 },
             TuningSpec(id: "gyro.startRate", group: "Wrist flip", label: "Start rate (rad/s)",
@@ -426,7 +426,7 @@ final class Tuning {
             TuningSpec(id: "gyro.maxDuration", group: "Wrist flip", label: "Longest twist (s)",
                        range: 0.25...1.2, step: 0.05, defaultValue: 0.45, digits: 2) { GyroTuning.maxDuration = $0 },
             TuningSpec(id: "gyro.maxAccel", group: "Wrist flip", label: "Shake limit (g)",
-                       range: 0.4...3, step: 0.1, defaultValue: 0.8, digits: 1) { GyroTuning.maxAcceleration = $0 },
+                       range: 0.4...3, step: 0.1, defaultValue: 1.5, digits: 1) { GyroTuning.maxAcceleration = $0 },
 
             TuningSpec(id: "foil.lightTravelX", group: "Holographic foil", label: "Light travel, horizontal (×)",
                        range: 0.2...3, step: 0.05, defaultValue: 1, digits: 2) { FoilTuning.lightTravelX = $0 },

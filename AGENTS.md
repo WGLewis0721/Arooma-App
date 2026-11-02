@@ -1,5 +1,8 @@
 # Arooma: instructions for coding agents
 
+**Animated Scent World assets:** Before creating or shipping any moving fragrance-world card, follow [the mandatory animation production pipeline](docs/design/brand/ANIMATED_SCENT_WORLD_PIPELINE.md). A static card with a shader does not count as animation; never merge as complete without real verified video and native playback.
+
+
 **CURRENT NATIVE DELIVERY OVERRIDE (2026-10-30):** The user already has Arooma installed via TestFlight. Implement and refine the native SwiftUI iOS 26 app only. Preserve existing native storage and bundle identifier, use approved photographic masters, and retain the signed Codemagic/TestFlight path. The old no-TestFlight/PWA simulator-only handoffs and liquid-animation instructions do not constrain this owner-approved Atelier redesign. Follow [NATIVE_ATELIER_FINAL.md](NATIVE_ATELIER_FINAL.md). Preserve accessibility, legal asset provenance and data safeguards.
 
 **ACTIVE OWNER OVERRIDE (2026-10-30):** The PWA is retired. Build a native SwiftUI iOS 26+ app. Do not port `index.html`, CSS, or the GitHub Pages demo. The goal is a polished app that can be demoed immediately in the iOS Simulator (clone + open Xcode project + run). No TestFlight required for the demo path.

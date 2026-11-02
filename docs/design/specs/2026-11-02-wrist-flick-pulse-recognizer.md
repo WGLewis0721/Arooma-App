@@ -26,7 +26,7 @@ Replayed on identical synthetic traces (development seeds unless marked):
 Four stages, one deterministic function of the sample stream. There are no thresholds beyond those listed below, and no learned or adaptive parts.
 
 1. **Pulse.** A quick twist about the long axis or the screen normal: the twist-plane rate rises above `startRate` (1.0 rad/s) while at least `minDominance` (75%) of the rotation is in that plane. The pulse ends when the rate falls below `endRate` (0.5 rad/s), or reverses while still above it. A reversal inside one pulse is an oscillation, which is how a shake is caught at 60 Hz. A return stroke after a real flick starts only after the pulse has ended, so it is never seen here.
-2. **Intent.** The pulse counts only if it is fast enough (peak at least `peakRate`, 2.2 rad/s), large enough (turn, the integral of |rate| over the pulse, at least `minTurn`, 0.35 rad), not sustained (no longer than `maxDuration`, 0.45 s), and not shake-like (user acceleration below `maxUserAcceleration`, 1.5 g, and no reversal of half the peak during a `confirmWindow` of 30 ms). A quick small wiggle fails on turn; a pitch or a roll fails on the axis share; a set-down knock fails on turn and on the acceleration check.
+2. **Intent.** The pulse counts only if it is fast enough (peak at least `peakRate`, 2.2 rad/s), large enough (turn, the integral of |rate| over the pulse, at least `minTurn`, 0.30 rad), not sustained (no longer than `maxDuration`, 0.45 s), and not shake-like (user acceleration below `maxUserAcceleration`, 1.5 g, and no reversal of half the peak during a `confirmWindow` of 30 ms). A quick small wiggle fails on turn; a pitch or a roll fails on the axis share; a set-down knock fails on turn and on the acceleration check.
 3. **Flip once.** The direction is the sense of rotation about the device axis that dominates the peak. It does not depend on a canonical projection, so the grip cannot invert it. After a flip the detector enters `cooldown` (1.2 s). A return stroke during cooldown is logged as "ignored" and never flips.
 4. **Reset.** The detector re-arms only after the cooldown and after `rearmCalm` (0.3 s) of calm. A rejected pulse needs `calmTime` (0.15 s) of calm before it can arm again. Suppression (touch, sheet, animation, Reduce Motion, inactive scene, Off) cancels a pulse in progress.
 
@@ -48,11 +48,13 @@ Method. `ios/Tests/GyroFlip/Corpus.swift` generates deterministic traces: 60 Hz 
 
 | Measure | PR #43, development | Pulse, development | PR #43, held-out | Pulse, held-out |
 | --- | --- | --- | --- | --- |
-| Flicks recognized, + and − | 35% and 38% | 88% and 85% | 44% and 31% | 87% and 89% |
+| Flicks recognized, + and − | 35% and 38% | 96% and 97% | 44% and 31% | 98% and 98% |
 | Wrong face | 17 | **0** | 22 | **0** |
 | Double flips | 0 | 0 | 0 | 0 |
-| Latency from peak, p50 and p95 | 94 and 165 ms | 175 and 219 ms | 104 and 172 ms | 175 and 215 ms |
-| Accidental flips per 900 ordinary trials (nine families) | 1 | **0** | 0 | **0** |
+| Latency from peak, p50 and p95 | 94 and 165 ms | 170 and 218 ms | 104 and 172 ms | 173 and 214 ms |
+| Accidental flips per 900 ordinary trials (nine families) | 1 | 5 | 0 | 3 |
+
+These pulse numbers are the 0.30 rad default, from CI run 41373863825 (head `7a7668d`). The 0.35 rad numbers that this table used before (88% and 85%, zero accidental flips) are in the turn sweep below.
 
 Flick recognition by size and duration, pulse, both seed ranges: flicks of 0.5 rad and larger were recognized in every cell (100%). Flicks of 0.35 to 0.5 rad were recognized 52 to 75% of the time. Under 0.35 rad, flicks are below the turn requirement by design.
 

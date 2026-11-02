@@ -4,6 +4,7 @@
 # keeps the toast open until Done.
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - quick-add
 ---
 - launchApp:

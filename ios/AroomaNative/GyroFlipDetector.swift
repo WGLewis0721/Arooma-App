@@ -77,6 +77,10 @@ struct GyroFlipConfiguration: Equatable {
     /// After a rejected candidate, or after a reset: the phone must be calm this long (s) first.
     var calmRate = 0.35
     var calmTime = 0.15
+    /// Turns the twist axis within the device's y-z plane (radians). 0 is the long axis; a positive value
+    /// leans it toward the screen normal. Only applies when the twist axis is `.y`. A real wrist twist is
+    /// not guaranteed to be about the long axis, so this exists to be measured and set on a physical iPhone.
+    var axisTilt = 0.0
 
     static let initial = GyroFlipConfiguration()
 }
@@ -94,11 +98,26 @@ struct GyroFlipDetector {
         case cooldown
     }
 
+    /// Why the last candidate ended, for the owner-tools readout only. It never influences a decision.
+    enum Outcome: Equatable {
+        case none
+        case flipped
+        case rejected(String)
+    }
+
     var configuration: GyroFlipConfiguration
     var twistAxis: GyroTwistAxis
     /// Off means no processing at all: samples are ignored and state is cleared.
     var isEnabled = true
     private(set) var phase: Phase = .needsCalm
+    private(set) var lastOutcome: Outcome = .none
+
+    /// Read-only live values for the owner-tools readout.
+    var filteredRate: GyroVector { filtered }
+    var candidateAngle: Double { angle }
+    var candidatePeak: Double { peak }
+    var currentTwistRate: Double { twist(of: filtered) }
+    var currentDominance: Double { abs(twist(of: filtered)) / max(0.001, filtered.magnitude) }
 
     private var hasLast = false
     private var lastTimestamp: TimeInterval = 0
@@ -141,7 +160,9 @@ struct GyroFlipDetector {
     private func twist(of v: GyroVector) -> Double {
         switch twistAxis {
         case .x: return v.x
-        case .y: return v.y
+        case .y:
+            let t = configuration.axisTilt
+            return t == 0 ? v.y : v.y * cos(t) + v.z * sin(t)
         case .z: return v.z
         }
     }
@@ -169,7 +190,7 @@ struct GyroFlipDetector {
             filtered = sample.rotationRate
             hasLast = true
             lastTimestamp = sample.timestamp
-            if phase == .candidate { abandon(to: .needsCalm) }
+            if phase == .candidate { lastOutcome = .rejected("dropout"); abandon(to: .needsCalm) }
             step = 0
         } else {
             step = min(max(gap, 0), c.maxStep)
@@ -210,14 +231,17 @@ struct GyroFlipDetector {
 
         case .candidate:
             if suppressed || acceleration >= c.maxUserAcceleration {
+                lastOutcome = .rejected(suppressed ? "touch or sheet" : "shake")
                 abandon(to: .needsCalm)
                 return nil
             }
             if abs(rate) > c.startRate && dominance < c.minDominance {
+                lastOutcome = .rejected("other axis \(String(format: "%.2f", dominance))")
                 abandon(to: .needsCalm)
                 return nil
             }
             if rate * sign < 0 {
+                lastOutcome = .rejected("reversed")
                 abandon(to: .needsCalm)
                 return nil
             }
@@ -227,6 +251,7 @@ struct GyroFlipDetector {
             if peak >= c.peakRate && abs(angle) >= c.minAngle
                 && duration >= c.minDuration && duration <= c.maxDuration {
                 let direction: GyroFlipDirection = angle > 0 ? .positive : .negative
+                lastOutcome = .flipped
                 phase = .cooldown
                 triggerTime = sample.timestamp
                 angle = 0
@@ -236,6 +261,13 @@ struct GyroFlipDetector {
                 return direction
             }
             if duration > c.maxDuration || abs(rate) < c.endRate {
+                if duration > c.maxDuration {
+                    lastOutcome = .rejected("too long")
+                } else if peak < c.peakRate {
+                    lastOutcome = .rejected("too weak, peak \(String(format: "%.1f", peak))")
+                } else {
+                    lastOutcome = .rejected("too small, angle \(String(format: "%.2f", abs(angle)))")
+                }
                 abandon(to: .needsCalm)
             }
             return nil

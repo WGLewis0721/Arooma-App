@@ -685,6 +685,7 @@ struct AtelierInspector: View {
     /// same FlipMotor. Off means no motion subscription at all. Tap, drag and VoiceOver always flip.
     @AppStorage(GyroFlipSettings.enabledKey) private var gyroFlipEnabled = true
     @State private var gyro = GyroFlipController()
+    @State private var tuning = Tuning.shared
     /// Mirrors `gyro.isListening` for the QA marker below only. Never drives behaviour.
     @State private var gyroListeningForQA = false
     @State private var axisLock: Axis?
@@ -733,6 +734,7 @@ struct AtelierInspector: View {
         }
         .background(AtelierAtmosphere(theme: archive.theme))
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
+        .overlay(alignment: .top) { MotionHUD(gyro: gyro).padding(.top, 64) }
         .overlay(alignment: .topLeading) { gyroQAMarker }
         .sheet(item: $editing) { record in
             NavigationStack { BottleEditor(bottle: record) }
@@ -761,6 +763,7 @@ struct AtelierInspector: View {
         .accessibilityAction(named: "Flip card") { flip.flip() }
         .onDisappear { gyro.stop(); gyroListeningForQA = false }
         .onChange(of: gyroFlipEnabled) { _, _ in syncGyro() }
+        .onChange(of: tuning.revision) { _, _ in gyro.reloadTuning() }
         .onChange(of: scenePhase) { _, phase in
             gyro.sceneActive = phase == .active
             gyro.resetDetector()

@@ -68,6 +68,7 @@ struct AtelierRoot: View {
             }
         }
         .overlay(alignment: .top) { FramePacingHUD().padding(.top, 2) }
+        .overlay(alignment: .top) { MotionHUD(gyro: nil).padding(.top, 52) }
         .overlay(alignment: .bottom) { wearToastLayer }
         .overlay { quickActionsLayer }
         .onAppear {

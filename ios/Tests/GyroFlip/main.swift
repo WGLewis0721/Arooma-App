@@ -299,5 +299,36 @@ do {
           "the initial configuration is the one in the plan")
 }
 
+// MARK: 8. Adjustable twist axis, and the outcome the owner-tools readout shows
+
+do {
+    // A twist about an axis halfway between the long axis and the screen normal (45 degrees in the y-z plane).
+    let diagonal: RateFn = { t in
+        let r = minJerk(t - 0.5, duration: 0.35, angle: 0.8)
+        return GyroVector(x: 0, y: r * cos(Double.pi / 4), z: r * sin(Double.pi / 4))
+    }
+    let trace = makeTrace(seconds: 3, rate: diagonal)
+    check(run(trace).isEmpty, "a twist 45 degrees off the long axis is rejected by the plan's dominance")
+    var tilted = GyroFlipDetector()
+    tilted.configuration.axisTilt = Double.pi / 4
+    check(run(trace, detector: tilted).count == 1, "with the axis tilted to match, the same twist flips exactly once")
+    var tiltedX = GyroFlipDetector()
+    tiltedX.configuration.axisTilt = Double.pi / 4
+    check(run(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 0)), detector: tiltedX).isEmpty,
+          "tilting the axis does not make an x-axis tilt flip")
+    check(GyroFlipConfiguration.initial.axisTilt == 0, "the shipped axis tilt is 0")
+
+    var valid = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8)) { valid.ingest(s) }
+    check(valid.lastOutcome == .flipped, "a valid twist records .flipped")
+    var slow = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8)) { slow.ingest(s) }
+    let slowRejected: Bool = { if case .rejected = slow.lastOutcome { return true } else { return false } }()
+    check(slowRejected, "a slow turn records a rejection reason")
+    var other = GyroFlipDetector()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2)) { other.ingest(s) }
+    check(other.lastOutcome == .none, "a rotation that never starts a candidate records nothing")
+}
+
 print("Gyro flip: \(passes) checks passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

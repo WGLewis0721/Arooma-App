@@ -6,7 +6,8 @@ import SwiftUI
 // open Inspector, subscribes it to the single shared MotionField feed, applies the suppression rules and,
 // when a twist qualifies, calls the SAME `FlipMotor.flip(direction:)` that a tap or drag uses.
 //
-// It publishes nothing: no sample is ever observable UI state. The only output is the flip.
+// It publishes nothing: no sample is ever observable UI state. The only output is the flip. (The owner-tools
+// readout pulls a snapshot ten times a second; nothing is pushed, stored or sent.)
 // Motion values are processed on this iPhone, transiently, and never stored or sent anywhere.
 
 enum GyroFlipSettings {
@@ -14,9 +15,57 @@ enum GyroFlipSettings {
     static let enabledKey = "arooma.gyroFlipEnabled"
 }
 
+/// Wrist-flip values the owner can change live (Tuning panel, group "Wrist flip"). Every default is the
+/// plan's initial value, so an untouched build behaves exactly as before. They exist because the thresholds
+/// and the twist axis were hypotheses, never measured on a physical iPhone.
+enum GyroTuning {
+    /// 0 = x, 1 = y (the long axis), 2 = z (the screen normal).
+    static var axis = 1.0
+    /// Leans the long axis toward the screen normal, in degrees (a twist is rarely exactly about one axis).
+    static var axisTiltDegrees = 0.0
+    static var startRate = GyroFlipConfiguration.initial.startRate
+    static var peakRate = GyroFlipConfiguration.initial.peakRate
+    static var minDominance = GyroFlipConfiguration.initial.minDominance
+    static var minAngle = GyroFlipConfiguration.initial.minAngle
+    static var maxDuration = GyroFlipConfiguration.initial.maxDuration
+    static var maxAcceleration = GyroFlipConfiguration.initial.maxUserAcceleration
+
+    static var configuration: GyroFlipConfiguration {
+        var c = GyroFlipConfiguration.initial
+        c.startRate = startRate
+        // The candidate is abandoned below half the start rate (the plan's 1.0 and 0.5).
+        c.endRate = startRate * 0.5
+        c.peakRate = peakRate
+        c.minDominance = minDominance
+        c.minAngle = minAngle
+        c.maxDuration = maxDuration
+        c.maxUserAcceleration = maxAcceleration
+        c.axisTilt = axisTiltDegrees * Double.pi / 180
+        return c
+    }
+
+    static var twistAxis: GyroTwistAxis { axis < 0.5 ? .x : (axis < 1.5 ? .y : .z) }
+}
+
+/// Owner-tools readout of what the detector sees. Plain values, never stored or sent.
+struct GyroDiagnostics {
+    var listening = false
+    var samples = 0
+    var rate = GyroVector.zero
+    var twistRate = 0.0
+    var dominance = 0.0
+    var peakTwist = 0.0
+    var phase = ""
+    var outcome = ""
+    var blocked = ""
+}
+
 @MainActor
 final class GyroFlipController {
     private var detector = GyroFlipDetector()
+    private var sampleCount = 0
+    private var peakTwist = 0.0
+    private var peakTwistTime = 0.0
     private weak var flip: FlipMotor?
     private(set) var isListening = false
     private var qaTask: Task<Void, Never>?
@@ -38,6 +87,9 @@ final class GyroFlipController {
         guard !isListening else { return }
         isListening = true
         detector.reset()
+        reloadTuning()
+        sampleCount = 0
+        peakTwist = 0
         MotionField.shared.acquire()
         MotionField.shared.setRawSink { [weak self] sample in
             self?.feed(sample)
@@ -58,6 +110,42 @@ final class GyroFlipController {
     /// Clears the detector without stopping: selection change, scene change, a cancelled gesture.
     func resetDetector() { detector.reset() }
 
+    /// Picks up the owner's Tuning values (axis, thresholds). A no-op for an untouched build.
+    func reloadTuning() {
+        detector.configuration = GyroTuning.configuration
+        detector.twistAxis = GyroTuning.twistAxis
+    }
+
+    func snapshot() -> GyroDiagnostics {
+        var d = GyroDiagnostics()
+        d.listening = isListening
+        d.samples = sampleCount
+        d.rate = detector.filteredRate
+        d.twistRate = detector.currentTwistRate
+        d.dominance = detector.currentDominance
+        d.peakTwist = peakTwist
+        switch detector.phase {
+        case .needsCalm: d.phase = "waiting for calm"
+        case .idle: d.phase = "armed"
+        case .candidate: d.phase = "measuring"
+        case .cooldown: d.phase = "cooldown"
+        }
+        switch detector.lastOutcome {
+        case .none: d.outcome = "-"
+        case .flipped: d.outcome = "FLIPPED"
+        case .rejected(let why): d.outcome = "rejected: \(why)"
+        }
+        // Worked out only when the readout asks, never per sample.
+        var reasons: [String] = []
+        if reduceMotion { reasons.append("reduce-motion") }
+        if !sceneActive { reasons.append("scene") }
+        if touching { reasons.append("touch") }
+        if covered { reasons.append("sheet") }
+        if flip?.model.isAnimating ?? false { reasons.append("flipping") }
+        d.blocked = reasons.isEmpty ? "-" : reasons.joined(separator: ",")
+        return d
+    }
+
     /// Feeds one sample. Called from MotionField's handler, or by the QA bridge.
     func feed(_ sample: GyroSample) {
         guard isListening else { return }
@@ -65,6 +153,12 @@ final class GyroFlipController {
         let suppressed = reduceMotion || !sceneActive || touching || covered || animating
         if let direction = detector.ingest(sample, suppressed: suppressed) {
             flip?.flip(direction: direction.sign)
+        }
+        sampleCount += 1
+        let twistNow = abs(detector.currentTwistRate)
+        if twistNow >= peakTwist || sample.timestamp - peakTwistTime > 3 {
+            peakTwist = twistNow
+            peakTwistTime = sample.timestamp
         }
     }
 
@@ -135,10 +229,55 @@ enum GyroQATrace: String {
 
 // MARK: - Settings row (View & Style, Card lighting)
 
+enum MotionHUDSettings {
+    static let key = "arooma.motionHUD"
+}
+
+/// Owner tools only (Debug and TestFlight): a small monospaced readout of the motion feed and, inside the
+/// Inspector, of what the wrist-flip detector sees. It exists to answer "is the sensor running, and what
+/// does a real twist look like" on a physical iPhone. Never shown in an App Store build.
+struct MotionHUD: View {
+    var gyro: GyroFlipController?
+    @AppStorage(MotionHUDSettings.key) private var on = false
+
+    var body: some View {
+        if BuildChannel.allowsOwnerTools && on {
+            TimelineView(.periodic(from: .now, by: 0.1)) { _ in
+                let m = MotionField.shared.diagnostics()
+                let age: String = m.sampleAge.map { f($0) + "s" } ?? "-"
+                let running: String = m.running ? "RUNNING" : "STOPPED"
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("motion \(running)  users \(m.users)  sample age \(age)")
+                    Text("sensor \(yn(m.sensorAvailable))  foreground \(yn(m.foreground))  low power \(yn(m.lowPower))  thermal \(m.thermal)")
+                    Text("foil tilt x \(f(m.tilt.x))  y \(f(m.tilt.y))")
+                    if let gyro {
+                        let g = gyro.snapshot()
+                        let listening: String = g.listening ? "LISTENING" : "off"
+                        Text("wrist flip \(listening)  samples \(g.samples)  \(g.phase)")
+                        Text("rad/s  x \(f(g.rate.x))  y \(f(g.rate.y))  z \(f(g.rate.z))")
+                        Text("twist \(f(g.twistRate))  axis share \(f(g.dominance))  peak 3s \(f(g.peakTwist))")
+                        Text("last \(g.outcome)  blocked by \(g.blocked)")
+                    }
+                }
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundStyle(.primary)
+                .padding(8)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private func f(_ v: Double) -> String { String(format: "%+.2f", v) }
+    private func yn(_ v: Bool) -> String { v ? "yes" : "NO" }
+}
+
 /// "Flip cards with wrist twist". When the device has no motion sensor the row explains that instead of
 /// showing a switch that cannot work. The holographic foil is a separate feature and is never affected.
 struct GyroFlipSettingRow: View {
     @AppStorage(GyroFlipSettings.enabledKey) private var enabled = true
+    @AppStorage(MotionHUDSettings.key) private var showReadout = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -162,6 +301,11 @@ struct GyroFlipSettingRow: View {
             Text("Motion readings stay on this iPhone. They are used as they arrive, only to light the foil and, if this is on, to flip an open card. They are never stored or sent.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
+            if BuildChannel.allowsOwnerTools {
+                Toggle("Show motion readout (owner tools)", isOn: $showReadout)
+                    .font(.footnote)
+                    .accessibilityIdentifier("motion-readout-toggle")
+            }
         }
     }
 }

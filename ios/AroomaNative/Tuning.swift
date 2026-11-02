@@ -422,7 +422,7 @@ final class Tuning {
             TuningSpec(id: "gyro.dominance", group: "Wrist flip", label: "Axis share needed (0 to 1)",
                        range: 0.3...0.95, step: 0.05, defaultValue: 0.75, digits: 2) { GyroTuning.minDominance = $0 },
             TuningSpec(id: "gyro.minAngle", group: "Wrist flip", label: "Turn needed (rad)",
-                       range: 0.2...1.5, step: 0.05, defaultValue: 0.55, digits: 2) { GyroTuning.minAngle = $0 },
+                       range: 0.2...1.5, step: 0.05, defaultValue: 0.35, digits: 2) { GyroTuning.minAngle = $0 },
             TuningSpec(id: "gyro.maxDuration", group: "Wrist flip", label: "Longest twist (s)",
                        range: 0.25...1.2, step: 0.05, defaultValue: 0.45, digits: 2) { GyroTuning.maxDuration = $0 },
             TuningSpec(id: "gyro.maxAccel", group: "Wrist flip", label: "Shake limit (g)",

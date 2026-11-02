@@ -1,0 +1,102 @@
+
+=== development seeds: seeds from 1, 200 flicks per direction, 100 ordinary trials per family ===
+prior: total angle 0.35...1.2 rad, peak 2.0...5.0 rad/s, duration 0.12...0.4 s, half with a return stroke
+
+Deliberate flicks (exactly one flip, correct direction):
+| recognizer | + recognized | - recognized | missed | wrong direction | double flips | latency p50 | latency p95 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| PR #43 | 35% (70/200) | 38% (76/200) | 237 | 17 | 0 | 94 ms | 165 ms |
+| pulse | 88% (175/200) | 85% (170/200) | 55 | 0 | 0 | 175 ms | 219 ms |
+
+Why flicks were missed (last rejection logged by each recognizer, all missed flicks):
+- PR #43: too small 167, too weak 59, waiting for calm 11
+- pulse: too small 36, too weak 19
+
+Sensitivity grid, both directions (recognized / trials), rows total angle (rad), columns duration (s):
+
+PR #43:
+| angle \ duration | 0.12-0.20 | 0.20-0.30 | 0.30-0.40 |
+| --- | --- | --- | --- |
+| 0.35-0.5 | 0% (0/52) | 0% (0/59) | 0% (0/20) |
+| 0.5-0.7 | 0% (0/4) | 25% (25/102) | 41% (21/51) |
+| 0.7-0.9 | - (0/0) | 86% (12/14) | 89% (66/74) |
+| 0.9-1.2 | - (0/0) | - (0/0) | 92% (22/24) |
+
+pulse:
+| angle \ duration | 0.12-0.20 | 0.20-0.30 | 0.30-0.40 |
+| --- | --- | --- | --- |
+| 0.35-0.5 | 52% (27/52) | 64% (38/59) | 55% (11/20) |
+| 0.5-0.7 | 100% (4/4) | 100% (102/102) | 100% (51/51) |
+| 0.7-0.9 | - (0/0) | 100% (14/14) | 100% (74/74) |
+| 0.9-1.2 | - (0/0) | - (0/0) | 100% (24/24) |
+
+Ordinary motion, flip events per family (trials with an event / trials):
+| family | PR #43 | pulse |
+| --- | --- | --- |
+| slow tilt | 0/100 | 0/100 |
+| quick tilt to face | 0/100 | 0/100 |
+| hand tremor | 0/100 | 0/100 |
+| walking sway | 0/100 | 0/100 |
+| hand shake | 1/100 | 0/100 |
+| pick up / reposition | 0/100 | 0/100 |
+| quick small wiggle | 0/100 | 0/100 |
+| pitch with twist leak | 0/100 | 0/100 |
+| set-down tap | 0/100 | 0/100 |
+All families: PR #43 1 events in 900 trials (0.11 per 100); pulse 0 events (0.00 per 100)
+
+=== held-out seeds (reported, never tuned on): seeds from 9000, 200 flicks per direction, 100 ordinary trials per family ===
+prior: total angle 0.35...1.2 rad, peak 2.0...5.0 rad/s, duration 0.12...0.4 s, half with a return stroke
+
+Deliberate flicks (exactly one flip, correct direction):
+| recognizer | + recognized | - recognized | missed | wrong direction | double flips | latency p50 | latency p95 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| PR #43 | 44% (87/200) | 31% (62/200) | 229 | 22 | 0 | 104 ms | 172 ms |
+| pulse | 87% (174/200) | 89% (178/200) | 48 | 0 | 0 | 175 ms | 215 ms |
+
+Why flicks were missed (last rejection logged by each recognizer, all missed flicks):
+- PR #43: too small 150, too weak 68, waiting for calm 11
+- pulse: too small 27, too weak 21
+
+Sensitivity grid, both directions (recognized / trials), rows total angle (rad), columns duration (s):
+
+PR #43:
+| angle \ duration | 0.12-0.20 | 0.20-0.30 | 0.30-0.40 |
+| --- | --- | --- | --- |
+| 0.35-0.5 | 0% (0/44) | 0% (0/80) | 0% (0/28) |
+| 0.5-0.7 | 0% (0/1) | 41% (40/97) | 50% (24/48) |
+| 0.7-0.9 | - (0/0) | 83% (10/12) | 82% (61/74) |
+| 0.9-1.2 | - (0/0) | - (0/0) | 88% (14/16) |
+
+pulse:
+| angle \ duration | 0.12-0.20 | 0.20-0.30 | 0.30-0.40 |
+| --- | --- | --- | --- |
+| 0.35-0.5 | 59% (26/44) | 75% (60/80) | 64% (18/28) |
+| 0.5-0.7 | 100% (1/1) | 100% (97/97) | 100% (48/48) |
+| 0.7-0.9 | - (0/0) | 100% (12/12) | 100% (74/74) |
+| 0.9-1.2 | - (0/0) | - (0/0) | 100% (16/16) |
+
+Ordinary motion, flip events per family (trials with an event / trials):
+| family | PR #43 | pulse |
+| --- | --- | --- |
+| slow tilt | 0/100 | 0/100 |
+| quick tilt to face | 0/100 | 0/100 |
+| hand tremor | 0/100 | 0/100 |
+| walking sway | 0/100 | 0/100 |
+| hand shake | 0/100 | 0/100 |
+| pick up / reposition | 0/100 | 0/100 |
+| quick small wiggle | 0/100 | 0/100 |
+| pitch with twist leak | 0/100 | 0/100 |
+| set-down tap | 0/100 | 0/100 |
+All families: PR #43 0 events in 900 trials (0.00 per 100); pulse 0 events (0.00 per 100)
+
+=== minimum turn sweep, pulse recognizer (peak 2.2 rad/s; development chose 0.35, held-out is reported) ===
+| turn (rad) | recognized, dev | recognized, held-out | wrong face, dev / held-out | accidental per 100 ordinary, dev | held-out |
+| --- | --- | --- | --- | --- | --- |
+| 0.25 | 392 / 400 (98%) | 391 / 400 (98%) | 0 / 0 | 3.44 | 3.44 |
+| 0.30 | 387 / 400 (97%) | 390 / 400 (98%) | 0 / 0 | 0.56 | 0.33 |
+| 0.35 | 345 / 400 (86%) | 352 / 400 (88%) | 0 / 0 | 0.00 | 0.00 |
+| 0.40 | 302 / 400 (76%) | 301 / 400 (75%) | 0 / 0 | 0.00 | 0.00 |
+| 0.45 | 269 / 400 (67%) | 253 / 400 (63%) | 0 / 0 | 0.00 | 0.00 |
+| 0.50 | 212 / 400 (53%) | 228 / 400 (57%) | 0 / 0 | 0.00 | 0.00 |
+| 0.55 | 173 / 400 (43%) | 186 / 400 (46%) | 0 / 0 | 0.00 | 0.00 |
+Gyro flip: 196 checks passed, 0 failed

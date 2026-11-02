@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Gyro Flip: the app side of the detector
 //
-// `GyroFlipDetector` (a pure file) decides what a twist is. This controller owns one detector for one
+// `GyroPulseDetector` (a pure file) decides what a flick is. This controller owns one detector for one
 // open Inspector, subscribes it to the single shared MotionField feed, applies the suppression rules and,
 // when a twist qualifies, calls the SAME `FlipMotor.flip(direction:)` that a tap or drag uses.
 //
@@ -33,19 +33,22 @@ enum GyroTuning {
     static var startRate = GyroFlipConfiguration.initial.startRate
     static var peakRate = GyroFlipConfiguration.initial.peakRate
     static var minDominance = GyroFlipConfiguration.initial.minDominance
-    static var minAngle = GyroFlipConfiguration.initial.minAngle
+    /// The recognizer's minimum turn (rad). Synthetic evidence puts the knee near 0.35; the physical calibration sets it.
+    static var minAngle = GyroPulseConfiguration.shipped.minTurn
     static var maxDuration = GyroFlipConfiguration.initial.maxDuration
     static var maxAcceleration = GyroFlipConfiguration.shipped.maxUserAcceleration
     static var cooldown = GyroFlipConfiguration.shipped.cooldown
 
-    static var configuration: GyroFlipConfiguration {
-        var c = GyroFlipConfiguration.shipped
+    /// What the live pulse recognizer uses: the owner's Tuning choices over the shipped defaults. The labels in
+    /// Tuning keep their names; "Turn needed" is the recognizer's minimum turn.
+    static var pulseConfiguration: GyroPulseConfiguration {
+        var c = GyroPulseConfiguration.shipped
         c.startRate = startRate
-        // The candidate is abandoned below half the start rate (the plan's 1.0 and 0.5).
+        // An excursion ends below half the start rate (the plan's 1.0 and 0.5).
         c.endRate = startRate * 0.5
         c.peakRate = peakRate
         c.minDominance = minDominance
-        c.minAngle = minAngle
+        c.minTurn = minAngle
         c.maxDuration = maxDuration
         c.maxUserAcceleration = maxAcceleration
         c.cooldown = cooldown
@@ -69,13 +72,100 @@ struct GyroDiagnostics {
     var phase = ""
     var outcome = ""
     var blocked = ""
+    /// Seconds from the peak to the last flip, if one has happened in this session.
+    var latency: Double?
+    /// The last trace file written in this session, if any (owner tools only).
+    var traceFile = ""
     /// The last few gestures, oldest first.
     var history: [GyroFlipDetector.GestureRecord] = []
 }
 
+enum GyroTraceSettings {
+    /// `@AppStorage` key for the owner-tools trace switch in View & Style. Default Off.
+    static let enabledKey = "arooma.gyroTraceRecording"
+    /// The file name of the last trace written, so View & Style can offer to share it.
+    static let lastFileKey = "arooma.gyroLastTraceFile"
+    /// What the owner is doing in the next recording: "flick+", "flick-" or "ordinary". Owner tools only.
+    static let labelKey = "arooma.gyroTraceLabel"
+    /// How many actions the owner will perform in that recording.
+    static let countKey = "arooma.gyroTraceCount"
+
+    /// The last trace file on this iPhone, if it still exists. Owner tools only.
+    static var lastFileURL: URL? {
+        guard BuildChannel.allowsOwnerTools,
+              let name = UserDefaults.standard.string(forKey: lastFileKey), !name.isEmpty,
+              let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
+        let url = folder.appendingPathComponent("GyroTraces", isDirectory: true).appendingPathComponent(name)
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
+}
+
+/// Owner tools only: records the samples the recognizer consumed, plus the live flip events, for one open card, and
+/// writes them to this iPhone's Documents folder as a trace file (see GyroTrace.swift). Nothing is uploaded. Off by
+/// default; it runs only when the owner has switched it on in View & Style, in a build that allows owner tools.
+@MainActor
+final class GyroTraceRecorder {
+    /// About two minutes at 60 Hz. Recording stops quietly at the limit.
+    static let sampleLimit = 8000
+    static var requested: Bool {
+        BuildChannel.allowsOwnerTools && UserDefaults.standard.bool(forKey: GyroTraceSettings.enabledKey)
+    }
+
+    private(set) var active = false
+    private var samples: [GyroSample] = []
+    private var events: [(label: String, time: Double, latency: Double?)] = []
+    private var label = ""
+    private var expected = 0
+
+    func start() {
+        samples = []
+        events = []
+        label = UserDefaults.standard.string(forKey: GyroTraceSettings.labelKey) ?? "flick+"
+        expected = max(0, UserDefaults.standard.integer(forKey: GyroTraceSettings.countKey))
+        active = true
+    }
+
+    func append(_ sample: GyroSample) {
+        guard active, samples.count < Self.sampleLimit else { return }
+        samples.append(sample)
+    }
+
+    func event(_ label: String, at time: Double, latency: Double?) {
+        guard active, events.count < 200 else { return }
+        events.append((label, time, latency))
+    }
+
+    /// Writes the trace and stops. Returns the file name, or nil when nothing was recorded or the write failed.
+    func finish(note: String) -> String? {
+        guard active else { return nil }
+        active = false
+        guard !samples.isEmpty else { return nil }
+        let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let name = "gyro-trace-\(stamp).jsonl"
+        let file = GyroTraceFile(label: label, expected: expected, note: note, samples: samples, liveEvents: events)
+        samples = []
+        events = []
+        guard let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
+        let directory = folder.appendingPathComponent("GyroTraces", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try GyroTraceCodec.encode(file).write(to: directory.appendingPathComponent(name), atomically: true, encoding: .utf8)
+            UserDefaults.standard.set(name, forKey: GyroTraceSettings.lastFileKey)
+            return name
+        } catch {
+            NSLog("Arooma could not write the gyro trace: %@", error.localizedDescription)
+            return nil
+        }
+    }
+}
+
 @MainActor
 final class GyroFlipController {
-    private var detector = GyroFlipDetector()
+    /// The live recognizer: the single-pulse detector of reference.md section 4. PR #43's classifier remains in
+    /// GyroFlipDetector.swift for replay comparison.
+    private var detector = GyroPulseDetector()
+    private let recorder = GyroTraceRecorder()
+    private var lastTraceFile = ""
     private var sampleCount = 0
     private var peakTwist = 0.0
     private var peakTwistTime = 0.0
@@ -103,6 +193,7 @@ final class GyroFlipController {
         reloadTuning()
         sampleCount = 0
         peakTwist = 0
+        if GyroTraceRecorder.requested { recorder.start() }
         MotionField.shared.acquire()
         MotionField.shared.setRawSink { [weak self] sample in
             self?.feed(sample)
@@ -118,6 +209,13 @@ final class GyroFlipController {
         MotionField.shared.setRawSink(nil)
         MotionField.shared.release()
         detector.reset()
+        if recorder.active, let name = recorder.finish(note: traceNote()) { lastTraceFile = name }
+    }
+
+    /// The configuration a trace was recorded with, so a replay can be read in context.
+    private func traceNote() -> String {
+        let c = detector.configuration
+        return "live pulse recognizer, axis \(GyroTuning.axis), turn \(String(format: "%.2f", c.minTurn)) rad, peak \(String(format: "%.1f", c.peakRate)) rad/s, dominance \(String(format: "%.2f", c.minDominance)), shake limit \(String(format: "%.1f", c.maxUserAcceleration)) g, confirm \(String(format: "%.2f", c.confirmWindow)) s"
     }
 
     /// Clears the detector without stopping: selection change, scene change, a cancelled gesture.
@@ -125,7 +223,7 @@ final class GyroFlipController {
 
     /// Picks up the owner's Tuning values (axis, thresholds). A no-op for an untouched build.
     func reloadTuning() {
-        detector.configuration = GyroTuning.configuration
+        detector.configuration = GyroTuning.pulseConfiguration
         detector.twistAxis = GyroTuning.twistAxis
     }
 
@@ -137,10 +235,13 @@ final class GyroFlipController {
         d.twistRate = detector.currentTwistRate
         d.dominance = detector.currentDominance
         d.peakTwist = peakTwist
+        d.latency = detector.lastLatency
+        d.traceFile = lastTraceFile
         switch detector.phase {
-        case .needsCalm: d.phase = "waiting for calm"
-        case .idle: d.phase = "armed"
+        case .settling: d.phase = "waiting for calm"
+        case .armed: d.phase = "armed"
         case .candidate: d.phase = "measuring"
+        case .confirming: d.phase = "confirming"
         case .cooldown: d.phase = "cooldown"
         }
         switch detector.lastOutcome {
@@ -165,8 +266,10 @@ final class GyroFlipController {
         guard isListening else { return }
         let animating = flip?.model.isAnimating ?? false
         let suppressed = reduceMotion || !sceneActive || touching || covered || animating
+        recorder.append(sample)
         if let direction = detector.ingest(sample, suppressed: suppressed) {
             flip?.flip(direction: direction.sign)
+            recorder.event(direction == .positive ? "FLIP +" : "FLIP -", at: sample.timestamp, latency: detector.lastLatency)
         }
         sampleCount += 1
         let twistNow = abs(detector.currentTwistRate)
@@ -270,7 +373,8 @@ struct MotionHUD: View {
                         Text("wrist flip \(listening)  samples \(g.samples)  \(g.phase)")
                         Text("rad/s  x \(f(g.rate.x))  y \(f(g.rate.y))  z \(f(g.rate.z))")
                         Text("twist \(f(g.twistRate))  axis share \(f(g.dominance))  peak 3s \(f(g.peakTwist))")
-                        Text("last \(g.outcome)  blocked by \(g.blocked)")
+                        Text("last \(g.outcome)  blocked by \(g.blocked)  latency \(g.latency.map { String(format: "%.0f ms", $0 * 1000) } ?? "-")")
+                        if !g.traceFile.isEmpty { Text("trace saved: \(g.traceFile)").lineLimit(1).minimumScaleFactor(0.6) }
                         Text("recent gestures, newest first (pk rad/s, ang rad, dur s, acc g)")
                             .foregroundStyle(.secondary)
                         if g.history.isEmpty {
@@ -304,6 +408,9 @@ struct MotionHUD: View {
 struct GyroFlipSettingRow: View {
     @AppStorage(GyroFlipSettings.enabledKey) private var enabled = true
     @AppStorage(MotionHUDSettings.key) private var showReadout = false
+    @AppStorage(GyroTraceSettings.enabledKey) private var recordTrace = false
+    @AppStorage(GyroTraceSettings.labelKey) private var traceLabel = "flick+"
+    @AppStorage(GyroTraceSettings.countKey) private var traceCount = 20
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Low Power Mode switches the motion sensor off (card foil and wrist flip alike). Saying so here stops a
     /// working feature from looking broken.
@@ -341,6 +448,30 @@ struct GyroFlipSettingRow: View {
                 Toggle("Show motion readout (owner tools)", isOn: $showReadout)
                     .font(.footnote)
                     .accessibilityIdentifier("motion-readout-toggle")
+                Toggle("Record a motion trace for the next open card (owner tools)", isOn: $recordTrace)
+                    .font(.footnote)
+                    .accessibilityIdentifier("gyro-trace-toggle")
+                Picker("Session", selection: $traceLabel) {
+                    Text("Flick +").tag("flick+")
+                    Text("Flick −").tag("flick-")
+                    Text("Ordinary").tag("ordinary")
+                }
+                .pickerStyle(.segmented)
+                .font(.footnote)
+                .accessibilityIdentifier("gyro-trace-label")
+                Stepper("Actions in this session: \(traceCount)", value: $traceCount, in: 1...200, step: 5)
+                    .font(.footnote)
+                    .accessibilityIdentifier("gyro-trace-count")
+                Text("Writes the raw motion readings from that session to a file on this iPhone, for offline replay. Nothing is uploaded.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                if let url = GyroTraceSettings.lastFileURL {
+                    ShareLink(item: url) {
+                        Label("Share last motion trace", systemImage: "square.and.arrow.up")
+                            .font(.footnote)
+                    }
+                    .accessibilityIdentifier("gyro-trace-share")
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name.NSProcessInfoPowerStateDidChange)) { _ in

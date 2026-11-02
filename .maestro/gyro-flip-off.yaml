@@ -20,7 +20,8 @@ tags:
     text: "Flip cards with wrist twist"
     checked: false
 - tapOn: "Done"
-- tapOn: "Search"
+- tapOn:
+    id: "search"
 - tapOn: "Name, house.*"
 - inputText: "Sauvage"
 - tapOn: ".*Sauvage Elixir.*"

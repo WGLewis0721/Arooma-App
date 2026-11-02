@@ -1,12 +1,24 @@
 import Foundation
 
-// Standalone test runner for ios/AroomaNative/GyroFlipDetector.swift. No XCTest, so it runs the same on
-// the macOS CI runner and on Linux:
-//   swiftc -O ios/AroomaNative/GyroFlipDetector.swift ios/Tests/GyroFlip/main.swift -o /tmp/gyro-tests && /tmp/gyro-tests
+// Standalone test runner for the wrist-flick detectors. No XCTest, so it runs the same on the macOS CI runner
+// and on Linux:
+//   swiftc -O ios/AroomaNative/GyroFlipDetector.swift ios/AroomaNative/GyroPulseDetector.swift \
+//       ios/Tests/GyroFlip/Corpus.swift ios/Tests/GyroFlip/Report.swift ios/Tests/GyroFlip/main.swift -o gyro-tests
+// Sections 1 to 10 test the PR #43 classifier (GyroFlipDetector). Section 11 tests the pulse recognizer that the app
+// uses, and section 12 prints the A/B comparison on identical traces.
 //
 // These are SYNTHETIC traces. They prove the classifier's logic (exactly one event per valid twist, none
 // for rejected motion). They say nothing about a real iPhone's gyroscope: that needs the physical test in
 // AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md section 1B (>= 18/20 intentional, <= 1/100 accidental).
+
+// `gyro-tests --replay <trace file>` replays a device recording through both recognizers and exits.
+if let i = CommandLine.arguments.firstIndex(of: "--replay"), i + 1 < CommandLine.arguments.count {
+    exit(replayFile(CommandLine.arguments[i + 1]))
+}
+// `gyro-tests --calibrate <folder>` sweeps the thresholds over labeled owner sessions and exits.
+if let i = CommandLine.arguments.firstIndex(of: "--calibrate"), i + 1 < CommandLine.arguments.count {
+    exit(calibrate(directory: CommandLine.arguments[i + 1]))
+}
 
 var failures = 0
 var passes = 0
@@ -498,6 +510,183 @@ do {
     check(shaken.history.count <= GyroFlipDetector.historyLimit, "the gesture log is capped at \(GyroFlipDetector.historyLimit)")
     check(!shaken.history.contains { $0.outcome.hasPrefix("FLIP") }, "20 s of violent shaking never flips")
 }
+
+// MARK: - 11. Pulse recognizer (reference.md section 4): the live detector since the wrist-flick work
+//
+// Everything above tests GyroFlipDetector (PR #43), kept as the baseline. Everything below tests
+// GyroPulseDetector, which the app uses. The corpus checks use DEVELOPMENT seeds only (Corpus.swift): defaults were
+// chosen on that range, and held-out results are printed by the report, never asserted here.
+
+func pulse(_ c: GyroPulseConfiguration = .shipped) -> GyroPulseDetector { GyroPulseDetector(configuration: c, twistAxis: .yz) }
+
+func pulseRun(_ samples: [GyroSample], enabled: Bool = true, suppress: (Double) -> Bool = { _ in false },
+              drop: (Double) -> Bool = { _ in false }, detector start: GyroPulseDetector? = nil) -> [Event] {
+    var d = start ?? pulse()
+    d.isEnabled = enabled
+    var events: [Event] = []
+    for (i, s) in samples.enumerated() {
+        let rel = Double(i) / 60
+        if drop(rel) { continue }
+        if let dir = d.ingest(s, suppressed: suppress(rel)) { events.append(Event(time: rel, direction: dir)) }
+    }
+    return events
+}
+
+do {
+    // Ordinary movement: nothing flips.
+    check(pulseRun(makeTrace(seconds: 4, rate: twist(at: 0.2, duration: 3.0, angle: 1.0))).isEmpty, "pulse: slow tilt does not flip")
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8))).isEmpty, "pulse: slow turn (0.9 s) does not flip")
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 0.25))).isEmpty, "pulse: tiny wiggle does not flip")
+    let shake: RateFn = { t in GyroVector(x: 0, y: (t > 0.2 && t < 1.0) ? 8 * sin(2 * .pi * 4 * t) : 0, z: 0) }
+    check(pulseRun(makeTrace(seconds: 2, rate: shake)).isEmpty, "pulse: rotation-only oscillation (4 Hz, 8 rad/s) does not flip")
+    let shakeAccel: AccelFn = { t in (t > 0.2 && t < 1.0) ? GyroVector(x: 1.6 * sin(2 * .pi * 4 * t + 1), y: 0, z: 0) : .zero }
+    check(pulseRun(makeTrace(seconds: 2, rate: shake, accel: shakeAccel)).isEmpty, "pulse: shake with 1.6 g does not flip")
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 0))).isEmpty, "pulse: x-axis lift does not flip")
+    check(pulseRun(makeTrace(seconds: 4, rate: { t in GyroVector(x: 0, y: 0.8 * sin(2 * .pi * 2 * t), z: 0) },
+                            accel: { t in GyroVector(x: 0.4 * sin(2 * .pi * 2 * t), y: 0, z: 0) })).isEmpty, "pulse: walking sway does not flip")
+    let lift = twist(at: 0.4, duration: 0.6, angle: 1.2, axis: 0)
+    check(pulseRun(makeTrace(seconds: 3, rate: lift, accel: { t in t > 0.4 && t < 1.0 ? GyroVector(x: 0, y: 0.5, z: 0) : .zero })).isEmpty,
+          "pulse: lifting with acceleration does not flip")
+    let flickAccel: AccelFn = { t in (t > 0.45 && t < 0.75) ? GyroVector(x: 1.2, y: 0, z: 0) : .zero }
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 1.2), accel: flickAccel)).count == 1,
+          "pulse: a vigorous flick with 1.2 g still flips once (the plan's 0.8 g limit would have rejected it)")
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 1.2),
+                             accel: { t in (t > 0.45 && t < 0.75) ? GyroVector(x: 2.0, y: 0, z: 0) : .zero })).isEmpty,
+          "pulse: a flick with 2.0 g is a shake and does not flip")
+}
+
+do {
+    // Valid flicks: one event, the right direction, about the long axis and about the screen normal.
+    for axis in [1, 2] {
+        let plus = pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: axis)))
+        let minus = pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: -0.8, axis: axis)))
+        check(plus.count == 1 && plus.first?.direction == .positive, "pulse: axis \(axis) +0.8 rad flips once, positive (got \(plus.count))")
+        check(minus.count == 1 && minus.first?.direction == .negative, "pulse: axis \(axis) -0.8 rad flips once, negative (got \(minus.count))")
+    }
+    // The direction is the physical sense of the turn, whatever the grip angle. A canonical-axis projection
+    // inverted the direction for some grips (PR #43 does; see the comparison report).
+    for degrees in [-60.0, -30.0, 0.0, 30.0, 60.0] {
+        let g = degrees * Double.pi / 180
+        for sign in [1.0, -1.0] {
+            let rate: RateFn = { t in
+                let r = sign * minJerk(t - 0.5, duration: 0.35, angle: 0.8)
+                return GyroVector(x: 0, y: r * cos(g), z: r * sin(g))
+            }
+            let events = pulseRun(makeTrace(seconds: 3, rate: rate))
+            let expected: GyroFlipDirection = sign > 0 ? .positive : .negative
+            check(events.count == 1 && events.first?.direction == expected,
+                  "pulse: grip \(Int(degrees)) degrees, sign \(Int(sign)): one flip in the physical direction (got \(events.map { $0.direction }))")
+        }
+    }
+    // Rebound: the phone is turned back at once. One flip, in the first direction.
+    let rebound = pulseRun(makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8),
+                                                             twist(at: 0.9, duration: 0.35, angle: -0.8)])))
+    check(rebound.count == 1 && rebound.first?.direction == .positive, "pulse: a flick and its immediate return flip once (got \(rebound.count))")
+    let spaced = pulseRun(makeTrace(seconds: 5, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8),
+                                                            twist(at: 2.6, duration: 0.35, angle: 0.8)])))
+    check(spaced.count == 2 && spaced.allSatisfy { $0.direction == .positive }, "pulse: two flicks 2 s apart flip twice (got \(spaced.count))")
+    let alternating = pulseRun(makeTrace(seconds: 6, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8),
+                                                                 twist(at: 3.0, duration: 0.35, angle: -0.8)])))
+    check(alternating.count == 2 && alternating[0].direction == .positive && alternating[1].direction == .negative,
+          "pulse: a flick, then an opposite flick after the cooldown: two flips, opposite directions")
+    let tooSoon = pulseRun(makeTrace(seconds: 4, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8),
+                                                             twist(at: 1.3, duration: 0.35, angle: 0.8)])))
+    check(tooSoon.count == 1, "pulse: a second flick 0.8 s later is inside the cooldown (got \(tooSoon.count))")
+    // Latency: the flip comes within 250 ms of the peak of a clear flick.
+    let peakAt = 0.5 + 0.175
+    let fast = pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8)))
+    check(fast.count == 1 && fast[0].time - peakAt <= 0.25, "pulse: the flip comes within 250 ms of the peak (\(fast.first.map { String(format: "%.0f", ($0.time - peakAt) * 1000) } ?? "none") ms)")
+    // A return stroke is logged as part of the same gesture, not as a second flip.
+    var logged = pulse()
+    for s in makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                              twist(at: 0.9, duration: 0.35, angle: -0.8, axis: 2)])) { logged.ingest(s) }
+    check(logged.history.first?.outcome == "FLIP +" && logged.history.contains { $0.outcome == "ignored: return stroke" },
+          "pulse: the return stroke is logged as ignored, after the one flip")
+}
+
+do {
+    // Dropouts, toggle, suppression, invalid timestamps. Same contract as the PR #43 classifier.
+    let valid = makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8))
+    check(pulseRun(valid, drop: { $0 > 0.6 && $0 < 0.8 }).isEmpty, "pulse: a 0.2 s dropout mid-flick resets the excursion")
+    check(pulseRun(valid, enabled: false).isEmpty, "pulse: toggle Off, zero events")
+    check(pulseRun(valid, suppress: { _ in true }).isEmpty, "pulse: suppressed for the whole flick, zero events")
+    check(pulseRun(valid, suppress: { $0 > 0.6 }).isEmpty, "pulse: a touch that begins mid-flick cancels it")
+    check(pulseRun(valid, suppress: { $0 < 0.4 }).count == 1, "pulse: suppression that ends before the flick does not block it")
+    var off = pulse()
+    off.isEnabled = false
+    for s in valid { _ = off.ingest(s) }
+    check(off.phase == .settling, "pulse: a disabled detector stays reset")
+    var bad = pulse()
+    _ = bad.ingest(GyroSample(timestamp: .nan, rotationRate: .zero, userAcceleration: .zero))
+    check(bad.phase == .settling, "pulse: non-finite samples reset the detector")
+    var back = pulse()
+    _ = back.ingest(GyroSample(timestamp: 5, rotationRate: .zero, userAcceleration: .zero))
+    _ = back.ingest(GyroSample(timestamp: 4, rotationRate: .zero, userAcceleration: .zero))
+    check(back.phase == .settling, "pulse: a timestamp that goes backwards does not advance state")
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.0, duration: 0.35, angle: 0.8))).isEmpty,
+          "pulse: a flick already under way at the first sample (no calm yet) does not flip")
+}
+
+do {
+    // Owner tuning values flow through: a higher turn requirement rejects a flick the default accepts.
+    var strict = GyroPulseConfiguration.shipped
+    strict.minTurn = 1.0
+    check(pulseRun(makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8)), detector: pulse(strict)).isEmpty,
+          "pulse: a raised turn requirement rejects a flick that the default accepts")
+}
+
+do {
+    // Corpus gates on DEVELOPMENT seeds (see Corpus.swift). These are the plan's rules applied to synthetic traces.
+    let flicks = makeFlickTrials(seedBase: 1, perSign: 200)
+    let deliberate = flicks.filter { ($0.trial.angle >= 0.7) && $0.trial.expected.count == 1 }
+    let all = evaluateFlicks(flicks, recognizer: { PulseRecognizer() })
+    check(all.double == 0, "corpus: no double flips across \(all.trials) natural flicks, with and without a return stroke (got \(all.double))")
+    check(all.wrongDirection == 0, "corpus: no wrong-direction flips across \(all.trials) natural flicks (got \(all.wrongDirection))")
+    let sub = evaluateFlicks(deliberate, recognizer: { PulseRecognizer() })
+    check(sub.trials > 0 && sub.recognized * 100 >= sub.trials * 95,
+          "corpus: flicks of 0.7 rad or more are recognized at least 95% of the time (\(sub.recognized)/\(sub.trials))")
+    let p95 = percentile(all.latencies, 0.95) ?? 1
+    check(p95 <= 0.25, "corpus: p95 latency from the peak is at most 250 ms (\(String(format: "%.0f", p95 * 1000)) ms)")
+    var ordinaryEvents = 0, ordinaryTrials = 0
+    for (_, st) in evaluateOrdinary(seedBase: 50_001, trialsPerFamily: 100, recognizer: { PulseRecognizer() }) {
+        ordinaryEvents += st.falseEvents
+        ordinaryTrials += st.trials
+    }
+    check(ordinaryEvents * 100 <= ordinaryTrials, "corpus: at most 1 accidental flip per 100 ordinary movement trials (\(ordinaryEvents) in \(ordinaryTrials))")
+    // The families added with the simplification: quick small wiggles, a pitch that leaks into the twist plane, and
+    // a set-down knock. None may flip on development seeds.
+    for family in [CorpusFamily.quickWiggle, .pitchWithLeak, .setDown] {
+        var flips = 0
+        for i in 0..<100 { var r = PulseRecognizer(); flips += replay(Corpus.ordinary(family, seed: 51_001, index: i), &r).events.count }
+        check(flips == 0, "corpus: \(family.rawValue) never flips on development seeds (got \(flips) in 100)")
+    }
+}
+
+// MARK: - 11b. Trace file: encode, decode, and rejection of other files
+
+do {
+    let trial = Corpus.naturalFlick(seed: 7, index: 0, sign: 1, angle: 0.9, duration: 0.25, returnStroke: true)
+    let file = GyroTraceFile(label: "flick+", expected: 20, note: "round-trip \"test\"", samples: Array(trial.samples.prefix(50)),
+                             liveEvents: [(label: "FLIP +", time: trial.samples[30].timestamp, latency: 0.12)])
+    let text = GyroTraceCodec.encode(file)
+    let back = GyroTraceCodec.decode(text)
+    check(back?.samples.count == 50, "trace: 50 samples survive a round trip (got \(back?.samples.count ?? -1))")
+    check(back?.liveEvents.count == 1 && back?.liveEvents.first?.label == "FLIP +", "trace: live events survive a round trip")
+    check(back?.note == "round-trip \"test\"", "trace: the note survives, with its quotes")
+    check(back?.label == "flick+" && back?.expected == 20, "trace: the label and the count survive a round trip")
+    if let first = back?.samples.first, let original = file.samples.first {
+        check(abs(first.timestamp - original.timestamp) < 1e-5 && abs(first.rotationRate.y - original.rotationRate.y) < 1e-4,
+              "trace: values survive to the stored precision")
+    }
+    check(GyroTraceCodec.decode("{\"format\":\"something-else\",\"version\":1}\n") == nil, "trace: a different format is rejected")
+    check(GyroTraceCodec.decode("{\"t\":1,\"w\":[0,0,0],\"a\":[0,0,0]}\n") == nil, "trace: a file without a header is rejected")
+}
+
+// MARK: - 12. Replay comparison, printed for the PR (development and held-out seeds, both recognizers, same traces)
+
+printComparison(label: "development seeds", seedBase: 1, perSign: 200, ordinaryTrials: 100)
+printComparison(label: "held-out seeds (reported, never tuned on)", seedBase: 9000, perSign: 200, ordinaryTrials: 100)
+printTurnSweep()
 
 print("Gyro flip: \(passes) checks passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

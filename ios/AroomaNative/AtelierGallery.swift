@@ -100,11 +100,9 @@ struct AtelierGallery: View {
                     identity
                         .padding(.horizontal, 24)
                         .padding(.top, 10)
-                    if context == .collection {
-                        actions
-                            .padding(.horizontal, 20)
-                            .frame(height: 76)
-                    }
+                    actions
+                        .padding(.horizontal, 24)
+                        .frame(height: 64)
 
                 }
             }
@@ -510,99 +508,93 @@ struct AtelierGallery: View {
                 .id("notes-\(card?.id ?? "")")
                 .accessibilityIdentifier("identity-notes")
                 .transition(.opacity)
-            Group {
-                if let card { contextActions(for: card) }
-            }
-            .frame(height: 52, alignment: .topLeading)
-            .padding(.top, 8)
+
         }
         .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: card?.id)
     }
 
-    /// Compact, context-dependent actions beside the name (A7). They replace the large gold CTA (A8).
-    /// The underlying records and rules are the store's: add, move, wishlist, undo and duplicate checks.
-    @ViewBuilder private func contextActions(for card: DisplayCard) -> some View {
-        if context == .explore {
-            if archive.isOwned(card.fragrance.id) {
-                Label("In your collection", systemImage: "checkmark.seal")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .accessibilityIdentifier("explore-owned-state")
-            } else {
-                let wish = archive.wishlist.first(where: { $0.fragranceID == card.fragrance.id })
-                HStack(spacing: 10) {
-                    compactAction(wish == nil ? "plus" : "plus.circle.fill",
-                                  label: wish == nil ? "Add to My Collection" : "Move to My Collection",
-                                  id: "explore-add-to-collection", selected: false) {
-                        if let wish { archive.moveToCollection(wishID: wish.id) }
-                        else { archive.addWithoutSwitching(card.fragrance) }
+    // One stable action dock for Explore, Owned, and Wishlist. The dock never
+    // changes height, so switching modes cannot push the deck or tab bar.
+    @ViewBuilder private var actions: some View {
+        HStack(spacing: 12) {
+            if let card = focusedCard {
+                if context == .explore {
+                    let wish = archive.wishlist.first(where: { $0.fragranceID == card.fragrance.id })
+                    if archive.isOwned(card.fragrance.id) {
+                        actionPrimary("In Collection", symbol: "checkmark.seal.fill",
+                                      id: "explore-owned-state", disabled: true) {}
+                        actionSecondary("Inspect", symbol: "info.circle", id: "explore-inspect") {
+                            inspect(card)
+                        }
+                    } else {
+                        actionPrimary(wish == nil ? "Add to Collection" : "Move to Collection",
+                                      symbol: "plus", id: "explore-add-to-collection") {
+                            if let wish { archive.moveToCollection(wishID: wish.id) }
+                            else { archive.addWithoutSwitching(card.fragrance) }
+                        }
+                        actionSecondary(wish == nil ? "Add to Wishlist" : "Remove from Wishlist",
+                                        symbol: wish == nil ? "heart" : "heart.fill",
+                                        id: "explore-wishlist-toggle") {
+                            if let wish { archive.removeFromWishlist(wish.id) }
+                            else { archive.addToWishlist(card.fragrance) }
+                        }
                     }
-                    compactAction(wish == nil ? "heart" : "heart.fill",
-                                  label: wish == nil ? "Add to Wishlist" : "Remove from Wishlist",
-                                  id: "explore-wishlist-toggle", selected: wish != nil) {
-                        if let wish { archive.removeFromWishlist(wish.id) }
-                        else { archive.addToWishlist(card.fragrance) }
+                } else if let wishID = card.wishID {
+                    actionPrimary("Move to Collection", symbol: "plus",
+                                  id: "wishlist-move") {
+                        archive.moveToCollection(wishID: wishID)
                     }
-                }
-            }
-        } else if let wishID = card.wishID {
-            HStack(spacing: 10) {
-                compactAction("plus.circle.fill", label: "Move to My Collection", id: "wishlist-move", selected: false) {
-                    archive.moveToCollection(wishID: wishID)
-                }
-                compactAction("heart.slash", label: "Remove from Wishlist", id: "wishlist-remove", selected: false) {
-                    archive.removeFromWishlist(wishID)
+                    actionSecondary("Remove from Wishlist", symbol: "heart.slash",
+                                    id: "wishlist-remove") {
+                        archive.removeFromWishlist(wishID)
+                    }
+                } else if let bottleID = card.bottleID {
+                    let worn = archive.bottles.first(where: { $0.id == bottleID })?.wornToday ?? false
+                    actionPrimary(worn ? "Worn Today · Undo" : "Wear Today",
+                                  symbol: worn ? "checkmark.circle.fill" : "drop",
+                                  id: "wear-today") {
+                        if worn { archive.undoTodayWear(bottleID: bottleID) }
+                        else { archive.recordWear(bottleIDs: [bottleID]) }
+                    }
+                    actionSecondary("Layer", symbol: "square.stack.3d.up",
+                                    id: "layer") {
+                        showToday(bottleID)
+                    }
                 }
             }
         }
+        .frame(maxWidth: .infinity, minHeight: 48, maxHeight: 48)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: archive.mode)
     }
 
-    /// A 44-point circular control with a glyph, a VoiceOver label and a stable identifier for flows.
-    private func compactAction(_ symbol: String, label: String, id: String, selected: Bool,
-                               action: @escaping () -> Void) -> some View {
+    private func actionPrimary(_ title: String, symbol: String, id: String,
+                               disabled: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+        }
+        .buttonStyle(.glassProminent)
+        .legibleTint(accent)
+        .disabled(disabled)
+        .accessibilityIdentifier(id)
+    }
+
+    private func actionSecondary(_ title: String, symbol: String, id: String,
+                                 action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(selected ? accent : Color.primary)
-                .frame(width: 44, height: 44)
+                .font(.system(size: 18, weight: .semibold))
+                .frame(width: 48, height: 48)
                 .contentShape(Circle())
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
-        .accessibilityLabel(label)
+        .accessibilityLabel(title)
         .accessibilityIdentifier(id)
-    }
-
-    /// My Collection, owned bottles only: Wear today and Layer, the composition path into Today (A11
-    /// removed the duplicate inspect icon because a tap on the focused card already inspects).
-    @ViewBuilder private var actions: some View {
-        if let card = focusedCard, let bottleID = card.bottleID {
-            let worn = archive.bottles.first(where: { $0.id == bottleID })?.wornToday ?? false
-            HStack(spacing: 10) {
-                Button {
-                    if worn { archive.undoTodayWear(bottleID: bottleID) }
-                    else { archive.recordWear(bottleIDs: [bottleID]) }
-                } label: {
-                    Label(worn ? "Worn today · Undo" : "Wear today",
-                          systemImage: worn ? "checkmark.circle.fill" : "drop")
-                        .contentTransition(.symbolEffect(.replace))
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 34)
-                }
-                .buttonStyle(.glassProminent)
-                .legibleTint(accent)
-                .accessibilityIdentifier("wear-today")
-                Button { showToday(bottleID) } label: {
-                    Label("Layer", systemImage: "square.stack.3d.up")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(minHeight: 34)
-                }
-                .buttonStyle(.glass)
-                .accessibilityHint("Combine with other bottles in Today")
-                .accessibilityIdentifier("layer")
-            }
-            .animation(reduceMotion ? nil : .snappy, value: card.id)
-        }
     }
 
     // MARK: Motor plumbing

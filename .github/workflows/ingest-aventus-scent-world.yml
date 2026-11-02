@@ -27,8 +27,8 @@ jobs:
           mkdir -p ios/AroomaNative/Resources
           curl --fail --location --retry 4 --connect-timeout 20 "$SOURCE_URL" -o ios/AroomaNative/Resources/creed-aventus-live-card.mp4
           echo "$EXPECTED_SHA256  ios/AroomaNative/Resources/creed-aventus-live-card.mp4" | sha256sum --check --status
-          ffprobe -v error -show_entries stream=codec_name,width,height -of default=noprint_wrappers=1 ios/AroomaNative/Resources/creed-aventus-live-card.mp4
-          ffmpeg -hide_banner -loglevel error -y -i ios/AroomaNative/Resources/creed-aventus-live-card.mp4 -frames:v 1 -q:v 3 ios/AroomaNative/Resources/creed-aventus-live-card-poster.jpg
+          curl --fail --location --retry 4 --connect-timeout 20 'https://d2ol7oe51mr4n9.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/977a560b-f681-465c-9f49-f9a66933fc04.jpg' -o ios/AroomaNative/Resources/creed-aventus-live-card-poster.jpg
+          echo "c9c368d785d4d31238b018fa0115f7c1e71d44873c254206ccb061feaab724d3  ios/AroomaNative/Resources/creed-aventus-live-card-poster.jpg" | sha256sum --check --status
       - name: Commit the real MP4 and poster to this branch
         shell: bash
         run: |

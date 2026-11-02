@@ -1,6 +1,7 @@
 # Smoke: the three tabs open their primary screens, and Search, Shelves and the Wear log respond.
 appId: com.graymatter.arooma
 tags:
+  - ux-audit
   - smoke
 ---
 - launchApp:

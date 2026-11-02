@@ -688,6 +688,9 @@ struct AtelierInspector: View {
     @State private var tuning = Tuning.shared
     /// Mirrors `gyro.isListening` for the QA marker below only. Never drives behaviour.
     @State private var gyroListeningForQA = false
+    /// True between onAppear and onDisappear, so a late defaults notification can never restart the sensor
+    /// after the Inspector has gone.
+    @State private var inspectorVisible = false
     @State private var axisLock: Axis?
     @State private var pull: CGSize = .zero
     @State private var pressUV = CGPoint(x: 0.5, y: 0.5)
@@ -746,6 +749,7 @@ struct AtelierInspector: View {
             gyro.attach(flip)
             gyro.reduceMotion = reduceMotion
             gyro.sceneActive = scenePhase == .active
+            inspectorVisible = true
             syncGyro()
             if let trace = GyroQATrace.requested {
                 Task { @MainActor in
@@ -761,8 +765,13 @@ struct AtelierInspector: View {
             }
         }
         .accessibilityAction(named: "Flip card") { flip.flip() }
-        .onDisappear { gyro.stop(); gyroListeningForQA = false }
+        .onDisappear { inspectorVisible = false; gyro.stop(); gyroListeningForQA = false }
         .onChange(of: gyroFlipEnabled) { _, _ in syncGyro() }
+        // The switch's key contains a dot, which @AppStorage's change observation does not always follow, so
+        // also re-check whenever any default changes. Cheap: only while an Inspector is open.
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+            syncGyro()
+        }
         .onChange(of: tuning.revision) { _, _ in gyro.reloadTuning() }
         .onChange(of: scenePhase) { _, phase in
             gyro.sceneActive = phase == .active
@@ -778,7 +787,8 @@ struct AtelierInspector: View {
 
     /// One place that applies the setting: listening exactly when Gyro Flip is On, nothing otherwise.
     private func syncGyro() {
-        if gyroFlipEnabled { gyro.start() } else { gyro.stop() }
+        guard inspectorVisible else { return }
+        if GyroFlipSettings.isEnabled { gyro.start() } else { gyro.stop() }
         gyroListeningForQA = gyro.isListening
     }
 

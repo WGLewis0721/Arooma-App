@@ -11,8 +11,15 @@ import SwiftUI
 // Motion values are processed on this iPhone, transiently, and never stored or sent anywhere.
 
 enum GyroFlipSettings {
-    /// `@AppStorage` key. Default On, with the conservative filters in `GyroFlipConfiguration`.
+    /// `@AppStorage` key for the switch in View & Style. Default On.
     static let enabledKey = "arooma.gyroFlipEnabled"
+
+    /// The one place that decides whether the motion subscription may run. It reads UserDefaults directly, at
+    /// the moment of use, instead of trusting a view's `@AppStorage` copy: on the Simulator an Inspector opened
+    /// after the switch was turned Off still came up listening, because the copy it read said On.
+    static var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? true
+    }
 }
 
 /// Wrist-flip values the owner can change live (Tuning panel, group "Wrist flip"). Every default is the

@@ -100,12 +100,10 @@ struct AtelierGallery: View {
                     identity
                         .padding(.horizontal, 24)
                         .padding(.top, 10)
-                    if context == .collection {
-                        actions
-                            .padding(.horizontal, 20)
-                            .padding(.top, 14)
-                            .padding(.bottom, 12)
-                    }
+                    actions
+                        .padding(.horizontal, 20)
+                        .frame(height: 76)
+
                 }
             }
             .scaleEffect(1 - 0.1 * overview)
@@ -204,14 +202,6 @@ struct AtelierGallery: View {
             let unit = motor.stride(cardWidth: Double(w))
             let position = motor.position
             ZStack {
-                // The table: a soft pool of the theme's key light the deck rests in.
-                Ellipse()
-                    .fill(RadialGradient(colors: [archive.theme.keyLight.opacity(0.16), .clear],
-                                         center: .center, startRadius: 4, endRadius: w * 0.9))
-                    .frame(width: w * 2.1, height: w * 0.5)
-                    .offset(y: h * 0.5)
-                    .accessibilityHidden(true)
-
                 ForEach(visibleCards(around: position), id: \.card.id) { entry in
                     deckCard(entry.card, index: entry.index, position: position, width: w)
                 }
@@ -277,6 +267,8 @@ struct AtelierGallery: View {
             pressure: abs(d) < 0.5 ? lift : 0
         )
         .frame(width: w, height: w * 86.0 / 59.0)
+        .shadow(color: .black.opacity(abs(d) < 0.5 ? 0.40 : 0.22),
+                radius: abs(d) < 0.5 ? 20 : 12, x: 0, y: abs(d) < 0.5 ? 16 : 9)
         .matchedTransitionSource(id: card.id, in: transitionNamespace)
         .scaleEffect(pose.scale * (1 + 0.03 * lift))
         .rotation3DEffect(.degrees(pose.yaw), axis: (x: 0, y: 1, z: 0), anchor: .center, perspective: 0.5)
@@ -660,7 +652,7 @@ struct AtelierGallery: View {
         try? await Task.sleep(for: .seconds(0.9))
         await synthSwipe(cards: 0.25, duration: 0.5, release: 0.1) // slow, springs back
         try? await Task.sleep(for: .seconds(1.0))
-        for layout in [CardLayout.stack, .fan, .coverFlow] {
+        for layout in [CardLayout.coverFlow] {
             archive.layout = layout
             try? await Task.sleep(for: .seconds(1.3))
             await synthSwipe(cards: 0.6, duration: 0.3, release: 3)

@@ -9,11 +9,15 @@ import Foundation
 // identical physical motion.
 //
 // Format (version 1):
-//   {"format":"arooma-gyro-trace","version":1,"note":"..."}          one header line
+//   {"format":"arooma-gyro-trace","version":1,"label":"flick+","expected":20,"note":"..."}   one header line
 //   {"t":123.456789,"w":[x,y,z],"a":[x,y,z]}                          one line per sample (rad/s and g)
 //   {"live":"FLIP +","t":123.567890,"latency":0.142}                  one line per flip the live app produced
 
 struct GyroTraceFile {
+    /// What the owner did in this session: "flick+", "flick-" or "ordinary". Empty when unknown.
+    var label: String
+    /// How many actions the owner performed: flicks for a flick session, ordinary movements for an ordinary one.
+    var expected: Int
     var note: String
     var samples: [GyroSample]
     /// Flip events the app produced while recording (label, sample time, seconds from the peak when known).
@@ -26,7 +30,7 @@ enum GyroTraceCodec {
 
     static func encode(_ file: GyroTraceFile) -> String {
         var lines: [String] = []
-        lines.append("{\"format\":\"\(format)\",\"version\":\(version),\"note\":\"\(escape(file.note))\"}")
+        lines.append("{\"format\":\"\(format)\",\"version\":\(version),\"label\":\"\(escape(file.label))\",\"expected\":\(file.expected),\"note\":\"\(escape(file.note))\"}")
         for s in file.samples {
             lines.append(String(format: "{\"t\":%.6f,\"w\":[%.5f,%.5f,%.5f],\"a\":[%.5f,%.5f,%.5f]}",
                                 s.timestamp, s.rotationRate.x, s.rotationRate.y, s.rotationRate.z,
@@ -44,6 +48,8 @@ enum GyroTraceCodec {
     /// Returns nil only when the header is missing or the file is not a trace at all.
     static func decode(_ text: String) -> GyroTraceFile? {
         var note = ""
+        var label = ""
+        var expected = 0
         var samples: [GyroSample] = []
         var live: [(label: String, time: Double, latency: Double?)] = []
         var sawHeader = false
@@ -54,6 +60,8 @@ enum GyroTraceCodec {
                 guard format == Self.format else { return nil }
                 sawHeader = true
                 note = object["note"] as? String ?? ""
+                label = object["label"] as? String ?? ""
+                expected = Int(number(object["expected"]) ?? 0)
             } else if let w = vector(object["w"]), let a = vector(object["a"]), let t = number(object["t"]) {
                 samples.append(GyroSample(timestamp: t,
                                           rotationRate: GyroVector(x: w[0], y: w[1], z: w[2]),
@@ -63,7 +71,7 @@ enum GyroTraceCodec {
             }
         }
         guard sawHeader else { return nil }
-        return GyroTraceFile(note: note, samples: samples, liveEvents: live)
+        return GyroTraceFile(label: label, expected: expected, note: note, samples: samples, liveEvents: live)
     }
 
     private static func vector(_ value: Any?) -> [Double]? {

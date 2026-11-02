@@ -204,3 +204,119 @@ func replayFile(_ path: String) -> Int32 {
     print("pulse recognizer:  \(p.events.isEmpty ? "none" : p.events.map { "\($0.direction == .positive ? "+" : "-") at \(String(format: "%.2f", $0.time))" }.joined(separator: ", "))")
     return 0
 }
+
+// MARK: - Owner calibration over labeled sessions (gyro-tests --calibrate <folder>)
+//
+// Each trace file is one session recorded in owner tools with a label (flick+, flick-, ordinary) and the number of
+// actions the owner performed. The sweep replays every session through the pulse recognizer for each pair of
+// thresholds and reports how many flicks were recognized (with the right face) and how many ordinary movements
+// flipped the card. The target is the plan's: at least 95% of flicks, no wrong faces, at most 1 accidental flip per
+// 100 ordinary actions.
+
+func calibrate(directory path: String) -> Int32 {
+    let fm = FileManager.default
+    guard let names = try? fm.contentsOfDirectory(atPath: path) else {
+        print("cannot read the folder \(path)")
+        return 2
+    }
+    var flickSessions: [(name: String, file: GyroTraceFile)] = []
+    var ordinarySessions: [(name: String, file: GyroTraceFile)] = []
+    var skipped = 0
+    for name in names.sorted() where name.hasSuffix(".jsonl") {
+        let full = (path as NSString).appendingPathComponent(name)
+        guard let data = fm.contents(atPath: full), let text = String(data: data, encoding: .utf8),
+              let file = GyroTraceCodec.decode(text) else { skipped += 1; continue }
+        switch file.label {
+        case "flick+", "flick-": flickSessions.append((name, file))
+        case "ordinary": ordinarySessions.append((name, file))
+        default: skipped += 1
+        }
+    }
+    print("sessions: \(flickSessions.count) flick, \(ordinarySessions.count) ordinary; \(skipped) skipped (unlabeled or not a trace)")
+    guard !flickSessions.isEmpty, !ordinarySessions.isEmpty else {
+        print("need at least one flick session (label flick+ or flick-) and one ordinary session (label ordinary).")
+        return 2
+    }
+    let flickActions = flickSessions.reduce(0) { $0 + max(1, $1.file.expected) }
+    let ordinaryActions = ordinarySessions.reduce(0) { $0 + max(1, $1.file.expected) }
+    print("flicks performed: \(flickActions); ordinary actions performed: \(ordinaryActions)")
+    print("target: at least 95% of flicks recognized with the right face, no wrong faces, at most 1 accidental flip per 100 ordinary actions\n")
+    print("| turn (rad) | peak (rad/s) | flicks recognized | wrong face | accidental per 100 ordinary | meets target |")
+    print("| --- | --- | --- | --- | --- | --- |")
+
+    // Among settings that meet the target, prefer the most recognition, then the most conservative thresholds.
+    var best: (turn: Double, peak: Double, recognized: Double)? = nil
+    for turn in [0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55] {
+        for peak in [1.8, 2.0, 2.2, 2.4] {
+            var c = GyroPulseConfiguration.shipped
+            c.minTurn = turn
+            c.peakRate = peak
+            var correct = 0, wrong = 0, accidental = 0
+            for session in flickSessions {
+                let trial = CorpusTrial(family: session.name, samples: session.file.samples, expected: [], peakTimes: [],
+                                        angle: 0, duration: 0, returnStroke: false)
+                var r = PulseRecognizer(c)
+                let events = replay(trial, &r).events
+                let wantPositive = session.file.label == "flick+"
+                for e in events {
+                    if (e.direction == .positive) == wantPositive { correct += 1 } else { wrong += 1 }
+                }
+            }
+            for session in ordinarySessions {
+                let trial = CorpusTrial(family: session.name, samples: session.file.samples, expected: [], peakTimes: [],
+                                        angle: 0, duration: 0, returnStroke: false)
+                var r = PulseRecognizer(c)
+                accidental += replay(trial, &r).events.count
+            }
+            let recognized = Double(correct) / Double(flickActions)
+            let per100 = Double(accidental) / Double(ordinaryActions) * 100
+            let meets = recognized >= 0.95 && wrong == 0 && per100 <= 1.0
+            print(String(format: "| %.2f | %.1f | %d / %d (%.0f%%) | %d | %.2f | %@ |",
+                         turn, peak, correct, flickActions, recognized * 100, wrong, per100, meets ? "yes" : "no"))
+            if meets {
+                let better = best.map { recognized > $0.recognized || (recognized == $0.recognized && (turn > $0.turn || (turn == $0.turn && peak > $0.peak))) } ?? true
+                if better { best = (turn, peak, recognized) }
+            }
+        }
+    }
+    if let best {
+        print(String(format: "\nhighest recognition that meets the target: turn %.2f rad, peak %.1f rad/s (%.0f%% of flicks); ties go to the stricter thresholds", best.turn, best.peak, best.recognized * 100))
+    } else {
+        print("\nno setting in this grid meets the target. Look at the table: wrong faces point at the direction, misses at the thresholds.")
+    }
+    return 0
+}
+
+// MARK: - Turn sweep (the one threshold that decides recognition versus accidental flips)
+
+/// Recognition on both seed ranges and accidental flips across every ordinary family, for each minimum turn.
+/// Development seeds chose the default; held-out seeds are reported only.
+func printTurnSweep() {
+    print("\n=== minimum turn sweep, pulse recognizer (peak 2.2 rad/s; development chose 0.35, held-out is reported) ===")
+    print("| turn (rad) | recognized, dev | recognized, held-out | wrong face, dev / held-out | accidental per 100 ordinary, dev | held-out |")
+    print("| --- | --- | --- | --- | --- | --- |")
+    let dev = makeFlickTrials(seedBase: 1, perSign: 200), held = makeFlickTrials(seedBase: 9000, perSign: 200)
+    let families = CorpusFamily.allCases.filter { $0 != .naturalPositive && $0 != .naturalNegative }
+    for turn in [0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55] {
+        var c = GyroPulseConfiguration.shipped
+        c.minTurn = turn
+        let make = { PulseRecognizer(c) }
+        func recognized(_ set: [(trial: CorpusTrial, angleBin: Int?, durationBin: Int?)]) -> (Int, Int, Int) {
+            let p = evaluateFlicks(set.filter { $0.trial.expected.first == .positive }, recognizer: make)
+            let n = evaluateFlicks(set.filter { $0.trial.expected.first == .negative }, recognizer: make)
+            return (p.recognized + n.recognized, p.trials + n.trials, p.wrongDirection + n.wrongDirection)
+        }
+        func accidental(_ seed: UInt64) -> (Int, Int) {
+            var events = 0, trials = 0
+            for family in families {
+                for i in 0..<100 { var r = make(); events += replay(Corpus.ordinary(family, seed: seed &+ 50_000, index: i), &r).events.count; trials += 1 }
+            }
+            return (events, trials)
+        }
+        let d = recognized(dev), h = recognized(held)
+        let da = accidental(1), ha = accidental(9000)
+        print(String(format: "| %.2f | %d / %d (%.0f%%) | %d / %d (%.0f%%) | %d / %d | %.2f | %.2f |",
+                     turn, d.0, d.1, Double(d.0) / Double(d.1) * 100, h.0, h.1, Double(h.0) / Double(h.1) * 100,
+                     d.2, h.2, Double(da.0) / Double(da.1) * 100, Double(ha.0) / Double(ha.1) * 100))
+    }
+}

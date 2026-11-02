@@ -15,6 +15,10 @@ import Foundation
 if let i = CommandLine.arguments.firstIndex(of: "--replay"), i + 1 < CommandLine.arguments.count {
     exit(replayFile(CommandLine.arguments[i + 1]))
 }
+// `gyro-tests --calibrate <folder>` sweeps the thresholds over labeled owner sessions and exits.
+if let i = CommandLine.arguments.firstIndex(of: "--calibrate"), i + 1 < CommandLine.arguments.count {
+    exit(calibrate(directory: CommandLine.arguments[i + 1]))
+}
 
 var failures = 0
 var passes = 0
@@ -649,19 +653,27 @@ do {
         ordinaryTrials += st.trials
     }
     check(ordinaryEvents * 100 <= ordinaryTrials, "corpus: at most 1 accidental flip per 100 ordinary movement trials (\(ordinaryEvents) in \(ordinaryTrials))")
+    // The families added with the simplification: quick small wiggles, a pitch that leaks into the twist plane, and
+    // a set-down knock. None may flip on development seeds.
+    for family in [CorpusFamily.quickWiggle, .pitchWithLeak, .setDown] {
+        var flips = 0
+        for i in 0..<100 { var r = PulseRecognizer(); flips += replay(Corpus.ordinary(family, seed: 51_001, index: i), &r).events.count }
+        check(flips == 0, "corpus: \(family.rawValue) never flips on development seeds (got \(flips) in 100)")
+    }
 }
 
 // MARK: - 11b. Trace file: encode, decode, and rejection of other files
 
 do {
     let trial = Corpus.naturalFlick(seed: 7, index: 0, sign: 1, angle: 0.9, duration: 0.25, returnStroke: true)
-    let file = GyroTraceFile(note: "round-trip \"test\"", samples: Array(trial.samples.prefix(50)),
+    let file = GyroTraceFile(label: "flick+", expected: 20, note: "round-trip \"test\"", samples: Array(trial.samples.prefix(50)),
                              liveEvents: [(label: "FLIP +", time: trial.samples[30].timestamp, latency: 0.12)])
     let text = GyroTraceCodec.encode(file)
     let back = GyroTraceCodec.decode(text)
     check(back?.samples.count == 50, "trace: 50 samples survive a round trip (got \(back?.samples.count ?? -1))")
     check(back?.liveEvents.count == 1 && back?.liveEvents.first?.label == "FLIP +", "trace: live events survive a round trip")
     check(back?.note == "round-trip \"test\"", "trace: the note survives, with its quotes")
+    check(back?.label == "flick+" && back?.expected == 20, "trace: the label and the count survive a round trip")
     if let first = back?.samples.first, let original = file.samples.first {
         check(abs(first.timestamp - original.timestamp) < 1e-5 && abs(first.rotationRate.y - original.rotationRate.y) < 1e-4,
               "trace: values survive to the stored precision")
@@ -674,6 +686,7 @@ do {
 
 printComparison(label: "development seeds", seedBase: 1, perSign: 200, ordinaryTrials: 100)
 printComparison(label: "held-out seeds (reported, never tuned on)", seedBase: 9000, perSign: 200, ordinaryTrials: 100)
+printTurnSweep()
 
 print("Gyro flip: \(passes) checks passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

@@ -2,28 +2,29 @@ import Foundation
 
 // MARK: - Gyro pulse recognizer
 //
-// Implements the single-pulse recognizer proposed in reference.md, section 4. It is a pure file, Foundation
-// only, so the standalone runner in ios/Tests/GyroFlip compiles it on macOS and Linux. It answers the same
-// question as GyroFlipDetector (PR #43) and takes the same inputs, but decides differently:
+// A small, deterministic detector for one deliberate wrist flick. It takes the same inputs as GyroFlipDetector (PR #43)
+// and runs on the same shared motion feed. It has four stages:
 //
-//   * One excursion is one candidate. It starts when the twist-plane rate rises above `startRate` and ends when
-//     it falls back below `endRate`. A return stroke therefore begins a new excursion, which is ignored while the
-//     detector is in cooldown. A flick and its rebound are one gesture, one flip.
-//   * The decision is made once, at the end of the excursion, from measured features only: the peak rate, the
-//     sign-free turn (integral of |rate|, so a snap and its return cannot cancel), the duration, the dominance at
-//     the peak and the strongest user acceleration. The direction is the sign of the rate at the peak, not the
-//     sign of a net angle.
-//   * The signal goes through a low-latency filter (45 ms in PR #43). That filter attenuated short peaks; the
-//     time constant here is 20 ms, so a 0.2 s flick keeps most of its measured peak.
-//   * Hysteresis: arming needs `startRate`, the excursion ends at `endRate`, and re-arming needs a calm phone for
-//     `rearmCalm` seconds after the cooldown (settling before re-arming).
+//   1. Pulse. A quick twist about the device's long axis or screen normal: the twist-plane rate rises above `startRate`
+//      while most of the rotation is in that plane. The pulse ends when the rate falls below `endRate`, or reverses while
+//      still above it (an oscillation: a shake). Nothing else starts a pulse.
+//   2. Intent. A pulse counts only if it is fast enough (peak at least `peakRate`), large enough (turn, the integral of
+//      |rate| over the pulse, at least `minTurn`), not shake-like (acceleration below `maxUserAcceleration`, and no
+//      reversal during a short confirmation window) and not sustained rotation (no longer than `maxDuration`).
+//      Quick small wrist wiggles fail on turn. Tilting and repositioning fail on the axis share and on acceleration.
+//   3. Flip once. The direction is the sense of rotation about the device axis that dominates the peak, not the sign
+//      of a net angle, so the grip cannot invert it. A flick and its return stroke are one gesture: the return falls
+//      inside the cooldown and is logged as ignored.
+//   4. Reset. After a flip, the detector waits for the cooldown and for the phone to settle before it can arm again.
+//      A rejected pulse also needs a calm phone before arming. Suppression (touch, sheet, animation, Reduce Motion,
+//      inactive scene, Off) cancels any pulse in progress.
 //
-// The numbers below are engineering hypotheses. They are validated on synthetic traces here, and they must be
-// confirmed on recordings from a physical iPhone (see the calibration procedure in the spec) before any claim of
-// physical accuracy.
+// Only the filter's time constant changed from PR #43 in the measurement path (20 ms instead of 45 ms), so a 0.2 s flick
+// keeps most of its measured peak. The numbers are engineering choices. Synthetic traces check the logic; the owner
+// calibration on a physical iPhone sets the thresholds (see the spec).
 
-/// Tunable parameters of the pulse recognizer. Defaults keep the PR #43 thresholds that the team already reviewed;
-/// only the filter time constant and the decision structure changed. Each change is listed in the spec.
+/// Tunable parameters of the pulse recognizer. Defaults are the plan's values except `minTurn`, which moved to the
+/// synthetic knee (0.35 rad) and awaits the physical calibration. Each change is listed in the spec.
 struct GyroPulseConfiguration: Equatable {
     /// Longest step integrated in one sample (s).
     var maxStep = 0.05
@@ -39,20 +40,20 @@ struct GyroPulseConfiguration: Equatable {
     var calmRate = 0.35
     /// The excursion peak must reach this (rad/s, about 126 degrees/s).
     var peakRate = 2.2
-    /// The turn (integral of |rate| over the excursion, rad) must reach this, about 32 degrees.
-    var minTurn = 0.55
-    /// Excursion duration, from the start crossing to the end (s).
-    var minDuration = 0.12
+    /// The turn (integral of |rate| over the excursion, rad) must reach this. Synthetic evidence put the knee here:
+    /// below it, quick small wrist wiggles flip; above it, recognition falls away. Calibrate on the device.
+    var minTurn = 0.35
+    /// An excursion longer than this (s) is sustained rotation, not a flick.
     var maxDuration = 0.45
-    /// The share of the rotation in the twist direction, at the peak, must reach this.
+    /// A flick must start with at least this share of its rotation in the twist plane. Rejects pitching and rolling.
     var minDominance = 0.75
     /// Acceleration evidence: a user acceleration at or above this (g) rejects the excursion as a shake or a
     /// translation. Shipped at 1.5 g: a vigorous flick alone produces about 1.2 g at the accelerometer.
     var maxUserAcceleration = 1.5
-    /// Confirmation window after the excursion has passed every rule (s). During it, a reversal of at least
+    /// Confirmation window after the excursion has passed its rules (s). During it, a reversal of at least
     /// `shakeAmplitude` times the peak, or a user acceleration at the limit, rejects the excursion as oscillation.
-    /// Chosen on the development seeds: 0.03 s removed the hand-shake and mixed-motion false flips with no loss of
-    /// recognition, and kept p95 latency near 220 ms. Longer windows add latency without further gain. Zero disables.
+    /// Chosen on the development seeds: 0.03 s removed the hand-shake false flips, kept p95 latency near 220 ms.
+    /// Zero disables it.
     var confirmWindow = 0.03
     /// A reversal this large, as a fraction of the peak, inside the confirmation window marks oscillation.
     var shakeAmplitude = 0.5
@@ -124,7 +125,6 @@ struct GyroPulseDetector {
     /// The filtered rotation vector at the peak. The flip direction comes from its dominant device axis.
     private var peakVector = GyroVector.zero
     private var confirmDeadline: TimeInterval = 0
-    private var dominanceAtPeak = 0.0
     private var accelerationPeak = 0.0
     private var calm = 0.0
     /// For `.yz`: the unit twist direction fixed when an excursion starts.
@@ -154,7 +154,6 @@ struct GyroPulseDetector {
         peakSign = 0
         peakVector = .zero
         confirmDeadline = 0
-        dominanceAtPeak = 0
         accelerationPeak = 0
         calm = 0
         planeY = 0
@@ -246,7 +245,6 @@ struct GyroPulseDetector {
         turn = 0
         peak = 0
         peakSign = 0
-        dominanceAtPeak = 0
         accelerationPeak = 0
         calm = 0
     }
@@ -265,7 +263,6 @@ struct GyroPulseDetector {
         peak = 0
         peakSign = 0
         peakVector = .zero
-        dominanceAtPeak = 0
         accelerationPeak = 0
         calm = 0
         return direction
@@ -335,7 +332,6 @@ struct GyroPulseDetector {
             turn = 0
             peak = 0
             peakSign = 0
-            dominanceAtPeak = 0
             accelerationPeak = acceleration
             if twistAxis == .yz {
                 let r = max(armed, 0.001)
@@ -362,14 +358,12 @@ struct GyroPulseDetector {
                 return nil
             }
             let p = projected(filtered)
-            let share = abs(p) / max(0.001, filtered.magnitude)
             turn += abs(p) * step
             if abs(p) > peak {
                 peak = abs(p)
                 peakTime = t
                 peakSign = p >= 0 ? 1 : -1
                 peakVector = filtered
-                dominanceAtPeak = share
             }
             if age > c.maxDuration {
                 endExcursion(rejected: "too long", to: .settling, now: t)
@@ -382,16 +376,12 @@ struct GyroPulseDetector {
             let reversed = p * peakSign < 0
             guard abs(p) < c.endRate || reversed else { return nil }
 
-            // The excursion has ended. Decide from the measured features; a pass starts the confirmation window.
+            // The excursion has ended. Intent is the measured peak and turn; a pass starts the confirmation window.
             let reason: String?
             if peak < c.peakRate {
                 reason = "too weak, peak \(String(format: "%.1f", peak))"
             } else if turn < c.minTurn {
                 reason = "too small, turn \(String(format: "%.2f", turn))"
-            } else if age < c.minDuration {
-                reason = "too brief, \(String(format: "%.2f", age)) s"
-            } else if dominanceAtPeak < c.minDominance {
-                reason = "wrong axis (share \(String(format: "%.2f", dominanceAtPeak)))"
             } else {
                 reason = nil
             }

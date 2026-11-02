@@ -50,6 +50,9 @@ enum CorpusFamily: String, CaseIterable {
     case walking = "walking sway"
     case handShake = "hand shake"
     case pickUp = "pick up / reposition"
+    case quickWiggle = "quick small wiggle"
+    case pitchWithLeak = "pitch with twist leak"
+    case setDown = "set-down tap"
 }
 
 /// Builds trials. Times are seconds from the first sample. Sampling is nominally 60 Hz with jitter; dropouts,
@@ -178,6 +181,35 @@ enum Corpus {
                 return GyroVector(x: lift, y: 0.3 * lift, z: 0)
             }
             accelAt = { t in t > start + 0.1 && t < start + 0.1 + 0.4 ? GyroVector(x: 0, y: 0, z: transl) : .zero }
+        case .quickWiggle:
+            // A quick, small wrist wiggle: about 10 to 20 degrees, fast enough to reach the peak requirement.
+            let start = rng.range(1, 3), dur = rng.range(0.12, 0.22)
+            let amp = rng.range(0.15, 0.35)
+            let sign = rng.next() < 0.5 ? 1.0 : -1.0
+            let grip = rng.range(-0.4, 0.4)
+            rateAt = { t in
+                let r = sign * minJerk(t - start, duration: dur, angle: amp)
+                return GyroVector(x: 0, y: r * cos(grip), z: r * sin(grip))
+            }
+            accelAt = { t in t > start && t < start + dur ? GyroVector(x: 0.15, y: 0, z: 0) : .zero }
+        case .pitchWithLeak:
+            // Raising the phone while it also rolls: mostly about x, with a leak into the twist plane that can exceed
+            // the start rate.
+            let start = rng.range(1, 3), dur = rng.range(0.25, 0.5)
+            let amp = rng.range(0.6, 1.2)
+            let sign = rng.next() < 0.5 ? 1.0 : -1.0
+            let leak = rng.range(0.5, 0.8)
+            rateAt = { t in
+                let pitch = sign * minJerk(t - start, duration: dur, angle: amp)
+                return GyroVector(x: pitch, y: leak * pitch, z: 0)
+            }
+            accelAt = { t in t > start && t < start + dur ? GyroVector(x: 0.3, y: 0, z: 0) : .zero }
+        case .setDown:
+            // Putting the phone down: a sharp linear knock with little rotation.
+            let start = rng.range(1, 3)
+            let knock = rng.range(1.0, 1.6)
+            rateAt = { t in GyroVector(x: 0.2 * sin(2 * .pi * 20 * (t - start)) * (t > start && t < start + 0.05 ? 1 : 0), y: 0, z: 0) }
+            accelAt = { t in t > start && t < start + 0.03 ? GyroVector(x: 0, y: 0, z: knock) : .zero }
         case .naturalPositive, .naturalNegative:
             fatalError("use naturalFlick")
         }

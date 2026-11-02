@@ -33,7 +33,8 @@ enum GyroTuning {
     static var startRate = GyroFlipConfiguration.initial.startRate
     static var peakRate = GyroFlipConfiguration.initial.peakRate
     static var minDominance = GyroFlipConfiguration.initial.minDominance
-    static var minAngle = GyroFlipConfiguration.initial.minAngle
+    /// The recognizer's minimum turn (rad). Synthetic evidence puts the knee near 0.35; the physical calibration sets it.
+    static var minAngle = GyroPulseConfiguration.shipped.minTurn
     static var maxDuration = GyroFlipConfiguration.initial.maxDuration
     static var maxAcceleration = GyroFlipConfiguration.shipped.maxUserAcceleration
     static var cooldown = GyroFlipConfiguration.shipped.cooldown
@@ -84,6 +85,10 @@ enum GyroTraceSettings {
     static let enabledKey = "arooma.gyroTraceRecording"
     /// The file name of the last trace written, so View & Style can offer to share it.
     static let lastFileKey = "arooma.gyroLastTraceFile"
+    /// What the owner is doing in the next recording: "flick+", "flick-" or "ordinary". Owner tools only.
+    static let labelKey = "arooma.gyroTraceLabel"
+    /// How many actions the owner will perform in that recording.
+    static let countKey = "arooma.gyroTraceCount"
 
     /// The last trace file on this iPhone, if it still exists. Owner tools only.
     static var lastFileURL: URL? {
@@ -109,10 +114,14 @@ final class GyroTraceRecorder {
     private(set) var active = false
     private var samples: [GyroSample] = []
     private var events: [(label: String, time: Double, latency: Double?)] = []
+    private var label = ""
+    private var expected = 0
 
     func start() {
         samples = []
         events = []
+        label = UserDefaults.standard.string(forKey: GyroTraceSettings.labelKey) ?? "flick+"
+        expected = max(0, UserDefaults.standard.integer(forKey: GyroTraceSettings.countKey))
         active = true
     }
 
@@ -133,7 +142,7 @@ final class GyroTraceRecorder {
         guard !samples.isEmpty else { return nil }
         let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
         let name = "gyro-trace-\(stamp).jsonl"
-        let file = GyroTraceFile(note: note, samples: samples, liveEvents: events)
+        let file = GyroTraceFile(label: label, expected: expected, note: note, samples: samples, liveEvents: events)
         samples = []
         events = []
         guard let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
@@ -400,6 +409,8 @@ struct GyroFlipSettingRow: View {
     @AppStorage(GyroFlipSettings.enabledKey) private var enabled = true
     @AppStorage(MotionHUDSettings.key) private var showReadout = false
     @AppStorage(GyroTraceSettings.enabledKey) private var recordTrace = false
+    @AppStorage(GyroTraceSettings.labelKey) private var traceLabel = "flick+"
+    @AppStorage(GyroTraceSettings.countKey) private var traceCount = 20
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Low Power Mode switches the motion sensor off (card foil and wrist flip alike). Saying so here stops a
     /// working feature from looking broken.
@@ -440,6 +451,17 @@ struct GyroFlipSettingRow: View {
                 Toggle("Record a motion trace for the next open card (owner tools)", isOn: $recordTrace)
                     .font(.footnote)
                     .accessibilityIdentifier("gyro-trace-toggle")
+                Picker("Session", selection: $traceLabel) {
+                    Text("Flick +").tag("flick+")
+                    Text("Flick −").tag("flick-")
+                    Text("Ordinary").tag("ordinary")
+                }
+                .pickerStyle(.segmented)
+                .font(.footnote)
+                .accessibilityIdentifier("gyro-trace-label")
+                Stepper("Actions in this session: \(traceCount)", value: $traceCount, in: 1...200, step: 5)
+                    .font(.footnote)
+                    .accessibilityIdentifier("gyro-trace-count")
                 Text("Writes the raw motion readings from that session to a file on this iPhone, for offline replay. Nothing is uploaded.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)

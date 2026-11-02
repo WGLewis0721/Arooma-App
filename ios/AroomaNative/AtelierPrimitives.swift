@@ -186,10 +186,29 @@ struct AtelierCardSurface: View {
         let theme = archive.theme
         let facing = cos(yaw * .pi / 180)
         let lambert = min(0.62, shade + (1 - max(0, facing)) * 0.5)
-        CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo, side: side, radius: radius, videoActive: videoActive)
-            .equatable()
-            .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw, radius: radius, tint: theme.keyLight,
-                                touch: touch, pressure: pressure))
+        Group {
+            if fragranceID == "aventus" && side == .front && photo == nil {
+                // AVPlayerLayer is a native Core Animation surface. A SwiftUI Metal colorEffect
+                // cannot sample it: the GPU replaces the card with a yellow prohibition tile.
+                // Render the video untouched; illuminate a separate SwiftUI-only foil layer.
+                CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo,
+                         side: side, radius: radius, videoActive: videoActive)
+                    .equatable()
+                    .overlay {
+                        VideoSafeFoilSurface(mode: mode, strength: foilStrength, yaw: yaw,
+                                             radius: radius, tint: theme.keyLight,
+                                             touch: touch, pressure: pressure)
+                            .allowsHitTesting(false)
+                    }
+            } else {
+                CardFace(fragranceID: fragranceID, fragrance: fragrance, photoURL: photo,
+                         side: side, radius: radius, videoActive: videoActive)
+                    .equatable()
+                    .modifier(FoilLayer(mode: mode, strength: foilStrength, yaw: yaw,
+                                        radius: radius, tint: theme.keyLight,
+                                        touch: touch, pressure: pressure))
+            }
+        }
             .overlay {
                 if lambert > 0.004 {
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
@@ -278,6 +297,8 @@ struct CardFace: View, Equatable {
                 else { PersonalReverse(fragrance: fragrance) }
             } else if fragranceID == "aventus" && side == .front {
                 LiveAventusScentWorldCard(isPlaying: videoActive)
+            } else if fragranceID == "aventus" && side == .back {
+                AventusScentWorldReverse(fragrance: fragrance)
             } else if side == .back, let autumn = Fall2026Collection.entry(for: fragranceID) {
                 // Same FlipMotor/Metal light as the four originals, with a true
                 // fragrance-specific reverse that never fabricates scent notes.
@@ -403,6 +424,48 @@ private struct FoilLayer: ViewModifier {
             }
         case .none:
             content
+        }
+    }
+}
+
+/// A native AVPlayerLayer cannot participate in SwiftUI's Metal colorEffect sampling.
+/// All holographic processing stays on this independent SwiftUI-generated foil layer.
+/// The video and photo/poster pixels are never run through a shader or offscreen snapshot.
+private struct VideoSafeFoilSurface: View {
+    let mode: FoilMode
+    let strength: Double
+    let yaw: Double
+    let radius: CGFloat
+    let tint: Color
+    let touch: CGPoint
+    let pressure: Double
+
+    @ViewBuilder var body: some View {
+        switch mode {
+        case .live:
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(LinearGradient(
+                    stops: [
+                        .init(color: .white.opacity(0.075), location: 0),
+                        .init(color: .clear, location: 0.29),
+                        .init(color: tint.opacity(0.065), location: 0.55),
+                        .init(color: .white.opacity(0.045), location: 0.69),
+                        .init(color: .clear, location: 1)
+                    ],
+                    startPoint: .init(x: 0.05 - yaw / 200, y: 0),
+                    endPoint: .init(x: 0.96 - yaw / 200, y: 1)))
+                .modifier(LiveFoil(strength: strength * 0.65, yaw: yaw, radius: radius,
+                                   tint: tint, touch: touch, pressure: pressure))
+                .accessibilityHidden(true)
+        case .sheen:
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(LinearGradient(
+                    colors: [.clear, tint.opacity(0.11), .white.opacity(0.075), .clear],
+                    startPoint: .init(x: 0 - yaw / 130, y: 0),
+                    endPoint: .init(x: 1 - yaw / 130, y: 1)))
+                .accessibilityHidden(true)
+        case .none:
+            EmptyView()
         }
     }
 }

@@ -1,0 +1,48 @@
+name: Ingest corrected Imagination Scent World keyframe candidate
+
+on:
+  push:
+    branches:
+      - feature/imagination-living-scent-world-v2-20261102
+    paths:
+      - .github/workflows/ingest-imagination-v2-keyframe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keyframe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch and verify Higgsfield keyframe candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/collectibles/scent-worlds/candidates
+          curl --fail --location --retry 4 --connect-timeout 20 \
+            'https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_142500_78e4311b-8133-4680-87bf-9839675777cf.png' \
+            -o assets/collectibles/scent-worlds/candidates/imagination-v2-keyframe.png
+          echo '72c91eff1174c41ea9cb7a14773bec22c0ce0d23e1caee6a6fcd823143250171  assets/collectibles/scent-worlds/candidates/imagination-v2-keyframe.png' | sha256sum --check
+          python3 - <<'PY'
+          import struct, pathlib
+          png = pathlib.Path("assets/collectibles/scent-worlds/candidates/imagination-v2-keyframe.png").read_bytes()
+          assert png[:8] == b'\x89PNG\r\n\x1a\n', "Not PNG"
+          w,h=struct.unpack(">II",png[16:24])
+          assert (w,h)==(880,1168), f"unexpected resolution {(w,h)}"
+          print("Verified corrected Imagination keyframe (NOT final animated output)")
+          PY
+      - name: Commit immutable candidate PNG
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/collectibles/scent-worlds/candidates/imagination-v2-keyframe.png
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: ingest verified Imagination Scent World video keyframe candidate"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi

@@ -698,41 +698,6 @@ struct AtelierStyle: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                AtelierEyebrow(text: "Arrangement", accent: archive.theme.palette.accent)
-                HStack(spacing: 10) {
-                    ForEach(CardLayout.allCases) { layout in
-                        Button {
-                            withAnimation(reduceMotion ? nil : .snappy) { archive.layout = layout }
-                        } label: {
-                            VStack(spacing: 8) {
-                                LayoutThumbnail(layout: layout, selected: archive.layout == layout,
-                                                accent: archive.theme.palette.accent)
-                                    .frame(height: 74)
-                                Text(layout.rawValue)
-                                    .font(.system(.caption, weight: archive.layout == layout ? .semibold : .regular))
-                                    .foregroundStyle(archive.layout == layout ? archive.theme.palette.accent : .primary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .atelierPlate(16)
-                            .overlay {
-                                if archive.layout == layout {
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .strokeBorder(archive.theme.palette.accent.opacity(0.8), lineWidth: 1.2)
-                                }
-                            }
-                        }
-                        .buttonStyle(PressableCardStyle())
-                        .accessibilityLabel(layout.rawValue)
-                        .accessibilityAddTraits(archive.layout == layout ? .isSelected : [])
-                    }
-                }
-                Text(archive.layout.choreography)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .contentTransition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: archive.layout)
-
                 AtelierEyebrow(text: "Atmosphere", accent: archive.theme.palette.accent)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                     ForEach(FragranceTheme.allCases) { theme in

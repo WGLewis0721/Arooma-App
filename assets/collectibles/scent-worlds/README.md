@@ -15,3 +15,13 @@ This is a **real 8-second AI-generated animation** of a miniature fragrance worl
 ## Native video/Metal compatibility fix (November 2026)
 
 The AVPlayerLayer must **not** be passed through the card's Metal `colorEffect` / `LiveFoil` pipeline. That produced a bright prohibition placeholder on the iPhone even with a valid MP4. `AtelierCardSurface` now keeps the AVPlayerLayer untouched and applies `LiveFoil` only to an independent SwiftUI vector-gradient overlay. Existing holo treatment on static cards stays unchanged. A bundled poster is always underneath the player, and the bundled local MP4 is the only playback source. The front stays live, the reverse shows verified note groups. The native CI verifies both binary files in the compiled app bundle. Runtime playback on physical iPhone still needs owner verification after the new build.
+
+## Louis Vuitton Imagination — approved two-sided static card
+
+- Front: Scent World lives inside the aquamarine Imagination bottle, on a plain dark studio background.
+- Reverse: Minimal structured fragrance note map; two-sided design with matching iridescent edge.
+- Both images are the owner-selected Higgsfield generations listed in the manifest. Their SHA-256 hashes are checked at ingestion.
+- Native ID `imagination` is registered in the catalog and backed by the two bundled PNG resources.
+- `ApprovedArtwork.image(for:side:)` loads the exact files without resizing or rewriting them; the deck's existing SwiftUI foil, gestures, Cover Flow/Stack/Fan, and flip work as for other static approved artworks.
+- **Not animated**: these are still images. This merge does not purport to contain an Imagination video. A separate video generation and native playback integration would be needed for the moving Scent World.
+- Independent Arooma artistic interpretation; no implied Louis Vuitton endorsement.

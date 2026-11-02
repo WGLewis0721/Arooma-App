@@ -22,6 +22,18 @@ enum ApprovedArtwork {
     static func image(for id: String, side: CardSide) -> UIImage? {
         let key = "\(id)-\(side.rawValue)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
+        if id == "imagination" {
+            // Approved, generated two-sided Scent World artwork, bundled for offline use.
+            let resource = side == .front
+                ? "louis-vuitton-imagination-scent-world-front"
+                : "louis-vuitton-imagination-scent-world-reverse"
+            guard let url = Bundle.main.url(forResource: resource, withExtension: "png"),
+                  let loaded = UIImage(contentsOfFile: url.path) else { return nil }
+            let image = loaded.preparingForDisplay() ?? loaded
+            let cost = (image.cgImage?.bytesPerRow ?? 0) * (image.cgImage?.height ?? 0)
+            cache.setObject(image, forKey: key, cost: cost)
+            return image
+        }
         if id == "aventus" {
             // The poster is the same exact first frame as the moving card.
             // It also powers previews, ambient lighting, exports and Reduce Motion.

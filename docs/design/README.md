@@ -37,6 +37,7 @@ Open decisions: [DECISIONS.md](DECISIONS.md).
 | Native navigation, tabs, quick actions, header signature, Gyro Flip | [specs/2026-11-02-native-navigation-v3.md](specs/2026-11-02-native-navigation-v3.md) | [Plan](../../AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md), [V2 spec](specs/2026-11-02-native-navigation-v2.md) (partly superseded) |
 | Native cards, Wishlist, scans, sharing or discovery | [specs/2026-10-31-gesture-first-wishlist-discovery.md](specs/2026-10-31-gesture-first-wishlist-discovery.md) | [Opus prompt](prompts/OPUS_55_GESTURE_FIRST_WISHLIST_DISCOVERY.md), [motion spec](specs/2026-10-31-native-premium-motion-interaction-system.md); no unlicensed catalog |
 | Catalog, image rights, ads or IAP planning | [specs/2026-10-30-unofficial-companion-strategy.md](specs/2026-10-30-unofficial-companion-strategy.md) | [Rights policy](brand/THIRD_PARTY_CONTENT_POLICY.md); strategy is not a publishing license | 
+| Building an animated Scent World card (bottle miniature + real moving scene + foil) | [brand/ANIMATED_SCENT_WORLD_PIPELINE.md](brand/ANIMATED_SCENT_WORLD_PIPELINE.md) | [Aventus native player](../../ios/AroomaNative/Artwork.swift), [production manifest](../../assets/collectibles/scent-worlds/manifest.json); never ship still as animated |
 | Generate an overframe collectible image pair | [packs/collectible-image-generation.md](packs/collectible-image-generation.md) | [brand/COLLECTIBLE_CARD_ART_DIRECTION.md](brand/COLLECTIBLE_CARD_ART_DIRECTION.md) and [production handbook](brand/COLLECTIBLE_CARD_PRODUCTION.md); separate from cabinet cards |
 | A plan, spec sheet, redesign or UI review | [packs/spec-writing.md](packs/spec-writing.md) | [PLAN_SPEC_PROTOCOL.md](PLAN_SPEC_PROTOCOL.md), [specs/TEMPLATE.md](specs/TEMPLATE.md) |
 | The shelf, cards, bottle art, layouts, Daily Pick, low stock, ownership record, test timer, share image | [packs/shelf-change.md](packs/shelf-change.md) | [brand/BRAND_BOARD.md](brand/BRAND_BOARD.md) sections named in the pack |
@@ -70,6 +71,7 @@ All paths are under `docs/design/`.
 | brand/THIRD_PARTY_CONTENT_POLICY.md | Asset provenance, licensing and review | Policy for third-party content planning; not a publication license |
 | specs/2026-10-30-unofficial-companion-strategy.md | Product/business strategy and staged real-catalog rollout | Chosen direction; implementation and image rights gated |
 | brand/COLLECTIBLE_CARD_ART_DIRECTION.md | Locked Dior Archive Foil v3 artwork | Highest for optional collectible art only; does not override cabinet UI |
+| brand/ANIMATED_SCENT_WORLD_PIPELINE.md | Required end-to-end 10-stage process for real animated miniature worlds inside fragrance bottles | Mandatory for living Scent World asset production; does not govern still cards |
 | brand/COLLECTIBLE_CARD_PRODUCTION.md | Human+AI production workflow, copy manifests, prompts and editable layered delivery requirements | Operational for collectible art only |
 | assets/collectibles/templates/archive-foil-v3-{front,back}.svg | Editable artboards outside docs | Current collectible templates |
 | tokens.json | Design tokens | Generated from `index.html` |

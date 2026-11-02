@@ -9,7 +9,6 @@ on:
     paths:
       - '.maestro/**'
       - '.github/workflows/maestro-ios.yml'
-      - 'ios/**'
   workflow_dispatch:
     inputs:
       include_tags:
@@ -20,6 +19,10 @@ on:
         description: 'Skip flows with these tags (comma-separated). Optional.'
         required: false
         default: ''
+# One latest audit run per branch once the audit checklist is finalized.
+concurrency:
+  group: maestro-ux-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   maestro:
     runs-on: macos-26

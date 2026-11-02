@@ -427,6 +427,8 @@ final class Tuning {
                        range: 0.25...1.2, step: 0.05, defaultValue: 0.45, digits: 2) { GyroTuning.maxDuration = $0 },
             TuningSpec(id: "gyro.maxAccel", group: "Wrist flip", label: "Shake limit (g)",
                        range: 0.4...3, step: 0.1, defaultValue: 1.5, digits: 1) { GyroTuning.maxAcceleration = $0 },
+            TuningSpec(id: "gyro.cooldown", group: "Wrist flip", label: "Pause after a flip (s)",
+                       range: 0.3...2.5, step: 0.1, defaultValue: 1.2, digits: 1) { GyroTuning.cooldown = $0 },
 
             TuningSpec(id: "foil.lightTravelX", group: "Holographic foil", label: "Light travel, horizontal (×)",
                        range: 0.2...3, step: 0.05, defaultValue: 1, digits: 2) { FoilTuning.lightTravelX = $0 },

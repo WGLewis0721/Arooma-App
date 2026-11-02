@@ -461,5 +461,43 @@ do {
     check(falseFlips == 0, "100 x-dominant lifts (shipped): \(falseFlips) false flips")
 }
 
+// MARK: 10. The gesture log the owner-tools readout shows
+
+do {
+    var d = shipped()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2)) { d.ingest(s) }
+    let flip = d.history.last
+    check(flip?.outcome == "FLIP +", "a flip is logged as FLIP + and the tail of the same twist adds no entry (got \(flip?.outcome ?? "nil"))")
+    check(d.history.count == 1, "one twist makes one log entry (got \(d.history.count))")
+    check((flip?.peak ?? 0) >= 2.2 && (flip?.angle ?? 0) >= 0.55 && (flip?.duration ?? 0) >= 0.12,
+          "the log carries the measured peak, angle and duration")
+    check(flip?.axis == "y0.00 z1.00", "a twist about the screen normal is logged with its axis (got \(flip?.axis ?? "nil"))")
+
+    var slow = shipped()
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.9, angle: 0.8, axis: 2)) { slow.ingest(s) }
+    check(slow.history.contains { $0.outcome.hasPrefix("rejected") }, "a slow turn is logged as rejected, with a reason")
+    check(!slow.history.contains { $0.outcome.hasPrefix("FLIP") }, "...and not as a flip")
+
+    var again = shipped()
+    for s in makeTrace(seconds: 3, rate: sum([twist(at: 0.5, duration: 0.35, angle: 0.8, axis: 2),
+                                               twist(at: 0.9, duration: 0.35, angle: -0.8, axis: 2)])) { again.ingest(s) }
+    check(again.history.contains { $0.outcome == "missed: cooldown" }, "the return twist inside the cooldown is logged as missed")
+
+    // A twist-like motion with too much acceleration is logged, not silently ignored.
+    var hard = shipped()
+    let heavy: AccelFn = { t in (t > 0.45 && t < 0.75) ? GyroVector(x: 2.0, y: 0, z: 0) : GyroVector.zero }
+    for s in makeTrace(seconds: 3, rate: twist(at: 0.5, duration: 0.2, angle: 1.2), accel: heavy) { hard.ingest(s) }
+    check(hard.history.contains { $0.outcome.hasPrefix("missed: shake") }, "a flick above the shake limit is logged as a shake")
+    check(!hard.history.contains { $0.outcome.hasPrefix("FLIP") }, "...and does not flip")
+
+    // The log never grows past its limit, however long the shaking.
+    var shaken = shipped()
+    let shakeRate: RateFn = { t in GyroVector(x: 0, y: 9.0 * sin(2 * .pi * 2.5 * t), z: 0) }
+    let shakeAcc: AccelFn = { t in GyroVector(x: 1.0 + abs(sin(2 * .pi * 2.5 * t)) * 1.5, y: 0, z: 0) }
+    for s in makeTrace(seconds: 20, rate: shakeRate, accel: shakeAcc) { shaken.ingest(s) }
+    check(shaken.history.count <= GyroFlipDetector.historyLimit, "the gesture log is capped at \(GyroFlipDetector.historyLimit)")
+    check(!shaken.history.contains { $0.outcome.hasPrefix("FLIP") }, "20 s of violent shaking never flips")
+}
+
 print("Gyro flip: \(passes) checks passed, \(failures) failed")
 exit(failures == 0 ? 0 : 1)

@@ -36,6 +36,7 @@ enum GyroTuning {
     static var minAngle = GyroFlipConfiguration.initial.minAngle
     static var maxDuration = GyroFlipConfiguration.initial.maxDuration
     static var maxAcceleration = GyroFlipConfiguration.shipped.maxUserAcceleration
+    static var cooldown = GyroFlipConfiguration.shipped.cooldown
 
     static var configuration: GyroFlipConfiguration {
         var c = GyroFlipConfiguration.shipped
@@ -47,6 +48,7 @@ enum GyroTuning {
         c.minAngle = minAngle
         c.maxDuration = maxDuration
         c.maxUserAcceleration = maxAcceleration
+        c.cooldown = cooldown
         c.axisTilt = axisTiltDegrees * Double.pi / 180
         return c
     }
@@ -67,6 +69,8 @@ struct GyroDiagnostics {
     var phase = ""
     var outcome = ""
     var blocked = ""
+    /// The last few gestures, oldest first.
+    var history: [GyroFlipDetector.GestureRecord] = []
 }
 
 @MainActor
@@ -152,6 +156,7 @@ final class GyroFlipController {
         if covered { reasons.append("sheet") }
         if flip?.model.isAnimating ?? false { reasons.append("flipping") }
         d.blocked = reasons.isEmpty ? "-" : reasons.joined(separator: ",")
+        d.history = detector.history
         return d
     }
 
@@ -266,6 +271,16 @@ struct MotionHUD: View {
                         Text("rad/s  x \(f(g.rate.x))  y \(f(g.rate.y))  z \(f(g.rate.z))")
                         Text("twist \(f(g.twistRate))  axis share \(f(g.dominance))  peak 3s \(f(g.peakTwist))")
                         Text("last \(g.outcome)  blocked by \(g.blocked)")
+                        Text("recent gestures, newest first (pk rad/s, ang rad, dur s, acc g)")
+                            .foregroundStyle(.secondary)
+                        if g.history.isEmpty {
+                            Text("none yet: flick the phone")
+                        }
+                        ForEach(Array(g.history.suffix(5).reversed().enumerated()), id: \.offset) { _, r in
+                            Text("\(r.outcome)  pk \(f1(r.peak)) ang \(f2(r.angle)) dur \(f2(r.duration)) acc \(f1(r.acceleration)) \(r.axis)")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        }
                     }
                 }
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
@@ -279,6 +294,8 @@ struct MotionHUD: View {
     }
 
     private func f(_ v: Double) -> String { String(format: "%+.2f", v) }
+    private func f1(_ v: Double) -> String { String(format: "%.1f", v) }
+    private func f2(_ v: Double) -> String { String(format: "%.2f", v) }
     private func yn(_ v: Bool) -> String { v ? "yes" : "NO" }
 }
 

@@ -22,6 +22,11 @@ enum ApprovedArtwork {
     static func image(for id: String, side: CardSide) -> UIImage? {
         let key = "\(id)-\(side.rawValue)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
+        if id == "aventus" {
+            // The poster is the same exact first frame as the moving card.
+            // It also powers previews, ambient lighting, exports and Reduce Motion.
+            return side == .front ? AventusScentWorldMedia.poster : nil
+        }
         if id.hasPrefix("fall2026-") {
             guard side == .front,
                   let card = Fall2026Collection.entry(for: id),
@@ -93,10 +98,8 @@ struct CollectibleCard: View {
 // development fallback if the video has not been ingested into the bundle yet.
 
 private enum AventusScentWorldMedia {
-    static let remoteVideo = URL(string: "https://d2ol7oe51mr4n9.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/c8178739-0924-4668-a8d2-52449cfc34b0.mp4")!
-    static var video: URL {
-        Bundle.main.url(forResource: "creed-aventus-live-card", withExtension: "mp4") ?? remoteVideo
-    }
+    // Bundle-first, offline-only. No network fetches inside an animation frame.
+    static let video: URL? = Bundle.main.url(forResource: "creed-aventus-live-card", withExtension: "mp4")
     static let poster: UIImage? = {
         guard let file = Bundle.main.url(forResource: "creed-aventus-live-card-poster", withExtension: "jpg") else { return nil }
         return UIImage(contentsOfFile: file.path)?.preparingForDisplay()
@@ -111,7 +114,13 @@ struct LiveAventusScentWorldCard: View {
     var body: some View {
         ZStack {
             if let poster = AventusScentWorldMedia.poster {
-                Image(uiImage: poster).resizable().scaledToFill()
+                GeometryReader { bounds in
+                    Image(uiImage: poster)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: bounds.size.width, height: bounds.size.height)
+                        .clipped()
+                }
             } else {
                 Rectangle()
                     .fill(LinearGradient(
@@ -128,8 +137,9 @@ struct LiveAventusScentWorldCard: View {
                 .padding(16)
             }
             // The AVPlayer is not mounted for cards outside the focused deck slot.
-            if isPlaying && !reduceMotion && scenePhase == .active {
-                AventusLoopingVideo()
+            if isPlaying && !reduceMotion && scenePhase == .active,
+               let videoURL = AventusScentWorldMedia.video {
+                AventusLoopingVideo(url: videoURL)
                     .allowsHitTesting(false) // Keep tap, drag and flip gestures native.
             }
         }
@@ -141,13 +151,14 @@ struct LiveAventusScentWorldCard: View {
 }
 
 private struct AventusLoopingVideo: UIViewRepresentable {
+    let url: URL
     func makeUIView(context: Context) -> AventusVideoLayerView {
         let view = AventusVideoLayerView()
-        view.start()
+        view.start(url: url)
         return view
     }
     func updateUIView(_ uiView: AventusVideoLayerView, context: Context) {
-        uiView.start()
+        uiView.start(url: url)
     }
     static func dismantleUIView(_ uiView: AventusVideoLayerView, coordinator: ()) {
         uiView.stop()
@@ -167,12 +178,12 @@ private final class AventusVideoLayerView: UIView {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func start() {
+    func start(url: URL) {
         if queue == nil {
             let player = AVQueuePlayer()
             player.isMuted = true
             player.allowsExternalPlayback = false
-            let item = AVPlayerItem(url: AventusScentWorldMedia.video)
+            let item = AVPlayerItem(url: url)
             looper = AVPlayerLooper(player: player, templateItem: item)
             queue = player
             (layer as? AVPlayerLayer)?.player = player
@@ -187,4 +198,78 @@ private final class AventusVideoLayerView: UIView {
         queue = nil
     }
     deinit { queue?.pause() }
+}
+
+
+// A proper reverse, never a generic unavailable-art tile or an invented rarity.
+struct AventusScentWorldReverse: View {
+    let fragrance: Fragrance?
+    private let gold = Color(hex: 0xE9C68C)
+
+    var body: some View {
+        GeometryReader { geometry in
+            let unit = geometry.size.width / 720
+            ZStack {
+                LinearGradient(
+                    colors: [Color(hex: 0x24212A), Color(hex: 0x171923), Color(hex: 0x30251F)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing)
+                RoundedRectangle(cornerRadius: 24 * unit, style: .continuous)
+                    .strokeBorder(gold.opacity(0.86), lineWidth: max(0.8, 3 * unit))
+                    .padding(22 * unit)
+                RoundedRectangle(cornerRadius: 20 * unit, style: .continuous)
+                    .strokeBorder(gold.opacity(0.35), lineWidth: max(0.5, unit))
+                    .padding(34 * unit)
+                VStack(alignment: .leading, spacing: 18 * unit) {
+                    HStack {
+                        Text("AROOMA").tracking(4 * unit)
+                        Spacer()
+                        Text("SCENT WORLD").tracking(2.5 * unit)
+                    }
+                    .font(.system(size: max(8, 21 * unit), weight: .medium))
+                    .foregroundStyle(gold.opacity(0.9))
+                    Spacer(minLength: 0)
+                    Text(fragrance?.house.uppercased() ?? "CREED")
+                        .font(.system(size: max(9, 27 * unit), weight: .semibold))
+                        .tracking(4 * unit)
+                        .foregroundStyle(gold)
+                    Text(fragrance?.name ?? "Aventus")
+                        .font(.system(size: max(23, 67 * unit), design: .serif))
+                        .foregroundStyle(.white)
+                    Text("EAU DE PARFUM  ·  2010")
+                        .font(.system(size: max(8, 18 * unit), weight: .medium))
+                        .tracking(1.4 * unit)
+                        .foregroundStyle(gold.opacity(0.8))
+                    Rectangle().fill(gold.opacity(0.6)).frame(height: max(0.5, 1.5 * unit))
+                        .padding(.vertical, 18 * unit)
+                    noteRow("TOP", fragrance?.top ?? ["Calabrian Bergamot", "Sicilian Lemon", "Blackcurrant Leaf"], unit: unit)
+                    noteRow("HEART", fragrance?.heart ?? ["Pineapple", "Pink Pepper", "Jasmine"], unit: unit)
+                    noteRow("BASE", fragrance?.base ?? ["Birch", "Patchouli", "Musk"], unit: unit)
+                    Spacer(minLength: 0)
+                    Text("A SCENT IMAGINED AS A LIVING WORLD")
+                        .font(.system(size: max(8, 17 * unit), weight: .medium))
+                        .tracking(1.8 * unit)
+                        .foregroundStyle(gold.opacity(0.77))
+                }
+                .padding(60 * unit)
+                .frame(width: geometry.size.width, height: geometry.size.height)
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .clipped()
+        }
+        .aspectRatio(59.0 / 86.0, contentMode: .fit)
+    }
+
+    private func noteRow(_ name: String, _ notes: [String], unit: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: max(4, 7 * unit)) {
+            Text(name)
+                .font(.system(size: max(9, 19 * unit), weight: .semibold))
+                .tracking(3 * unit)
+                .foregroundStyle(gold)
+            Text(notes.joined(separator: "  ·  "))
+                .font(.system(size: max(11, 25 * unit), design: .serif))
+                .foregroundStyle(.white.opacity(0.92))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 }

@@ -11,3 +11,7 @@ This is a **real 8-second AI-generated animation** of a miniature fragrance worl
 - The owner's actual preview remains usable on iPhone: https://d2ol7oe51mr4n9.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/c8178739-0924-4668-a8d2-52449cfc34b0.mp4
 
 **Review gates:** preview on an actual iPhone, confirm moving sunrise/valley/leaves, frame registration and text readability, flip and swipe behavior, Reduce Motion, thermal impact, and offline resource loading. Do not claim TestFlight release or rights clearance from this PR. This project is independent of Creed and is not endorsed by its fragrance house. See `docs/design/brand/THIRD_PARTY_CONTENT_POLICY.md`.
+
+## Native video/Metal compatibility fix (November 2026)
+
+The AVPlayerLayer must **not** be passed through the card's Metal `colorEffect` / `LiveFoil` pipeline. That produced a bright prohibition placeholder on the iPhone even with a valid MP4. `AtelierCardSurface` now keeps the AVPlayerLayer untouched and applies `LiveFoil` only to an independent SwiftUI vector-gradient overlay. Existing holo treatment on static cards stays unchanged. A bundled poster is always underneath the player, and the bundled local MP4 is the only playback source. The front stays live, the reverse shows verified note groups. The native CI verifies both binary files in the compiled app bundle. Runtime playback on physical iPhone still needs owner verification after the new build.

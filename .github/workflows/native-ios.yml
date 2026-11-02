@@ -53,6 +53,10 @@ jobs:
           app="$RUNNER_TEMP/AroomaBuild/Build/Products/Debug-iphonesimulator/Arooma.app"
           test -f "$app/catalog.json"
           test -f "$app/Assets.car"
+          # The MP4 and still poster must actually be in the .app bundle.
+          # Compilation alone does not prove offline Scent World playback is possible.
+          test -s "$app/creed-aventus-live-card.mp4"
+          test -s "$app/creed-aventus-live-card-poster.jpg"
           xcrun --sdk iphonesimulator assetutil --info "$app/Assets.car" > "$RUNNER_TEMP/arooma-assets.json"
           python3 - "$RUNNER_TEMP/arooma-assets.json" <<'PY'
           import json, pathlib, sys

@@ -65,14 +65,14 @@ struct AtelierWelcome: View {
                         Button(action: openDemo) {
                             Text("Explore the Archive")
                                 .font(.headline)
-                                .frame(maxWidth: .infinity, minHeight: 40)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.glassProminent)
                         .legibleTint(accent)
                         Button(action: openMine) {
                             Text("Start My Collection")
                                 .font(.subheadline.weight(.semibold))
-                                .frame(maxWidth: .infinity, minHeight: 36)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.glass)
                     }
@@ -265,7 +265,7 @@ struct ShelfLedge: View {
                     .foregroundStyle(.secondary)
                     .contentTransition(.numericText(value: Double(cards.count)))
                 Button(action: rename) {
-                    Image(systemName: "pencil").frame(width: 30, height: 30)
+                    Image(systemName: "pencil").frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -376,7 +376,7 @@ struct ShelfOverview: View {
                 Button {
                     withAnimation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.88)) { progress = 0 }
                 } label: {
-                    Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).frame(width: 30, height: 30)
+                    Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -760,7 +760,7 @@ struct AtelierStyle: View {
                         Label("Show signature", systemImage: "sparkles")
                             .font(.subheadline.weight(.medium))
                     }
-                    .frame(maxWidth: .infinity, minHeight: 40)
+                    .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.glass)
                 .accessibilityLabel("Show the Arooma signature")
@@ -1190,7 +1190,7 @@ struct AtelierWearLog: View {
                 }
                 Spacer(minLength: 0)
                 Button { selected.removeAll(); impression = "" } label: {
-                    Image(systemName: "xmark").font(.caption.weight(.bold)).frame(width: 26, height: 26)
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
@@ -1207,7 +1207,7 @@ struct AtelierWearLog: View {
                 Button(action: log) {
                     Label(ids.count > 1 ? "Log this layer" : "Log this wear", systemImage: "checkmark")
                         .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.glassProminent)
                 .legibleTint(accent)
@@ -1215,14 +1215,14 @@ struct AtelierWearLog: View {
                     withAnimation(.snappy) { addingNote.toggle() }
                 } label: {
                     Image(systemName: addingNote ? "text.badge.checkmark" : "text.bubble")
-                        .frame(width: 36, height: 36)
+                        .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
                 .accessibilityLabel("Add an impression")
                 if ids.count > 1 {
                     Button { newLayerName = ""; namingLayer = true } label: {
-                        Image(systemName: "bookmark").frame(width: 36, height: 36)
+                        Image(systemName: "bookmark").frame(width: 44, height: 44)
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)

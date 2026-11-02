@@ -286,9 +286,19 @@ struct GyroFlipSettingRow: View {
     @AppStorage(GyroFlipSettings.enabledKey) private var enabled = true
     @AppStorage(MotionHUDSettings.key) private var showReadout = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Low Power Mode switches the motion sensor off (card foil and wrist flip alike). Saying so here stops a
+    /// working feature from looking broken.
+    @State private var lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if lowPower {
+                Label("Low Power Mode is on, so card foil and wrist flip are paused. Turn it off to use them.",
+                      systemImage: "battery.25percent")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("low-power-note")
+            }
             if MotionField.shared.isSensorAvailable {
                 Toggle("Flip cards with wrist twist", isOn: $enabled)
                     .font(.subheadline)
@@ -313,6 +323,9 @@ struct GyroFlipSettingRow: View {
                     .font(.footnote)
                     .accessibilityIdentifier("motion-readout-toggle")
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name.NSProcessInfoPowerStateDidChange)) { _ in
+            lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
         }
     }
 }

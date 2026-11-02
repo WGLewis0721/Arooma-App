@@ -689,6 +689,7 @@ struct AtelierStyle: View {
     @Environment(\.colorScheme) private var scheme
     @State private var replayingIntro = false
     @State private var tuning = false
+    @State private var showingMotionDiagnostics = false
     private static var versionString: String {
         let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
         let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
@@ -778,6 +779,14 @@ struct AtelierStyle: View {
                 GyroFlipSettingRow()
                     .padding(15)
                     .atelierPlate(16)
+                if BuildChannel.allowsOwnerTools {
+                    Button { showingMotionDiagnostics = true } label: {
+                        Label("Motion diagnostics", systemImage: "waveform.path")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                    }
+                    .buttonStyle(.glass)
+                }
                 // Shown in App Store builds only once a licensed card source exists (App Review 2.1:
                 // no permanently disabled placeholder features). TestFlight keeps it visible.
                 if StylizedCardSettings.licensedSourceAvailable || BuildChannel.allowsOwnerTools {
@@ -785,7 +794,7 @@ struct AtelierStyle: View {
                 }
                 AtelierEyebrow(text: "About", accent: archive.theme.palette.accent)
                 DisclosureGroup("About this archive") {
-                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone, and an open card can turn over with a wrist twist if you leave that on. Motion readings stay on your iPhone and are never stored or sent. Both hold still with Reduce Motion and switch off in Low Power Mode.")
+                    Text("Your collection, photos, and wear history stay on your device. Arooma is not affiliated with the fragrance houses shown. Card foil responds to how you hold your iPhone, and an open card can turn over with a wrist twist if you leave that on. Motion readings stay on your iPhone and are never stored or sent. The costly foil effect is disabled in Low Power Mode, while the wrist-twist detector can continue using the shared motion sensor at a reduced rate. Both motion effects pause under Reduce Motion.")
                         .font(.footnote).foregroundStyle(.secondary)
                         .padding(.top, 6)
                 }
@@ -818,6 +827,10 @@ struct AtelierStyle: View {
         .scrollContentBackground(.hidden)
         .fullScreenCover(isPresented: $replayingIntro) { SignatureReplay().environmentObject(archive) }
         .sheet(isPresented: $tuning) { TuningPanel() }
+        .sheet(isPresented: $showingMotionDiagnostics) {
+            NavigationStack { MotionDiagnosticView() }
+                .presentationDetents([.medium, .large])
+        }
     }
 }
 

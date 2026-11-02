@@ -1,0 +1,13 @@
+frame, highlight mass, centroid x (px in the crop, crop width 360), peak brightness above ink
+v3-sig-explore-t00.png: mass=    11769  centroid_x=248  peak=143
+v3-sig-explore-t01.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t02.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t03.png: mass=    14238  centroid_x=245  peak=149
+v3-sig-explore-t04.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t05.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t06.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t07.png: mass=        0  centroid_x=   -  peak=0
+v3-sig-explore-t08.png: mass=        0  centroid_x=   -  peak=0
+
+frames with a visible highlight: 2 of 9; frames at rest (no highlight on the lettering): 7
+centroid range across highlight frames: 245 .. 248 px (spread 3 of 360)

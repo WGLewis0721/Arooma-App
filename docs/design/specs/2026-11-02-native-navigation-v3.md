@@ -9,7 +9,7 @@ Summary: Arooma's SwiftUI app now has three bottom tabs in this order: Explore, 
 | Branch | `feat/arooma-v3`, from `origin/main` at `1a477c9` |
 | Scope | `ios/AroomaNative/`, `ios/Tests/GyroFlip/`, `.maestro/`, one step in `.github/workflows/native-ios.yml`, design docs |
 | Not in scope | Merge, TestFlight, deployment, signing, bundle ID, persisted record schema, the PWA, deleting any saved data |
-| Status | Implemented and merged to `main` at the owner's request, **before any Maestro flow had run on the V3 build**. Verified: compiles, Gyro Flip detector unit tests pass (94 checks), flow syntax passes. NOT verified: every behaviour that needs a running app (the tab-bar hold above all). No physical-iPhone validation. See the evidence README. |
+| Status | Merged to `main` at the owner's request before any Maestro flow had run. First Maestro results (iOS 26 Simulator): 12 of 15 new flows and 4 of 14 existing flows passed; the press-and-hold passes. Fixes for the failures are in a follow-up PR whose confirming runs were not finished when it was merged. Detector unit tests pass (94 checks). No physical-iPhone validation. See the evidence README. |
 
 ## What changed
 
@@ -18,7 +18,7 @@ Summary: Arooma's SwiftUI app now has three bottom tabs in this order: Explore, 
 | Tabs | `AtelierTab` is `explore`, `myCollection`, `search`. No Today tab, no Cards tab, no bottom accessory. Search is the existing `AtelierSearch` as a real tab; a result opens its Inspector from inside the tab and changes no selection. | `AroomaApp.swift` |
 | Explore | The "EXPLORE" label and the Search icon are gone. The header is the signature at the left and one View & Style control. | `AtelierGallery.swift` |
 | Fragrance identity | House, name, then the concentration and scent-note line **directly beneath the name**, then the contextual actions. Nothing sits between title and notes. | `AtelierGallery.identity` |
-| My Collection | Signature left, Owned/Wishlist control right. Low on the screen, labelled controls: Shelves, Wear log, Add. The Wear today and Layer buttons stay, so one-tap wear works without a long press. Controls are hidden while the deck is empty (the empty state has the one Add). | `MyCollectionScreen` |
+| My Collection | Signature left, Owned/Wishlist control right. Low on the screen, labelled controls: Shelves, Wear log, Add. The Wear today and Layer buttons stay, so one-tap wear works without a long press. Shelves and the Wear log stay in the owned view even on an empty collection; Add is hidden then, because the empty state's own button (same identifier) is the single Add. | `MyCollectionScreen` |
 | Wear log | The existing `AtelierWearLog` (wear, layer, saved combinations, history, undo) in a sheet from My Collection. Layer on a card opens it with that bottle chosen. | `AtelierRoot.showingWearLog` |
 | Quick actions | Hold the My Collection tab: column with Wishlist, Add, Wear, directly above the tab. A tap on the tab still navigates. | `QuickActions.swift` |
 | Wear | Resolves the owner-selected owned bottle from `selectedMineID`, validated against `bottles`. One session through `recordWear`, which now returns the session id. A confirmation "Worn today · Name" with Undo that reverses only that session. A bottle already worn today shows "Worn today" and cannot be logged again. With no valid owned selection the row is disabled: "Select a bottle in My Collection". | `QuickWearAvailability`, `CollectionStore.recordWear` |
@@ -28,7 +28,7 @@ Summary: Arooma's SwiftUI app now has three bottom tabs in this order: Explore, 
 
 ## Decisions and judgement calls (for owner review)
 
-- **The tab hold is a UIKit hook.** `TabView` gives a `Tab` no long-press, so a `UILongPressGestureRecognizer` is added to the system `UITabBar`. It begins only on the My Collection item, found by accessibility label with equal thirds as a fallback. The system tab bar is not rebuilt. `AtelierRoot` also reverts any tab change the hold itself causes. **Not yet run on any simulator or device**: it compiles, nothing more is established.
+- **The tab hold is a UIKit hook.** `TabView` gives a `Tab` no long-press, so a `UILongPressGestureRecognizer` is added to the system `UITabBar`. It begins only on the My Collection item, found by accessibility label with equal thirds as a fallback. The system tab bar is not rebuilt. `AtelierRoot` also reverts any tab change the hold itself causes. It passes on the iOS 26 Simulator (`collection-long-press-actions`); it has not been tried on a physical iPhone.
 - **Add is shown once in the lower area** of My Collection, as a labelled control, so users who never long-press can still add. The long-press Add is the shortcut to the same sheet. The old top-right + is gone. Reading "avoid duplicating the contextual Add shortcut" this way is a judgement call.
 - **Wear target.** The row names the bottle it will log. While My Collection's owned deck is on screen, the card in front is synced into `selectedMineID` (a first bottle has no stored selection until then). From Explore or Wishlist the last owned selection is used and named; a Wishlist or sample card is never inferred to be owned.
 - **Wear confirmation** lasts 6 s. QA builds can lengthen it with `-AroomaQAUndoWindow <seconds>`, the argument the Quick Add flows already use.

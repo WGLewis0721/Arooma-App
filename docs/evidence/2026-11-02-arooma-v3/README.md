@@ -2,81 +2,104 @@
 
 > Part of the [Arooma design brain](../../design/README.md). Companion to the [V3 implementation record](../../design/specs/2026-11-02-native-navigation-v3.md) and the [plan](../../../AROOMA_NAVIGATION_V3_QUICK_ACTIONS.md).
 
-**Read this first.** V3 was merged at the owner's request *before any Maestro flow had run on the V3 build*. What is verified is that the app **compiles**, the Gyro Flip detector's **unit tests pass**, and every flow **passes Maestro's syntax check**. What is **not** verified is how the app behaves on a simulator or a phone: the tab-bar press-and-hold, the Wear action, the layout and the signature header have never been seen running. Every row below that depends on that says NOT RUN. Nothing is claimed that did not run.
+**Read this first.** V3 was merged (PR #41) before any Maestro flow had run on it. The first Maestro results arrived afterwards and were mixed: **12 of 15 new flows passed and 4 of 14 existing flows passed**. Most failures were flows that no longer matched the V3 screens, plus one real V3 regression (My Collection hid Shelves and Add on an empty collection), all fixed in the follow-up PR. Whether those fixes work is **not yet verified by a Maestro run**: the confirming runs were still executing when that PR was merged. Nothing here claims a pass that did not happen.
 
-## What was verified
+Every Maestro result below is the iOS 26 Simulator on a GitHub macOS runner. **None of it is a physical iPhone.**
+
+## Verified
 
 | Item | Result | Evidence |
 | --- | --- | --- |
-| BEFORE screenshots on the V2 app | 8 captured (the Inspector capture failed: the Explore deck has no Inspect button) | [`before/`](before/), run [41357109292](https://github.com/WGLewis0721/Arooma-App/actions/runs/41357109292), artifact 13104391734, [`maestro-before/junit.xml`](maestro-before/junit.xml) |
-| Gyro Flip detector unit tests | **PASS: 94 checks, 0 failed.** Synthetic traces on a macOS Swift toolchain. This is classifier logic, not a sensor. | `Native iOS 26 SwiftUI Build` run [41358378384](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358378384), step "Gyro Flip detector unit tests" |
-| Native Debug build and Release-proof build | **PASS** at `78b8343` | same run |
-| Native Debug build with the identity identifiers | **PASS** at `b58b92c` (the "Build Debug simulator app" step of both Maestro runs below) | runs [41358788686](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358788686) and [41358794490](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358794490) |
-| Maestro flow syntax, all 38 flows | **PASS** (the new selector forms `rightOf`, nested `below`, `checked`, `(?-i)`, `pressKey: home` and `launchApp stopApp: false` are valid) | step "Check flow syntax" of both runs |
-| `npm run docs:check`, `npm run test:docs` | **PASS** | run locally before merge |
-| `npm test` | **PASS: 221 checks, 0 failed, exit 0.** This is the self-contained PWA suite; V3 does not touch the PWA, so it shows only that nothing else regressed. | run locally before merge |
+| Gyro Flip detector unit tests | **PASS, 94 checks.** Synthetic traces, not a sensor. | `Native iOS 26 SwiftUI Build` run [41358378384](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358378384) |
+| Native Debug and Release-proof builds | **PASS** for the merged V3 build and for the follow-up commits | runs above, and [41363118023](https://github.com/WGLewis0721/Arooma-App/actions/runs/41363118023) |
+| Maestro flow syntax, all flows | **PASS** | step "Check flow syntax" of every Maestro run |
+| `npm run docs:check`, `npm run test:docs`, `npm test` (221 checks, PWA untouched) | **PASS** | local, before each merge |
+| BEFORE screenshots (V2 app) | 8 captured; the Inspector capture failed | [`before/`](before/), run [41357109292](https://github.com/WGLewis0721/Arooma-App/actions/runs/41357109292) |
+| AFTER screenshots (first V3 build, before the polish commit) | 8 captured | [`after/`](after/) |
 
-## Maestro: NOT RUN at merge time
+## First Maestro results on the V3 build
 
-Two runs were dispatched on `b58b92c` and were still booting their simulators (build passed, flows had not started) when the owner asked to merge without waiting. They are left running; if they finish, their `junit.xml`, screenshots and the signature-sheen analysis should be added in a follow-up.
+Runs [41358788686](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358788686) (new flows) and [41358794490](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358794490) (existing flows), build `b58b92c`. Raw files: [`maestro-first-run/`](maestro-first-run/).
 
-| Run | Selects |
+### New V3 flows: 12 of 15 passed
+
+| Flow | Result | What it showed |
+| --- | --- | --- |
+| `navigation-v3` | PASS | Explore, My Collection, Search in that order; no Today or Cards tab |
+| `collection-long-press-actions` | **PASS** | Holding the My Collection tab shows Wishlist, Add and Wear above it, does not navigate, a tap elsewhere dismisses it, a tap on the tab still navigates |
+| `collection-long-press-wishlist` | PASS | Wishlist row goes straight to the Wishlist view |
+| `collection-long-press-add` | PASS | Add row opens Quick Add; a save returns to My Collection |
+| `collection-long-press-wear-disabled` | PASS | With no owned selection Wear is disabled and says why |
+| `collection-layout-v3` | PASS | Notes directly beneath the name; actions below; one signature |
+| `collection-wear-layer-history` | PASS | Wear, a two-bottle layer, saved combination and history inside My Collection |
+| `card-studio-hidden` | PASS | No Card Studio or My Cards |
+| `signature-header-loop` | PASS | Signature on all three tabs; see "Signature" below |
+| `gyro-flip-settings` | PASS | Switch On by default, persists across a relaunch |
+| `gyro-flip-unavailable` | PASS | With no sensor the row explains instead of showing a dead switch |
+| `gyro-flip-inspector` | PASS | A synthetic twist reaches `FlipMotor` through the real detector; a shake and a tilt do not; a tap still flips |
+| `collection-long-press-wear` | **FAIL at the last step** | Steps 1 to 41 passed: Wear from Explore logged the selected owned bottle with no navigation, a confirmation appeared, a repeat press logged nothing, and Search showed exactly "1 wears · 99% left" for both bottles. The **scoped Undo was not exercised**: the flow's `hideKeyboard` tapped a result, whose Inspector covered the toast |
+| `search-tab-v3` | FAIL (flow) | Looked for a "Filters" button, which does not exist while a search is active |
+| `gyro-flip-off` | **FAIL, unexplained** | With the switch Off and a synthetic twist, the card was on its reverse. The code says it cannot be (no subscription starts when Off), and `gyro-flip-settings` shows the setting persists. Not understood. A QA marker was added to settle it; see the follow-up |
+
+### Existing flows: 4 of 14 passed
+
+| Flow | Result | Cause |
+| --- | --- | --- |
+| `appearance-studio-regression`, `style-sections`, `quick-add-context`, `quick-add-undo` | PASS | |
+| `my-collection-shelves`, `quick-add-wishlist` | FAIL | **Real V3 regression.** My Collection hid Shelves and the Add handle while the collection was empty |
+| `smoke` | FAIL (flow and app) | The Search keyboard covered the tab bar and dragging the results did not dismiss it |
+| `explore-no-mode-menu` | FAIL (flow) | "My collection" (the old menu item) also matches the new "My Collection" tab label |
+| `quick-add-name-owned` | FAIL (flow) | A relaunch lands on Explore by design; the flow expected My Collection |
+| `wishlist-in-my-collection` | FAIL (flow) | After moving the last wish the Wishlist view stays on screen, empty; the flow expected the Owned card |
+| `explore-counter-navigation`, `explore-annotated-cleanup` | FAIL | Maestro's default swipe settled two cards on ("03 / 04") instead of one. Gallery code is unchanged, so this is not shown to be a V3 effect |
+| `explore-insights-frosted` | FAIL | Swipe up did not open the Insights tray. Gallery code unchanged; cause not established |
+| `tuning-presets` | FAIL | Known backlog item F2, unrelated to V3 ([DECISIONS.md](../../design/DECISIONS.md)) |
+
+Several of these flows were written for V2 and were never run against the app before (the [V2 evidence](../2026-11-02-navigation-v2/README.md) is a placeholder), so for them there is no earlier pass to compare with.
+
+## Acceptance (plan section 4)
+
+"Simulator" means the first Maestro run above. Items marked NOT VERIFIED have no run yet.
+
+| Criterion | Result |
 | --- | --- |
-| [41358788686](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358788686) | `include_tags: v3`, the 14 new flows below |
-| [41358794490](https://github.com/WGLewis0721/Arooma-App/actions/runs/41358794490) | `exclude_tags: v3,capture-before`, the updated and unchanged existing flows |
+| (i) Exactly 3 tabs: Explore, My Collection, Search | **PASS, simulator** |
+| (ii) 3 long-press actions, no extra screen for Wear | **PASS, simulator** (hold, Wishlist, Add, Wear steps). Hold on a physical iPhone: NOT RUN |
+| (iii) 1 session per eligible press, no duplicate | **PASS, simulator** (exact "1 wears" after one wear and a repeat press) |
+| (iv) Bottle by id, never a sample or Wishlist card | **PASS, simulator** (Beta logged, Alpha unchanged; disabled-Wear flow). Undo scoped to its own session: **NOT VERIFIED** |
+| (v) Earlier collection, Wishlist, wear, layer, history, search and art retained | **PARTIAL.** Wear, layer, history, Quick Add and Undo, styles and appearance passed. The rest of the existing flows failed for the reasons above and await the re-run |
+| (vi) No visible Card Studio, no saved card lost | **PASS, simulator** for "not visible". Recovery of created cards: open question, see below |
+| (vii) Before and after screenshots; flows reported | **PASS** for the set captured; flow results are in the tables above |
+| Signature: compact mark top left on all tabs | **PASS, simulator.** Smoothness, energy cost and Reduce Motion: NOT RUN |
+| Gyro Flip: toggle, privacy wording, routing, no flip for shake or tilt | **PASS, simulator** (synthetic). **Off means no flip: FAIL, unexplained.** Real thresholds and feel: NOT RUN, no device |
 
-| New flow | What it would verify | Result |
-| --- | --- | --- |
-| `navigation-v3` | Exactly Explore, My Collection, Search in that order; no Today or Cards tab; no Search icon on Explore | NOT RUN |
-| `collection-long-press-actions` | Hold shows exactly Wishlist, Add, Wear above the tab, does not navigate, tap elsewhere dismisses, a tap still navigates | NOT RUN |
-| `collection-long-press-wishlist` | Wishlist row goes straight to the Wishlist view; Owned is one tap back | NOT RUN |
-| `collection-long-press-add` | Add row opens Quick Add; a direct save returns to My Collection; no Card Studio | NOT RUN |
-| `collection-long-press-wear` | One session, one decrement, no duplicate on a repeat press, Undo only that session, no navigation, Explore left on a sample card; counts read from Search | NOT RUN |
-| `collection-long-press-wear-disabled` | Wear disabled with "Select a bottle in My Collection"; a Wishlist or sample focus is never logged | NOT RUN |
-| `collection-layout-v3` | Notes directly beneath the name; actions below; no banner; no My Cards; one signature | NOT RUN |
-| `collection-wear-layer-history` | Solo wear, two-bottle layer, saved combination, history and undo inside My Collection | NOT RUN |
-| `search-tab-v3` | Search tab keeps query and filters across Inspector and back | NOT RUN |
-| `card-studio-hidden` | No Card Studio or My Cards anywhere | NOT RUN |
-| `signature-header-loop` | Header on all three tabs; "EXPLORE" label gone; eight timed frames; background then foreground | NOT RUN |
-| `gyro-flip-settings` | Switch is On by default and persists across a relaunch | NOT RUN |
-| `gyro-flip-unavailable` | With no sensor the row explains instead of showing a dead switch | NOT RUN |
-| `gyro-flip-inspector` | A synthetic twist reaches `FlipMotor` through the real detector; a shake and a tilt do not; tap still flips | NOT RUN |
-| `gyro-flip-off` | With the switch Off, no flip; tap still flips | NOT RUN |
+## Signature
 
-Retired with the UI they covered: `navigation-three-tabs`, `today-preservation`, `return-to-today`, `my-cards-studio`, `explore-search-inspector`. Updated: `smoke`, `explore-annotated-cleanup`, `quick-add-context`.
-
-## Acceptance (plan section 4, quantified definition of done)
-
-| Criterion | Implemented in code | Verified by running |
-| --- | --- | --- |
-| (i) Exactly 3 tabs: Explore, My Collection, Search | Yes (`AtelierTab`, three `Tab`s) | NOT RUN |
-| (ii) 3 long-press actions, 0 extra screens for Wear | Yes | NOT RUN. The hold itself has never been exercised. |
-| (iii) 1 session per eligible press, 0 duplicates | Yes (availability re-resolved at the tap; already-worn shows "Worn today") | NOT RUN |
-| (iv) Bottle by id, Undo scoped by session id, never a sample or Wishlist card | Yes (`selectedMineID` validated against `bottles`; `deleteWearSession`) | NOT RUN |
-| (v) All earlier collection, Wishlist, wear, layer, history, search and art retained | Yes by construction (`AtelierWearLog`, `AtelierSearch`, the deck and records are reused unchanged) | NOT RUN |
-| (vi) No visible Card Studio, no saved card lost | Yes (entry points removed; `CardCommerce` and its data untouched) | NOT RUN |
-| (vii) Before and after screenshots, flows reported PASS/FAIL/NOT RUN | Before: 8 captured. After: none. Flows: all NOT RUN. | PARTIAL |
-| Signature: one compact mark top left, no menu, 6 s loop, paused when inactive, static on Reduce Motion | Yes | NOT RUN. Smoothness, energy and Reduce Motion are untestable by Maestro. |
-| Gyro Flip: pure detector, one `CMMotionManager`, toggle, privacy wording, suppression rules | Yes | Detector logic PASS (94 checks). Everything with a sensor or a screen: NOT RUN. |
+[`after/signature-sheen-frames.jpg`](after/signature-sheen-frames.jpg) and [`after/signature-sheen-analysis.txt`](after/signature-sheen-analysis.txt) analyse nine header frames. The gold highlight is on the lettering in 2 of 9 frames (`t00` and `t03`), at the same place on the end swash, and the Maestro log puts those two screenshots **5.98 s apart**, one full 6 s loop. That is what a looping sweep looks like. It does not show smoothness or that nothing stutters.
 
 ## Gyro Flip: what is and is not proven
 
-- **Proven:** exactly one flip event for each valid synthetic twist, none for slow tilt, shake, x or z rotation, a rebound, a dropout, a reset, the switch Off, Reduce Motion or a touch, at 30, 60 and 100 Hz, plus 300 deterministic fuzz traces with 0 false flips. These are made-up traces.
-- **Not proven:** that the thresholds feel right or reject real incidental movement. Required on a physical iPhone, none done: at least 18 of 20 deliberate twists (10 each direction), at most 1 of 100 incidental movements, no double flip, no performance regression, and the six-second signature loop coexisting with live foil and the flip. **NOT RUN, no device.**
-- **Raw initial thresholds** (hypotheses from the plan, in `GyroFlipConfiguration.initial`): filter 45 ms; start 1.0 rad/s, end 0.5; dominance at least 0.75; peak at least 2.2 rad/s (about 126 degrees/s); turn at least 0.55 rad (about 32 degrees) counted from the start of the candidate, which in practice needs about 0.65 to 0.7 rad of total turn; duration 0.12 to 0.45 s; user acceleration under 0.8 g; cooldown 1.2 s then 0.30 s below 0.35 rad/s; recalm 0.15 s.
-- **Direction** follows the sign of the integrated twist (positive means the phone's right edge turns away). Whether that matches the card's turn on a device is unchecked.
+- **Proven (synthetic):** one flip per valid twist, none for slow tilt, shake, x or z rotation, rebound, dropout, reset, Reduce Motion or a touch, at 30, 60 and 100 Hz, plus 300 deterministic fuzz traces with no false flip. On the simulator, a replayed twist reaches `FlipMotor` through the real detector and a shake or tilt does not.
+- **Not proven:** that the thresholds feel right or reject real movement. Needed on a physical iPhone: at least 18 of 20 deliberate twists (10 each way), at most 1 of 100 incidental movements, no double flip, no performance regression. **NOT RUN, no device.**
+- **Off:** see `gyro-flip-off` above.
+- **Direction:** positive means the phone's right edge turns away. Whether that matches the card on a device is unchecked.
+- Initial thresholds are in `GyroFlipConfiguration.initial` (filter 45 ms; start 1.0 rad/s, end 0.5; dominance at least 0.75; peak at least 2.2 rad/s; turn at least 0.55 rad; 0.12 to 0.45 s; user acceleration under 0.8 g; cooldown 1.2 s then 0.30 s below 0.35 rad/s).
 
-## Known limitations and risks
+## Known limitations
 
-- **The tab-bar hold is the main risk.** It is a `UILongPressGestureRecognizer` added to the system `UITabBar`, finding the My Collection item by accessibility label with equal thirds as a fallback. It was written without ever seeing a simulator. It may fail to fire, fire on the wrong item, or select the tab as a side effect (the root view reverts that, also unverified). The same column is reachable from VoiceOver ("Collection quick actions") and, in QA builds, with `-AroomaQATab quickactions`, and one-tap Wear today remains on the card. If the hold does not work on a device or simulator, document the platform blocker and get owner review before substituting another gesture, as the plan requires.
-- **Widths.** Only the runner's iPhone 17 Pro (402 pt) is available; 375, 390 and 430 pt, both appearances and all four palettes are NOT RUN.
-- **Search header.** The signature is a toolbar item with the shared glass background hidden (`sharedBackgroundVisibility`). It compiles; how it looks is unseen.
-- **Reduce Motion, Reduce Transparency, Increase Contrast, background pause and resume, energy cost:** coded, not observed.
+- **The tab-bar hold works on the simulator and is not tested on a physical iPhone.** It is a `UILongPressGestureRecognizer` on the system tab bar. A real thumb, haptics and VoiceOver may differ.
+- **Widths.** Only the runner's iPhone 17 Pro (402 pt) was used. 375, 390 and 430 pt, both appearances and all four palettes: NOT RUN.
+- **Seen in the AFTER screenshots and fixed afterwards, not re-photographed yet:** hard background bands on My Collection, the Search signature at about half size, the disabled Wear reason cut off.
+- **Not observed:** Reduce Motion, Reduce Transparency, Increase Contrast, haptics, VoiceOver, background pause and resume, energy cost.
 - **Share sheet.** SwiftUI cannot observe the system share sheet, so motion flips are not suppressed while it is open.
-- **Card Studio audit.** Created cards, their share, export and restore, have no screen now. Records are intact. See the spec's audit and the open decision in `DECISIONS.md`.
-- **Before set.** No Inspector screenshot of V2. After screenshots: none.
+- **Card Studio audit.** Created cards, their share, export and restore, have no screen now. Records are intact. See the spec and `DECISIONS.md`.
+
+## Follow-up
+
+The fix PR changes the app (Shelves and the Add handle on an empty collection, search keyboard dismissal, a QA marker for the motion subscription, the three polish items) and the flows above. Its confirming Maestro runs were [41362987517](https://github.com/WGLewis0721/Arooma-App/actions/runs/41362987517) (existing flows) and [41363883218](https://github.com/WGLewis0721/Arooma-App/actions/runs/41363883218) (new flows). Their results go in the next update of this file, with fresh AFTER screenshots of the polished screens.
 
 ## Files
 
-- [`before/`](before/): the eight V2 screenshots, 600 px wide.
-- [`maestro-before/junit.xml`](maestro-before/junit.xml): the before capture run.
+- [`before/`](before/): eight V2 screenshots, 600 px wide, and [`maestro-before/junit.xml`](maestro-before/junit.xml).
+- [`after/`](after/): eight screenshots of the first V3 build, the signature frames and their analysis.
+- [`maestro-first-run/`](maestro-first-run/): JUnit for the two first runs.

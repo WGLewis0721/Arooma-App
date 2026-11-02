@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.4 - 7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8" tests="15" failures="3" time="1486.533" timestamp="2026-11-01T22:54:06">
+    <testcase id="signature-header-loop" name="signature-header-loop" classname="signature-header-loop" file=".maestro/signature-header-loop.yaml" time="168.908" timestamp="2026-11-01T22:54:06" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, branding"/>
+      </properties>
+    </testcase>
+    <testcase id="gyro-flip-off" name="gyro-flip-off" classname="gyro-flip-off" file=".maestro/gyro-flip-off.yaml" time="108.811" timestamp="2026-11-01T22:56:55" status="ERROR">
+      <properties>
+        <property name="tags" value="v3, gyro"/>
+      </properties>
+      <failure>Assertion is false: "FRONT.*" is visible</failure>
+    </testcase>
+    <testcase id="collection-long-press-wishlist" name="collection-long-press-wishlist" classname="collection-long-press-wishlist" file=".maestro/collection-long-press-wishlist.yaml" time="75.683" timestamp="2026-11-01T22:58:44" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, quick-actions"/>
+      </properties>
+    </testcase>
+    <testcase id="collection-long-press-wear" name="collection-long-press-wear" classname="collection-long-press-wear" file=".maestro/collection-long-press-wear.yaml" time="225.109" timestamp="2026-11-01T22:59:59" status="ERROR">
+      <properties>
+        <property name="tags" value="v3, quick-actions"/>
+      </properties>
+      <failure>Element not found: Id matching regex: wear-toast-undo</failure>
+    </testcase>
+    <testcase id="collection-long-press-wear-disabled" name="collection-long-press-wear-disabled" classname="collection-long-press-wear-disabled" file=".maestro/collection-long-press-wear-disabled.yaml" time="88.511" timestamp="2026-11-01T23:03:45" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, quick-actions"/>
+      </properties>
+    </testcase>
+    <testcase id="search-tab-v3" name="search-tab-v3" classname="search-tab-v3" file=".maestro/search-tab-v3.yaml" time="66.946" timestamp="2026-11-01T23:05:13" status="ERROR">
+      <properties>
+        <property name="tags" value="v3, search"/>
+      </properties>
+      <failure>Element not found: Text matching regex: Filters</failure>
+    </testcase>
+    <testcase id="gyro-flip-settings" name="gyro-flip-settings" classname="gyro-flip-settings" file=".maestro/gyro-flip-settings.yaml" time="94.2" timestamp="2026-11-01T23:06:20" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, gyro"/>
+      </properties>
+    </testcase>
+    <testcase id="card-studio-hidden" name="card-studio-hidden" classname="card-studio-hidden" file=".maestro/card-studio-hidden.yaml" time="63.586" timestamp="2026-11-01T23:07:54" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, cards"/>
+      </properties>
+    </testcase>
+    <testcase id="collection-layout-v3" name="collection-layout-v3" classname="collection-layout-v3" file=".maestro/collection-layout-v3.yaml" time="54.218" timestamp="2026-11-01T23:08:58" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, layout"/>
+      </properties>
+    </testcase>
+    <testcase id="gyro-flip-unavailable" name="gyro-flip-unavailable" classname="gyro-flip-unavailable" file=".maestro/gyro-flip-unavailable.yaml" time="58.532" timestamp="2026-11-01T23:09:52" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, gyro"/>
+      </properties>
+    </testcase>
+    <testcase id="collection-wear-layer-history" name="collection-wear-layer-history" classname="collection-wear-layer-history" file=".maestro/collection-wear-layer-history.yaml" time="163.636" timestamp="2026-11-01T23:10:51" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, wear"/>
+      </properties>
+    </testcase>
+    <testcase id="collection-long-press-add" name="collection-long-press-add" classname="collection-long-press-add" file=".maestro/collection-long-press-add.yaml" time="70.595" timestamp="2026-11-01T23:13:35" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, quick-actions"/>
+      </properties>
+    </testcase>
+    <testcase id="gyro-flip-inspector" name="gyro-flip-inspector" classname="gyro-flip-inspector" file=".maestro/gyro-flip-inspector.yaml" time="136.908" timestamp="2026-11-01T23:14:45" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, gyro"/>
+      </properties>
+    </testcase>
+    <testcase id="collection-long-press-actions" name="collection-long-press-actions" classname="collection-long-press-actions" file=".maestro/collection-long-press-actions.yaml" time="60.642" timestamp="2026-11-01T23:17:02" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, quick-actions"/>
+      </properties>
+    </testcase>
+    <testcase id="navigation-v3" name="navigation-v3" classname="navigation-v3" file=".maestro/navigation-v3.yaml" time="49.59" timestamp="2026-11-01T23:18:03" status="SUCCESS">
+      <properties>
+        <property name="tags" value="v3, navigation"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -99,10 +99,11 @@ struct AtelierGallery: View {
                     insightGrabber
                     identity
                         .padding(.horizontal, 24)
-                        .padding(.top, 10)
+                        .padding(.top, 12)
                     actions
                         .padding(.horizontal, 24)
-                        .frame(height: 64)
+                        .padding(.top, 24)
+                        .padding(.bottom, 24)
 
                 }
             }
@@ -471,7 +472,7 @@ struct AtelierGallery: View {
         let card = focusedCard
         let notes = card.map { Array($0.fragrance.top.prefix(3)) } ?? []
         let edge: Edge = motor.travelDirection >= 0 ? .trailing : .leading
-        return VStack(alignment: .leading, spacing: 5) {
+        return VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text(card?.fragrance.house.uppercased() ?? "")
                     .font(.system(size: 11, weight: scheme == .light ? .bold : .semibold)).tracking(2.1)

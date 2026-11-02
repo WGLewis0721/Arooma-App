@@ -1,5 +1,8 @@
 # Arooma: instructions for Claude Code
 
+**Animated Scent World assets:** Before creating or shipping any moving fragrance-world card, follow [the mandatory animation production pipeline](docs/design/brand/ANIMATED_SCENT_WORLD_PIPELINE.md). A static card with a shader does not count as animation; never merge as complete without real verified video and native playback.
+
+
 **ACTIVE OWNER OVERRIDE (2026-10-30):** The PWA is retired. Build a native SwiftUI iOS 26+ app for immediate simulator demo (no TestFlight). Do not port the single-file web app.
 
 Read [AROOMA_V2_FINAL_POLISH_SPEC.md](AROOMA_V2_FINAL_POLISH_SPEC.md) and the brand board. Preserve design objectives, art masters, and interactions. Liquid Glass on functional layer only.

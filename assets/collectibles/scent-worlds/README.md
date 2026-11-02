@@ -1,3 +1,7 @@
+# Animated Scent World production instructions
+
+All living Scent World assets MUST follow [the dedicated 10-stage animated production spec](../../../docs/design/brand/ANIMATED_SCENT_WORLD_PIPELINE.md). A static PNG is not complete animated artwork.
+
 # Arooma · Living Scent World (Aventus)
 
 This is a **real 8-second AI-generated animation** of a miniature fragrance world embedded in a premium card frame. It is not an oscillating image, depth filter or overlay-only effect.

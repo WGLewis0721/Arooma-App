@@ -464,7 +464,7 @@ struct MyCollectionScreen: View {
                 .frame(maxWidth: 190)
                 collectionMenu
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
             .padding(.top, 6)
             AtelierGallery(
                 context: .collection,
@@ -478,25 +478,19 @@ struct MyCollectionScreen: View {
         }
     }
 
-    /// Persistent collection utilities are intentionally separated from card-specific actions.
-    /// A single menu avoids a third row of buttons above the tab bar.
+    /// Shelves is the only header utility. Wear Log and Add remain available
+    /// through their existing entry points; no duplicate actions or menu.
     private var collectionMenu: some View {
-        Menu {
-            Button("Shelves", systemImage: "square.grid.2x2", action: openShelves)
-                .accessibilityIdentifier("all-shelves")
-            Button("Wear Log", systemImage: "clock.arrow.circlepath") { openWearLog(nil) }
-                .accessibilityIdentifier("wear-log")
-            Button("Add Fragrance", systemImage: "plus", action: add)
-                .accessibilityIdentifier("quick-add-a-bottle")
-        } label: {
-            Image(systemName: "ellipsis.circle")
-                .font(.system(size: 20, weight: .medium))
+        Button(action: openShelves) {
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 18, weight: .medium))
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Collection tools")
-        .accessibilityIdentifier("collection-tools")
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .accessibilityLabel("Shelves")
+        .accessibilityIdentifier("all-shelves")
     }
 
 }

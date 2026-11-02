@@ -1,0 +1,49 @@
+{
+  "fragrance": "Louis Vuitton Imagination",
+  "id": "imagination",
+  "production_type": "animated-scent-world",
+  "reference_implementation": "creed-aventus-live-card.mp4",
+  "status": "KEYFRAME_CREATED__VIDEO_NOT_RENDERED",
+  "image_job_id": "78e4311b-8133-4680-87bf-9839675777cf",
+  "image_model": "gpt_image_2_5",
+  "keyframe_source": "https://d8j0ntlcm91z4.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/hf_20261102_142500_78e4311b-8133-4680-87bf-9839675777cf.png",
+  "keyframe_sha256": "72c91eff1174c41ea9cb7a14773bec22c0ce0d23e1caee6a6fcd823143250171",
+  "keyframe_dimensions": [
+    880,
+    1168
+  ],
+  "keyframe_repo_path": "assets/collectibles/scent-worlds/candidates/imagination-v2-keyframe.png",
+  "video_model_target": "seedance_2_0",
+  "video_duration_target_seconds": 8,
+  "video_file_target": "ios/AroomaNative/Resources/louis-vuitton-imagination-live-card.mp4",
+  "poster_target": "ios/AroomaNative/Resources/louis-vuitton-imagination-live-card-poster.jpg",
+  "reverse": "ios/AroomaNative/Resources/louis-vuitton-imagination-scent-world-reverse.png",
+  "animation_requirements": [
+    "ocean water and reflections move",
+    "citrus/neroli leaves sway",
+    "tea steam rises with volumetric change",
+    "atmospheric clouds drift"
+  ],
+  "fixed_elements": [
+    "card typography",
+    "holographic frame",
+    "bottle silhouette",
+    "bottle cap",
+    "outside-bottle studio backdrop"
+  ],
+  "completed_steps": [
+    "research",
+    "card style brief",
+    "bottle identity brief",
+    "keyframe image generation"
+  ],
+  "pending_steps": [
+    "render independent genuine motion video",
+    "inspect multi-region motion and seam",
+    "integrate movie and poster into collectible face",
+    "prove shader/player separation on device",
+    "compile and bundle offline media",
+    "merge finished full asset"
+  ],
+  "safety_gate": "Do not mark animated=true or merge to main until actual motion and native playback checks pass"
+}

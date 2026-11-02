@@ -266,10 +266,10 @@ struct AtelierGallery: View {
         let lift = motor.press.value * nearness
         return AtelierCardSurface(
             fragranceID: card.fragrance.id,
+            videoActive: abs(d) < 0.15,
             yaw: pose.yaw,
             lift: lift,
             shade: pose.shade,
-            videoActive: abs(d) < 0.15,
             foil: abs(d) < 1.15 ? .live : .sheen,
             foilStrength: max(0, 1 - abs(d) * 1.8), // shader off beyond ~half a slot
             lean: nearness * nearness,

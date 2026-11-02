@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "aventus",
+      "fragrance": "Creed Aventus",
+      "media": "ios/AroomaNative/Resources/creed-aventus-live-card.mp4",
+      "poster": "ios/AroomaNative/Resources/creed-aventus-live-card-poster.jpg",
+      "source_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/c8178739-0924-4668-a8d2-52449cfc34b0.mp4",
+      "sha256": "2ecbb30aa08006e73d0988d33f63abb888274e142f851a55e0a5cd10c98ab1e1",
+      "duration_seconds": 8,
+      "video_size": [
+        720,
+        1050
+      ],
+      "fps": 24,
+      "playback": "muted, looping, focused front face only, Respect Reduce Motion",
+      "status": "pending ingestion; external fallback supported"
+    }
+  ]
+}

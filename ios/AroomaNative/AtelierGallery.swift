@@ -266,6 +266,7 @@ struct AtelierGallery: View {
         let lift = motor.press.value * nearness
         return AtelierCardSurface(
             fragranceID: card.fragrance.id,
+            videoActive: abs(d) < 0.15,
             yaw: pose.yaw,
             lift: lift,
             shade: pose.shade,
@@ -870,6 +871,7 @@ struct AtelierInspector: View {
         let facing = abs(cos(angle * .pi / 180))
         return ZStack {
             AtelierCardSurface(fragranceID: card.fragrance.id, side: .front, radius: 16,
+                               videoActive: !back,
                                yaw: frontYaw, lift: 0.6, foil: .live, lean: 0.7,
                                touch: pressUV, pressure: pressing, shadowed: false)
                 .opacity(back ? 0 : 1)

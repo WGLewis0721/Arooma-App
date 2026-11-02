@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import AVFoundation
 
 enum CardSide: String { case front, back }
 
@@ -53,7 +54,9 @@ struct CollectibleCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         Group {
-            if let image = ApprovedArtwork.image(for: id, side: side) {
+            if id == "aventus" && side == .front {
+                LiveAventusScentWorldCard(isPlaying: false)
+            } else if let image = ApprovedArtwork.image(for: id, side: side) {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
@@ -78,4 +81,110 @@ struct CollectibleCard: View {
         }
         .accessibilityLabel("\(id), \(side.rawValue) collectible artwork")
     }
+}
+
+
+// MARK: - Animated Scent World (Creed Aventus)
+//
+// The motion is an actual 8-second AI-generated video, NOT a Photoshop/SwiftUI
+// displacement effect. It sits below the deck's existing Metal foil and physics.
+// Only the focused front card plays. Flip, background, Reduce Motion or leaving
+// the gallery pause playback. The offline bundled video is preferred; a URL is a
+// development fallback if the video has not been ingested into the bundle yet.
+
+private enum AventusScentWorldMedia {
+    static let remoteVideo = URL(string: "https://d2ol7oe51mr4n9.cloudfront.net/user_3IkKBBXHZvEZQt2d8pBaRYd083T/c8178739-0924-4668-a8d2-52449cfc34b0.mp4")!
+    static var video: URL {
+        Bundle.main.url(forResource: "creed-aventus-live-card", withExtension: "mp4") ?? remoteVideo
+    }
+    static let poster: UIImage? = {
+        guard let file = Bundle.main.url(forResource: "creed-aventus-live-card-poster", withExtension: "jpg") else { return nil }
+        return UIImage(contentsOfFile: file.path)?.preparingForDisplay()
+    }()
+}
+
+struct LiveAventusScentWorldCard: View {
+    let isPlaying: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        ZStack {
+            if let poster = AventusScentWorldMedia.poster {
+                Image(uiImage: poster).resizable().scaledToFill()
+            } else {
+                Rectangle()
+                    .fill(LinearGradient(
+                        colors: [Color(hex: 0x17131C), Color(hex: 0x71532D), Color(hex: 0x17131C)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing))
+                VStack(spacing: 7) {
+                    Text("AROOMA").font(.caption.weight(.semibold)).tracking(3)
+                    Spacer(minLength: 0)
+                    Text("CREED").font(.system(size: 20, design: .serif)).tracking(3)
+                    Text("AVENTUS").font(.system(size: 29, design: .serif)).tracking(2)
+                    Text("SCENT WORLD").font(.caption2).tracking(2)
+                }
+                .foregroundStyle(Color(hex: 0xEDD5A1))
+                .padding(16)
+            }
+            // The AVPlayer is not mounted for cards outside the focused deck slot.
+            if isPlaying && !reduceMotion && scenePhase == .active {
+                AventusLoopingVideo()
+                    .allowsHitTesting(false) // Keep tap, drag and flip gestures native.
+            }
+        }
+        .aspectRatio(59.0 / 86.0, contentMode: .fit)
+        .clipped()
+        .accessibilityLabel("Creed Aventus, animated Scent World")
+        .accessibilityHint(reduceMotion ? "Animation paused due to Reduce Motion" : "Animated sunrise and fragrant landscape in a collectible card")
+    }
+}
+
+private struct AventusLoopingVideo: UIViewRepresentable {
+    func makeUIView(context: Context) -> AventusVideoLayerView {
+        let view = AventusVideoLayerView()
+        view.start()
+        return view
+    }
+    func updateUIView(_ uiView: AventusVideoLayerView, context: Context) {
+        uiView.start()
+    }
+    static func dismantleUIView(_ uiView: AventusVideoLayerView, coordinator: ()) {
+        uiView.stop()
+    }
+}
+
+private final class AventusVideoLayerView: UIView {
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
+    private var queue: AVQueuePlayer?
+    private var looper: AVPlayerLooper?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        backgroundColor = .clear
+        (layer as? AVPlayerLayer)?.videoGravity = .resizeAspectFill
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func start() {
+        if queue == nil {
+            let player = AVQueuePlayer()
+            player.isMuted = true
+            player.allowsExternalPlayback = false
+            let item = AVPlayerItem(url: AventusScentWorldMedia.video)
+            looper = AVPlayerLooper(player: player, templateItem: item)
+            queue = player
+            (layer as? AVPlayerLayer)?.player = player
+        }
+        queue?.play()
+    }
+    func stop() {
+        queue?.pause()
+        (layer as? AVPlayerLayer)?.player = nil
+        looper?.disableLooping()
+        looper = nil
+        queue = nil
+    }
+    deinit { queue?.pause() }
 }

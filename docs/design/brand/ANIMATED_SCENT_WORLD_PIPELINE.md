@@ -1,5 +1,9 @@
 # Animated Scent World collectible — required production procedure
 
+> Summary: Mandatory 10-stage research-to-live-video workflow for bottle-contained Scent Worlds, including independent environmental motion, offline SwiftUI looping, separated holographic foil, quality gates and release checks.
+
+**Design map:** [Arooma design brain](../README.md).
+
 **Status: required for any Arooma card described as "animated Scent World".** This procedure is specific to the *living miniature environment inside a recognizable fragrance bottle* card type. It does not apply to ordinary still-image cards. The approved reference implementation is Creed Aventus (PRs #46 and #47). Louis Vuitton Imagination PR #48 was a **static-only** delivery and does not satisfy this procedure.
 
 ## Definition of done

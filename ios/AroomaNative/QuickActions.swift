@@ -4,8 +4,8 @@ import UIKit
 // MARK: - My Collection quick actions (Native Navigation V3, section 2)
 //
 // Tap the My Collection tab and it opens normally. Press and hold it and a compact frosted column floats
-// directly above it with exactly three rows, top to bottom: Wishlist, Add, Wear. This is an action column,
-// not a mode menu: nothing here switches between Owned, Wishlist and Explore data.
+// directly above it with three rows: Owned, Wishlist, Add. The menu switches collection
+// views or starts capture; the card-level Wear Today action remains in the gallery.
 //
 // Wear logs today's wear for the owner-selected OWNED bottle at once, with no navigation, through the same
 // `CollectionStore.recordWear(bottleIDs:)` path as every other wear. It never touches a sample-deck card,
@@ -83,7 +83,7 @@ struct WearToastView: View {
 // MARK: The column
 
 struct QuickActionsColumn: View {
-    let wear: QuickWearAvailability
+    let owned: () -> Void
     let wishlist: () -> Void
     let add: () -> Void
     let wearNow: () -> Void
@@ -102,14 +102,15 @@ struct QuickActionsColumn: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            QuickActionRow(symbol: "square.stack", title: "Owned", detail: nil, enabled: true,
+                           id: "quick-action-owned", action: owned)
+            Divider().padding(.leading, 56)
             QuickActionRow(symbol: "heart", title: "Wishlist", detail: nil, enabled: true,
                            id: "quick-action-wishlist", action: wishlist)
             Divider().padding(.leading, 56)
             QuickActionRow(symbol: "plus", title: "Add", detail: nil, enabled: true,
                            id: "quick-action-add", action: add)
-            Divider().padding(.leading, 56)
-            wearRow
-        }
+         }
         .frame(width: Self.width)
         .background {
             // Frosted: a native material over the deck. Reduce Transparency and Increase Contrast get the
@@ -139,20 +140,7 @@ struct QuickActionsColumn: View {
         .accessibilityAction(.escape) { dismiss() }
     }
 
-    @ViewBuilder private var wearRow: some View {
-        switch wear {
-        case .ready(_, let name):
-            QuickActionRow(symbol: "drop", title: "Wear", detail: name, enabled: true,
-                           id: "quick-action-wear", action: wearNow)
-        case .alreadyWorn(let name):
-            // Informational, not a second wear: repeat presses cannot create a duplicate session.
-            QuickActionRow(symbol: "checkmark.circle.fill", title: "Worn today", detail: name, enabled: false,
-                           id: "quick-action-wear", action: {})
-        case .unavailable:
-            QuickActionRow(symbol: "drop", title: "Wear", detail: QuickWearAvailability.unavailableReason, enabled: false,
-                           id: "quick-action-wear", action: {})
-        }
-    }
+
 }
 
 struct QuickActionRow: View {

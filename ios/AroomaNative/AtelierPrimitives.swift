@@ -242,7 +242,7 @@ struct CardFace: View, Equatable {
     let photoURL: URL?
     let side: CardSide
     let radius: CGFloat
-    let videoActive: Bool
+    var videoActive = false
 
     var body: some View {
         Group {

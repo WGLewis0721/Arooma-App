@@ -460,7 +460,7 @@ struct RotationManager: View {
                     HStack {
                         Button {
                             archive.rotationID = rotation.id
-                            archive.layout = .fan
+                            archive.layout = .coverFlow
                             dismiss()
                         } label: {
                             VStack(alignment: .leading) {

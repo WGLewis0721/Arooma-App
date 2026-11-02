@@ -266,7 +266,7 @@ struct AtelierSearch: View {
             }
             Spacer(minLength: 4)
             Text(badge(item))
-                .font(.system(size: 9, weight: .bold)).tracking(0.8)
+                .font(.caption2.weight(.bold)).tracking(0.4)
                 .padding(.horizontal, 7).padding(.vertical, 4)
                 .background(.primary.opacity(0.07), in: Capsule())
                 .foregroundStyle(item.relationship == .catalog ? Color.secondary : accent)

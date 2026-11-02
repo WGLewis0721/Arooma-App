@@ -292,7 +292,7 @@ func calibrate(directory path: String) -> Int32 {
 /// Recognition on both seed ranges and accidental flips across every ordinary family, for each minimum turn.
 /// Development seeds chose the default; held-out seeds are reported only.
 func printTurnSweep() {
-    print("\n=== minimum turn sweep, pulse recognizer (peak 2.2 rad/s; development chose 0.35, held-out is reported) ===")
+    print("\n=== minimum turn sweep, pulse recognizer (peak 2.2 rad/s; development chose 0.30, held-out is reported) ===")
     print("| turn (rad) | recognized, dev | recognized, held-out | wrong face, dev / held-out | accidental per 100 ordinary, dev | held-out |")
     print("| --- | --- | --- | --- | --- | --- |")
     let dev = makeFlickTrials(seedBase: 1, perSign: 200), held = makeFlickTrials(seedBase: 9000, perSign: 200)

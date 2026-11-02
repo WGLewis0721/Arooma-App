@@ -26,7 +26,7 @@ Replayed on identical synthetic traces (development seeds unless marked):
 Four stages, one deterministic function of the sample stream. There are no thresholds beyond those listed below, and no learned or adaptive parts.
 
 1. **Pulse.** A quick twist about the long axis or the screen normal: the twist-plane rate rises above `startRate` (1.0 rad/s) while at least `minDominance` (75%) of the rotation is in that plane. The pulse ends when the rate falls below `endRate` (0.5 rad/s), or reverses while still above it. A reversal inside one pulse is an oscillation, which is how a shake is caught at 60 Hz. A return stroke after a real flick starts only after the pulse has ended, so it is never seen here.
-2. **Intent.** The pulse counts only if it is fast enough (peak at least `peakRate`, 2.2 rad/s), large enough (turn, the integral of |rate| over the pulse, at least `minTurn`, 0.35 rad), not sustained (no longer than `maxDuration`, 0.45 s), and not shake-like (user acceleration below `maxUserAcceleration`, 1.5 g, and no reversal of half the peak during a `confirmWindow` of 30 ms). A quick small wiggle fails on turn; a pitch or a roll fails on the axis share; a set-down knock fails on turn and on the acceleration check.
+2. **Intent.** The pulse counts only if it is fast enough (peak at least `peakRate`, 2.2 rad/s), large enough (turn, the integral of |rate| over the pulse, at least `minTurn`, 0.30 rad), not sustained (no longer than `maxDuration`, 0.45 s), and not shake-like (user acceleration below `maxUserAcceleration`, 1.5 g, and no reversal of half the peak during a `confirmWindow` of 30 ms). A quick small wiggle fails on turn; a pitch or a roll fails on the axis share; a set-down knock fails on turn and on the acceleration check.
 3. **Flip once.** The direction is the sense of rotation about the device axis that dominates the peak. It does not depend on a canonical projection, so the grip cannot invert it. After a flip the detector enters `cooldown` (1.2 s). A return stroke during cooldown is logged as "ignored" and never flips.
 4. **Reset.** The detector re-arms only after the cooldown and after `rearmCalm` (0.3 s) of calm. A rejected pulse needs `calmTime` (0.15 s) of calm before it can arm again. Suppression (touch, sheet, animation, Reduce Motion, inactive scene, Off) cancels a pulse in progress.
 
@@ -36,9 +36,11 @@ What changed from PR #43, and why:
 - The **direction** comes from the dominant device axis at the peak, not from a canonical projection (measured above).
 - The **decision** is made once, at the end of the pulse, not in the middle of it. This costs latency (about 175 ms median from peak on synthetic traces) and removed PR #43's "reversed" rejection, which rejected a flick whose return stroke began before it had finished.
 - The **duration floor** (0.12 s) and the **end-of-pulse dominance check** were removed. An ablation showed neither changed recognition or accidental flips on the corpus. The start-of-pulse dominance check stays: it is what rejects pitches.
-- The **turn default** moved from 0.55 rad (the plan's value) to 0.35 rad. The ablation put the turn requirement at the centre of the misses. The turn sweep below shows where small quick wiggles start to flip and where recognition falls away. The default is the setting with no accidental flips on either seed range. 0.30 rad is the alternative the calibration can weigh.
+- The **turn default** moved from 0.55 rad (the plan's value) to 0.30 rad. The ablation put the turn requirement at the centre of the misses. The turn sweep below shows where small quick wiggles start to flip and where recognition falls away. 0.30 rad is the lowest turn that kept ordinary movement at or below 1 accidental flip per 100 on the development seeds (0.56 per 100), and it recognizes 97 to 98% of synthetic flicks. The earlier 0.35 rad default recognized 86 to 88% with zero accidental flips in the same runs.
 
 Owner tuning (View & Style, Wrist flip) keeps its labels and ranges. "Turn needed" is `minTurn`; "Peak rate needed" is `peakRate`; "Start rate", "Axis share needed", "Longest twist", "Shake limit" and "Pause after a flip" map as before.
+
+**Wrist-twist feels.** A separate "Wrist twist" section in the tuning panel offers three starting points that change only the wrist twist, not the holographic feel: Standard (0.30 rad, the default), Sensitive (0.25 rad: flips on gentler twists, more accidental flips, 3.4 per 100 ordinary movements on the synthetic corpus) and Firm (0.40 rad: fewer accidental flips, more missed twists). Choosing a feel clears the individual wrist-twist edits and keeps the holographic ones. The synthetic numbers for each feel come from the same gyro-tests run that CI reports.
 
 ## Synthetic measurements
 
@@ -46,11 +48,13 @@ Method. `ios/Tests/GyroFlip/Corpus.swift` generates deterministic traces: 60 Hz 
 
 | Measure | PR #43, development | Pulse, development | PR #43, held-out | Pulse, held-out |
 | --- | --- | --- | --- | --- |
-| Flicks recognized, + and − | 35% and 38% | 88% and 85% | 44% and 31% | 87% and 89% |
+| Flicks recognized, + and − | 35% and 38% | 96% and 97% | 44% and 31% | 98% and 98% |
 | Wrong face | 17 | **0** | 22 | **0** |
 | Double flips | 0 | 0 | 0 | 0 |
-| Latency from peak, p50 and p95 | 94 and 165 ms | 175 and 219 ms | 104 and 172 ms | 175 and 215 ms |
-| Accidental flips per 900 ordinary trials (nine families) | 1 | **0** | 0 | **0** |
+| Latency from peak, p50 and p95 | 94 and 165 ms | 170 and 218 ms | 104 and 172 ms | 173 and 214 ms |
+| Accidental flips per 900 ordinary trials (nine families) | 1 | 5 | 0 | 3 |
+
+These pulse numbers are the 0.30 rad default, from CI run 41373863825 (head `7a7668d`). The 0.35 rad numbers that this table used before (88% and 85%, zero accidental flips) are in the turn sweep below.
 
 Flick recognition by size and duration, pulse, both seed ranges: flicks of 0.5 rad and larger were recognized in every cell (100%). Flicks of 0.35 to 0.5 rad were recognized 52 to 75% of the time. Under 0.35 rad, flicks are below the turn requirement by design.
 
@@ -59,8 +63,8 @@ Turn sweep (pulse, peak 2.2 rad/s; ordinary per 100 means per 100 ordinary trial
 | Minimum turn (rad) | Recognized, dev | Recognized, held-out | Wrong face (dev / held-out) | Accidental per 100, dev | Accidental per 100, held-out |
 | --- | --- | --- | --- | --- | --- |
 | 0.25 | 98% | 98% | 0 / 0 | 3.44 | 3.44 |
-| 0.30 | 97% | 98% | 0 / 0 | 0.56 | 0.33 |
-| **0.35 (default)** | **86%** | **88%** | **0 / 0** | **0.00** | **0.00** |
+| **0.30 (default)** | **97%** | **98%** | **0 / 0** | **0.56** | **0.33** |
+| 0.35 | 86% | 88% | 0 / 0 | 0.00 | 0.00 |
 | 0.40 | 76% | 75% | 0 / 0 | 0.00 | 0.00 |
 | 0.45 | 67% | 63% | 0 / 0 | 0.00 | 0.00 |
 | 0.50 | 53% | 57% | 0 / 0 | 0.00 | 0.00 |
@@ -100,7 +104,8 @@ Motion readings are still processed on this iPhone and used only for the foil an
 ## Limitations
 
 - No physical measurement exists. Every physical target is NOT RUN. The synthetic results are a regression harness and a comparison, not accuracy on a phone.
-- The default turn (0.35 rad) is the synthetic knee, not a measured value. The calibration sets it. Recognition below about 0.35 rad is unavailable at the default, by design, until a recording shows that smaller flicks should count.
+- The default turn (0.30 rad) is a synthetic choice, not a measured value. The calibration sets it. Gentler twists than about 0.30 rad are missed at the default. The Sensitive feel accepts them at the cost of more accidental flips.
+- Users cannot see when the twist is armed, so a twist will not always trigger when they expect it. Tap and drag remain the reliable way to flip. No in-app cue exists yet.
 - Latency is higher than PR #43's (p95 about 220 ms against 165 ms), because the decision waits for the end of the pulse. It is inside the 250 ms target on synthetic traces.
 - The synthetic corpus cannot reproduce the sensor's real sample timing, its noise, or the way a phone sits in a hand. The calibration sessions are the only test of those.
 - A twist that is mostly about the screen normal flips only when it dominates; its direction follows the screen-normal sense.

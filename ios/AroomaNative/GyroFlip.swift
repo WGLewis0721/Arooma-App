@@ -33,7 +33,7 @@ enum GyroTuning {
     static var startRate = GyroFlipConfiguration.initial.startRate
     static var peakRate = GyroFlipConfiguration.initial.peakRate
     static var minDominance = GyroFlipConfiguration.initial.minDominance
-    /// The recognizer's minimum turn (rad). Synthetic evidence puts the knee near 0.35; the physical calibration sets it.
+    /// The recognizer's minimum turn (rad). The shipped default is 0.30; the physical calibration sets it.
     static var minAngle = GyroPulseConfiguration.shipped.minTurn
     static var maxDuration = GyroFlipConfiguration.initial.maxDuration
     static var maxAcceleration = GyroFlipConfiguration.shipped.maxUserAcceleration

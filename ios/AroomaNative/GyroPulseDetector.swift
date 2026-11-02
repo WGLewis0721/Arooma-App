@@ -23,8 +23,9 @@ import Foundation
 // keeps most of its measured peak. The numbers are engineering choices. Synthetic traces check the logic; the owner
 // calibration on a physical iPhone sets the thresholds (see the spec).
 
-/// Tunable parameters of the pulse recognizer. Defaults are the plan's values except `minTurn`, which moved to the
-/// synthetic knee (0.35 rad) and awaits the physical calibration. Each change is listed in the spec.
+/// Tunable parameters of the pulse recognizer. Defaults are the plan's values except `minTurn`, which is 0.30 rad: the
+/// lowest turn that kept accidental flips at or below 1 per 100 ordinary trials on the development seeds. It awaits the
+/// physical calibration. Each change is listed in the spec.
 struct GyroPulseConfiguration: Equatable {
     /// Longest step integrated in one sample (s).
     var maxStep = 0.05
@@ -40,9 +41,10 @@ struct GyroPulseConfiguration: Equatable {
     var calmRate = 0.35
     /// The excursion peak must reach this (rad/s, about 126 degrees/s).
     var peakRate = 2.2
-    /// The turn (integral of |rate| over the excursion, rad) must reach this. Synthetic evidence put the knee here:
-    /// below it, quick small wrist wiggles flip; above it, recognition falls away. Calibrate on the device.
-    var minTurn = 0.35
+    /// The turn (integral of |rate| over the excursion, rad) must reach this. 0.30 catches most deliberate twists while
+    /// keeping ordinary movement under 1 accidental flip per 100 trials on the development seeds. Raise it on the device
+    /// if ordinary movement flips the card.
+    var minTurn = 0.30
     /// An excursion longer than this (s) is sustained rotation, not a flick.
     var maxDuration = 0.45
     /// A flick must start with at least this share of its rotation in the twist plane. Rejects pitching and rolling.

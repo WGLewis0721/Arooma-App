@@ -115,6 +115,25 @@ struct TuningPreset: Identifiable, Equatable {
     static let all: [TuningPreset] = [.signature, .silk, .crisp, .vivid, .quiet]
 }
 
+/// A starting point for the wrist twist only. It moves the twist's own values and leaves the holographic feel alone.
+/// Sensitive flips on gentler twists and so flips by accident more often; Firm does the opposite.
+struct GyroFeel: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let summary: String
+    let symbol: String
+    let values: [String: Double]
+
+    static let standard = GyroFeel(id: "standard", name: "Standard", summary: "The balanced twist: a clear twist flips, small wiggles do not.",
+                                   symbol: "gauge.with.dots.needle.50percent", values: ["gyro.minAngle": 0.30])
+    static let sensitive = GyroFeel(id: "sensitive", name: "Sensitive", summary: "Flips on gentler twists. More false flips while moving.",
+                                    symbol: "gauge.with.dots.needle.100percent", values: ["gyro.minAngle": 0.25])
+    static let firm = GyroFeel(id: "firm", name: "Firm", summary: "Needs a clear twist. Fewer false flips, more missed twists.",
+                               symbol: "gauge.with.dots.needle.33percent", values: ["gyro.minAngle": 0.40])
+
+    static let all: [GyroFeel] = [.standard, .sensitive, .firm]
+}
+
 // MARK: - Quick adjust
 
 /// One plain-language slider that moves a related group of values together, on top of the
@@ -175,9 +194,12 @@ final class Tuning {
     private static let presetKey = "arooma.tuning.v2.preset"
     private static let macrosKey = "arooma.tuning.v2.macros"
     private static let overridesKey = "arooma.tuning.v2.overrides"
+    private static let gyroFeelKey = "arooma.tuning.v2.gyroFeel"
 
     /// The chosen feel. Every value starts from it.
     private(set) var presetID: String = TuningPreset.signature.id
+    /// The chosen wrist-twist feel. It applies only to the gyro values.
+    private(set) var gyroFeelID: String = GyroFeel.standard.id
     /// Quick-adjust multipliers on top of the preset (1 = neutral).
     private(set) var macros: [String: Double] = [:]
     /// Individual edits from the Advanced list or pasted values; they win over everything.
@@ -188,6 +210,7 @@ final class Tuning {
     private init() {
         let defaults = UserDefaults.standard
         presetID = defaults.string(forKey: Self.presetKey) ?? TuningPreset.signature.id
+        gyroFeelID = defaults.string(forKey: Self.gyroFeelKey) ?? GyroFeel.standard.id
         macros = (defaults.dictionary(forKey: Self.macrosKey) as? [String: Double]) ?? [:]
         overrides = (defaults.dictionary(forKey: Self.overridesKey) as? [String: Double]) ?? [:]
         // One-time migration from the first tuning panel: keep any value the owner changed.
@@ -203,6 +226,7 @@ final class Tuning {
     }
 
     var preset: TuningPreset { TuningPreset.all.first { $0.id == presetID } ?? .signature }
+    var gyroFeel: GyroFeel { GyroFeel.all.first { $0.id == gyroFeelID } ?? .standard }
 
     /// Final value: edit → quick-adjust applied to the preset → shipped default.
     func value(_ id: String) -> Double {
@@ -213,7 +237,7 @@ final class Tuning {
     /// The value before any individual edit.
     func derived(_ id: String) -> Double {
         guard let spec = Self.spec(id) else { return 0 }
-        let base = preset.values[id] ?? spec.defaultValue
+        let base = (id.hasPrefix("gyro.") ? gyroFeel.values[id] : preset.values[id]) ?? spec.defaultValue
         return Self.sanitize(TuningMacro.transform(id, base, macros: macros), spec)
     }
 
@@ -229,6 +253,13 @@ final class Tuning {
         macros = [:]
         overrides = [:]
         commit(tilt: true)
+    }
+
+    /// Chooses a wrist-twist feel. It clears only the individual wrist-twist edits, never the holographic ones.
+    func selectGyroFeel(_ f: GyroFeel) {
+        gyroFeelID = f.id
+        overrides = overrides.filter { !$0.key.hasPrefix("gyro.") }
+        commit(tilt: false)
     }
 
     func setMacro(_ m: TuningMacro, _ raw: Double) {
@@ -256,6 +287,7 @@ final class Tuning {
 
     func resetAll() {
         presetID = TuningPreset.signature.id
+        gyroFeelID = GyroFeel.standard.id
         macros = [:]
         overrides = [:]
         commit(tilt: true)
@@ -275,6 +307,7 @@ final class Tuning {
     private func save() {
         let defaults = UserDefaults.standard
         defaults.set(presetID, forKey: Self.presetKey)
+        defaults.set(gyroFeelID, forKey: Self.gyroFeelKey)
         defaults.set(macros, forKey: Self.macrosKey)
         defaults.set(overrides, forKey: Self.overridesKey)
     }
@@ -422,7 +455,7 @@ final class Tuning {
             TuningSpec(id: "gyro.dominance", group: "Wrist flip", label: "Axis share needed (0 to 1)",
                        range: 0.3...0.95, step: 0.05, defaultValue: 0.75, digits: 2) { GyroTuning.minDominance = $0 },
             TuningSpec(id: "gyro.minAngle", group: "Wrist flip", label: "Turn needed (rad)",
-                       range: 0.2...1.5, step: 0.05, defaultValue: 0.35, digits: 2) { GyroTuning.minAngle = $0 },
+                       range: 0.2...1.5, step: 0.05, defaultValue: 0.30, digits: 2) { GyroTuning.minAngle = $0 },
             TuningSpec(id: "gyro.maxDuration", group: "Wrist flip", label: "Longest twist (s)",
                        range: 0.25...1.2, step: 0.05, defaultValue: 0.45, digits: 2) { GyroTuning.maxDuration = $0 },
             TuningSpec(id: "gyro.maxAccel", group: "Wrist flip", label: "Shake limit (g)",
@@ -494,6 +527,33 @@ struct TuningPanel: View {
                     Text("Feel")
                 } footer: {
                     Text(tuning.isCustomized ? "\(tuning.preset.name), adjusted below." : "Pick a starting point, then fine-tune below.")
+                }
+
+                Section {
+                    ForEach(GyroFeel.all) { feel in
+                        Button { tuning.selectGyroFeel(feel); flash("Wrist twist: \(feel.name).") } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: feel.symbol)
+                                    .frame(width: 26)
+                                    .foregroundStyle(.tint)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(feel.name).font(.body.weight(.medium)).foregroundStyle(.primary)
+                                    Text(feel.summary).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if tuning.gyroFeelID == feel.id {
+                                    Image(systemName: "checkmark").font(.body.weight(.semibold)).foregroundStyle(.tint)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(tuning.gyroFeelID == feel.id ? .isSelected : [])
+                    }
+                } header: {
+                    Text("Wrist twist")
+                } footer: {
+                    Text("Changes only the wrist twist. Individual wrist-twist values below still win.")
                 }
 
                 Section("Quick adjust") {

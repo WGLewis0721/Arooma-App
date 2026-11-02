@@ -13,6 +13,16 @@
 - 196 checks passed, 0 failed. 141 are the PR #43 classifier checks, unchanged. The rest cover the pulse recognizer (ordinary-motion rejection, valid flicks in both axes and at five grip angles, rebound, cooldown, latency, dropouts, suppression, owner tuning), the corpus gates on development seeds (zero double flips, zero wrong faces, flicks of 0.7 rad and up recognized at least 95%, p95 latency at most 250 ms, at most 1 accidental flip per 100 ordinary trials, and zero flips for the three added ordinary families), and the trace-file codec.
 - Calibration mode: `gyro-tests --calibrate <folder>` runs on labeled owner sessions. Checked here on three generated synthetic sessions only, to confirm the workflow.
 
+## CI compile check (head `6ee4a4f`)
+
+- Run: [Native iOS 26 SwiftUI Build, run 41371298715](https://github.com/WGLewis0721/Arooma-App/actions/runs/41371298715). Conclusion: success. Job `compile`: success.
+  - Gyro tests step (`Wrist-flick detector tests and A/B replay report`): success. The runner exits 1 on any failed check and the step pipes through `tee` with `pipefail`, so this means all 196 checks passed.
+  - Debug simulator build (`-configuration Debug`): success.
+  - Release build of the internal TestFlight proof configuration: `BUILD SUCCEEDED` (arm64 and x86_64 simulator slices).
+- Run: [Build and smoke test, run 41371298732](https://github.com/WGLewis0721/Arooma-App/actions/runs/41371298732). Conclusion: success. The `Deploy` check in that run was skipped.
+- Maestro: not started, not waited for and not recorded, as the owner asked. The gyro Maestro flows have not been run.
+- This check proves the code compiles and the synthetic tests pass. It does not prove recognition on a physical iPhone. Every physical target stays NOT RUN.
+
 ## Headline numbers (synthetic)
 
 | | PR #43 | Pulse |

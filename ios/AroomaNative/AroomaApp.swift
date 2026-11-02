@@ -425,8 +425,8 @@ struct SearchTabScreen: View {
 }
 
 /// My Collection (Native Navigation V3). Owned bottles are the default view; the Wishlist is a view inside
-/// this tab, not a tab. The signature sits at the upper left beside the Owned/Wishlist control. Shelves, the
-/// Wear log and Add are labelled controls in the lower area, below the card and its notes.
+/// this tab, not a tab. Collection utilities live in a single header menu, keeping the
+/// fragrance action dock visually separate from navigation.
 struct MyCollectionScreen: View {
     @EnvironmentObject private var archive: CollectionStore
     let transitionNamespace: Namespace.ID
@@ -462,8 +462,9 @@ struct MyCollectionScreen: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 190)
+                collectionMenu
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.top, 6)
             AtelierGallery(
                 context: .collection,
@@ -474,39 +475,28 @@ struct MyCollectionScreen: View {
                 showToday: { openWearLog($0) },
                 quickActions: quickActions
             )
-            tools
         }
     }
 
-    /// Distinct labelled controls, low on the screen. Shelves and the Wear log stay reachable in the owned view
-    /// even before the first bottle, because shelves and history exist independently of any one bottle. Add is
-    /// hidden while the deck is empty: the empty state's own button (same identifier) is then the single Add.
-    @ViewBuilder private var tools: some View {
-        let hasCards = !archive.displayedCards.isEmpty
-        if archive.mode == .mine || hasCards {
-            GlassEffectContainer(spacing: 10) {
-                HStack(spacing: 10) {
-                    if archive.mode == .mine {
-                        toolButton("Shelves", symbol: "square.grid.2x2", id: "all-shelves", action: openShelves)
-                        toolButton("Wear log", symbol: "clock.arrow.circlepath", id: "wear-log") { openWearLog(nil) }
-                    }
-                    if hasCards {
-                        toolButton("Add", symbol: "plus", id: "quick-add-a-bottle", action: add)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 8)
+    /// Persistent collection utilities are intentionally separated from card-specific actions.
+    /// A single menu avoids a third row of buttons above the tab bar.
+    private var collectionMenu: some View {
+        Menu {
+            Button("Shelves", systemImage: "square.grid.2x2", action: openShelves)
+                .accessibilityIdentifier("all-shelves")
+            Button("Wear Log", systemImage: "clock.arrow.circlepath") { openWearLog(nil) }
+                .accessibilityIdentifier("wear-log")
+            Button("Add Fragrance", systemImage: "plus", action: add)
+                .accessibilityIdentifier("quick-add-a-bottle")
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.system(size: 20, weight: .medium))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Collection tools")
+        .accessibilityIdentifier("collection-tools")
     }
 
-    private func toolButton(_ title: String, symbol: String, id: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: symbol)
-                .font(.footnote.weight(.semibold))
-                .frame(maxWidth: .infinity, minHeight: 44)
-        }
-        .buttonStyle(.glass)
-        .accessibilityIdentifier(id)
-    }
 }

@@ -141,7 +141,7 @@ struct AtelierGallery: View {
         .onChange(of: archive.mode) { _, _ in configure() }
         .onChange(of: archive.selectedID) { _, _ in
             // External selection (search, shelves, Today) glides the deck from where it is.
-            if !motor.isInteracting && storedIndex != motor.deck.targetIndex {
+            if !touching && !motor.isMoving && storedIndex != motor.deck.targetIndex {
                 motor.glide(to: storedIndex)
             }
         }
@@ -604,7 +604,7 @@ struct AtelierGallery: View {
         motor.reduceMotion = reduceMotion
         // A late data/selection refresh must not re-place the deck while a finger
         // owns its position. That would make the first swipe visibly jump.
-        guard !touching && !motor.isInteracting else { return }
+        guard !touching && !motor.isMoving else { return }
         motor.configure(count: cards.count, index: storedIndex, layout: archive.layout.kind)
     }
 
